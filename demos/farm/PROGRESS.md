@@ -29,3 +29,12 @@
 - Verification: 29/29 farm tests; lint (0 errors/warnings), typecheck and production build passed. Node DOM loaded the actual new production entry with zero entry errors; WebGL is unavailable in that test environment. Independent DOM focus checks passed (initial focus, Tab/Shift+Tab loop, Escape close and opener restoration).
 - Mac service remains PID 12490, PPID 1, no TTY, correct farm cwd, bound only to 127.0.0.1:5190. It reads dist per request, so the new build is live without restarting the server or touching SQLite. Cross-call checks confirmed it remains alive. Actual HTTP responses match all 20 built HTML/JS/CSS/icons/GLB/portrait resources byte-for-byte; API returns local-sqlite and three residents with a dedicated test identity. Diagnostics empty. A sandbox loopback EPERM was resolved using the supported escalated local read check.
 - Boundary: no independent Chrome plugin/node_repl tool is exposed. No CUA or alternate browser automation used. Real Chrome WebGL composition, touch and visual consistency remain unverified. No Sites deployment, original-demo modifications, SQLite reset or GitHub push this round.
+
+## Complete playable loop — overnight implementation
+
+- Baseline clean at13516b6, same codex/animal-farm-companion-demo. User requested own LX and tap-to-open cards, autonomous implementation while asleep.
+- Verified original human-lx.glb (3,497,224 bytes) and portrait. Current farm supports only animal avatar choices and pointerdown selection without opening a card; no feeding/company/milestone route.
+- Planning/test-first/executing-plans skills applied. P0 and acceptance in GAMEPLAY.md; tasks in IMPLEMENTATION.md. User explicitly authorized continuous implementation, so no approval wait.
+- Shared interfaces checked: Task1v2 Snapshot/commands feed Task2; Task2 entity IDs pipi/momo/doudou/guardian feed inspect. Task3 isolated DB/identity does not reset running user farm.
+- Task1 in progress: failing tests before LX migration, care and milestone rules.
+- Task1 implemented: v2 migration defaults legacy/new player to LX once; care sessions, finite feeding/company credits, eight saved milestone rewards. Natural no-fast-forward route yields exactly8wool before stage purchase; repeated fast-forward cannot replenish the same demo visit. Seven new behavioral tests were RED before implementation; state suite now green. Exact LX asset copied, original demo untouched.

@@ -1,5 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
-import { applyCommand, createFarm, snapshot, type Farm, type Command, type Snapshot, type FarmEvent } from '../src/model.ts';
+import { applyCommand, createFarm, upgradeFarm, snapshot, type Farm, type Command, type Snapshot, type FarmEvent } from '../src/model.ts';
 export type Reply = { accepted: boolean; message: string; event?: FarmEvent; duplicate: boolean; snapshot: Snapshot };
 type Receipt = Omit<Reply, 'snapshot' | 'duplicate'>;
 /** Local-only adapter. A SQLite transaction owns state and the command receipt together. */
@@ -13,7 +13,7 @@ export class FarmStore {
   }
   private load(device: string, now: number): Farm {
     const row = this.db.prepare('SELECT state FROM farms WHERE device=?').get(device) as {state: string} | undefined;
-    if (row) return JSON.parse(row.state) as Farm;
+    if (row) {const raw=JSON.parse(row.state);const s=upgradeFarm(raw);if(raw.version!==s.version)this.save(s);return s;}
     const s = createFarm(device, now);
     this.save(s); return s;
   }

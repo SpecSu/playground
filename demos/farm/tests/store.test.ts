@@ -18,7 +18,7 @@ test('SQLite reopen preserves distinct device farms, habits, chosen avatar and s
  store.command('a',{id:'look-1',type:'avatar',avatar:'banana-cat'},T+1); store.close();
  store=new FarmStore(file); const a=store.get('a',T+20000),b=store.get('b',T+20000);
  assert.equal(a.playerId,'a'); assert.equal(a.avatar,'banana-cat'); assert.equal(a.animals[0].habits.dance?.count,1);
- assert.equal(b.animals[0].bond,0); assert.equal(b.avatar,'miaocuijiao'); store.close();
+ assert.equal(b.animals[0].bond,0); assert.equal(b.avatar,'human-lx'); store.close();
  } finally { rmSync(dir,{recursive:true,force:true}); }
 });
 test('retrying collection and purchase after restart cannot duplicate rewards or charges',()=>{
