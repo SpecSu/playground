@@ -1,0 +1,98 @@
+[
+  {
+    "id": "milk-frog",
+    "name": "奶蛙",
+    "sourceFile": "01_奶蛙_Demo使用版.glb",
+    "heightMetres": 1.2499999707464848,
+    "sha256": "55d0c7ad79288822fe39f73d1ff5af8a6e82afdcde6a207ef1b66901a7b55454",
+    "bytes": 3175116
+  },
+  {
+    "id": "niulai",
+    "name": "牛来",
+    "sourceFile": "02_牛来_等比放大至1.50m.glb",
+    "heightMetres": 1.499999875710769,
+    "sha256": "66fc6ecf78fe8b4548b6f01d369f090c5d3146d22a4e82a696ab163b69af7b8a",
+    "bytes": 3532432
+  },
+  {
+    "id": "feidudu",
+    "name": "肥嘟嘟",
+    "sourceFile": "03_肥嘟嘟_Demo使用版.glb",
+    "heightMetres": 1.2499998956918716,
+    "sha256": "6ba70c4026e3eb92adabc13cc50a9e2480e157200dc1009cc7a8a12583964b72",
+    "bytes": 2952516
+  },
+  {
+    "id": "miaocuijiao",
+    "name": "喵脆角",
+    "sourceFile": "04_喵脆角_Demo使用版.glb",
+    "heightMetres": 1.1250000074505806,
+    "sha256": "b4d18acbd03b510564f2bed9a393086cf28e7e3ee1abbf7cf1a8096cdb6fba9e",
+    "bytes": 3545756
+  },
+  {
+    "id": "banana-cat",
+    "name": "香蕉猫",
+    "sourceFile": "05_香蕉猫_Demo使用版.glb",
+    "heightMetres": 1.4999999968822988,
+    "sha256": "6c0a08bb6d7388b78aa87909bff1ecbbc409cdbc33aaae341d7c216d15a266e6",
+    "bytes": 3705368
+  },
+  {
+    "id": "sword-shield-dog",
+    "name": "刀盾狗",
+    "sourceFile": "07_刀盾狗_Demo使用版.glb",
+    "heightMetres": 0.9499999731779099,
+    "sha256": "28a1deb2c3c76bfb4bb35e81258d6cab01b799602df6d540170f3d902b1fb99a",
+    "bytes": 3655952
+  },
+  {
+    "id": "human-lx",
+    "name": "LX",
+    "sourceFile": "10_LX_Demo使用版.glb",
+    "heightMetres": 1.4500000164670688,
+    "sha256": "c2678958b323d8bc5f66897485a606a97c9380a95df0fbbbabd3ad5c8ff63090",
+    "bytes": 3497224
+  },
+  {
+    "id": "human-kelly",
+    "name": "Kelly",
+    "sourceFile": "23_Kelly_Demo使用版.glb",
+    "heightMetres": 1.450000037994629,
+    "sha256": "1764b7f3b51deb620822eab6fcb41bc2e4c533831bf21470e212452c18f3bab7",
+    "bytes": 3842012
+  },
+  {
+    "id": "human-bear",
+    "name": "Bear熊",
+    "sourceFile": "15_Bear熊_Demo使用版.glb",
+    "heightMetres": 1.4500001696290379,
+    "sha256": "16d9e9b9bc07113cbf9738d6601242c37785afe743451680532be0717e804abe",
+    "bytes": 3872420
+  },
+  {
+    "id": "human-subeike",
+    "name": "苏贝壳",
+    "sourceFile": "08_苏贝壳_Demo使用版.glb",
+    "heightMetres": 1.450000048484926,
+    "sha256": "6afc92e7feb5462112e7dfbda665bfa99c683eb460e1a5cbd7d9f1037051fec5",
+    "bytes": 3747504
+  },
+  {
+    "id": "human-jiji",
+    "name": "吉吉",
+    "sourceFile": "12_吉吉_Demo使用版.glb",
+    "heightMetres": 1.4500000486054665,
+    "sha256": "630d5f712672a569b1174eb78a4adb530be75b300725328620eee0a8004f3948",
+    "bytes": 3924428
+  },
+  {
+    "id": "human-jiaxin",
+    "name": "Jiaxin",
+    "sourceFile": "09_Jiaxin_Demo使用版.glb",
+    "heightMetres": 1.4500000209452928,
+    "sha256": "1b834100e9eb5d2d2c6ec8d5488e86f4adf505c4376cb36abbff51f94d95a773",
+    "bytes": 3683240
+  }
+]

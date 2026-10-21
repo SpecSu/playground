@@ -1,0 +1,32 @@
+[
+  {
+    "demo": "disco",
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "exitCode": 0,
+    "seconds": 5.78
+  },
+  {
+    "demo": "fishing",
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "exitCode": 0,
+    "seconds": 5.78
+  },
+  {
+    "demo": "festival",
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "exitCode": 0,
+    "seconds": 5.07
+  }
+]

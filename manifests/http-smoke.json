@@ -1,0 +1,141 @@
+[
+  {
+    "demo": "disco",
+    "port": 5181,
+    "checks": [
+      {
+        "route": "/",
+        "status": 200,
+        "bytes": 24967,
+        "contentType": "text/html; charset=utf-8"
+      },
+      {
+        "route": "/build-info.json",
+        "status": 200,
+        "bytes": 1701,
+        "contentType": "application/json",
+        "version": "0.5.3"
+      },
+      {
+        "route": "/avatars/cast-v1/milk-frog.glb",
+        "status": 200,
+        "bytes": 3175116,
+        "contentType": "model/gltf-binary",
+        "sha256": "55d0c7ad79288822fe39f73d1ff5af8a6e82afdcde6a207ef1b66901a7b55454",
+        "matchesSource": true
+      },
+      {
+        "route": "/api/room?room=main",
+        "status": 200,
+        "bytes": 522,
+        "contentType": "application/json; charset=utf-8",
+        "jsonKeys": [
+          "roomId",
+          "revision",
+          "serverNow",
+          "self",
+          "participants",
+          "capacity",
+          "track",
+          "playlistOrder",
+          "lightMode",
+          "lightCycle",
+          "events",
+          "totalVisits",
+          "movements"
+        ],
+        "cacheControl": "private, no-store, max-age=0"
+      }
+    ]
+  },
+  {
+    "demo": "fishing",
+    "port": 5182,
+    "checks": [
+      {
+        "route": "/",
+        "status": 200,
+        "bytes": 23662,
+        "contentType": "text/html; charset=utf-8"
+      },
+      {
+        "route": "/build-info.json",
+        "status": 200,
+        "bytes": 1918,
+        "contentType": "application/json",
+        "version": "0.3.5"
+      },
+      {
+        "route": "/avatars/cast-v1/milk-frog.glb",
+        "status": 200,
+        "bytes": 3175116,
+        "contentType": "model/gltf-binary",
+        "sha256": "55d0c7ad79288822fe39f73d1ff5af8a6e82afdcde6a207ef1b66901a7b55454",
+        "matchesSource": true
+      },
+      {
+        "route": "/api/fishing?room=ocean",
+        "status": 200,
+        "bytes": 837,
+        "contentType": "application/json; charset=utf-8",
+        "jsonKeys": [
+          "roomId",
+          "revision",
+          "serverNow",
+          "capacity",
+          "ambientParticipants",
+          "participants",
+          "events",
+          "self"
+        ],
+        "cacheControl": "private, no-store, max-age=0"
+      }
+    ]
+  },
+  {
+    "demo": "festival",
+    "port": 5183,
+    "checks": [
+      {
+        "route": "/",
+        "status": 200,
+        "bytes": 22100,
+        "contentType": "text/html; charset=utf-8"
+      },
+      {
+        "route": "/build-info.json",
+        "status": 200,
+        "bytes": 1689,
+        "contentType": "application/json",
+        "version": "0.3.3"
+      },
+      {
+        "route": "/avatars/cast-v1/milk-frog.glb",
+        "status": 200,
+        "bytes": 3175116,
+        "contentType": "model/gltf-binary",
+        "sha256": "55d0c7ad79288822fe39f73d1ff5af8a6e82afdcde6a207ef1b66901a7b55454",
+        "matchesSource": true
+      },
+      {
+        "route": "/api/festival",
+        "status": 200,
+        "bytes": 1697,
+        "contentType": "application/json; charset=utf-8",
+        "jsonKeys": [
+          "roomId",
+          "revision",
+          "serverNow",
+          "capacity",
+          "self",
+          "participants",
+          "installations",
+          "ambientParticipants",
+          "ambientInstallations",
+          "round"
+        ],
+        "cacheControl": "private, no-store, max-age=0"
+      }
+    ]
+  }
+]

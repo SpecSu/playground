@@ -1,0 +1,115 @@
+.fishing-shell{background:radial-gradient(ellipse at 55% 40%,#173d4c 0,#10252d 38%,#0c171e 75%)}
+.fishing-shell .demo-caption h1{color:#cdeaf1}.fishing-shell .demo-caption p{color:#729eaa}.fishing-shell .demo-caption>span{color:#87b3bd}
+.feed-v020.fishing-feed{--accent:#fff;--lime:#b7ebef;background:#000;-webkit-tap-highlight-color:transparent}
+/* Pointer taps stay quiet; keyboard navigation keeps a restrained visible cue. */
+.feed-v020.fishing-feed :focus:not(:focus-visible){outline:none}
+.feed-v020.fishing-feed :focus-visible{outline:1px solid #dff8f480;outline-offset:2px}
+.fishing-feed .feed-page{background:#0c0d0f}.fishing-feed .club-stage{background:#0c0d0f}.fishing-feed .stage-top-shade{height:190px;background:linear-gradient(#083f676f,#083f6700)}.fishing-feed .stage-bottom-shade{height:248px;background:linear-gradient(#082f3b00,#082b38c9 30%,#071d29 74%,#07151f)}
+.yacht-scene,.yacht-canvas,.yacht-labels{position:absolute;inset:0;width:100%;height:100%;overflow:hidden}.yacht-canvas canvas{display:block;width:100%;height:100%;cursor:grab}.yacht-labels{pointer-events:none}.feed-v020 .yacht-person-label{position:absolute;top:0;left:0;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:44px;min-height:36px;padding:4px 7px;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;white-space:nowrap;color:#fff;text-shadow:0 1px 3px #061c30cc,0 0 6px #061c3070;font-family:inherit;letter-spacing:.1px;pointer-events:auto;touch-action:none;cursor:pointer;transition:none;user-select:none;-webkit-user-select:none}.yacht-person-name{font-size:11px;font-weight:500;line-height:1.2;color:#fff0bc}.yacht-person-state{font-size:9px;font-weight:450;line-height:1.2;color:#b9e4ec}.yacht-person-label.own .yacht-person-name{color:#fff}.yacht-person-label.bite .yacht-person-state{color:#ffe58a;font-weight:650}.feed-v020 .yacht-person-label.selected{background:transparent}.feed-v020 .yacht-person-label:focus-visible{outline:none}.feed-v020 .yacht-person-label:focus-visible .yacht-person-name{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:2px}.yacht-person-label.asset-failed .yacht-person-state{color:#ffd2c0}.yacht-loading{position:absolute;inset:0;background:#0c0d0f;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#fff;font-size:12px}.yacht-loading span{width:28px;height:28px;border:2px solid #fff4;border-top-color:#fff;border-radius:50%;animation:record-spin 1s linear infinite}.yacht-failure{position:absolute;top:220px;left:24px;right:24px;background:#163c51ed;border:1px solid #ffffff22;border-radius:18px;padding:22px;text-align:center;font-size:13px}.yacht-failure p{font-size:11px;line-height:1.7;color:#bed7e4;margin:10px 0}.feed-v020 .yacht-failure button{padding:10px 14px;background:#d9f7fc;color:#12364b;border-radius:9px;margin-top:6px}
+.fishing-feed .creator-caption{top:565px}.fishing-feed .feed-live-tag{background:#0a34455e}.fishing-feed .lower-controls{gap:13px;bottom:9px}
+.feed-v020 .fishing-dock{gap:7px;height:63px}.feed-v020 .fishing-dock .dock-control{width:48px;height:53px;background:#b5e2f00c;border-radius:12px;flex:none;display:grid;grid-template-rows:28px 12px;gap:2px;align-content:center;justify-items:center}.feed-v020 .fishing-dock .dock-control svg{width:23px;height:23px}.feed-v020 .fishing-dock .dock-control>span:last-child{font-size:9px;line-height:12px;white-space:nowrap}.feed-v020 .fishing-dock .dock-control .fishing-dock-icon{width:28px;height:28px;display:grid;place-items:center}.feed-v020 .fishing-dock .fishing-avatar-control{width:48px}.feed-v020 .fishing-avatar-control img{display:block;width:28px;height:28px;object-fit:contain}.feed-v020 .fishing-avatar-control .fishing-avatar-emoji{font-size:24px;line-height:28px}.feed-v020 .fishing-primary{min-width:0;flex:1;height:53px;border-radius:12px;background:#dff8f4;color:#163e4f;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:650;box-shadow:inset 0 1px 0 #fff8}.feed-v020 .fishing-primary:disabled{opacity:.58}.feed-v020 .fishing-primary.bite{background:#ffe296;color:#503914;animation:bite-button .55s ease-in-out infinite}.feed-v020 .fishing-primary.collect{background:#fbe5bb;color:#644926}
+.catch-reveal{position:absolute;left:12px;right:12px;top:445px;pointer-events:none;text-align:center;color:#fff;padding:10px 14px;border-radius:16px;background:linear-gradient(135deg,#08243261,#071c2b47);box-shadow:0 5px 18px #031a2924;text-shadow:0 1px 3px #0009}.catch-eyebrow{font-size:8px;line-height:12px;font-weight:650;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--rarity-color)}.catch-reveal h2{font-size:27px;line-height:32px;letter-spacing:1px;font-weight:650;margin:5px 0 4px}.catch-reveal>div{display:flex;align-items:center;justify-content:center;gap:9px;font-size:11px;line-height:17px}.catch-reveal strong{font-size:14px;color:#fff1cb;font-weight:600}.catch-reveal i{width:2px;height:2px;background:#b4dce9;border-radius:50%}.catch-reveal p{font-size:9px;color:#e1edf2;margin-top:6px;line-height:13px}
+.feed-v020 .bite-banner{position:absolute;z-index:35;top:194px;left:63px;right:63px;height:72px;background:linear-gradient(120deg,#ffefa9,#ffc96d);border:1px solid #fff6c5;box-shadow:0 8px 45px #e1ad2f45,0 0 0 6px #fff2b526;border-radius:18px;display:flex;align-items:center;gap:11px;padding:10px 15px;color:#594018;animation:bite-arrive .25s ease-out}.bite-mark{display:grid;place-items:center;width:32px;height:38px;font-size:34px;line-height:1;font-weight:800;transform:rotate(-8deg)}.bite-banner>span:nth-child(2){display:flex;flex-direction:column;gap:5px;flex:1;text-align:left}.bite-banner b{font-size:18px}.bite-banner small{font-size:10px;font-variant-numeric:tabular-nums}.feed-v020 .fishing-network-warning{position:absolute;z-index:36;left:14px;right:14px;bottom:203px;border:1px solid #e3bb7755;background:#493d2feb;border-radius:9px;color:#fff0d5;display:flex;gap:8px;padding:8px 10px;align-items:center;font-size:10px;line-height:1.4}.fishing-network-warning span{flex:1}.feed-v020 .fishing-network-warning button{min-width:40px;min-height:30px;font-size:11px;background:#8b7045;border-radius:6px}.fishing-form-error{font-size:11px;color:#ffbeab;line-height:1.5;margin-top:8px}
+.fishing-sheet .avatar-grid{margin-top:16px}.feed-v020 .fishing-sheet .nickname-input{font-size:14px}.feed-v020 .fishing-sheet .primary-button{background:#dff8f4;color:#163e4f}.feed-v020 .fishing-sheet .sheet-note{font-size:9px;line-height:1.7}.bag-overview{display:flex;gap:26px;align-items:center;padding:2px 4px 18px}.bag-overview>div{display:flex;flex-direction:column;gap:5px}.bag-overview b{font-size:28px;font-weight:600;line-height:1}.bag-overview b small{font-size:13px;color:#7597a5;margin-left:2px}.bag-overview span{font-size:9px;color:#86a5b2}.bag-overview .bag-ocean-icon{margin-left:auto;color:#73cad3;border:1px solid #8adddd24;border-radius:50%;width:58px;height:58px;align-items:center;justify-content:center;background:#6bd6d609}.bag-filter{display:flex;gap:21px;margin:0 0 16px}.feed-v020 .bag-filter button{font-size:12px;color:#82939c;padding:8px 0;border-bottom:2px solid transparent}.feed-v020 .bag-filter button.selected{color:#e5f7fa;border-color:#b7f1ef}.marine-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:14px}.feed-v020 .marine-card{position:relative;min-height:173px;display:flex;flex-direction:column;align-items:center;background:#1a242a;border:1px solid #ffffff09;border-radius:13px;padding:8px 8px 11px;overflow:hidden}.feed-v020 .marine-card.collected{border-color:#8dcbcb3a;background:#1b282c}.marine-card .marine-image{width:100%;height:98px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:transparent}.marine-card:not(.collected) .marine-image{background:transparent}.marine-card img{display:block;width:100%;height:100%;padding:7px;object-fit:contain;filter:none}.marine-card:not(.collected) img{filter:brightness(0) drop-shadow(0 0 1px #b7d6df66)}.marine-card b{font-size:12px;font-weight:550;margin-top:8px}.marine-card small{font-size:8px;color:#a8b7bd;margin-top:5px}.marine-card .marine-rarity{color:var(--species-color);font-size:8px;line-height:1.4;margin-top:5px}.marine-card i{position:absolute;right:9px;top:9px;width:14px;height:14px;border-radius:50%;background:#c6ece5;color:#224539;display:grid;place-items:center}.empty-bag{text-align:center;padding:30px 10px;font-size:12px;color:#8fa8b3;line-height:1.7}.fishing-how{display:flex;flex-direction:column;gap:18px;padding:8px 0}.fishing-how p{display:grid;grid-template-columns:26px 1fr;column-gap:9px;row-gap:5px}.fishing-how p>span{grid-row:span 2;color:#90ccd7;font-size:11px;font-variant-numeric:tabular-nums;padding-top:1px}.fishing-how b{font-size:12px;font-weight:550}.fishing-how small{font-size:10px;line-height:1.6;color:#a0aeb7}.fishing-activity>p{display:flex;align-items:center;gap:6px;padding:12px 0;border-bottom:1px solid #fff1}.fishing-activity>p>span{color:#a3dadd;flex:none;width:15px}.fishing-activity b{font-size:11px;max-width:85px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fishing-activity small{font-size:10px;color:#9baeb8}.fishing-media-preview{display:block;width:100%;max-height:410px;object-fit:contain;border-radius:12px}.fishing-sheet .invite-card>svg{display:block;margin:0 auto 12px;color:#9fd5df}.fishing-feed .live-tile .live-stage-thumb{object-position:center 50%}
+@keyframes fishing-wait{0%,70%,100%{opacity:.35;transform:translateY(0)}35%{opacity:1;transform:translateY(-3px)}}@keyframes bite-button{50%{box-shadow:0 0 20px #ffe38855,inset 0 0 0 1px #fff3b0}}@keyframes bite-arrive{from{opacity:0;transform:translateY(-8px) scale(.9)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.fishing-feed .bite-banner,.fishing-feed .fishing-primary.bite,.fishing-feed .waiting-dots i{animation:none}}
+
+/* Only the sea consumes pan/pinch. The fixed shell cannot drift behind the phone,
+   while sheets and the personal page keep their own native vertical scrolling. */
+.fishing-shell{position:fixed;inset:0;overscroll-behavior:none}
+.fishing-feed,.fishing-feed .feed-page,.yacht-scene,.yacht-canvas{overscroll-behavior:none}
+.yacht-canvas canvas{touch-action:none;user-select:none;-webkit-user-select:none}
+.fishing-feed .fishing-sheet,.fishing-feed .profile-scroll{touch-action:pan-y;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
+
+/* Compact, direct ocean ambience control; no panel or extra control row. */
+
+/* Name labels must never inherit the legacy 30px avatar emoji span rule. */
+.feed-v020 .fishing-sheet .avatar-option>.fishing-avatar-label{font-size:12px;line-height:16px;font-weight:500;letter-spacing:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.feed-v020 .fishing-sheet .avatar-option>.option-icon{font-size:29px;line-height:35px}.feed-v020 .fishing-sheet .sheet-heading h2{font-size:18px;line-height:26px}.feed-v020 .fishing-sheet .field-label{font-size:11px;line-height:16px}
+
+/* Quiet announcement band: y510–555 on the 758px feed, below guest copy and above creator/controls. */
+.fishing-catch-broadcast-region{position:absolute;z-index:8;top:auto;bottom:203px;left:20px;right:20px;pointer-events:none;display:flex;justify-content:center}
+.fishing-catch-broadcast{max-width:100%;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #e5fbff3b;border-radius:22px;background:#123f52b8;box-shadow:0 3px 14px #10374712;backdrop-filter:blur(8px);color:#f0fbff;animation:fishing-broadcast-arrive .28s ease-out;overflow:hidden}
+.fishing-catch-broadcast>svg{flex:none;color:var(--broadcast-rarity)}.fishing-catch-broadcast-copy{display:flex;flex-direction:column;gap:3px;min-width:0;font-size:10px;line-height:13px}.fishing-catch-broadcast-copy>span{display:flex;min-width:0;white-space:nowrap}.fishing-catch-broadcast-copy b{max-width:105px;overflow:hidden;text-overflow:ellipsis;font-weight:600;flex-shrink:1}.fishing-catch-broadcast-copy>span>span{white-space:pre;flex-shrink:0}.fishing-catch-broadcast-copy small{font-size:9px;line-height:11px;color:var(--broadcast-rarity);font-variant-numeric:tabular-nums}
+@keyframes fishing-broadcast-arrive{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){.fishing-catch-broadcast{animation:none}}
+
+.fishing-catch-broadcast[data-reduced-motion="true"]{animation:none}
+
+/* Unified V3: the divider sits above the single-line scene/sound strip. */
+.fishing-top-strip{position:absolute;z-index:4;top:96px;left:12px;right:12px;height:38px;border-top:1px solid #ffffff20;display:flex;align-items:center;justify-content:space-between;padding:0 6px;color:#e5f7f9;pointer-events:none}
+.fishing-top-strip>span{display:flex;align-items:center;gap:8px;font-size:12px;line-height:18px;font-weight:450}
+.feed-v020 .fishing-top-strip .fishing-ocean-sound{width:34px;height:34px;display:grid;place-items:center;pointer-events:auto;color:#d9f4f6;border-radius:8px}
+.fishing-top-strip .fishing-ocean-sound svg{width:20px;height:20px}.fishing-top-strip .fishing-ocean-sound.is-playing{color:#fff}
+.fishing-feed .fishing-assistive-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.fishing-feed.is-visitor .creator-caption{top:619px}
+.fishing-feed.is-visitor .stage-bottom-shade{height:194px}
+.feed-v020.fishing-feed.is-visitor .fishing-dock{gap:6px}
+.feed-v020.fishing-feed.is-visitor .fishing-dock .dock-control{width:66px}
+.feed-v020.fishing-feed.is-visitor .fishing-primary{background:#fff;color:#111;min-width:222px}
+.feed-v020 .fishing-chat-composer{height:36px;display:flex;align-items:center;gap:8px;padding:0 7px 0 12px;border:1px solid #dff8f430;border-radius:22px;background:rgba(8,18,24,.72);color:#ffffff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);pointer-events:auto;min-width:0}
+.fishing-chat-composer .chat-composer-icon{flex:none;opacity:1}
+.feed-v020 .fishing-chat-composer input{min-width:0;flex:1;width:0;height:32px;padding:0;border:0;outline:none;background:transparent;color:#ffffff;caret-color:#ffffff;font-size:16px;line-height:24px;box-shadow:none;touch-action:manipulation}
+/* The rounded composer owns focus feedback; its text field keeps only the caret. */
+.feed-v020.fishing-feed .fishing-chat-composer input:focus,.feed-v020.fishing-feed .fishing-chat-composer input:focus-visible{outline:none;box-shadow:none;border:0;caret-color:#ffffff}
+.fishing-chat-composer input::placeholder{color:rgba(255,255,255,.68);-webkit-text-fill-color:rgba(255,255,255,.68);opacity:1;font-size:12px}.fishing-chat-composer input:disabled{opacity:1;-webkit-text-fill-color:#e5edf0;color:#e5edf0}
+.feed-v020 .fishing-chat-composer.is-focused{border-color:#dff8f480;background:rgba(8,18,24,.72)}
+.feed-v020 .fishing-chat-composer .chat-send,.feed-v020 .fishing-chat-composer .chat-dismiss{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;color:#1967d2;background:#ffffff}
+.feed-v020 .fishing-chat-composer .chat-send:disabled{opacity:1;color:#ffffff;background:#53646c}.feed-v020 .fishing-chat-composer .chat-dismiss{background:transparent;color:#ffffff}
+.feed-v020 .fishing-dock .fishing-emote-control{width:44px}
+.feed-v020 .fishing-emote-control[aria-expanded="true"]{background:#dff8f421;box-shadow:inset 0 0 0 1px #dff8f440}
+.fishing-emote-tray{position:absolute;right:55px;bottom:77px;z-index:8;display:flex;align-items:center;gap:2px;padding:4px 5px;border:1px solid #dff8f432;border-radius:24px;background:#193743f5;box-shadow:0 4px 18px #0002;pointer-events:auto}
+.feed-v020 .fishing-emote-tray button{width:42px;height:36px;border-radius:18px;font-family:"Apple Color Emoji","Noto Color Emoji","Segoe UI Emoji",sans-serif;font-size:24px;line-height:36px}.fishing-emote-tray button:hover{background:#ffffff15}
+.yacht-person-speech{position:relative;display:block;max-width:184px;padding:8px 12px;margin-bottom:5px;border-radius:14px;background:rgba(255,255,255,.9);color:#263a40;box-shadow:0 2px 7px #092e4030;font-size:12px;font-weight:400;line-height:17px;text-shadow:none;white-space:normal;overflow-wrap:anywhere;word-break:break-word;text-align:center;pointer-events:none}
+.yacht-person-speech::after{content:"";position:absolute;left:calc(50% - 4px);bottom:-4px;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid rgba(255,255,255,.9)}
+.own .yacht-person-speech{background:rgba(255,255,255,.9)}.own .yacht-person-speech::after{border-top-color:rgba(255,255,255,.9)}
+/* Expressions are content inside the same speech bubble, including its white tail. */
+.yacht-person-speech.is-emote{font-size:34px;line-height:42px;min-width:66px;max-width:66px;white-space:nowrap}
+/* Keep typing at the pre-keyboard scale; only the inline composer lifts above the viewport edge. */
+.fishing-feed.chat-focused .lower-controls{top:0;bottom:auto;height:100%}
+.feed-v020.fishing-feed.chat-focused .fishing-chat-composer{position:absolute;top:clamp(0px,calc(var(--phone-visible-height,844px) - 68px),637px);left:0;right:0;height:44px;border-radius:22px;background:rgba(8,18,24,.72);box-shadow:none}
+.fishing-feed.chat-focused .creator-caption,.fishing-feed.chat-focused .fishing-dock,.fishing-feed.chat-focused .bottom-nav,.fishing-feed.chat-focused .fishing-catch-broadcast-region,.fishing-feed.chat-focused .catch-reveal,.fishing-feed.chat-focused .fishing-emote-tray{visibility:hidden;pointer-events:none}
+.feed-v020 .fishing-primary{position:relative;overflow:hidden}.fishing-reel-progress{position:absolute;left:0;bottom:0;height:3px;background:#6d491e70;transition:width .05s linear}
+
+.feed-v020 .fishing-chat-composer input::selection{color:#18333f;background:#d5ecff}
+/* Keep the solid send and protected glyphs legible throughout a press. */
+.feed-v020 .fishing-chat-composer .chat-send:active,.feed-v020 .fishing-chat-composer .chat-dismiss:active{opacity:1}
+
+/* Projection owns each frame; shared button press feedback must not fade a dragged nameplate. */
+.feed-v020 .yacht-person-label:active{opacity:1}
+
+/* Joined action geometry is independent of countdown, pending copy and catch phase. */
+.feed-v020.fishing-feed.joined .fishing-dock{display:grid;gap:7px;grid-template-columns:minmax(0,1fr) 48px 48px 44px 48px}
+.feed-v020.fishing-feed.joined .fishing-primary{width:100%;min-width:0;height:53px;transform:none;transition:background .18s,opacity .18s}
+.feed-v020.fishing-feed.joined .fishing-primary>svg{flex:none}
+.feed-v020.fishing-feed.joined .fishing-primary>span{min-width:0;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* Uploaded cast: all twelve choices keep a three-column/four-row mobile grid. */
+.feed-v020 .fishing-sheet .avatar-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0 16px}
+.feed-v020 .fishing-sheet .avatar-option{min-height:87px;padding:7px 4px 6px;gap:3px}
+.feed-v020 .fishing-sheet .avatar-option>img{display:block;width:58px;height:58px;object-fit:contain;background:transparent;border-radius:0}
+
+/* The avatar picker owns one bounded layout: identity above a scrolling list,
+   with the submit action always outside that list at the panel's bottom edge. */
+.feed-v020 .fishing-sheet[data-avatar-picker]{display:flex;flex-direction:column;height:min(560px,calc(var(--phone-visible-height,844px) - 8px));min-height:0;overflow:hidden;padding-bottom:0}
+.feed-v020 .fishing-sheet[data-avatar-picker] .sheet-handle{flex:none}
+.feed-v020 .fishing-sheet[data-avatar-picker] .sheet-heading{position:relative;top:auto;flex:none;margin-bottom:12px}
+.feed-v020 .fishing-sheet[data-avatar-picker] .fishing-avatar-form{display:flex;flex-direction:column;flex:1;min-height:0}
+.feed-v020 .fishing-sheet[data-avatar-picker] .fishing-avatar-identity{flex:none;padding-bottom:10px}
+.feed-v020 .fishing-sheet[data-avatar-picker] .fishing-avatar-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 2px 12px;margin:0 -2px}
+.feed-v020 .fishing-sheet[data-avatar-picker] .avatar-grid{margin:0}
+.feed-v020 .fishing-sheet[data-avatar-picker] .fishing-avatar-footer{flex:none;position:relative;z-index:3;background:#161616;border-top:1px solid #ffffff12;box-shadow:0 -8px 20px #0002;margin:0 -16px;padding:12px 16px;padding-bottom:max(12px,calc(env(safe-area-inset-bottom,0px) / var(--phone-scale,1)))}
+.feed-v020 .fishing-sheet[data-avatar-picker] .fishing-avatar-footer .primary-button{margin-top:0}
+/* PhoneViewport already preserves scale and exposes the keyboard-safe height.
+   Override generic sheet scrolling; compact decoration keeps both controls visible. */
+.phone-viewport[data-keyboard-held] .feed-v020 .fishing-sheet[data-avatar-picker]{overflow:hidden}
+.phone-viewport[data-keyboard-held] .feed-v020 .fishing-sheet[data-avatar-picker] .sheet-handle{display:none}
+.phone-viewport[data-keyboard-held] .feed-v020 .fishing-sheet[data-avatar-picker] .sheet-heading{padding:0;margin:0 0 4px}
+.phone-viewport[data-keyboard-held] .feed-v020 .fishing-sheet[data-avatar-picker] .sheet-heading .eyebrow{display:none}
+.phone-viewport[data-keyboard-held] .feed-v020 .fishing-sheet[data-avatar-picker] .fishing-avatar-identity{padding-bottom:6px}
+.phone-viewport[data-keyboard-held] .feed-v020 .fishing-sheet[data-avatar-picker] .nickname-input{height:38px;padding:8px 12px;margin-top:4px}
+.phone-viewport[data-keyboard-held] .feed-v020 .fishing-sheet[data-avatar-picker] .fishing-avatar-scroll{padding:0 2px}
+.phone-viewport[data-keyboard-held] .feed-v020 .fishing-sheet[data-avatar-picker] .fishing-avatar-footer{padding-top:8px;padding-bottom:8px}
+.feed-v020 .fishing-avatar-load-status{margin:12px 0 0;color:#c7dfe4;font-size:12px;line-height:18px}
+.feed-v020 .fishing-avatar-footer .primary-button[aria-busy="true"]{cursor:progress}
+.yacht-avatar-failure{position:absolute;top:160px;left:42px;right:42px;display:flex;align-items:center;justify-content:center;gap:10px;padding:9px 12px;border-radius:12px;background:#163c51ed;color:#e4f4f8;font-size:11px;pointer-events:auto}
+.feed-v020 .yacht-avatar-failure button{padding:5px 8px;border-radius:7px;background:#d9f7fc;color:#12364b;font-size:11px}

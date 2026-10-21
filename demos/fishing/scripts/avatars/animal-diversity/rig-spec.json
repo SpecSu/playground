@@ -1,0 +1,330 @@
+{
+  "coordinateConvention": "Blender X right, Y depth (negative forward), Z up. Every bone tail is origin + (0,0,0.10); same local axes as approved cast. Values below are x, height, forward before conversion.",
+  "species": {
+    "cat": {
+      "bodyPlan": "compact-biped",
+      "hips": [
+        0,
+        0.4,
+        0
+      ],
+      "spine": [
+        0,
+        0.62,
+        0
+      ],
+      "chest": [
+        0,
+        0.79,
+        0
+      ],
+      "neck": [
+        0,
+        0.86,
+        0
+      ],
+      "head": [
+        0,
+        1.02,
+        0.02
+      ],
+      "shoulder": [
+        0.3,
+        0.74,
+        0
+      ],
+      "elbow": [
+        0.39,
+        0.54,
+        0.035
+      ],
+      "hand": [
+        0.405,
+        0.36,
+        0.1
+      ],
+      "hip": [
+        0.19,
+        0.37,
+        0
+      ],
+      "knee": [
+        0.23,
+        0.24,
+        0.03
+      ],
+      "ankle": [
+        0.245,
+        0.075,
+        0.065
+      ],
+      "tail": [
+        0,
+        0.43,
+        -0.24
+      ],
+      "tailTip": [
+        0.28,
+        0.55,
+        -0.38
+      ]
+    },
+    "frog": {
+      "bodyPlan": "crouched-amphibian",
+      "hips": [
+        0,
+        0.31,
+        0
+      ],
+      "spine": [
+        0,
+        0.48,
+        0
+      ],
+      "chest": [
+        0,
+        0.64,
+        0
+      ],
+      "neck": [
+        0,
+        0.72,
+        0.02
+      ],
+      "head": [
+        0,
+        0.77,
+        0.025
+      ],
+      "shoulder": [
+        0.33,
+        0.6,
+        0
+      ],
+      "elbow": [
+        0.41,
+        0.38,
+        0.05
+      ],
+      "hand": [
+        0.445,
+        0.205,
+        0.12
+      ],
+      "hip": [
+        0.25,
+        0.33,
+        -0.04
+      ],
+      "knee": [
+        0.445,
+        0.255,
+        -0.035
+      ],
+      "ankle": [
+        0.39,
+        0.055,
+        0.1
+      ]
+    },
+    "dog": {
+      "bodyPlan": "lean-longleg-biped",
+      "hips": [
+        0,
+        0.82,
+        0
+      ],
+      "spine": [
+        0,
+        1.02,
+        0
+      ],
+      "chest": [
+        0,
+        1.2,
+        0
+      ],
+      "neck": [
+        0,
+        1.4,
+        0.015
+      ],
+      "head": [
+        0,
+        1.62,
+        0.015
+      ],
+      "shoulder": [
+        0.225,
+        1.2,
+        0
+      ],
+      "elbow": [
+        0.3,
+        0.925,
+        0.025
+      ],
+      "hand": [
+        0.31,
+        0.675,
+        0.09
+      ],
+      "hip": [
+        0.12,
+        0.78,
+        0
+      ],
+      "knee": [
+        0.145,
+        0.43,
+        0.045
+      ],
+      "ankle": [
+        0.16,
+        0.075,
+        0.035
+      ],
+      "tail": [
+        0,
+        0.87,
+        -0.16
+      ],
+      "tailTip": [
+        0.04,
+        1.03,
+        -0.34
+      ],
+      "ear_L": [
+        0.2,
+        1.73,
+        0.01
+      ],
+      "ear_R": [
+        -0.2,
+        1.73,
+        0.01
+      ]
+    },
+    "capybara": {
+      "bodyPlan": "quadruped",
+      "hips": [
+        0,
+        0.59,
+        -0.32
+      ],
+      "spine": [
+        0,
+        0.63,
+        0
+      ],
+      "chest": [
+        0,
+        0.64,
+        0.3
+      ],
+      "neck": [
+        0,
+        0.76,
+        0.39
+      ],
+      "head": [
+        0,
+        0.91,
+        0.46
+      ],
+      "shoulder": [
+        0.235,
+        0.57,
+        0.31
+      ],
+      "elbow": [
+        0.25,
+        0.325,
+        0.33
+      ],
+      "hand": [
+        0.26,
+        0.085,
+        0.37
+      ],
+      "hip": [
+        0.245,
+        0.56,
+        -0.32
+      ],
+      "knee": [
+        0.27,
+        0.31,
+        -0.37
+      ],
+      "ankle": [
+        0.27,
+        0.085,
+        -0.32
+      ],
+      "exportTransform": {
+        "forwardOffset": -0.167,
+        "forwardScale": 0.87,
+        "description": "Final forward=(authoringForward-0.167)*0.87 for every vertex and joint except root. Centers solid snout/barrel in navigation circle."
+      }
+    },
+    "panda": {
+      "bodyPlan": "heavy-pear-biped",
+      "hips": [
+        0,
+        0.48,
+        0
+      ],
+      "spine": [
+        0,
+        0.79,
+        0
+      ],
+      "chest": [
+        0,
+        1.09,
+        0
+      ],
+      "neck": [
+        0,
+        1.22,
+        0.015
+      ],
+      "head": [
+        0,
+        1.41,
+        0.025
+      ],
+      "shoulder": [
+        0.365,
+        1.09,
+        0
+      ],
+      "elbow": [
+        0.465,
+        0.835,
+        0.02
+      ],
+      "hand": [
+        0.455,
+        0.59,
+        0.11
+      ],
+      "hip": [
+        0.24,
+        0.45,
+        0
+      ],
+      "knee": [
+        0.275,
+        0.27,
+        0.025
+      ],
+      "ankle": [
+        0.28,
+        0.08,
+        0.06
+      ]
+    }
+  }
+}

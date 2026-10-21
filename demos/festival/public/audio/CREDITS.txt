@@ -1,0 +1,38 @@
+RECORDED MUSIC CREDITS
+
+The first five recordings are user-provided, Suno-generated recordings explicitly authorized by the user for this public demo on 2026-10-12. This is not a Creative Commons grant or a representation of general redistribution rights.
+Arabic Nights retains its existing CC BY 3.0 attribution and modification notice. The creator does not endorse this demo.
+Personal playback volume is separate from approximately -16 LUFS track matching.
+
+"Filtered Chords" — User-provided · Suno. User-provided Suno-generated recording, authorized by the user for this public demo. Source and credits: /audio/CREDITS.txt. No Creative Commons license or general redistribution rights are asserted.
+Changes: Complete decoded recording retained, 9811848 frames / 204.413500 seconds at 48000 Hz; no trimming or edge fades; constant-gain loudness matching; artwork and source metadata removed; re-encoded as 128 kbps stereo MP3. No EQ, pitch or tempo changes. Playback gain targets -16 LUFS, with headroom protection taking priority for high-crest-factor recordings.
+Playback gain: 1.22320712
+Source SHA-256: a3769848a39bb1c11e8a30d9dd3c3a232065e636d6f03f408695fea0e41a4779
+
+"Runway Poise" — User-provided · Suno. User-provided Suno-generated recording, authorized by the user for this public demo. Source and credits: /audio/CREDITS.txt. No Creative Commons license or general redistribution rights are asserted.
+Changes: Complete decoded recording retained, 9781128 frames / 203.773500 seconds at 48000 Hz; no trimming or edge fades; constant-gain loudness matching; artwork and source metadata removed; re-encoded as 128 kbps stereo MP3. No EQ, pitch or tempo changes. Playback gain targets -16 LUFS, with headroom protection taking priority for high-crest-factor recordings.
+Playback gain: 1.05075145
+Source SHA-256: e20e4dee31dae218b26101d310561e269e1a0a14a14868c017e804ba1f0cffff
+
+"Tech House Groove" — User-provided · Suno. User-provided Suno-generated recording, authorized by the user for this public demo. Source and credits: /audio/CREDITS.txt. No Creative Commons license or general redistribution rights are asserted.
+Changes: Complete decoded recording retained, 8542728 frames / 177.973500 seconds at 48000 Hz; no trimming or edge fades; constant-gain loudness matching; artwork and source metadata removed; re-encoded as 128 kbps stereo MP3. No EQ, pitch or tempo changes. Playback gain targets -16 LUFS, with headroom protection taking priority for high-crest-factor recordings.
+Playback gain: 1.19536353
+Source SHA-256: 99d426e6f097e825a0499aaab32e6c99127914d945a3ecd2696d64b69de6a399
+
+"Understated Groove" — User-provided · Suno. User-provided Suno-generated recording, authorized by the user for this public demo. Source and credits: /audio/CREDITS.txt. No Creative Commons license or general redistribution rights are asserted.
+Changes: Complete decoded recording retained, 9445128 frames / 196.773500 seconds at 48000 Hz; no trimming or edge fades; constant-gain loudness matching; artwork and source metadata removed; re-encoded as 128 kbps stereo MP3. No EQ, pitch or tempo changes. Playback gain targets -16 LUFS, with headroom protection taking priority for high-crest-factor recordings.
+Playback gain: 1.05075145
+Source SHA-256: e4a2bb3b0955de46310ad310043d9e3fdfcaa5ca9c6a46c12099d783c0325e1e
+
+"Meditative Groove" — User-provided · Suno. User-provided Suno-generated recording, authorized by the user for this public demo. Source and credits: /audio/CREDITS.txt. No Creative Commons license or general redistribution rights are asserted.
+Changes: A 96-second excerpt from 110.000–206.000 seconds of the decoded source; 8 ms edge fades added; constant-gain loudness matching; artwork and source metadata removed; re-encoded as 128 kbps stereo MP3. No EQ, pitch or tempo changes. Playback gain targets -16 LUFS, with headroom protection taking priority for high-crest-factor recordings.
+Playback gain: 1.05075145
+Source SHA-256: 7d4b60cb1f18bd923f437a7c79b9fe8445356b00bca8e75ffaa5efc9b6074fd2
+
+"Arabic Nights" by Nemphirex. Source: https://soundcloud.com/nemphirex/nemphirex-arabic-nights . Licensed under CC BY 3.0: https://creativecommons.org/licenses/by/3.0/
+Changes: A 64-second / 128-beat excerpt from 64.000–128.000 seconds; constant gain loudness matching to approximately -16 LUFS; 4 ms edge fades; re-encoded as 160 kbps stereo MP3 for looping game playback. No EQ, pitch or tempo changes.
+Playback gain: 1.0543869
+Source SHA-256: d96e78bc62512c0b7f68f5eccf290d64389dd47aec11a497bc4ca35d0484ef70
+
+Arabic Nights only: CC BY 3.0 legal code: https://creativecommons.org/licenses/by/3.0/legalcode
+No additional restrictions are imposed on reuse permitted by the Arabic Nights license. That license does not apply to the five user-provided recordings.

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "authorizationDate": "2026-10-12",
+  "authorization": "The user explicitly authorized these user-provided Suno-generated recordings for this public demo.",
+  "scope": "This public demo only; no Creative Commons license or general redistribution rights are asserted.",
+  "acquisition": "User-supplied local MP3 files; source bytes retained outside the repository.",
+  "publicMetadataPolicy": "No artwork, source account handles, provider track IDs, Library/chat IDs, tokens or signed URLs.",
+  "tracks": [
+    {
+      "id": "filtered-chords",
+      "suppliedFilename": "Filtered Chords.mp3",
+      "sourceSha256": "a3769848a39bb1c11e8a30d9dd3c3a232065e636d6f03f408695fea0e41a4779",
+      "sourceBytes": 4971215,
+      "sourceSampleRate": 48000,
+      "sourceDecodedSampleFrames": 9811848,
+      "sourceDecodedDurationMs": 204413.5,
+      "retainedStartMs": 0,
+      "retainedEndMs": 204413.5,
+      "rightsKind": "user-authorized-demo"
+    },
+    {
+      "id": "runway-poise",
+      "suppliedFilename": "Runway Poise.mp3",
+      "sourceSha256": "e20e4dee31dae218b26101d310561e269e1a0a14a14868c017e804ba1f0cffff",
+      "sourceBytes": 4780453,
+      "sourceSampleRate": 48000,
+      "sourceDecodedSampleFrames": 9781128,
+      "sourceDecodedDurationMs": 203773.5,
+      "retainedStartMs": 0,
+      "retainedEndMs": 203773.5,
+      "rightsKind": "user-authorized-demo"
+    },
+    {
+      "id": "tech-house-groove",
+      "suppliedFilename": "Tech House Groove.mp3",
+      "sourceSha256": "99d426e6f097e825a0499aaab32e6c99127914d945a3ecd2696d64b69de6a399",
+      "sourceBytes": 4256085,
+      "sourceSampleRate": 48000,
+      "sourceDecodedSampleFrames": 8542728,
+      "sourceDecodedDurationMs": 177973.5,
+      "retainedStartMs": 0,
+      "retainedEndMs": 177973.5,
+      "rightsKind": "user-authorized-demo",
+      "sourceTitleNote": "Embedded source title says Understated Groove; display title follows the user-supplied filename Tech House Groove.mp3."
+    },
+    {
+      "id": "understated-groove",
+      "suppliedFilename": "Understated Groove.mp3",
+      "sourceSha256": "e4a2bb3b0955de46310ad310043d9e3fdfcaa5ca9c6a46c12099d783c0325e1e",
+      "sourceBytes": 4651827,
+      "sourceSampleRate": 48000,
+      "sourceDecodedSampleFrames": 9445128,
+      "sourceDecodedDurationMs": 196773.5,
+      "retainedStartMs": 0,
+      "retainedEndMs": 196773.5,
+      "rightsKind": "user-authorized-demo"
+    },
+    {
+      "id": "meditative-groove",
+      "suppliedFilename": "Meditative Groove.mp3",
+      "sourceSha256": "7d4b60cb1f18bd923f437a7c79b9fe8445356b00bca8e75ffaa5efc9b6074fd2",
+      "sourceBytes": 8268042,
+      "sourceSampleRate": 48000,
+      "sourceDecodedSampleFrames": 16422408,
+      "sourceDecodedDurationMs": 342133.5,
+      "retainedStartMs": 110000,
+      "retainedEndMs": 206000.0,
+      "rightsKind": "user-authorized-demo"
+    }
+  ]
+}
