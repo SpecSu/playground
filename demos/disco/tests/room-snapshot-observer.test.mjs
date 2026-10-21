@@ -1,0 +1,5 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { RoomClient } from '../lib/room-client.ts';
+const snapshot=(revision,movement)=>({roomId:'main',revision,serverNow:1000+revision,self:{id:'me',role:'visitor',lastSequence:revision},participants:[],capacity:10,track:{id:'midnight-drive',startedAt:0,durationMs:120000},lightMode:'neon',events:[],totalVisits:1,movements:[movement]});
+test('raw observer exposes fresh movement from rejected room revision after canonical subscribers',async()=>{const observed=[],canonical=[];let reads=0;const client=new RoomClient('main',{fetcher:async()=>new Response(JSON.stringify(++reads===1?snapshot(5,{moveSequence:1}):snapshot(4,{moveSequence:2}))),onSnapshot:s=>observed.push(s)});client.subscribe(()=>canonical.push(client.getState().snapshot));await client.refresh();await client.refresh();assert.equal(client.getState().snapshot.revision,5);assert.deepEqual(observed.map(s=>s.movements[0].moveSequence),[1,2]);assert.equal(canonical.at(-1).revision,5);assert.equal(client.getState().pendingCount,0);client.stop();});

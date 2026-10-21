@@ -1,0 +1,33 @@
+{
+  "archiveDate": "2026-10-21",
+  "scope": "Three specified public legacy demos only; excludes island v0.2",
+  "projects": [
+    {
+      "name": "disco",
+      "sitesVersion": 8,
+      "sourceCommit": "b957db28ad5650daafdfd31dc4aa333d58a98d6a",
+      "liveUrl": "https://dreamina-disco-avatars.mythicgleam32.chatgpt.site",
+      "deploymentStatus": "succeeded",
+      "publishedAt": "2026-10-18T15:41:26.154434+00:00",
+      "originalDeploymentArchiveSha256": "sha256:0a8591f81201ffd34c450833a4b3340177a608b6cd80c8682fef6f6a0d81c4c0"
+    },
+    {
+      "name": "fishing",
+      "sitesVersion": 7,
+      "sourceCommit": "55de7c92b90d54665d4f4772b793aa5be46e856b",
+      "liveUrl": "https://dreamina-fishing-avatars.mythicgleam32.chatgpt.site",
+      "deploymentStatus": "succeeded",
+      "publishedAt": "2026-10-18T15:31:36.751055+00:00",
+      "originalDeploymentArchiveSha256": "sha256:bd3a22133c2bd201dfe343bf469b52fb267a76ee5b96974bcf1dc8b8d0e63395"
+    },
+    {
+      "name": "festival",
+      "sitesVersion": 35,
+      "sourceCommit": "1237c6810f851b33f50652c379268a5d5d3dc33d",
+      "liveUrl": "https://dreamina-desert-festival.mythicgleam32.chatgpt.site",
+      "deploymentStatus": "succeeded",
+      "publishedAt": "2026-10-18T15:31:14.338998+00:00",
+      "originalDeploymentArchiveSha256": "sha256:dbd2071a37f1be536a0c63a68bbe07b2717756489e53ab8a9fade3f16e16e57d"
+    }
+  ]
+}

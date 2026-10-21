@@ -1,0 +1,16 @@
+{
+  "kind": "dj-cockatoo",
+  "triangles": 18004,
+  "bytes": 629820,
+  "material_groups": 4,
+  "joints": 19,
+  "rig": "club-v1-18-joints + crest",
+  "sha256": "8222a55f74f33c812980399e5e767a00d08668708befaf8baed5ddd28857b936",
+  "provenance": "Original geometry; no external models or textures",
+  "axes": "Y-up, +Z front in GLB",
+  "authoring_blend": "dj-cockatoo.blend",
+  "generator": "scripts/avatars/cockatoo/generate_cockatoo.py",
+  "purpose": "Dedicated resident DJ; excluded from participant avatar choices",
+  "source_model": "Original procedural mesh, no external assets",
+  "authored_on": "2026-10-12"
+}

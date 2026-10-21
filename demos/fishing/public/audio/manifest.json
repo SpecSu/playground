@@ -1,0 +1,18 @@
+{
+  "title": "Solace",
+  "artist": "Scott Buckley",
+  "source": "https://www.scottbuckley.com.au/library/solace/",
+  "recordingSource": "https://www.scottbuckley.com.au/library/wp-content/uploads/2020/05/sb_solace.mp3",
+  "sourceSha256": "bb54696d9b49e60d8e9edc25d80c19a975d25b3c8d8ca32afe4d963372e1d1bf",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "path": "/audio/solace-scott-buckley.mp3",
+  "bytes": 4277333,
+  "sha256": "b513f281a56ae02352314dc95b5e29328c36b86a7dfde9873704c70a99e8d5cd",
+  "durationSeconds": 356.414694,
+  "sampleRate": 22050,
+  "channels": 2,
+  "bitrate": 96000,
+  "originalSpeed": true,
+  "alterations": "Full track transcoded; gain 0.8, 1.5 s fade-in, 4 s fade-out at 352.3 s. No time stretch."
+}

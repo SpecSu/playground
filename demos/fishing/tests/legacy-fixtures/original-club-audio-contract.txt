@@ -1,0 +1,9 @@
+Baseline nightclub file-presence assertion, intentionally not part of yacht release: no audio is shipped.
+
+// Real files and recording-derived metadata, rather than synthesized sample fixtures.
+test('licensed recording package has matching asset hashes, durations, cues and RMS envelopes', () => {
+  const checker = fileURLToPath(new URL('../scripts/qa/check-audio-assets-build.mjs', import.meta.url));
+  const root = fileURLToPath(new URL('../public', import.meta.url));
+  assert.match(execFileSync(process.execPath, [checker, root], { encoding: 'utf8' }), /6 licensed recording assets/);
+});
+

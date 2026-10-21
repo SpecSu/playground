@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { JoystickInput, normalizeStick, stickFromPoint } from '../lib/club-joystick.ts';
+test('unit-radius clamping and finite dead zone',()=>{assert.deepEqual(normalizeStick(.01,.02),{x:0,y:0});assert.deepEqual(normalizeStick(NaN,Infinity),{x:0,y:0});const p=normalizeStick(3,4);assert.equal(p.x,.6);assert.equal(p.y,.8);});
+test('pointer coordinates use scaled visual bounds and up is positive',()=>{const p=stickFromPoint(44,0,{left:0,top:0,width:88,height:88});assert.deepEqual(p,{x:0,y:1});const scaled=stickFromPoint(22,0,{left:0,top:0,width:44,height:44});assert.deepEqual(scaled,p);});
+test('only one primary pointer owns a gesture',()=>{const j=new JoystickInput();assert.equal(j.beginPointer(1,0,true,true),true);assert.equal(j.beginPointer(2,0,true,true),false);assert.equal(j.acceptsPointer(2),false);assert.equal(j.endPointer(2),false);assert.equal(j.endPointer(1),true);assert.equal(j.acceptsPointer(1),false);});
+test('disabled, right-click and secondary pointers never start',()=>{for(const args of [[1,0,true,false],[1,2,true,true],[1,0,false,true]])assert.equal(new JoystickInput().beginPointer(...args),false);});
+test('cancellation invalidates held pointer until a new down',()=>{const j=new JoystickInput();j.beginPointer(1,0,true,true);j.reset();assert.equal(j.acceptsPointer(1),false);assert.equal(j.beginPointer(1,0,true,true),true);});
+test('keyboard diagonals normalize and releasing one key keeps other axis',()=>{const j=new JoystickInput();assert.deepEqual(j.keyDown('ArrowUp',false,true),{x:0,y:1});const p=j.keyDown('KeyD',false,true);assert.ok(Math.abs(p.x-Math.SQRT1_2)<1e-9);assert.deepEqual(j.keyUp('KeyD'),{x:0,y:1});assert.deepEqual(j.keyUp('ArrowUp'),{x:0,y:0});assert.equal(j.hasKeys(),false);});
+test('held key repeats cannot revive a reset/disabled gesture',()=>{const j=new JoystickInput();j.keyDown('KeyW',false,true);j.reset();assert.equal(j.keyDown('KeyW',true,true),null);assert.equal(j.keyDown('KeyW',false,false),null);assert.deepEqual(j.keyDown('KeyW',false,true),{x:0,y:1});});

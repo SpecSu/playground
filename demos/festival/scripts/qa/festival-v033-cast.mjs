@@ -1,0 +1,13 @@
+/** Offline actual-skin check. Run with node --experimental-strip-types --import ./tests/room-loader.mjs scripts/qa/festival-v033-cast.mjs */
+import * as THREE from 'three';
+import assert from 'node:assert/strict';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import {createClubAvatar} from '../../lib/club-avatar-rig.ts';
+import {createFestivalBuilderAvatar} from '../../lib/festival-builder-avatar.ts';
+import {createFestivalCelebrationAvatar} from '../../src/desert/celebration-avatar.ts';
+import {UPLOADED_CAST,uploadedTemplate,actualBounds,boneState} from '../../tests/helpers/uploaded-avatar.ts';
+const report=[];let frames=0,vertices=0;
+for(const kind of UPLOADED_CAST){const a=createClubAvatar(kind,'dense',{mode:'desert',template:await uploadedTemplate(kind)});a.root.scale.setScalar(2);const b=createFestivalBuilderAvatar(a),c=createFestivalCelebrationAvatar(a,kind);let vertexCount=0;a.root.traverse(n=>{if(n instanceof THREE.Mesh)vertexCount+=n.geometry.attributes.position.count;});let min=0,max=0,error=0,maxScale=0;for(const mode of ['build','burn','walk','wave','dance','spin','love','laugh','ghost']){for(let i=0;i<40;i++){let t=i*(mode==='build'?.299:mode==='burn'?.87:.09);b.update(null);c.update(null);a.root.position.set(0,0,0);a.root.rotation.y=.7;a.update(t,mode==='build'||mode==='burn'||mode==='walk'?'dance':mode,false,mode==='build'||mode==='burn'||mode==='walk'?0:.55,mode==='walk'?{slot:0,x:0,z:0,heading:.7,speed:5.4,distance:t,walkBlend:1,action:'dance',sampleAtDistance:d=>({x:Math.sin(.7)*(d-t),z:Math.cos(.7)*(d-t),heading:.7})}:undefined);if(mode==='build')b.update(t);if(mode==='burn')c.update(t);frames++;vertices+=vertexCount;const bounds=actualBounds(a.root);assert.ok(bounds.min.y>=-.035,`${kind}/${mode}/${t}: floor clearance ${bounds.min.y}`);assert.ok(boneState(a.root).every(Number.isFinite),`${kind}/${mode}: finite bones`);assert.deepEqual(a.root.scale.toArray(),[2,2,2]);min=Math.min(min,bounds.min.y);max=Math.max(max,bounds.max.y-bounds.min.y);a.root.traverse(n=>{if(n instanceof THREE.Bone){error=Math.max(error,Math.abs(n.quaternion.length()-1));maxScale=Math.max(maxScale,n.scale.x,n.scale.y,n.scale.z);}});}}assert.ok(error<.0001,`${kind}: normalized quaternions`);assert.ok(max<a.height*3+.5,`${kind}: finite skin envelope`);const row={kind,min,max,height:a.height,error,maxScale};report.push(row);console.log(JSON.stringify(row));c.dispose();b.dispose();a.dispose();}
+
+const output=resolve(process.argv[2]??'.local-qa/v033');mkdirSync(output,{recursive:true});writeFileSync(resolve(output,'dense-cast-check.json'),JSON.stringify({frames,vertices,sceneScale:2,report},null,2));console.log(JSON.stringify({frames,vertices,passed:true}));
