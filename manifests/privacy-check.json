@@ -1,0 +1,9 @@
+{
+  "scope": "deliverable source and GLB JSON metadata; excludes dependencies, build outputs and local state",
+  "patternFindings": [],
+  "removedPhotos": 27,
+  "privateSourceImagesIncluded": false,
+  "runtimeStateIncluded": false,
+  "credentialsIncluded": false,
+  "limits": "Pattern and manual source review; not an exhaustive proof of rights or security."
+}

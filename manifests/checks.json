@@ -1,0 +1,79 @@
+[
+  {
+    "demo": "disco",
+    "check": "typecheck",
+    "command": [
+      "npm",
+      "run",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "seconds": 5.28
+  },
+  {
+    "demo": "disco",
+    "check": "core-tests",
+    "command": [
+      "node",
+      "--experimental-strip-types",
+      "--test",
+      "--test-concurrency=1",
+      "tests/room-server.test.mjs",
+      "tests/room-client.test.mjs",
+      "tests/room-movement-client.test.mjs"
+    ],
+    "exitCode": 0,
+    "seconds": 0.41
+  },
+  {
+    "demo": "fishing",
+    "check": "typecheck",
+    "command": [
+      "npm",
+      "run",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "seconds": 5.24
+  },
+  {
+    "demo": "fishing",
+    "check": "core-tests",
+    "command": [
+      "node",
+      "--experimental-strip-types",
+      "--test",
+      "--test-concurrency=1",
+      "tests/fishing-server.test.mjs",
+      "tests/fishing-client.test.mjs",
+      "tests/fishing-chat-server.test.mjs"
+    ],
+    "exitCode": 0,
+    "seconds": 0.35
+  },
+  {
+    "demo": "festival",
+    "check": "typecheck",
+    "command": [
+      "npm",
+      "run",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "seconds": 5.3
+  },
+  {
+    "demo": "festival",
+    "check": "core-tests",
+    "command": [
+      "node",
+      "--experimental-strip-types",
+      "--test",
+      "--test-concurrency=1",
+      "tests/festival-server.test.mjs",
+      "tests/festival-v033-protocol.test.mjs"
+    ],
+    "exitCode": 0,
+    "seconds": 0.45
+  }
+]

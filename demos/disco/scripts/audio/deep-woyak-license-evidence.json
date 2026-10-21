@@ -1,0 +1,16 @@
+{
+  "checkedOn": "2026-10-12",
+  "scope": "Only owner-approved Deep Woyak. Shine is excluded. No source credentials or media service URLs are shipped.",
+  "artist": "T.Kanizaj",
+  "creatorPublishedTitle": "T.Kanizaj - 'Deep Woyak' [Original Mix]",
+  "sourceUrl": "https://soundcloud.com/tkanizaj/t-kanizaj-deep-woyak-original",
+  "publishedLicenseCode": "cc-by",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+  "licenseMapping": {
+    "sourceUrl": "https://a-v2.sndcdn.com/assets/56-b922d60a.js",
+    "finding": "The public SoundCloud license mapping serializes cc-by to Creative Commons Attribution 3.0."
+  },
+  "approvedPreviewSourceStartSeconds": 95,
+  "sourceSha256": "671593dcc3da3f4b7fc3bbe8638bb5c2fd6311cda8973b48777971e2d80d0e73",
+  "changes": "A 60-second / 128-beat excerpt from 95.000\u2013155.000 seconds; constant gain loudness matching to approximately -16 LUFS; 4 ms edge fades; re-encoded as 160 kbps stereo MP3 for looping game playback. No EQ, pitch or tempo changes."
+}

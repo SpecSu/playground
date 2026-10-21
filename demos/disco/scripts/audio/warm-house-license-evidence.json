@@ -1,0 +1,39 @@
+{
+  "checkedOn": "2026-10-12",
+  "scope": "Only the two owner-approved SoundCloud artist recordings. Deep Care is excluded. Source files and service credentials are never shipped.",
+  "licenseMapping": {
+    "sourceUrl": "https://a-v2.sndcdn.com/assets/56-b922d60a.js",
+    "finding": "The public SoundCloud license mapping serializes cc-by to Creative Commons Attribution 3.0."
+  },
+  "legalCodeUrl": "https://creativecommons.org/licenses/by/3.0/legalcode",
+  "requirements": [
+    "Retain artist/title/source/license credits",
+    "Identify excerpt, level and fade modifications",
+    "Do not imply creator endorsement",
+    "Do not impose additional restrictions on licensed music reuse"
+  ],
+  "tracks": [
+    {
+      "id": "sun-goes-down",
+      "artist": "Naan Moons",
+      "sourceUrl": "https://soundcloud.com/naanmoons/when-the-sun-goes-down-deep-house-free-download-creative-commons-attribution",
+      "creatorPublishedTitle": "When The Sun Goes Down - Leftfield Deep House [Free Download] [Creative Commons - Attribution)",
+      "publishedLicenseCode": "cc-by",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "approvedPreviewSourceStartSeconds": 160,
+      "sourceSha256": "b02a4dd5c39176c1ac104c0d1973c74a0f61eb3eb22fbcd3eb9fabcaeaf2f10c",
+      "permissionEvidence": "Creator explicitly permits downloading and remixing with credit."
+    },
+    {
+      "id": "arabic-nights",
+      "artist": "Nemphirex",
+      "sourceUrl": "https://soundcloud.com/nemphirex/nemphirex-arabic-nights",
+      "creatorPublishedTitle": "Nemphirex - Arabic Nights [Creative Common CC BY] Progressive House Deep House Tech - Free Download",
+      "publishedLicenseCode": "cc-by",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+      "approvedPreviewSourceStartSeconds": 64,
+      "sourceSha256": "d96e78bc62512c0b7f68f5eccf290d64389dd47aec11a497bc4ca35d0484ef70",
+      "permissionEvidence": "Creator explicitly permits commercial projects, videos and games under CC BY and specifies 120 BPM."
+    }
+  ]
+}

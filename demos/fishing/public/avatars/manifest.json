@@ -1,0 +1,234 @@
+{
+  "generator": "Per-avatar generators recorded below; untouched monsters retain scripts/avatars/generate_club_avatars.py",
+  "provenance": "Original code-authored geometry; human appearance follows user-provided character references. No external models or textures.",
+  "rig": "club-v1 canonical18 joints; species-anatomy-v3 animal proportions with optional weighted tail/ear chains",
+  "avatars": [
+    {
+      "kind": "human-jiji",
+      "triangles": 27910,
+      "bytes": 992508,
+      "materialGroups": 4,
+      "revision": "rounded-cast-v2",
+      "sha256": "6a1939a2ea2315b505a6b1b9378b2d0dde270f622033e9e9e1bd20b486a72b8e",
+      "generator": "scripts/avatars/polished-cast/generate_polished.py",
+      "provenance": "Original code-authored rounded character revision from user-provided illustrations; no external models or textures."
+    },
+    {
+      "kind": "human-subeike",
+      "triangles": 22864,
+      "bytes": 799124,
+      "materialGroups": 4,
+      "revision": "rounded-cast-v2",
+      "sha256": "990b964e2bffcd3597d6169a5bbaf7cff1a97a7d194af296d3fcdd7a15b59e2e",
+      "generator": "scripts/avatars/polished-cast/generate_polished.py",
+      "provenance": "Original code-authored rounded character revision from user-provided illustrations; no external models or textures."
+    },
+    {
+      "kind": "human-lx",
+      "triangles": 21988,
+      "bytes": 769328,
+      "materialGroups": 4,
+      "revision": "rounded-cast-v2",
+      "sha256": "654705983c63ed3d1cfe4a259cce5979cbb72c2754643167686b5ac4ca5f5a4c",
+      "generator": "scripts/avatars/polished-cast/generate_polished.py",
+      "provenance": "Original code-authored rounded character revision from user-provided illustrations; no external models or textures."
+    },
+    {
+      "kind": "cat",
+      "triangles": 13346,
+      "bytes": 470264,
+      "materialGroups": 2,
+      "revision": "species-anatomy-v3",
+      "bodyPlan": "compact-biped",
+      "bones": 20,
+      "authoredBoundsBlender": [
+        [
+          -0.4819999933242798,
+          0.5643845200538635
+        ],
+        [
+          -0.3504233658313751,
+          0.46207597851753235
+        ],
+        [
+          0.0,
+          1.4450138807296753
+        ]
+      ],
+      "sha256": "f773fca6a4cf3bcfb370c61bcf5a60a126053f8974f606441681952822c07586",
+      "generator": "scripts/avatars/animal-diversity/generate_animals.py",
+      "provenance": "Original procedural animal sculpts and species-specific skeletal proportions authored from user reference direction; no third-party models or textures."
+    },
+    {
+      "kind": "frog",
+      "triangles": 13190,
+      "bytes": 464776,
+      "materialGroups": 2,
+      "revision": "species-anatomy-v3",
+      "bodyPlan": "crouched-amphibian",
+      "bones": 18,
+      "authoredBoundsBlender": [
+        [
+          -0.5493896007537842,
+          0.5493896007537842
+        ],
+        [
+          -0.32199999690055847,
+          0.2735227644443512
+        ],
+        [
+          0.0,
+          1.0709999799728394
+        ]
+      ],
+      "sha256": "d1f8ac17a4bc319c422f4d697b71db0b94ab2825fffd3c11d146607b7db20194",
+      "generator": "scripts/avatars/animal-diversity/generate_animals.py",
+      "provenance": "Original procedural animal sculpts and species-specific skeletal proportions authored from user reference direction; no third-party models or textures."
+    },
+    {
+      "kind": "dog",
+      "triangles": 13394,
+      "bytes": 471388,
+      "materialGroups": 2,
+      "revision": "species-anatomy-v3",
+      "bodyPlan": "lean-longleg-biped",
+      "bones": 22,
+      "authoredBoundsBlender": [
+        [
+          -0.3938754200935364,
+          0.3938754200935364
+        ],
+        [
+          -0.45654889941215515,
+          0.4200199246406555
+        ],
+        [
+          0.0,
+          1.9470000267028809
+        ]
+      ],
+      "sha256": "df8f66c6122ec1972d875b6a44e974b7b8c769bfda1b24f7c90ada1d1ae895b3",
+      "generator": "scripts/avatars/animal-diversity/generate_animals.py",
+      "provenance": "Original procedural animal sculpts and species-specific skeletal proportions authored from user reference direction; no third-party models or textures."
+    },
+    {
+      "kind": "capybara",
+      "triangles": 13330,
+      "bytes": 469568,
+      "materialGroups": 3,
+      "revision": "species-anatomy-v3",
+      "bodyPlan": "quadruped",
+      "bones": 18,
+      "authoredBoundsBlender": [
+        [
+          -0.3773399591445923,
+          0.3773399591445923
+        ],
+        [
+          -0.6142079830169678,
+          0.6134876012802124
+        ],
+        [
+          0.0,
+          1.2350000143051147
+        ]
+      ],
+      "sha256": "31a2dffae6c21b89da54a92d7795ca39ad7d3ac0aa72ec07208a875e107d572d",
+      "generator": "scripts/avatars/animal-diversity/generate_animals.py",
+      "provenance": "Original procedural animal sculpts and species-specific skeletal proportions authored from user reference direction; no third-party models or textures."
+    },
+    {
+      "kind": "panda",
+      "triangles": 11778,
+      "bytes": 416004,
+      "materialGroups": 2,
+      "revision": "species-anatomy-v3",
+      "bodyPlan": "heavy-pear-biped",
+      "bones": 18,
+      "authoredBoundsBlender": [
+        [
+          -0.5812073349952698,
+          0.5812073349952698
+        ],
+        [
+          -0.35789546370506287,
+          0.406000018119812
+        ],
+        [
+          0.0,
+          1.815999984741211
+        ]
+      ],
+      "sha256": "bf0e7598695d9f196ec0b0b5cf761a9ed1c0db952360201886482953b8537e47",
+      "generator": "scripts/avatars/animal-diversity/generate_animals.py",
+      "provenance": "Original procedural animal sculpts and species-specific skeletal proportions authored from user reference direction; no third-party models or textures."
+    },
+    {
+      "kind": "monster-blob",
+      "triangles": 5862,
+      "bytes": 206532
+    },
+    {
+      "kind": "monster-tower",
+      "triangles": 5670,
+      "bytes": 201368
+    },
+    {
+      "kind": "monster-star",
+      "triangles": 5854,
+      "bytes": 209404
+    },
+    {
+      "kind": "banana-cat",
+      "triangles": 13712,
+      "bytes": 478208,
+      "materialGroups": 2,
+      "revision": "meme-cast-v1",
+      "bodyPlan": "closed-banana-suit",
+      "bones": 18,
+      "authoredBoundsBlender": [
+        [
+          -0.401343435049057,
+          0.401343435049057
+        ],
+        [
+          -0.29287827014923096,
+          0.22849838435649872
+        ],
+        [
+          0.0,
+          1.7259999513626099
+        ]
+      ],
+      "sha256": "08a3b30f8adc40a51bbbaa21e7531b8560cc1aac115d177f78abd45e30f61a38",
+      "generator": "scripts/avatars/meme-cast/generate_memes.py",
+      "provenance": "Original procedural vinyl sculpture based on verified Banana Cat / Cheems Frog meme reference direction; no third-party model or texture."
+    },
+    {
+      "kind": "sword-shield-dog",
+      "triangles": 13816,
+      "bytes": 505288,
+      "materialGroups": 2,
+      "revision": "meme-cast-v1",
+      "bodyPlan": "squat-cheems-frog",
+      "bones": 18,
+      "authoredBoundsBlender": [
+        [
+          -0.7419999837875366,
+          0.8330000042915344
+        ],
+        [
+          -0.4677666425704956,
+          0.35894906520843506
+        ],
+        [
+          0.0,
+          1.3179999589920044
+        ]
+      ],
+      "sha256": "e7fd53e6c1eb8340a13e18dd6eb534adfe1fa24f5b9340b13cf79d9c05855ff9",
+      "generator": "scripts/avatars/meme-cast/generate_memes.py",
+      "provenance": "Original procedural vinyl sculpture based on verified Banana Cat / Cheems Frog meme reference direction; no third-party model or texture."
+    }
+  ]
+}

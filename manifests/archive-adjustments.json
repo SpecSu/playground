@@ -1,0 +1,135 @@
+{
+  "disco": {
+    "sourceCommit": "b957db28ad5650daafdfd31dc4aa333d58a98d6a",
+    "excluded": [
+      "RESTORE-v0.3.1.md",
+      "docs/dance-track-analysis.json",
+      "docs/dance-track-analysis.md",
+      "docs/implementation-plan.md",
+      "docs/implementation-v0.4.0.md",
+      "docs/release-v0.3.2.md",
+      "docs/release-v0.3.3.md",
+      "docs/release-v0.4.0.md",
+      "docs/release-v0.4.1.md",
+      "docs/release-v0.4.2.md",
+      "docs/release-v0.4.3.md",
+      "docs/release-v0.4.4.md",
+      "docs/release-v0.4.5.md",
+      "docs/release-v0.4.6.md",
+      "docs/release-v0.4.7.md",
+      "docs/release-v0.4.8.md",
+      "docs/release-v0.5.0.md",
+      "docs/release-v0.5.1.md",
+      "docs/release-v0.5.2.md",
+      "docs/release-v0.5.3.md",
+      "docs/runtime-and-qa.md",
+      "docs/superpowers/plans/2026-10-18-uploaded-cast.md",
+      "public/feed-ui/me-image0_4_527.png",
+      "public/feed-ui/me-image1_4_527.png",
+      "public/feed-ui/me-image3_4_527.png",
+      "public/feed-ui/me-image4_4_527.png",
+      "public/feed-ui/me-image5_4_527.png",
+      "public/feed-ui/me-image6_4_527.png",
+      "public/feed-ui/me-image7_4_527.png",
+      "public/feed-ui/me-image8_4_527.png",
+      "public/feed-ui/me-image9_4_527.png"
+    ],
+    "modified": [
+      ".openai/hosting.json",
+      "README.md",
+      "components/LiveFeed.tsx",
+      "components/ProfilePage.tsx",
+      "package.json",
+      "tests/profile-page.test.mjs"
+    ],
+    "added": [
+      ".nvmrc",
+      "public/feed-ui/archive-placeholder.svg",
+      "scripts/init-local-db.mjs"
+    ]
+  },
+  "fishing": {
+    "sourceCommit": "55de7c92b90d54665d4f4772b793aa5be46e856b",
+    "excluded": [
+      "docs/implementation-plan.md",
+      "docs/legacy-template/club-v0.3.1-reference.md",
+      "docs/release-v0.2.0.md",
+      "docs/release-v0.2.1.md",
+      "docs/release-v0.2.2.md",
+      "docs/release-v0.2.3.md",
+      "docs/release-v0.3.0.md",
+      "docs/release-v0.3.1.md",
+      "docs/release-v0.3.2.md",
+      "docs/release-v0.3.3.md",
+      "docs/release-v0.3.4.md",
+      "docs/release-v0.3.5.md",
+      "docs/runtime-and-qa.md",
+      "docs/superpowers/plans/2026-10-14-yacht-fishing.md",
+      "docs/superpowers/plans/2026-10-18-fishing-avatars.md",
+      "docs/superpowers/specs/2026-10-14-yacht-fishing-design.md",
+      "public/feed-ui/me-image0_4_527.png",
+      "public/feed-ui/me-image1_4_527.png",
+      "public/feed-ui/me-image3_4_527.png",
+      "public/feed-ui/me-image4_4_527.png",
+      "public/feed-ui/me-image5_4_527.png",
+      "public/feed-ui/me-image6_4_527.png",
+      "public/feed-ui/me-image7_4_527.png",
+      "public/feed-ui/me-image8_4_527.png",
+      "public/feed-ui/me-image9_4_527.png"
+    ],
+    "modified": [
+      ".openai/hosting.json",
+      "README.md",
+      "components/LiveFeed.tsx",
+      "components/ProfilePage.tsx",
+      "components/fishing/FishingProfilePage.tsx",
+      "package.json",
+      "tests/profile-page.test.mjs"
+    ],
+    "added": [
+      ".nvmrc",
+      "public/feed-ui/archive-placeholder.svg",
+      "scripts/init-local-db.mjs"
+    ]
+  },
+  "festival": {
+    "sourceCommit": "1237c6810f851b33f50652c379268a5d5d3dc33d",
+    "excluded": [
+      "RESTORE-v0.3.1.md",
+      "docs/implementation-plan.md",
+      "docs/release-v0.2.5.md",
+      "docs/release-v0.2.6.md",
+      "docs/release-v0.2.7.md",
+      "docs/release-v0.2.9.md",
+      "docs/release-v0.3.0.md",
+      "docs/release-v0.3.1.md",
+      "docs/release-v0.3.2.md",
+      "docs/release-v0.3.3.md",
+      "docs/runtime-and-qa.md",
+      "public/feed-ui/me-image0_4_527.png",
+      "public/feed-ui/me-image1_4_527.png",
+      "public/feed-ui/me-image3_4_527.png",
+      "public/feed-ui/me-image4_4_527.png",
+      "public/feed-ui/me-image5_4_527.png",
+      "public/feed-ui/me-image6_4_527.png",
+      "public/feed-ui/me-image7_4_527.png",
+      "public/feed-ui/me-image8_4_527.png",
+      "public/feed-ui/me-image9_4_527.png"
+    ],
+    "modified": [
+      ".openai/hosting.json",
+      "README.md",
+      "components/DesertFeed.tsx",
+      "components/LiveFeed.tsx",
+      "components/ProfilePage.tsx",
+      "package.json",
+      "tests/desert-release.test.mjs",
+      "tests/profile-page.test.mjs"
+    ],
+    "added": [
+      ".nvmrc",
+      "public/feed-ui/archive-placeholder.svg",
+      "scripts/init-local-db.mjs"
+    ]
+  }
+}

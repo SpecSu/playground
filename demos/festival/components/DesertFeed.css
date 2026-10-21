@@ -1,0 +1,103 @@
+/* World styling is independent; approved top bar, author block, My and navigation remain untouched. */
+.desert-shell{background:radial-gradient(ellipse at 52% 44%,#392d28 0,#1e1a1a 40%,#101113 80%)}
+.desert-caption>span{border-color:#66513e;color:#d5b496}.desert-caption h1{color:#f0ded0}.desert-caption p{color:#a59283}.desert-coordinates{font-family:monospace;font-size:10px;letter-spacing:1px;line-height:1.8;color:#817165;margin-top:34px}.desert-coordinates b{font-size:8px;font-weight:400;letter-spacing:1.6px;color:#b29278}
+.desert-feed .desert-scene{position:absolute;inset:0;background:linear-gradient(#5b5665,#c88961 42%,#d5ac79);overflow:hidden;touch-action:none}
+.desert-feed .desert-scene canvas{display:block;width:100%;height:100%;touch-action:none;outline-offset:-3px}
+.desert-feed .scene-loading{position:absolute;inset:0;display:flex;flex-direction:column;gap:11px;align-items:center;justify-content:center;background:#0c0d0f;font-size:13px;color:#fff3dc;z-index:2;pointer-events:none}
+.desert-feed .scene-loading i{width:32px;height:32px;border:1px solid #ffe6b555;border-top-color:#ffe6b5;border-radius:50%;animation:desert-turn 1.6s linear infinite}.desert-feed .scene-loading small{font-size:10px;opacity:.65}.desert-feed .scene-failed{pointer-events:auto;background:#3d3432;text-align:center;padding:30px}.desert-feed .scene-failed button{background:#f0dfc3;color:#42382b;border-radius:10px;padding:11px 20px;margin-top:6px}.desert-feed .stage-top-shade{height:165px;background:linear-gradient(#302b32aa,#49393218,transparent);pointer-events:none}.desert-feed .stage-bottom-shade{height:226px;background:linear-gradient(transparent,#181512bf 39%,#080808 84%);pointer-events:none}
+/* Approved A timer at 80%: centered independently; title and sound retain their positions. */
+@font-face{font-family:FestivalCountdown;src:url('/fonts/festival-countdown-mono.ttf') format('truetype');font-style:normal;font-weight:700;font-display:swap}
+.desert-feed .festival-status-strip{position:absolute;top:96px;left:14px;right:12px;height:44px;border-top:1px solid #ffffff1a;display:flex;align-items:center;gap:8px;z-index:4;color:#fff0d4cc;pointer-events:none}
+.desert-feed .festival-status-title{display:flex;align-items:center;gap:0;font-size:12px;line-height:18px;font-weight:400;flex:1;min-width:0;white-space:nowrap}
+.desert-feed .festival-status-actions{display:flex;align-items:center;gap:0;flex:none}
+.desert-feed .burn-clock{position:absolute;top:8px;left:calc(50% - 1px);transform:translateX(-50%);text-align:center;white-space:nowrap;pointer-events:none}
+.desert-feed .burn-clock-plate{display:flex;align-items:center;justify-content:center;width:113.6px;height:40.8px;border-radius:7.2px;background:linear-gradient(180deg,rgba(63,39,23,.34),rgba(49,32,21,.28));border:1px solid #ffee9d38;box-shadow:inset 0 1px 0 #ffffe00d,0 3px 10px #22170914}
+.desert-feed .burn-clock-digits{font-family:FestivalCountdown,monospace;font-size:28px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.96px;color:#fff593;text-shadow:0 0 4px #ffe97990,0 0 11px #ffcc465e}
+.desert-feed .burn-clock-caption{display:block;margin-top:4.8px;font-size:10px;font-weight:500;line-height:15px;letter-spacing:.8px;color:#fff1cf;text-shadow:0 1px 4px #50300bb3}
+.desert-feed .festival-phase-status{position:absolute;top:50%;left:calc(50% - 1px);transform:translate(-50%,-50%);font-size:12px;line-height:18px;font-weight:400;font-variant-numeric:tabular-nums;white-space:nowrap;color:#fff1dc;text-shadow:0 1px 3px #382312b3;pointer-events:none}
+.desert-feed .festival-status-strip button{height:44px;display:grid;place-items:center;pointer-events:auto;border-radius:9px;color:inherit}
+.desert-feed .festival-sound-toggle{width:44px;min-width:44px;height:44px;flex:none}
+.desert-feed .festival-status-strip button:focus-visible{outline:2px solid #ead7be;outline-offset:-4px}
+.desert-feed .placement-banner{position:absolute;top:174px;left:14px;right:14px;display:flex;align-items:center;justify-content:space-between;background:#34291e52;border:1px solid #f4ce962e;backdrop-filter:blur(3px);border-radius:13px;padding:11px 12px;color:#fff1dc;box-shadow:0 3px 12px #0000000d;text-shadow:0 1px 3px #382312b3}.desert-feed .placement-banner>div{display:flex;align-items:center;gap:10px;font-size:12px}.desert-feed .placement-banner small{display:block;color:#f4e2cc;font-size:10px;margin-top:4px}.desert-feed .placement-banner button{width:28px;height:28px;display:grid;place-items:center}
+.desert-feed .create-art-control svg{color:#ead3b2}
+.desert-feed .installation-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.desert-feed .installation-card{min-height:130px;border:1px solid transparent;border-radius:13px;background:transparent;overflow:hidden;text-align:center;display:flex;flex-direction:column;align-items:center;padding:0 3px 10px}.desert-feed .installation-card:hover{border-color:var(--art-color);background:transparent}.desert-feed .installation-card.selected{border-color:var(--art-color);outline:1px solid var(--art-color);outline-offset:1px;background:transparent}.desert-feed .installation-card:focus-visible:not(.selected){outline:1px solid #ead7be80;outline-offset:2px}.desert-feed .installation-image{position:relative;width:100%;height:83px;display:grid;place-items:center;background:transparent;overflow:hidden}.desert-feed .installation-image img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1}.desert-feed .installation-image img:not([hidden])+span{visibility:hidden}.desert-feed .installation-image span{font-size:34px;filter:saturate(.8);line-height:1}.desert-feed .installation-card strong{font-size:12px;font-weight:550;color:#eee2d4;margin-top:1px}.desert-feed .installation-card small{font-size:8px;color:#8f857c;line-height:15px;margin-top:3px;white-space:nowrap}.desert-feed .desert-emotes{grid-template-columns:repeat(3,minmax(0,1fr))}.desert-feed .desert-emotes .option-card{min-height:89px}.desert-feed .desert-invite{padding:0 0 21px;overflow:hidden}.desert-feed .desert-invite img{width:100%;height:175px;border-radius:0;object-fit:cover;margin-bottom:20px}.desert-feed .view-grid{grid-template-columns:1fr}.desert-feed .view-option{padding:14px;min-height:90px;display:grid;grid-template-columns:38px 1fr;text-align:left}.desert-feed .view-option svg{grid-row:span 2;color:#dec3a2}.desert-feed .view-option small{grid-column:2;margin-top:-7px}.desert-feed .feed-toast{top:264px;background:#342a24a1;border-color:#dfbc8540;color:#f0dabe;text-shadow:0 1px 3px #0009;font-size:11px;max-width:320px}.desert-feed .connection-warning{top:515px}
+@keyframes desert-turn{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.desert-feed .scene-loading i{animation:none}.desert-feed .ritual-progress{transition:none}}
+
+/* One quiet keepsake after the ceremony, inside the phone's existing frame. */
+.desert-feed .festival-memory-layer{position:absolute;inset:0;z-index:40;display:grid;place-items:center;padding:45px 24px 26px}
+.desert-feed .festival-memory-backdrop{position:absolute;inset:0;width:100%;height:100%;background:#201914db;backdrop-filter:blur(9px)}
+.desert-feed .festival-memory-dialog{position:relative;width:100%;max-height:100%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;display:flex;flex-direction:column;align-items:center;padding:12px 7px 5px;outline:none}
+.desert-feed .festival-memory-eyebrow{margin:0 0 23px;color:#d8c3a891;font-size:8px;line-height:1.5;letter-spacing:1.8px;text-align:center}
+.desert-feed .festival-memory-paper{width:100%;max-width:308px;flex:none;margin:0 0 27px;padding:18px 18px 24px;background:#fffdf7;color:#40392f;box-shadow:0 14px 45px #07050370,0 1px 3px #0003;transform:none}
+.desert-feed .festival-memory-image{display:block;width:100%;height:auto;max-height:340px;object-fit:contain;background:#e3d3bd}
+.desert-feed .festival-memory-paper figcaption{text-align:center}
+.desert-feed .festival-memory-paper h2{margin:18px 0 11px;font-family:"Songti SC","Noto Serif CJK SC",serif;font-size:22px;line-height:1.4;font-weight:500;letter-spacing:3px}
+.desert-feed .festival-memory-paper figcaption p{margin:0;color:#736c62;font-size:10px;line-height:1.8;letter-spacing:.35px;white-space:nowrap}
+.desert-feed .festival-memory-date{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:17px;color:#969084;font-size:8px;line-height:1.5;letter-spacing:.45px;font-variant-numeric:tabular-nums}
+.desert-feed .festival-memory-date span{padding-left:12px;border-left:1px solid #cfc8bc}
+.desert-feed .festival-memory-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:100%;flex:none}
+.desert-feed .festival-memory-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 14px;border:1px solid transparent;border-radius:24px;font-size:12px;line-height:1.2;font-weight:500}
+.desert-feed .festival-memory-actions .festival-memory-save{background:#f1e4d0;color:#46392c;min-width:122px}
+.desert-feed .festival-memory-actions .festival-memory-close,.desert-feed .festival-memory-actions .festival-memory-share{background:#ffffff08;border-color:#e7d9c22e;color:#e0cdb3;min-width:64px}
+.desert-feed .festival-memory-actions button:disabled{opacity:.52;cursor:wait}
+.desert-feed .festival-memory-actions button:focus-visible{outline:2px solid #ffe8c5;outline-offset:4px}
+.desert-feed .festival-memory-status{max-width:290px;min-height:34px;margin:14px 0 0;color:#cfbda5a6;font-size:9px;line-height:1.7;text-align:center}
+@media(prefers-reduced-motion:reduce){.desert-feed .festival-memory-actions .spin{animation:none}}
+
+/* Approved v3: author, inline chat and the original interaction dock. */
+.desert-feed:not(.joined) .creator-caption{top:619px}
+.desert-feed:not(.joined) .stage-bottom-shade{height:172px}
+.desert-feed:not(.joined) .join-control{background:#fff;color:#151515}
+.desert-feed .festival-view-control{width:66px}
+.desert-feed .festival-chat{position:absolute;top:633px;left:12px;right:12px;z-index:5;height:44px;padding:4px 0;display:flex;align-items:center;gap:8px;pointer-events:auto}
+.desert-feed .festival-chat-field{display:flex;align-items:center;gap:8px;min-width:0;flex:1;height:36px;border:1px solid #ffffff2b;border-radius:22px;background:rgba(24,14,8,.72);padding:0 5px 0 12px;color:#ffffff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.desert-feed .festival-chat input{display:block;flex:1;min-width:0;height:34px;font-size:16px;line-height:22px;color:#ffffff;caret-color:#ffffff;background:transparent;border:0;outline:0;padding:0;text-overflow:ellipsis}
+.desert-feed .festival-chat input::placeholder{color:rgba(255,255,255,.68);-webkit-text-fill-color:rgba(255,255,255,.68);opacity:1;font-size:12px}
+.desert-feed .festival-chat-send{width:28px;height:28px;flex:none;border-radius:50%;display:grid;place-items:center;background:#ead4b2;color:#4b3423;position:relative}
+.desert-feed .festival-chat-send::before{content:"";position:absolute;inset:-8px}
+.desert-feed .festival-chat-send:disabled{background:#80664e;color:#ffffff;opacity:1}
+.desert-feed .festival-chat-cancel{height:44px;width:40px;flex:none;font-size:12px;color:#ffffff;background:rgba(8,18,24,.72);border-radius:22px}
+.desert-feed.chat-is-focused .festival-chat{top:clamp(0px,calc(var(--phone-visible-height,844px) - 68px),633px);height:68px;left:0;right:0;padding:12px;background:transparent;gap:8px;box-shadow:none}
+.desert-feed.chat-is-focused .festival-chat-field{height:44px}
+.desert-feed.chat-is-focused .festival-chat input{height:42px}
+.desert-feed.chat-is-focused .creator-caption,.desert-feed.chat-is-focused .lower-controls,.desert-feed.chat-is-focused .bottom-nav{visibility:hidden;pointer-events:none}
+
+/* Suppress browser tap/input rectangles throughout this demo. Keep text editing,
+   selected artwork outlines and keyboard-only navigation feedback intact. */
+.feed-v020.desert-feed,.feed-v020.desert-feed *{-webkit-tap-highlight-color:transparent}
+.feed-v020.desert-feed :is(input,textarea,select):focus,
+.feed-v020.desert-feed :is(input,textarea,select):focus-visible{outline:none;box-shadow:none}
+.feed-v020.desert-feed :is(button,a,[tabindex]):focus:not(:focus-visible):not(.selected){outline:none}
+.feed-v020.desert-feed :is(button,a,[tabindex]):focus-visible:not(.selected){outline:1px solid #ead7be80;outline-offset:2px}
+.feed-v020.desert-feed canvas:focus,.feed-v020.desert-feed canvas:focus-visible{outline:none}
+
+.desert-feed .festival-memory-builders{margin-top:10px;color:#969084;font-size:10px;line-height:1.55;overflow-wrap:anywhere;white-space:normal}
+
+.desert-feed .festival-chat input::selection{color:#18333f;background:#d5ecff}
+.desert-feed .festival-chat input:disabled{opacity:1;color:#e5edf0;-webkit-text-fill-color:#e5edf0}
+/* Never fade the protective capsule together with its white text on press. */
+.desert-feed .festival-chat-send:active,.desert-feed .festival-chat-cancel:active{opacity:1}
+
+.desert-feed.joined .join-control{width:66px;height:52px;gap:3px;border:0;border-radius:12px;background:#ffffff08;font-weight:400}
+.desert-feed.joined .joined-avatar{width:24px;height:24px;line-height:24px;font-size:22px}.desert-feed.joined .join-label{font-size:10px;line-height:13px;font-weight:400;color:#ffffffe0}
+
+/* Only the avatar picker owns this bounded layout. The name and internal
+   confirmation stay visible while the twelve portraits scroll independently. */
+.desert-feed .sheet.festival-avatar-sheet{display:flex;flex-direction:column;height:560px;max-height:min(560px,calc(var(--phone-visible-height,844px) - 8px));overflow:hidden;padding-bottom:0}
+.desert-feed .festival-avatar-sheet .sheet-handle,.desert-feed .festival-avatar-sheet .sheet-heading{flex:none}
+.desert-feed .festival-avatar-sheet .sheet-heading{position:static}
+.desert-feed .festival-avatar-sheet .join-form{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;overflow:hidden}
+.desert-feed .festival-avatar-field{flex:none;margin-bottom:14px}
+.desert-feed .festival-avatar-field .nickname-input{display:block;width:100%;min-height:44px}
+.desert-feed .festival-avatar-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;scroll-padding-block:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#ffffff30 transparent}
+.desert-feed .festival-avatar-scroll .avatar-grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:84px;gap:8px;margin:0}
+.desert-feed .festival-avatar-sheet .avatar-option{min-height:84px}
+.desert-feed .festival-avatar-sheet .avatar-preview{display:block;width:48px;height:48px;background-color:transparent;background-size:contain;background-repeat:no-repeat;background-position:center;border-radius:0;font-size:38px;line-height:48px}
+.desert-feed .festival-avatar-scroll .privacy-note{margin:12px 0}
+.desert-feed .festival-avatar-footer{flex:none;padding:12px 0 max(12px,env(safe-area-inset-bottom,0px));background:#161616;border-top:1px solid #ffffff0d}
+.desert-feed .festival-avatar-footer .primary-button{margin-top:0}
+.phone-viewport[data-keyboard-held] .desert-feed .sheet.festival-avatar-sheet{overflow:hidden;overflow-y:hidden}
+.phone-viewport[data-keyboard-held] .desert-feed .festival-avatar-sheet .sheet-handle{display:none}
+.phone-viewport[data-keyboard-held] .desert-feed .festival-avatar-sheet .sheet-heading{margin:0 0 8px;padding:0}
+.phone-viewport[data-keyboard-held] .desert-feed .festival-avatar-sheet .sheet-heading .eyebrow{display:none}

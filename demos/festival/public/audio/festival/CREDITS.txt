@@ -1,0 +1,60 @@
+DREAMINA DESERT FESTIVAL — AUDIO CREDITS
+Source and license verification: 2026-10-14.
+
+fire-crackle.mp3
+"Fire Crackling" by AntumDeluge
+Source: https://opengameart.org/content/fire-crackling/
+Original download: https://opengameart.org/sites/default/files/fire-1.wav
+License: CC0 1.0 Universal (public-domain dedication)
+License URL: https://creativecommons.org/publicdomain/zero/1.0/
+The author's source page explicitly labels this recording CC0 and describes
+it as a popping, crackling fireplace. The download is the actual listed asset,
+not an OpenGameArt demonstration preview.
+Changes: 180 Hz high-pass, +4 dB treble, 8.5 kHz low-pass, gain adjustment,
+peak limiting, 15/30 ms edge fades, resampled to 32 kHz mono, MP3 64 kbps.
+
+crowd-cheer.mp3
+"Crowd cheer.wav" by BeeProductive
+Source: https://freesound.org/people/BeeProductive/sounds/430046/
+Public HQ encoded copy linked by that source page:
+https://cdn.freesound.org/previews/430/430046_4298084-hq.mp3
+License: CC0 1.0 Universal (public-domain dedication)
+License URL: https://creativecommons.org/publicdomain/zero/1.0/
+The source page explicitly labels the sound Creative Commons 0. It describes
+a medium-size crowd cheering and clapping. The bundled recording derives from
+Freesound's public HQ encoded version of this same CC0 sound. No account,
+API key, purchase, or third-party streaming connection is needed at runtime.
+Freesound documents its encoded versions here:
+https://freesound.org/docs/api/overview.html
+Changes: first 15.5 seconds, mono mix, 180 Hz high-pass, 7.2 kHz low-pass,
+gain adjustment, peak limiting, 120/250 ms edge fades, 32 kHz MP3 80 kbps.
+
+arabic-nights-128beat.mp3
+"Arabic Nights" by Nemphirex
+Source: https://soundcloud.com/nemphirex/nemphirex-arabic-nights
+License: Creative Commons Attribution 3.0 Unported (CC BY 3.0)
+License URL: https://creativecommons.org/licenses/by/3.0/
+Legal code: https://creativecommons.org/licenses/by/3.0/legalcode
+Existing Disco excerpt and its provenance reused with the user's permission.
+Changes already made for Disco: A 64-second / 128-beat excerpt from
+64.000–128.000 seconds; constant gain loudness matching to approximately
+-16 LUFS; 4 ms edge fades; re-encoded as 160 kbps stereo MP3 for looping
+game playback. No EQ, pitch or tempo changes.
+Festival changes: The MP3 is copied byte-for-byte without additional encoding.
+Playback uses a contiguous section with ignition at 16.2575 seconds into the
+bundled excerpt (source 80.2575 seconds), a 9-second smooth crossfade before
+ignition, a 35-second burn, and a final 2.2-second fade. No looping, new EQ,
+pitch or tempo changes. Playback gain: 1.0543869.
+Bundled SHA-256: a464bce9092ead1b34c7cebb2f46c836d4b03e4d348cb23fbcde66b665413f4e
+Original source SHA-256: d96e78bc62512c0b7f68f5eccf290d64389dd47aec11a497bc4ca35d0484ef70
+No additional restrictions are imposed on reuse permitted by this license.
+Nemphirex does not endorse this demo.
+
+Only the daytime ambient score is an original procedural composition.
+The burn uses Arabic Nights alone, with quiet crowd and fire recordings.
+All recordings are bundled locally and decoded only after gesture unlock.
+This release was verified without audible playback, using mock Web Audio
+lifecycle tests and offline waveform/codec measurements.
+
+CC0 does not imply endorsement by either creator. Attribution is included
+as a courtesy and to preserve verifiable provenance.

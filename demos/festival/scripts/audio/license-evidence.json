@@ -1,0 +1,91 @@
+{
+  "checkedOn": "2026-10-12",
+  "scope": "Two original artist-published recordings, not later remasters or fan mirrors. Whole source MP3s and fetched webpage snapshots remain outside public/.",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "legalCodeUrl": "https://creativecommons.org/licenses/by/4.0/legalcode.en",
+  "permissionAssessment": "CC BY 4.0 permits reproduction, public sharing/performance, and adapted material, including complete or excerpted game background recordings. Attribution, license/source links, modification notices, and no additional restrictions apply. No guarantee against third-party claims.",
+  "acquisitions": {
+    "neon-house.source.mp3": {
+      "url": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/EDM%20Detection%20Mode.mp3",
+      "resolvedUrl": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/EDM%20Detection%20Mode.mp3",
+      "httpStatus": 200,
+      "contentType": "application/octet-stream",
+      "bytes": 11704283,
+      "sha256": "746f7b1d4dad9c949a67bc063e0ca79da34452c69cd98f4ab9c16a712e92e951"
+    },
+    "midnight-techno.source.mp3": {
+      "url": "https://teknoaxe.com/direct_download.php?file=Beat_Timed_Grime.mp3",
+      "resolvedUrl": "https://teknoaxe.com/direct_download.php?file=Beat_Timed_Grime.mp3",
+      "httpStatus": 200,
+      "contentType": "audio/mpeg",
+      "bytes": 14321760,
+      "sha256": "7dab9569e41dc41892b9f9096993d32f036504f04f3103c37a95af841a6b48f5"
+    },
+    "kevin-source.html": {
+      "url": "https://incompetech.com/music/royalty-free/index.html?Search=Search&isrc=USUAN1500026",
+      "resolvedUrl": "https://incompetech.com/music/royalty-free/index.html?Search=Search&isrc=USUAN1500026",
+      "httpStatus": 200,
+      "contentType": "text/html",
+      "bytes": 26826,
+      "sha256": "0aaccc3d496fc4ae189e27e3fe2d4f5216266e3bcccf2e0ba77fb1b57a28fa94"
+    },
+    "kevin-catalog.json": {
+      "url": "https://incompetech.com/music/royalty-free/pieces.json",
+      "resolvedUrl": "https://incompetech.com/music/royalty-free/pieces.json",
+      "httpStatus": 200,
+      "contentType": "application/json",
+      "bytes": 881512,
+      "sha256": "54802ad340562624b9d1c9c97aa9f005e2b9bf79001f8a1a07ed857e68b2164a"
+    },
+    "teknoaxe-source.html": {
+      "url": "https://teknoaxe.com/Link_Code_3.php?genre=End&q=264",
+      "resolvedUrl": "https://teknoaxe.com/Link_Code_3.php?genre=End&q=264",
+      "httpStatus": 200,
+      "contentType": "text/html",
+      "bytes": 94803,
+      "sha256": "83b3ae095966ce951e4fdeaee8e480ee0148b9fe2bb455bc07863f132c9eb70c"
+    },
+    "cc-by-4.0.txt": {
+      "url": "https://creativecommons.org/licenses/by/4.0/legalcode.txt",
+      "resolvedUrl": "https://creativecommons.org/licenses/by/4.0/legalcode.txt",
+      "httpStatus": 200,
+      "contentType": "text/plain; charset=utf-8",
+      "bytes": 18657,
+      "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+    }
+  },
+  "trackEvidence": {
+    "neon-house": {
+      "catalogRecord": {
+        "title": "EDM Detection Mode",
+        "filename": "EDM Detection Mode.mp3",
+        "length": "00:06:06",
+        "instruments": "Synths, Percussion",
+        "genre": "7",
+        "bpm": "128",
+        "description": "This is a sort of electronic music with a heavy backbeat and thumpin' bass. There is a significant change in theme at around 2 minutes - so if the beginning is a bit boring, you can start there. There is another fun change at around 3:30. If you didn't like the previous bits, just start there! I think you get the picture.",
+        "feel": "Driving",
+        "uploaded": "2015-04-15",
+        "isrc": "USUAN1500026",
+        "collection": "18",
+        "sheetmusic": null,
+        "video": "https://youtu.be/laHl-aFZUJI",
+        "itunes": "https://itunes.apple.com/us/album/edm-detection-mode/id1069337849?i=1069337855",
+        "filmmusicURL": "https://incompetech.filmmusic.io/song/3687-edm-detection-mode/"
+      },
+      "licenseObserved": "The creator track renderer publishes Creative Commons Attribution 4.0 credits for the selected track. The corresponding live track search result also explicitly named that license.",
+      "downloadLinkDerivation": "The official page uses /music/royalty-free/mp3-royaltyfree/ plus its catalog filename."
+    },
+    "midnight-techno": {
+      "licenseObserved": "The official Beat Timed Grime page explicitly links https://creativecommons.org/licenses/by/4.0/.",
+      "downloadLinkObserved": "direct_download.php?file=Beat_Timed_Grime.mp3",
+      "tempoEvidence": "The original verified artist video description states 120 bpm.",
+      "tempoEvidenceUrl": "https://www.youtube.com/watch?v=t3758pixHZY"
+    }
+  },
+  "excludedSources": {
+    "NCS": "https://ncs.io/usage-policy",
+    "StreamBeats": "https://www.streambeats.com/licensing/"
+  },
+  "excludedSourceReason": "Creator-video permissions do not establish game permission; these providers direct games to separate licensing."
+}

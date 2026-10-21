@@ -1,0 +1,24 @@
+[
+  {
+    "demo": "disco",
+    "exitCode": 0,
+    "tests": [
+      "tests/feed-ui-migration.test.mjs"
+    ]
+  },
+  {
+    "demo": "fishing",
+    "exitCode": 0,
+    "tests": [
+      "tests/feed-ui-migration.test.mjs"
+    ]
+  },
+  {
+    "demo": "festival",
+    "exitCode": 0,
+    "tests": [
+      "tests/feed-ui-migration.test.mjs",
+      "tests/desert-release.test.mjs"
+    ]
+  }
+]
