@@ -44,7 +44,6 @@
     ],
     "added": [
       ".nvmrc",
-      "next-env.d.ts",
       "public/feed-ui/archive-placeholder.svg",
       "scripts/init-local-db.mjs"
     ]
@@ -89,7 +88,6 @@
     ],
     "added": [
       ".nvmrc",
-      "next-env.d.ts",
       "public/feed-ui/archive-placeholder.svg",
       "scripts/init-local-db.mjs"
     ]
@@ -130,7 +128,6 @@
     ],
     "added": [
       ".nvmrc",
-      "next-env.d.ts",
       "public/feed-ui/archive-placeholder.svg",
       "scripts/init-local-db.mjs"
     ]
