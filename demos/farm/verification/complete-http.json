@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-10-21T16:35:15.064Z",
+  "durationSeconds": 45,
+  "server": "http://127.0.0.1:5193",
+  "defaultLX": true,
+  "identityPreserved": true,
+  "threeCardsRecorded": true,
+  "careCooldownAndCompanyDuration": true,
+  "naturalEightWoolRoute": true,
+  "savedMemoryGreeting": true,
+  "stageUse": true,
+  "reversibleAppearance": true,
+  "duplicateRewardsAndOfflineClaimsPrevented": true,
+  "savedMilestones": 8,
+  "assets": 4,
+  "isolatedNewDevice": true
+}

@@ -1,0 +1,144 @@
+{
+  "checkedAt": "2026-10-21T16:39:23.739Z",
+  "url": "http://127.0.0.1:5190",
+  "pid": 85673,
+  "resources": [
+    {
+      "url": "/",
+      "status": 200,
+      "bytes": 706,
+      "type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "/assets/index-D4cmffIQ.js",
+      "status": 200,
+      "bytes": 240764,
+      "type": "text/javascript"
+    },
+    {
+      "url": "/assets/index-zUYEki5j.css",
+      "status": 200,
+      "bytes": 46523,
+      "type": "text/css"
+    },
+    {
+      "url": "/assets/three-CHf73H8A.js",
+      "status": 200,
+      "bytes": 618409,
+      "type": "text/javascript"
+    },
+    {
+      "url": "/assets/world-Bvoighda.js",
+      "status": 200,
+      "bytes": 54018,
+      "type": "text/javascript"
+    },
+    {
+      "url": "/boot-guard.js",
+      "status": 200,
+      "bytes": 708,
+      "type": "text/javascript"
+    },
+    {
+      "url": "/feed-ui/icons/battery.svg",
+      "status": 200,
+      "bytes": 622,
+      "type": "image/svg+xml"
+    },
+    {
+      "url": "/feed-ui/icons/bell.svg",
+      "status": 200,
+      "bytes": 819,
+      "type": "image/svg+xml"
+    },
+    {
+      "url": "/feed-ui/icons/plus.svg",
+      "status": 200,
+      "bytes": 800,
+      "type": "image/svg+xml"
+    },
+    {
+      "url": "/feed-ui/icons/settings.svg",
+      "status": 200,
+      "bytes": 1170,
+      "type": "image/svg+xml"
+    },
+    {
+      "url": "/feed-ui/icons/signal.svg",
+      "status": 200,
+      "bytes": 996,
+      "type": "image/svg+xml"
+    },
+    {
+      "url": "/feed-ui/icons/spark.svg",
+      "status": 200,
+      "bytes": 855,
+      "type": "image/svg+xml"
+    },
+    {
+      "url": "/feed-ui/icons/wifi.svg",
+      "status": 200,
+      "bytes": 1437,
+      "type": "image/svg+xml"
+    },
+    {
+      "url": "/avatars/cast-v1/banana-cat.glb",
+      "status": 200,
+      "bytes": 3705368,
+      "type": "model/gltf-binary"
+    },
+    {
+      "url": "/avatars/cast-v1/human-lx.glb",
+      "status": 200,
+      "bytes": 3497224,
+      "type": "model/gltf-binary"
+    },
+    {
+      "url": "/avatars/cast-v1/miaocuijiao.glb",
+      "status": 200,
+      "bytes": 3545756,
+      "type": "model/gltf-binary"
+    },
+    {
+      "url": "/avatars/cast-v1/milk-frog.glb",
+      "status": 200,
+      "bytes": 3175116,
+      "type": "model/gltf-binary"
+    },
+    {
+      "url": "/avatars/portraits/banana-cat.webp",
+      "status": 200,
+      "bytes": 9018,
+      "type": "image/webp"
+    },
+    {
+      "url": "/avatars/portraits/human-lx.webp",
+      "status": 200,
+      "bytes": 10824,
+      "type": "image/webp"
+    },
+    {
+      "url": "/avatars/portraits/miaocuijiao.webp",
+      "status": 200,
+      "bytes": 10602,
+      "type": "image/webp"
+    },
+    {
+      "url": "/avatars/portraits/milk-frog.webp",
+      "status": 200,
+      "bytes": 7196,
+      "type": "image/webp"
+    }
+  ],
+  "api": {
+    "status": 200,
+    "version": 2,
+    "avatar": "human-lx",
+    "storage": "local-sqlite",
+    "animals": 3
+  },
+  "backupIntegrity": "ok",
+  "existingFarmIdentitiesAndRelationshipsPreserved": 7,
+  "diagnosticsErrors": 0,
+  "webgl": "not visually verified"
+}

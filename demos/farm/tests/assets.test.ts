@@ -2,7 +2,7 @@ import {test} from 'node:test';import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 import {createClubAvatar} from '../src/avatars/club-avatar-rig.ts';
-for(const kind of ['miaocuijiao','banana-cat','milk-frog'] as const)test(`${kind} loads the archived skeleton and yields finite articulated poses`,async()=>{
+for(const kind of ['human-lx','miaocuijiao','banana-cat','milk-frog'] as const)test(`${kind} loads the archived skeleton and yields finite articulated poses`,async()=>{
  const bytes=readFileSync(new URL(`../public/avatars/cast-v1/${kind}.glb`,import.meta.url));
  const original=readFileSync(new URL(`../../disco/public/avatars/cast-v1/${kind}.glb`,import.meta.url));assert.deepEqual(bytes,original);
  // Geometry/skin test only: image decoding and WebGL remain browser acceptance gaps.

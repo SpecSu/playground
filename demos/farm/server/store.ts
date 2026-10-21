@@ -13,7 +13,7 @@ export class FarmStore {
   }
   private load(device: string, now: number): Farm {
     const row = this.db.prepare('SELECT state FROM farms WHERE device=?').get(device) as {state: string} | undefined;
-    if (row) {const raw=JSON.parse(row.state);const s=upgradeFarm(raw);if(raw.version!==s.version)this.save(s);return s;}
+    if (row) {const s=upgradeFarm(JSON.parse(row.state));if(JSON.stringify(s)!==row.state)this.save(s);return s;}
     const s = createFarm(device, now);
     this.save(s); return s;
   }

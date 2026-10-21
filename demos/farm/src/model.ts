@@ -15,7 +15,7 @@ export type Farm = {
   version: 2; playerId: string; avatar: Avatar; animals: Animal[]; createdAt: number;
   lastActionAt: number; lastRhythmAt: number; visits: number; demoMode: boolean;
   sharedEvents: number; wool: number; woolAt: number; stage: boolean; revision: number;
-  company:{animalId:string;startedAt:number;readyAt:number;expiresAt:number}|null;
+  company:{id:string;animalId:string;startedAt:number;readyAt:number;expiresAt:number}|null;
   book:{met:string[];claimed:string[];rememberedVisits:number};
 };
 export type Reaction = {
@@ -23,10 +23,11 @@ export type Reaction = {
   micro: 'ear' | 'look'; progressed: boolean; source: 'action' | 'memory'; text: string;
 };
 export type FarmEvent = { id: string; kind: 'action' | 'rhythm' | 'welcome' | 'stage' | 'appearance' | 'feed' | 'company'; at: number; action: Action; reactions: Reaction[] };
-export type Command = { id: string; type: string; action?: unknown; target?: unknown; avatar?: unknown; appearance?: unknown;quest?:unknown };
+export type Command = { id: string; type: string; action?: unknown; target?: unknown; avatar?: unknown; appearance?: unknown;quest?:unknown;session?:unknown };
 export type Result = { state: Farm; accepted: boolean; message: string; event?: FarmEvent };
 export type Snapshot = Farm & { now: number; woolReady: number; storage: 'local-sqlite'; actionReadyAt: number };
 export const ACTION_LABEL: Record<Action, string> = { dance: '跳舞', bounce: '蹦跳', love: '喜欢' };
+export const AVATAR_LABEL:Record<Avatar,string>={'human-lx':'LX',miaocuijiao:'喵脆角','banana-cat':'香蕉猫'};
 export const PERSONALITY_LABEL: Record<Personality, string> = { eager: '热情', shy: '慢热', independent: '有主见' };
 export const WOOL_INTERVAL = 30 * 60_000;
 export const WOOL_CAP = 12;
@@ -54,6 +55,7 @@ export function upgradeFarm(raw:unknown):Farm {
  const s=structuredClone(raw) as Farm;
  if(!s||typeof s!=='object'||![1,2].includes(s.version))throw new Error('不支持的农场存档版本，原存档已保留');
  if((s.version as number)===1){s.version=2;s.avatar='human-lx';s.company=null;s.book={met:[],claimed:[],rememberedVisits:0};s.animals.forEach(a=>a.care=emptyCare());s.revision++;}
+ if(s.company&&typeof s.company.id!=='string'){s.company.id=`legacy-company-${s.company.startedAt}-${s.company.animalId}`;s.revision++;}
  return s;
 }
 export function bondStage(bond: number): string { return bond >= 10 ? '默契' : bond >= 6 ? '亲近' : bond >= 3 ? '熟悉' : '初识'; }
@@ -100,13 +102,14 @@ export function applyCommand(original: Farm, c: Command, now: number): Result {
     }else{
       if(s.company&&now<=s.company.expiresAt)return reject('已经有一位朋友在陪你啦');
       if(now-a.care.lastCompanyAt<COMPANY_COOLDOWN)return reject(`${a.name}记着这段陪伴，稍后再一起待会儿`);
-      s.company={animalId:a.id,startedAt:now,readyAt:now+COMPANY_DURATION,expiresAt:now+COMPANY_EXPIRY};
+      s.company={id:c.id,animalId:a.id,startedAt:now,readyAt:now+COMPANY_DURATION,expiresAt:now+COMPANY_EXPIRY};
       visual=event('company','love',[{...reaction(a,'love',false,'action'),text:a.personality==='shy'?'隔一点距离，也想陪着你':a.personality==='independent'?'我就坐在这边，陪你一会':'我来陪你！'}]);
       message=`和${a.name}待20秒，完成后记下这段陪伴`;
     }
     s.lastActionAt=now;
   }else if(c.type==='finishCompany'||c.type==='cancelCompany'){
     if(!s.company)return reject('现在没有进行中的陪伴');
+    if(c.session!==s.company.id)return reject('这段陪伴已经变化，请重新打开动物卡片');
     const session=s.company;
     if(c.type==='cancelCompany'||now>session.expiresAt){s.company=null;message='这次陪伴结束了 · 关系不会减少';}
     else{

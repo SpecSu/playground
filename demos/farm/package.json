@@ -10,6 +10,8 @@
     "dev": "node --experimental-strip-types server/index.ts --dev",
     "start": "node --experimental-strip-types server/index.ts",
     "test": "node --import ./tests/view-loader.mjs --experimental-strip-types --test --test-concurrency=1 tests/*.test.ts",
+    "test:dom": "node scripts/dom-smoke.mjs",
+    "test:http": "node scripts/complete-http-smoke.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src server tests",
     "build": "tsc --noEmit && vite build"
@@ -27,8 +29,9 @@
     "@types/three": "0.186.0",
     "@vitejs/plugin-react": "6.0.2",
     "eslint": "9.39.4",
+    "happy-dom": "21.0.4",
     "typescript": "5.9.3",
     "typescript-eslint": "8.62.1",
-    "vite": "8.0.13"
+    "vite": "8.3.5"
   }
 }

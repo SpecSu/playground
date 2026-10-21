@@ -6,7 +6,7 @@ import {createFarm,snapshot} from '../src/model.ts';
 import {layoutPhoneViewport,PHONE_SCREEN} from '../src/feed/phone-viewport.ts';
 import {ClubCameraController} from '../src/avatars/club-camera.ts';
 import {CLUB_AVATAR_SCALE} from '../src/avatars/club-avatar-scale.ts';
-function props(sheet:FarmViewProps['sheet']=null):FarmViewProps{return {farm:snapshot(createFarm('a',100000),100000),target:'all',camera:'overview',reduced:false,sheet,busy:false,pending:false,error:'',message:'',assetStatus:'伙伴已就位',now:100000,guide:'对大家跳舞',nextLearn:0,worldRef:createRef(),onTarget(){},onSheet(){},onCommand(){},onAction(){},onCamera(){},onReduced(){},onMove(){},onStop(){}};}
+function props(sheet:FarmViewProps['sheet']=null):FarmViewProps{return {farm:snapshot(createFarm('a',100000),100000),target:'all',camera:'overview',reduced:false,sheet,busy:false,pending:false,error:'',message:'',assetStatus:'伙伴已就位',now:100000,guide:'对大家跳舞',nextLearn:0,worldRef:createRef(),onInspect(){},onTarget(){},onSheet(){},onCommand(){},onAction(){},onCamera(){},onReduced(){},onMove(){},onStop(){}};}
 test('farm renders the same portrait feed, full scene and bottom navigation without a dashboard rail',()=>{
  const html=renderToStaticMarkup(createElement(FarmView,props()));
  assert.match(html,/app-shell app-shell-v020/);assert.match(html,/data-phone-ratio="195:422"/);assert.match(html,/feed-window feed-v020 farm-feed joined/);assert.match(html,/class="club-stage"/);assert.match(html,/class="interaction-dock/);assert.match(html,/class="bottom-nav"/);
@@ -58,5 +58,20 @@ test('continuous keyboard or joystick input travels straight in follow view with
   assert.ok(Math.abs(position.x*initialDirection!.z-position.z*initialDirection!.x)<1e-6,'travel remains on the initial screen basis');
   assert.ok(camera.getWorldDirection(new THREE.Vector3()).angleTo(initialForward)<1e-6,'the camera heading stays locked throughout the gesture');
   assert.equal(gesture.active,true);assert.deepEqual(gesture.sample(camera,'third-person',0,0),{x:0,z:0});assert.equal(gesture.active,false);assert.equal(gesture.headingLock,undefined);
+ }
+});
+
+test('selected animal card exposes its status, all learned habits, care and reversible appearance in the shared drawer',()=>{
+ const p=props('residents');p.target='momo';p.farm.animals[1].habits.bounce={count:2,stage:'imitate',lastAt:90000};
+ const html=renderToStaticMarkup(createElement(FarmView,p));assert.match(html,/data-resident-id="momo"/);for(const label of ['茉茉的记忆','慢热','正在草地上散步','跳舞','蹦跳','喜欢','喂青草','一起待会儿','普通卷毛'])assert.ok(html.includes(label),label);
+});
+test('LX can be chosen as the player and the independent guardian and journey have usable drawers',()=>{
+ const avatar=renderToStaticMarkup(createElement(FarmView,props('avatar')));assert.match(avatar,/LX/);assert.match(avatar,/human-lx.webp/);
+ const guardian=renderToStaticMarkup(createElement(FarmView,props('guardian')));assert.match(guardian,/守护伙伴/);assert.match(guardian,/奶蛙合拍/);
+ const book=renderToStaticMarkup(createElement(FarmView,props('journey')));for(const label of ['相处手账','认识三位住民','一口青草','搭好软垫舞台'])assert.ok(book.includes(label));
+});
+test('an unresolved save disables care, appearance, reward and avatar mutations until explicit retry',()=>{
+ for(const sheet of ['residents','avatar','journey'] as const){const p=props(sheet);p.pending=true;p.error='保存失败';p.farm.animals[0].growthEligible=true;p.farm.book.met=['pipi','momo','doudou'];const html=renderToStaticMarkup(createElement(FarmView,p));
+  assert.match(html,/class="farm-sheet-error"/,'retry must be reachable inside the active modal');for(const command of sheet==='residents'?['feed','company','appearance']:sheet==='avatar'?['avatar','nextVisit']:['questClaim'])assert.match(html,new RegExp(`<button(?=[^>]*data-command="${command}")(?=[^>]*disabled="")[^>]*>`),command);
  }
 });

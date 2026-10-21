@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import {randomUUID} from 'node:crypto';
+import {setTimeout as delay} from 'node:timers/promises';
+import {writeFileSync} from 'node:fs';
+const base=process.env.FARM_URL;
+if(!base||new URL(base).port==='5190')throw new Error('Use FARM_URL for an isolated test server/database, never the user preview5190');
+const started=Date.now(),first=await fetch(base+'/api/farm'),cookie=first.headers.get('set-cookie')?.split(';')[0],initial=await first.json();
+assert.equal(first.status,200);assert.ok(cookie);assert.equal(initial.avatar,'human-lx');assert.equal(initial.version,2);assert.equal(initial.book.claimed.length,0);
+const headers={'Content-Type':'application/json',Cookie:cookie};
+const post=async(type,extra={},id=randomUUID())=>{const response=await fetch(base+'/api/farm',{method:'POST',headers,body:JSON.stringify({id,type,...(['finishCompany','cancelCompany'].includes(type)?{session:state.company?.id}:{}),...extra})});assert.equal(response.status,200);return response.json();};
+let state=initial;
+async function accepted(type,extra={},id=randomUUID()){const r=await post(type,extra,id);assert.equal(r.accepted,true,`${type}: ${r.message}`);state=r.snapshot;return r;}
+const claim=async quest=>accepted('questClaim',{quest});
+for(const target of ['pipi','momo','doudou'])await accepted('inspect',{target});
+const claimId=randomUUID();await accepted('questClaim',{quest:'meet'},claimId);assert.equal((await post('questClaim',{quest:'meet'},claimId)).snapshot.wool,1);assert.equal((await post('questClaim',{quest:'meet'})).accepted,false);
+const feedId=randomUUID();await accepted('feed',{target:'pipi'},feedId);assert.equal((await post('feed',{target:'pipi'},feedId)).snapshot.animals[0].care.feedCount,1);assert.equal((await post('feed',{target:'pipi'})).accepted,false);await claim('feed');
+await delay(6100);await accepted('act',{action:'dance',target:'all'});await claim('dance');
+await delay(6100);await accepted('company',{target:'momo'});assert.equal((await post('finishCompany')).accepted,false);
+await delay(7100);await accepted('act',{action:'dance',target:'all'});
+await delay(13100);await accepted('act',{action:'dance',target:'all'});await accepted('finishCompany');assert.equal((await post('finishCompany')).accepted,false);await claim('company');await claim('learn');
+await delay(6100);await accepted('rhythm');await claim('rhythm');const visit=await accepted('visit');assert.equal(visit.event.reactions.length,3);assert.ok(visit.event.reactions.every(r=>r.source==='memory'));await claim('memory');
+assert.equal(state.wool,8);assert.equal(state.woolReady,0);assert.equal(state.demoMode,false);await accepted('buy');assert.equal(state.wool,0);assert.equal((await post('buy')).snapshot.wool,0);await claim('stage');
+await accepted('appearance',{target:'pipi',appearance:'starlit'});assert.equal(state.animals[0].appearance,'starlit');await accepted('appearance',{target:'pipi',appearance:'plain'});
+const animals=structuredClone(state.animals);await accepted('avatar',{avatar:'banana-cat'});await accepted('avatar',{avatar:'human-lx'});assert.deepEqual(state.animals,animals);assert.equal(state.playerId,initial.playerId);
+await delay(6100);await accepted('stagePlay');await accepted('nextVisit');assert.equal(state.woolReady,12);const collect=randomUUID();await accepted('claim',{},collect);assert.equal(state.wool,13);assert.equal((await post('claim',{},collect)).snapshot.wool,13);assert.equal((await post('claim')).snapshot.wool,13);assert.equal((await post('nextVisit')).accepted,false);
+const saved=await(await fetch(base+'/api/farm',{headers:{Cookie:cookie}})).json();assert.equal(saved.avatar,'human-lx');assert.equal(saved.stage,true);assert.equal(saved.animals[1].care.companyCount,1);assert.equal(saved.book.claimed.length,8);
+const fresh=await(await fetch(base+'/api/farm')).json();assert.equal(fresh.book.claimed.length,0);assert.equal(fresh.animals[0].bond,0);
+for(const kind of ['human-lx','miaocuijiao','banana-cat','milk-frog']){const r=await fetch(base+`/avatars/cast-v1/${kind}.glb`);assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),'model/gltf-binary');}
+assert.equal((await fetch(base+'/api/farm',{method:'POST',headers:{...headers,Origin:'https://unrelated.invalid'},body:'{}'})).status,403);
+const report={checkedAt:new Date().toISOString(),durationSeconds:Math.round((Date.now()-started)/1000),server:base,defaultLX:true,identityPreserved:true,threeCardsRecorded:true,careCooldownAndCompanyDuration:true,naturalEightWoolRoute:true,savedMemoryGreeting:true,stageUse:true,reversibleAppearance:true,duplicateRewardsAndOfflineClaimsPrevented:true,savedMilestones:8,assets:4,isolatedNewDevice:true};
+if(process.env.FARM_REPORT)writeFileSync(process.env.FARM_REPORT,JSON.stringify(report,null,2));console.log(JSON.stringify(report));

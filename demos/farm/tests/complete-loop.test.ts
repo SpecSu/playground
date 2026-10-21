@@ -8,7 +8,7 @@ import * as model from '../src/model.ts';
 import {FarmStore} from '../server/store.ts';
 const T=1_800_000_000_000;let seq=0;
 const cmd=(type:string,extra:Record<string,unknown>={})=>({id:`complete-${++seq}`,type,...extra});
-const run=(s:model.Farm,type:string,time:number,extra:Record<string,unknown>={})=>model.applyCommand(s,cmd(type,extra),time);
+const run=(s:model.Farm,type:string,time:number,extra:Record<string,unknown>={})=>model.applyCommand(s,cmd(type,{...(['finishCompany','cancelCompany'].includes(type)?{session:s.company?.id}:{}),...extra}),time);
 
 test('LX is the default player and switching body preserves every relationship',()=>{
  let s=model.createFarm('owner',T);assert.equal(s.avatar,'human-lx');assert.equal(s.version,2);
@@ -70,9 +70,17 @@ test('one demo visit cannot replenish the same offline interval repeatedly',()=>
 });
 test('care receipts survive restart and repeated new IDs cannot settle a completed company twice',()=>{
  const dir=mkdtempSync(join(tmpdir(),'farm-care-receipt-')),file=join(dir,'farm.sqlite');
- try{let store=new FarmStore(file);const feed=cmd('feed',{target:'pipi'}),start=cmd('company',{target:'momo'}),finish=cmd('finishCompany');
- store.command('a',feed,T);store.command('a',feed,T+1000);store.command('a',start,T+6000);store.command('a',finish,T+26000);store.close();
+ try{let store=new FarmStore(file);const feed=cmd('feed',{target:'pipi'}),start=cmd('company',{target:'momo'});
+ store.command('a',feed,T);store.command('a',feed,T+1000);const session=store.command('a',start,T+6000).snapshot.company!.id,finish=cmd('finishCompany',{session});store.command('a',finish,T+26000);store.close();
  store=new FarmStore(file);const repeated=store.command('a',finish,T+27000);assert.equal(repeated.duplicate,true);assert.equal(repeated.snapshot.animals[0].care.feedCount,1);assert.equal(repeated.snapshot.animals[1].care.companyCount,1);assert.equal(repeated.snapshot.animals[1].bond,1);
  const newId=store.command('a',cmd('finishCompany'),T+28000);assert.equal(newId.accepted,false);assert.equal(newId.snapshot.animals[1].bond,1);store.close();
  }finally{rmSync(dir,{recursive:true,force:true});}
+});
+test('a delayed finish or cancel cannot act on a replacement company session in another tab',()=>{
+ let s=model.createFarm('a',T);s=run(s,'company',T,{target:'pipi'}).state;const session=s.company!.id;
+ const pendingFinish=cmd('finishCompany',{session}),pendingCancel=cmd('cancelCompany',{session});
+ s=run(s,'visit',T+21000).state;s=run(s,'company',T+22000,{target:'momo'}).state;
+ const finish=model.applyCommand(s,pendingFinish,T+42000),cancel=model.applyCommand(s,pendingCancel,T+42001);
+ assert.equal(finish.accepted,false);assert.equal(cancel.accepted,false);assert.deepEqual(finish.state,s);assert.equal(finish.state.animals[1].care.companyCount,0);assert.equal(cancel.state.company?.animalId,'momo');
+ assert.equal(run(s,'finishCompany',T+42000).state.animals[1].care.companyCount,1);
 });

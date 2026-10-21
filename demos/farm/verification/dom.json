@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-10-21T16:38:25.813Z",
+  "actualBuiltEntry": true,
+  "defaultLX": true,
+  "threeIndividualCards": true,
+  "rapidSwitchSaved": true,
+  "worldHostRetained": true,
+  "joystickDoesNotPick": true,
+  "pendingModalRetry": true,
+  "responseLossRetrySameIdAndTarget": true,
+  "avatarIdentity": true,
+  "rewardDoubleClickOnce": true,
+  "focusAndEscape": true,
+  "webgl": "not verified (Node DOM)"
+}

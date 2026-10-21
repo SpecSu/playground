@@ -1,41 +1,57 @@
-# 绒绒农场 · 本机可玩 Demo
+# 绒绒农场 · 完整本机试玩版
 
-独立 React / Three.js / Vite 工程，基于仓库 `main@5d60a20`。不修改三个归档 Demo。
+打开 <http://127.0.0.1:5190>。玩家默认是仓库的 **LX**，三只小羊和奶蛙是独立实体。沿用原三个Demo的390×844画布、全屏场景、原版镜头/摇杆和底部抽屉。
 
-当前预览：<http://127.0.0.1:5190>。需要 **Node 24.9.0+**：
+## 从哪里开始
+
+1. 摇杆、WASD/方向键或点地走动。**点击羊身或名字，打开它自己的卡片**；拖动不会误开。点奶蛙打开守护者卡。
+2. 在卡片喂青草、一起待20秒，或跳舞/蹦跳/表达喜欢。皮皮热情跟拍、茉茉先观察再小幅回应、豆豆自己改编。
+3. 同一动作隔至少12秒做三次，从观察到模仿再到邀请。连点不刷进度；亲密不会抹平性格。
+4. 奶蛙带一次合拍后，刷新再来，它们会用真实保存的舞步认出你。也可在「我的分身」体验明确标注的6小时演示快进。
+5. 顶部「手账」收下已完成目标的羊毛，前七项合计8团，不必等数小时就能在底部「+」换软垫舞台，再一起蹦跳。
+6. 学会舞步+合拍后，可在动物卡留下星点卷毛或恢复普通，名字、个性和关系保留。规则驱动，无付费或生成API。
+
+每只羊的卡片显示实时状态、亲密阶段、三种动作习惯、外观和最近经历。卡片可以切换住民、关闭回场景；保存失败时可在面板内重试原指令。
+
+喂草每羊45秒间隔；陪伴20秒后手动记下，每羊5分钟间隔。各有前三次关系成长，之后仍可陪伴但不刷分。刷新结束未完成陪伴，超过60秒不结算，不扣关系。陪伴完成/取消绑定会话ID，旧重试不会误结算另一只羊。
+
+## 本机运行与存档
+
+当前独立后台服务会保留在任务结束后，无登录项/开机自启，仅监听127.0.0.1。若以后停了，在此目录运行：
 
 ```sh
-npm ci
-npm run build
-npm start
+python3 scripts/local-preview.py
 ```
 
-这台 Mac 的已安装运行时可直接启动：
+已在本工作区 `.local/runtime/node` 保留Node24.9运行时，启动器优先使用它，避免依赖临时目录。`python3 scripts/local-preview.py --check` 只读检查PID、工作目录、实际5190监听和页面。重复启动会复用当前进程，不杀其他程序。日志 `.local/server.log`、PID `.local/server.pid`。
+
+`.local/farm.sqlite` 保存Cookie设备身份对应的农场，请保留文件和Cookie。旧版存档一次升级为LX，所有关系/设施/羊毛保留；以后主动切换LX/喵脆角/香蕉猫不会换玩家ID。无跨设备账户。升级前的一致性备份在 `.local/backups/`。
+
+开发/重新构建（需要Node24.9+）：
 
 ```sh
-PATH=/tmp/farm-node-runtime/node_modules/node/bin:$PATH npm start
+PATH="$PWD/.local/runtime:$PATH" npm ci
+PATH="$PWD/.local/runtime:$PATH" npm test
+PATH="$PWD/.local/runtime:$PATH" npm run lint
+PATH="$PWD/.local/runtime:$PATH" npm run typecheck
+PATH="$PWD/.local/runtime:$PATH" npm run build
 ```
 
-本地 `.local/farm.sqlite` 保存设备身份下的农场；不要删该文件或清 Cookie。换分身不改变关系身份。不宣称跨设备账号。`npm run dev` 使用同一个本地适配。已新增独立 Sites 工程在 `../../../../farm-site`（同一任务工作区），通过官方 Vinext Worker + D1 发布；其云端状态与本机 SQLite 独立。
+服务器逐次读取dist，前端重建后刷新同一地址即可。自然羊毛每30分钟1团、最多12团，不因缺席腐烂或扣关系，亲密度不乘产量。领取、奖励、购买和失败重试均有真实SQLite收据防重复。
 
-## 试玩
+## 验证与边界
 
-界面沿用原三个 Demo 的 390×844 画布、全屏场景、底部动作栏和抽屉面板；桌面居中显示，手机等比适配。镜头、摇杆、图标和分身原生 1.5 倍显示参数复用 `disco`。
+完整玩法/P0/验收：[GAMEPLAY.md](./GAMEPLAY.md)；实施记录：[PROGRESS.md](./PROGRESS.md)；结果与证据：[VERIFICATION.md](./VERIFICATION.md)。
 
-1. 底部「互动」打开动作抽屉，默认对大家跳舞，观察皮皮靠近跟拍、茉茉先动耳朵再小幅回应、豆豆改编侧步。
-2. 同动作间隔至少 12 秒，三次会从观察→模仿→主动邀请；连点不增加进度。
-3. 奶蛙合拍后，刷新或点「体验下次来访」。迎接来自真实保存的习惯，快进明确标注为演示。
-4. 星点卷毛可保留或恢复普通，羊名、性格、关系保留。它是规则驱动原型。
-5. 自然羊毛每30分钟1团，上限12。演示来访快进6小时；领取8团兑换软垫舞台，解锁一起蹦。
+HTTP和DOM脚本必须针对**独立测试数据库**，明确拒绝5190：
 
-点击草地、WASD/方向键或底部摇杆移动，点击羊或「住民」选择对象。底部「+」打开羊毛与设施，「我的分身」切换外观或体验下次来访，「视角」切换全景/跟随。仅使用已有喵脆角、香蕉猫、奶蛙 GLB 与 portraits；骨骼渲染器来自 `disco/lib`，羊/场景为程序化几何。未声称有奶龙、抚摸、抱起、喂食或付费生成。
+```sh
+PORT=5193 FARM_DB=/tmp/farm-test.sqlite PATH="$PWD/.local/runtime:$PATH" npm start
+# 另一个终端
+FARM_URL=http://127.0.0.1:5193 PATH="$PWD/.local/runtime:$PATH" npm run test:http
+FARM_URL=http://127.0.0.1:5193 PATH="$PWD/.local/runtime:$PATH" npm run test:dom
+```
 
-## 验证和边界
+真实Chrome/WebGL画面、手机触控和观感**未验收**：当前独立Chrome插件工具不可用，未用CUA或其他浏览器绕行。DOM回归使用实际构建入口和真实测试API，但没有WebGL；模型测试保留真实几何/骨骼，跳过Node不支持的图片解码。SQLite会输出Node标准ExperimentalWarning。
 
-`npm test`、`npm run lint`、`npm run typecheck`、`npm run build`。`scripts/http-smoke.mjs` 对指定 FARM_URL 使用新测试设备身份跑30秒真实学习闭环；测试应指向独立实例。数据库重开、重复领取/购买和新用户初始化有独立回归。
-
-农场 29 项测试覆盖规则/SQLite、共享画布布局、动作/关系抽屉入口、跟随移动方向与松手停止；lint、类型检查和生产构建通过。Node DOM 已运行实际构建入口，能挂载完整控件且零入口异常；独立 DOM 复核通过抽屉焦点进入、双向 Tab 循环、Escape 关闭及焦点归还。
-
-独立 Chrome 插件工具在本次任务不可用，严格未用 CUA/替代浏览器。以上不验证 WebGL、手机构图、触控或观感；不能称视觉验收通过。保留静态首屏兜底、React 错误边界与运行时诊断（本地 `/api/diagnostics`）。
-
-本地 SQLite 是 Node 实验模块，会打印标准 ExperimentalWarning。模型测试保留真实几何与骨骼，跳过 Node 不支持的图片解码；不声称纹理/WebGL 已验收。角色来源及许可边界沿用仓库 `THIRD_PARTY_NOTICES.md` 和 `docs/assets-and-provenance.md`。
+仅复用已有LX/喵脆角/香蕉猫/奶蛙GLB及头像；小羊、青草和农场为程序化几何。没有奶龙、抚摸/抱起、多人、云账号、付费AI等伪按钮。原三个Demo与独立Sites工程本轮未修改/发布。

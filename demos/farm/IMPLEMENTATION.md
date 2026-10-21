@@ -41,16 +41,16 @@ Files: src/picking.ts, animal-view.ts, world.ts, sheep.ts, main.tsx, FarmView.ts
 
 Interfaces: SceneTapGesture guards release; pickSceneEntity honors nearest visible hit. onInspect(id) selects+opens resident/guardian. Cards consume snapshot/animal/event/now; all mutations use pending lock and explicit retry. Company drives proximity/countdown, feed drives chew/grass.
 
-- [ ] Tests first: real Three geometry pick sheep/guardian/occluder, drag/cancel/multi-pointer suppression; card ID/all habits/status/food/company/appearance, LX, journey, dialog continuity.
-- [ ] Watch failures; implement tap release and labels, guardian card, avatar picker, care/journey/status UI, timed feedback.
-- [ ] Pending save disables mutations, explicit retry preserves command; DOM verifies card switching and drawer lifecycle.
-- [ ] Full suite/lint/typecheck/build; commit playable UI slice.
+- [x] Tests first: real Three geometry pick sheep/guardian/occluder, drag/cancel/multi-pointer suppression; card ID/all habits/status/food/company/appearance, LX, journey, dialog continuity.
+- [x] Watch failures; implement tap release and labels, guardian card, avatar picker, care/journey/status UI, timed feedback.
+- [x] Pending save disables mutations, explicit retry preserves command; DOM verifies card switching and drawer lifecycle.
+- [x] Full suite/lint/typecheck/build; commit playable UI slice.
 
 ## Task3 — evidence and Mac handoff
 
 Files: scripts/complete-http-smoke.mjs, README.md, GAMEPLAY.md, PROGRESS.md.
 
-- [ ] Isolated server/db: HTTP initialize, inspect/feed/company, rewards/repeats/LX/reload. Test clock via pure/store construction only, never production API.
-- [ ] Independent review; fix important findings with regressions; full tests/lint/typecheck/build.
-- [ ] Consistent SQLite backup; replace only recorded farmPID, independent session same5190, logs/PID; correct cwd/listener/assets/API and cross-call survival.
-- [ ] Record evidence/Chrome limit; final local commit and deliver URL/path/checks. No push/deploy.
+- [x] Isolated server/db: HTTP initialize, inspect/feed/company, rewards/repeats/LX/reload. Test clock via pure/store construction only, never production API.
+- [x] Independent review; fix important findings with regressions; full tests/lint/typecheck/build.
+- [x] Consistent SQLite backup; replace only recorded farmPID, independent session same5190, logs/PID; correct cwd/listener/assets/API and cross-call survival.
+- [x] Record evidence/Chrome limit; final local commit and deliver URL/path/checks. No push/deploy.
