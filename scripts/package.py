@@ -17,7 +17,7 @@ def source_files(base):
             p = Path(directory) / name
             if p.is_symlink():
                 raise RuntimeError(f'Symlinks require review: {p.relative_to(ROOT)}')
-            if name == '.DS_Store' or name.startswith('.env') and name != '.env.example':
+            if name in {'.DS_Store', 'next-env.d.ts'} or name.startswith('.env') and name != '.env.example':
                 continue
             if name.endswith(('.log', '.tsbuildinfo', '.pyc', '.pem', '.key')):
                 continue
