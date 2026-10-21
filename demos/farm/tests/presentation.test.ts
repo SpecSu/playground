@@ -7,7 +7,7 @@ import {persistenceReducer,initialPersistence} from '../src/persistence.ts';
 test('changing target or motion preference with the same snapshot cannot rewind server time',()=>{
  const data=snapshot(createFarm('a',Date.now()-5000),Date.now()-5000);
  const world=Object.create(FarmWorld.prototype) as FarmWorld;
- Object.assign(world,{data,offset:12345,env:{stage:{visible:false}},lastEvent:''});
+ Object.assign(world,{data,offset:12345,env:{stage:{visible:false}},lastEvent:'',cameraMode:'overview'});
  world.set(data,undefined,'momo',false);assert.equal(Reflect.get(world,'offset'),12345);
  world.set(data,undefined,'pipi',true);assert.equal(Reflect.get(world,'offset'),12345);
 });

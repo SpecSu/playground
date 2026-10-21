@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import {createClubAvatar,type ClubAvatar} from './avatars/club-avatar-rig.ts';
 import type {ClubMotionState} from './avatars/club-scene-motion.ts';
+import {ClubCameraController,projectCameraLabel,type ClubCameraMode} from './avatars/club-camera.ts';
+import {CLUB_AVATAR_SCALE} from './avatars/club-avatar-scale.ts';
+import {CameraMovementGesture} from './farm-camera.ts';
 import {assetStatusText,type AssetStatus} from './asset-status.ts';
 import {makeSheep} from './sheep.ts';
 import {makeEnvironment} from './environment.ts';
@@ -12,7 +15,7 @@ type Sheep=ReturnType<typeof makeSheep> & {label:HTMLButtonElement;bubble:HTMLSp
 const clamp=THREE.MathUtils.clamp;
 export class FarmWorld {
  private playerStatus:AssetStatus='loading';private guardianStatus:AssetStatus='loading';
- private scene=new THREE.Scene();private camera:THREE.OrthographicCamera;
+ private scene=new THREE.Scene();private cameraController=new ClubCameraController();private camera:THREE.Camera=this.cameraController.overview;private cameraMode:ClubCameraMode='overview';
  private renderer:THREE.WebGLRenderer;private frame=0;private disposed=false;private resize:ResizeObserver;
  private data:Snapshot;private event:FarmEvent|undefined;private selected='all';private reduced=false;
  private env:ReturnType<typeof makeEnvironment>;private sheep:Sheep[]=[];private player:ClubAvatar|undefined;private guardian:ClubAvatar;
@@ -20,12 +23,13 @@ export class FarmWorld {
  private guardDistance=0;
  private destination:Point={x:0,z:2.7};private distance=0;private prevTime=0;private lastEvent='';private offset=0;
  private keys=new Set<string>();private direction:Point={x:0,z:0};private dragging=false;private ray=new THREE.Raycaster();private cursor=new THREE.Vector2();
+ private movementGesture=new CameraMovementGesture();
  private listenerCleanup:(()=>void)[]=[];private projection=new THREE.Vector3();
  private host:HTMLDivElement;private handlers:Handlers;
  constructor(host:HTMLDivElement,data:Snapshot,handlers:Handlers){
    this.host=host;this.handlers=handlers;
    this.data=data;this.offset=data.now-Date.now();this.scene.background=new THREE.Color('#edf3dc');this.scene.fog=new THREE.Fog('#edf3dc',30,65);
-   this.camera=new THREE.OrthographicCamera(-9,9,8,-8,.1,100);this.camera.position.set(10,15,19);this.camera.lookAt(0,.1,0);
+
    this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.2;
    const canvas=this.renderer.domElement;canvas.tabIndex=0;canvas.setAttribute('aria-label','农场草地，点击移动，点小羊选择。方向键或 WASD 行走。');this.host.append(canvas);
    this.scene.add(new THREE.HemisphereLight('#fff9e9','#a8b984',2.5));const sun=new THREE.DirectionalLight('#fff0d5',3);sun.position.set(-6,14,8);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-11;sun.shadow.camera.right=11;sun.shadow.camera.top=11;sun.shadow.camera.bottom=-11;sun.shadow.normalBias=.04;this.scene.add(sun);
@@ -35,14 +39,14 @@ export class FarmWorld {
      const name=document.createElement('strong'),memory=document.createElement('small'),bubble=document.createElement('span');bubble.className='world-bubble';label.append(bubble,name,memory);name.textContent=a.name;label.style.setProperty('--sheep-color',a.color);label.onclick=()=>handlers.select(a.id);this.host.append(label);this.sheep.push({...sheep,label,bubble,name,memory});
    });
    this.scene.add(this.playerGroup,this.guardianGroup);this.playerGroup.position.set(0,0,2.7);this.guardianGroup.position.set(-2,0,2.6);
-   this.guardian=createClubAvatar('milk-frog','farm-guardian');this.guardianGroup.add(this.guardian.root);void this.guardian.ready.then(()=>{if(!this.disposed){this.guardian.root.scale.setScalar(1.45/this.guardian.height);this.guardianStatus='ready';this.reportAssets();}}).catch(()=>{if(!this.disposed){this.guardianStatus='error';this.reportAssets();}});
+   this.guardian=createClubAvatar('milk-frog','farm-guardian');this.guardianGroup.add(this.guardian.root);void this.guardian.ready.then(()=>{if(!this.disposed){this.guardian.root.scale.setScalar(CLUB_AVATAR_SCALE);this.guardianStatus='ready';this.reportAssets();}}).catch(()=>{if(!this.disposed){this.guardianStatus='error';this.reportAssets();}});
    this.installAvatar(data.avatar);
    const guardianLabel=document.createElement('div');guardianLabel.className='guardian-label';guardianLabel.textContent='奶蛙 · 守护伙伴';this.host.append(guardianLabel);
    const playerLabel=document.createElement('div');playerLabel.className='player-label';playerLabel.textContent='▼ 我';this.host.append(playerLabel);
    this.positionLabels=(now:number)=>{
      this.sheep.forEach((s,i)=>{const a=this.data.animals[i];this.place(s.label,s.root.position,2.1);s.label.classList.toggle('selected',this.selected===a.id);s.name.textContent=`${a.name}${a.appearance==='starlit'?' ✦':''}`;
        const response=responseAt(this.event,a.id,now);const invite=this.invitation(a,i,now);s.bubble.textContent=response?.reaction.text||(invite?'想和你再来一段 ♫':'');s.bubble.hidden=!s.bubble.textContent;s.memory.textContent=a.habits.dance?.stage==='invite'?'♫ 记得你的舞步':a.habits.dance?.stage==='imitate'?'♫ 学着你的舞步':'';
-     });this.place(guardianLabel,this.guardianGroup.position,1.9);this.place(playerLabel,this.playerGroup.position,2.2);
+     });this.place(guardianLabel,this.guardianGroup.position,this.guardian.height*CLUB_AVATAR_SCALE+.3);this.place(playerLabel,this.playerGroup.position,(this.player?.height??1.5)*CLUB_AVATAR_SCALE+.35);
    };
    this.resize=new ResizeObserver(()=>this.fit());this.resize.observe(host);this.fit();
    const listen=(target:EventTarget,type:string,fn:EventListener)=>{target.addEventListener(type,fn);this.listenerCleanup.push(()=>target.removeEventListener(type,fn));};
@@ -60,20 +64,22 @@ export class FarmWorld {
    this.player?.dispose();if(this.player)this.playerGroup.remove(this.player.root);
    const avatar=createClubAvatar(kind,'farm-player');this.player=avatar;this.playerGroup.add(avatar.root);
    this.playerStatus='loading';this.reportAssets();
-   void avatar.ready.then(()=>{if(!this.disposed&&this.player===avatar){avatar.root.scale.setScalar(1.8/avatar.height);this.playerStatus='ready';this.reportAssets();}}).catch(()=>{if(!this.disposed&&this.player===avatar){this.playerStatus='error';this.reportAssets();}});
+   void avatar.ready.then(()=>{if(!this.disposed&&this.player===avatar){avatar.root.scale.setScalar(CLUB_AVATAR_SCALE);this.playerStatus='ready';this.reportAssets();}}).catch(()=>{if(!this.disposed&&this.player===avatar){this.playerStatus='error';this.reportAssets();}});
  }
- set(data:Snapshot,event:FarmEvent|undefined,target:string,reduced:boolean){
+ set(data:Snapshot,event:FarmEvent|undefined,target:string,reduced:boolean,cameraMode:ClubCameraMode='overview'){
    if(data.avatar!==this.data.avatar)this.installAvatar(data.avatar);
    if(data!==this.data)this.offset=data.now-Date.now();
-   this.data=data;this.event=event;this.selected=target;this.reduced=reduced;this.env.stage.visible=data.stage;
+   if(this.cameraMode!==cameraMode){this.movementGesture.reset();this.direction={x:0,z:0};this.keys.clear();this.destination={x:this.playerGroup.position.x,z:this.playerGroup.position.z};}
+   this.data=data;this.event=event;this.selected=target;this.reduced=reduced;this.cameraMode=cameraMode;this.env.stage.visible=data.stage;
    if(event&&event.id!==this.lastEvent){this.lastEvent=event.id;this.destination={x:this.playerGroup.position.x,z:this.playerGroup.position.z};
      if(event.kind==='stage')this.destination={x:3.6,z:3.25};
      const facing=target==='all'?new THREE.Vector3(0,0,-1):this.sheep[data.animals.findIndex(a=>a.id===target)]?.root.position.clone().sub(this.playerGroup.position);if(facing)this.playerGroup.rotation.y=Math.atan2(facing.x,facing.z);
    }
  }
- move(direction:Point){this.direction=direction;}
- private fit(){const w=this.host.clientWidth,h=this.host.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);const aspect=w/h;const height=Math.max(12.4,16/aspect);this.camera.left=-height*aspect/2;this.camera.right=height*aspect/2;this.camera.top=height/2;this.camera.bottom=-height/2;this.camera.updateProjectionMatrix();}
- private place(el:HTMLElement,point:THREE.Vector3,lift:number){this.projection.copy(point);this.projection.y+=lift;this.projection.project(this.camera);const x=(this.projection.x*.5+.5)*this.host.clientWidth,y=(-this.projection.y*.5+.5)*this.host.clientHeight;el.style.transform=`translate(-50%,-100%) translate(${x}px,${y}px)`;}
+ move(direction:Point){this.direction=direction;if(!direction.x&&!direction.z){this.movementGesture.reset();this.destination={x:this.playerGroup.position.x,z:this.playerGroup.position.z};}}
+ private updateCamera(dt:number){this.camera=this.cameraController.update({width:this.host.clientWidth,height:this.host.clientHeight,mode:this.cameraMode,orbit:{yaw:0,pitch:0},headingLock:this.movementGesture.headingLock,subject:{id:'farm-player',position:this.playerGroup.position,heading:this.playerGroup.rotation.y,height:(this.player?.height??1.5)*CLUB_AVATAR_SCALE,radius:(this.player?.footprintRadius??.6)*CLUB_AVATAR_SCALE,displayScale:CLUB_AVATAR_SCALE,groundLift:(this.player?.groundLift??0)*CLUB_AVATAR_SCALE},deltaSeconds:dt,reducedMotion:this.reduced});}
+ private fit(){const w=this.host.clientWidth,h=this.host.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.updateCamera(0);}
+ private place(el:HTMLElement,point:THREE.Vector3,lift:number){this.projection.copy(point);this.projection.y+=lift;const position=projectCameraLabel(this.projection,this.camera,this.host.clientWidth,this.host.clientHeight);el.hidden=!position;if(position)el.style.transform=`translate(-50%,-100%) translate(${position.x}px,${position.y}px)`;}
  private point(e:PointerEvent,pick:boolean){const r=this.renderer.domElement.getBoundingClientRect();this.cursor.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);this.ray.setFromCamera(this.cursor,this.camera);
    if(pick){const hit=this.ray.intersectObjects(this.sheep.map(s=>s.root),true)[0];if(hit){this.handlers.select(String(hit.object.userData.animalId));return;}}
    const point=new THREE.Vector3();if(this.ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),point))this.destination=keepInMeadow(point);
@@ -87,7 +93,8 @@ export class FarmWorld {
    if(this.disposed)return;this.frame=requestAnimationFrame(t=>this.animate(t));const dt=Math.min(.05,(time-this.prevTime)/1000||.016);this.prevTime=time;const now=Date.now()+this.offset,t=time/1000;
    const dx=(this.keys.has('d')||this.keys.has('ArrowRight')?1:0)-(this.keys.has('a')||this.keys.has('ArrowLeft')?1:0)+this.direction.x;
    const dz=(this.keys.has('s')||this.keys.has('ArrowDown')?1:0)-(this.keys.has('w')||this.keys.has('ArrowUp')?1:0)+this.direction.z;
-   if(dx||dz)this.destination=keepInMeadow({x:this.playerGroup.position.x+dx*.7,z:this.playerGroup.position.z+dz*.7});
+   if(dx||dz){const ground=this.movementGesture.sample(this.camera,this.cameraMode,dx,dz);this.destination=keepInMeadow({x:this.playerGroup.position.x+ground.x*.7,z:this.playerGroup.position.z+ground.z*.7});}
+   else if(this.movementGesture.active){this.movementGesture.reset();this.destination={x:this.playerGroup.position.x,z:this.playerGroup.position.z};}
    const speed=this.walk(this.playerGroup,this.destination,dt,2.8);this.distance+=speed*dt;
    const age=this.event?now-this.event.at:Infinity;const active=this.event&&age>=0&&age<6000&&['action','rhythm','stage'].includes(this.event.kind);
    const action=active?this.event!.action:undefined;const beat=active?age/500:t*2;
@@ -105,7 +112,7 @@ export class FarmWorld {
      const sheepAction=r&&!r.micro?r.reaction.action:invitation;const elapsed=sheepAnimationTime(r,t);const weight=r?Math.min(1,Math.max(0,r.elapsed/400))*Math.min(1,(8500-age)/650):invitation?1:0;
      s.update(a,elapsed,sheepAction,weight,moving,r?.micro||false,this.selected===a.id||this.selected==='all',this.reduced);
    });
-   this.env.update(t,this.reduced);this.positionLabels(now);this.renderer.render(this.scene,this.camera);
+   this.env.update(t,this.reduced);this.updateCamera(dt);this.positionLabels(now);this.renderer.render(this.scene,this.camera);
  }
  private walk(group:THREE.Group,to:Point,dt:number,speed:number){const dx=to.x-group.position.x,dz=to.z-group.position.z,d=Math.hypot(dx,dz);if(d<.035)return 0;const step=Math.min(d,speed*dt);group.position.x+=dx/d*step;group.position.z+=dz/d*step;group.rotation.y+=Math.atan2(Math.sin(Math.atan2(dx,dz)-group.rotation.y),Math.cos(Math.atan2(dx,dz)-group.rotation.y))*Math.min(1,dt*7);return step/dt;}
  dispose(){this.disposed=true;cancelAnimationFrame(this.frame);this.resize.disconnect();this.listenerCleanup.forEach(f=>f());this.player?.dispose();this.guardian.dispose();const geometries=new Set<THREE.BufferGeometry>(),materials=new Set<THREE.Material>();this.scene.traverse(o=>{if(o instanceof THREE.Mesh){geometries.add(o.geometry);(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>materials.add(m));}});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());this.renderer.dispose();this.host.replaceChildren();}
