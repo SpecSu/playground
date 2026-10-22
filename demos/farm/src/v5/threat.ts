@@ -10,7 +10,8 @@
  * threatSummary(state) -> counts and per-actor factual records
  * evaluateEvacuation({actors,doors}) -> deterministic independent-door benchmark
  */
-import { buildingApproaches, buildingFootprint, findPath, isWalkable, lineOfSight, shelterEntries, type GridPoint, type Layout } from './layout.ts';
+import { buildingApproaches, buildingFootprint, isWalkable, lineOfSight, shelterEntries, type GridPoint, type Layout } from './layout.ts';
+import { findActorPath } from './actor-navigation.ts';
 
 export type GuardianKind = 'dog' | 'cat' | 'frog';
 export type ThreatMode = 'tutorial' | 'rehearsal' | 'reassure' | 'challenge';
@@ -103,10 +104,7 @@ function emit(s: ThreatState, type: string, details: Omit<ThreatTelemetry, 'id' 
   s.events.push({ id: `${s.id}:${s.events.length + 1}`, type, at: rounded(at), ...details });
 }
 function pathTo(layout: Layout, from: GridPoint, to: GridPoint): GridPoint[] {
-  const route = findPath(layout, cell(from), cell(to));
-  if (!route?.length) return [];
-  if (!equal(from, route[0])) route.unshift(point(from));
-  return route;
+  return findActorPath(layout, from, to) ?? [];
 }
 function reachableWithin(layout: Layout, from: GridPoint, to: GridPoint, range: number) {
   if (distance(from, to) > range) return false;
@@ -129,24 +127,11 @@ function visibleThreatPositions(s: ThreatState, layout: Layout) {
 function actorPath(layout: Layout, from: GridPoint, to: GridPoint, visible: GridPoint[]) {
   const fallback = pathTo(layout, from, to);
   if (!fallback.length || !visible.length) return fallback;
-  const start = cell(from), goal = cell(to), key = (p: GridPoint) => `${p.x},${p.z}`;
-  const queue = [start], previous = new Map<string, GridPoint | null>([[key(start), null]]);
-  for (let i = 0; i < queue.length; i++) {
-    const current = queue[i];
-    if (equal(current, goal)) {
-      const result: GridPoint[] = [];
-      for (let p: GridPoint | null = current; p; p = previous.get(key(p)) ?? null) result.push(point(p));
-      result.reverse(); if (!equal(from, result[0])) result.unshift(point(from));
-      return result;
-    }
-    for (const [x, z] of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
-      const next = { x: current.x + x, z: current.z + z };
-      if (previous.has(key(next)) || !isWalkable(layout, next) || (!equal(next, goal) && visible.some(w => distance(next, w) <= THREAT_RULES.contact))) continue;
-      previous.set(key(next), current); queue.push(next);
-    }
-  }
+  const start = cell(from), goal = cell(to);
+  const safeLayout = {...layout, owned: layout.owned.filter(p => equal(p, start) || equal(p, goal)
+    || !visible.some(w => distance(p, w) <= THREAT_RULES.contact))};
   // A wolf cannot turn a disconnected alternative into a wall/water shortcut.
-  return fallback;
+  return findActorPath(safeLayout, from, to) ?? fallback;
 }
 function setPath(mover: { path: GridPoint[]; pathIndex: number }, route: GridPoint[]) {
   mover.path = route.map(point); mover.pathIndex = route.length > 1 ? 1 : route.length;
@@ -368,7 +353,7 @@ export function guardianCommand(state: ThreatState, layout: Layout, command: Gua
   if (!state.guardian || state.phase === 'choosing') return fail('请先选择守护者');
   if (state.phase === 'complete') return fail('本次事件已经结束');
   const g = state.guardian;
-  if (command.target && (!Number.isFinite(command.target.x) || !Number.isFinite(command.target.z) || !isWalkable(layout, cell(command.target)) || !pathTo(layout, g.position, command.target).length)) return fail('目标不可达，请选择同一连通区的合法地点');
+  if (command.target && (!Number.isFinite(command.target.x) || !Number.isFinite(command.target.z) || !isWalkable(layout, cell(command.target)) || !pathTo(layout, g.position, cell(command.target)).length)) return fail('目标不可达，请选择同一连通区的合法地点');
   if (['block', 'gather', 'calm', 'bubble'].includes(command.kind)) {
     const ability = command.kind as GuardianAbility;
     if ((ability === 'block' && g.kind !== 'dog') || (ability === 'gather' && g.kind !== 'cat') || (['calm', 'bubble'].includes(ability) && g.kind !== 'frog')) return fail('当前守护者没有这项能力');
@@ -379,7 +364,7 @@ export function guardianCommand(state: ThreatState, layout: Layout, command: Gua
     if ((ability === 'block' || ability === 'bubble') && !wolf && !state.wolves.some(w => !['retreated', 'boundary'].includes(w.status))) return fail('没有可拦截的威胁');
     if (ability === 'block' && wolf && wolf.blockUsed >= THREAT_RULES.dog.duration) return fail('同一威胁最多守住6秒');
     if (ability === 'bubble' && wolf && wolf.bubbleDelay >= THREAT_RULES.frog.bubbleMaxDelay) return fail('这条狼路线的泡泡延迟已到2秒上限');
-    const target = command.target ?? wolf?.position;
+    const target = command.target ? cell(command.target) : wolf?.position;
     if (target && !pathTo(layout, g.position, target).length) return fail('守护者到不了这条威胁路线');
     if (ability === 'bubble' && wolf && (distance(g.position, wolf.position) > THREAT_RULES.frog.bubbleRange || !lineOfSight(layout, g.position, wolf.position, THREAT_RULES.frog.bubbleRange))) return fail('泡泡需要6格内且有实际视线');
     const s = clone(state), next = s.guardian!;
@@ -424,7 +409,7 @@ function guardianStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt
       const wolf = s.wolves.find(w => w.targetActorId === actor.id && w.status === 'carrying');
       if (wolf && distance(g.position, wolf.position) <= THREAT_RULES.contact && lineOfSight(layout, g.position, wolf.position, THREAT_RULES.contact)) release(s, layout, wolf, '守护者追上并救回，继续护送');
     } else { g.behavior = 'respond'; g.targetActorId = null; }
-  } else if (g.behavior === 'follow') target = input.playerPosition ?? g.target;
+  } else if (g.behavior === 'follow') target = input.playerPosition ? cell(input.playerPosition) : g.target;
   else if (g.behavior === 'station') target = g.target;
   else if (s.discoveredAt !== null) {
     g.behavior = 'respond';
@@ -450,7 +435,7 @@ function guardianStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt
   }
   if (g.ability === 'calm' || g.ability === 'block') return;
   if (target && distance(g.position, target) > 0.05) {
-    if (!g.path.length || !equal(g.path[g.path.length - 1], cell(target))) setPath(g, pathTo(layout, g.position, target));
+    if (!g.path.length || !equal(g.path[g.path.length - 1], target)) setPath(g, pathTo(layout, g.position, target));
     move(g, THREAT_RULES[g.kind].speed, dt);
   }
 }

@@ -1,0 +1,67 @@
+{
+  "version": "v5.2.1-playability",
+  "verifiedAt": "2026-10-22T14:58:17.883096+00:00",
+  "tests": {
+    "total": 313,
+    "passed": 313,
+    "failed": 0,
+    "skipped": 0
+  },
+  "lint": "passed",
+  "typecheck": "passed",
+  "productionBuild": {
+    "directory": ".local/v521-dist",
+    "modules": 1841
+  },
+  "http": {
+    "http": true,
+    "currentApi": true,
+    "guardianPersisted": true,
+    "templateApplied": true,
+    "receiptDuplicate": true,
+    "ownerBoundary": true,
+    "labIsolation": true,
+    "legacyBypassClosed": true,
+    "sameOrigin": true,
+    "resourcesByteMatched": 24,
+    "webgl": "not verified"
+  },
+  "builtReact": {
+    "actualBuiltReactEntry": true,
+    "tutorialRoutes": true,
+    "preChoiceGated": true,
+    "independentReplayNoEconomyMutation": true,
+    "selectionSetup": "isolated API and explicit test readiness clock; WebGL unavailable",
+    "defaultLX": true,
+    "rapidIndividualCards": true,
+    "responseLossRetrySameId": true,
+    "targetSwitchCancelsWithoutCharge": true,
+    "actualWalkAndThreeSecondFeed": true,
+    "templateApplyUndo": true,
+    "privateWork": true,
+    "avatarIdentity": true,
+    "labSeparation": true,
+    "worldHostRetained": true,
+    "escape": true,
+    "webgl": "not verified (Node DOM)"
+  },
+  "realThreeMethodChecks": [
+    "four region ground raycasts at two camera modes and CSS scales",
+    "three real sheep mesh selections",
+    "pointer drag/cancel",
+    "four mover types continuous 200ms/60fps trajectory",
+    "retained planted feet",
+    "opening route prefix",
+    "same snapshot UI clock",
+    "replay and profile clock reset",
+    "open door admission/egress"
+  ],
+  "review": "two confirmed motion issues reproduced and fixed; no remaining high-confidence blocking findings",
+  "visualVerification": "NOT RUN: independent Chrome plugin/node_repl unavailable; no CUA/Playwright used",
+  "liveRollout": "recorded separately in v521-live.json",
+  "unintegrated": [
+    "online random event scheduler",
+    "finite caretaker",
+    "duck species/shallow-water life"
+  ]
+}

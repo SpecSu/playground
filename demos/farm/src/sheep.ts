@@ -21,7 +21,7 @@ export function makeSheep(animal:Animal){
  const stars=new THREE.Group();stars.name='growth-stars';body.add(stars);
  for(let i=0;i<7;i++){const m=new THREE.Mesh(new THREE.OctahedronGeometry(.075),new THREE.MeshStandardMaterial({color:'#ffe4a3',emissive:'#f2b757',emissiveIntensity:.5}));const a=i*2.4;m.position.set(Math.cos(a)*.58,1.12+(i%2)*.2,Math.sin(a)*.64);stars.add(m);}
  const halo=new THREE.Mesh(new THREE.RingGeometry(.75,.8,48),new THREE.MeshBasicMaterial({color:animal.color,transparent:true,opacity:.7,side:THREE.DoubleSide}));halo.rotation.x=-Math.PI/2;halo.position.y=.025;halo.userData.pickThrough=true;root.add(halo);
- return {root,update(a:Animal,t:number,action:SheepAction|undefined,weight:number,walking:number,micro:boolean,selected:boolean,reduced:boolean){
+ return {root,update(a:Animal,t:number,action:SheepAction|undefined,weight:number,walking:number,micro:boolean,selected:boolean,reduced:boolean,walkingDistance?:number){
    const speed=reduced?0:t;const cycle=speed*Math.PI*4;const independent=a.personality==='independent';const shy=a.personality==='shy';const gain=weight*(shy?.34:1);
    body.position.y=action==='bounce'?Math.max(0,Math.sin(cycle))*.43*gain:action==='dance'?Math.max(0,Math.sin(cycle))*.12*gain:action==='rest'&&walking<.1?-.08*gain:0;
    body.rotation.z=(action==='dance'?Math.sin(cycle*(independent?.67:.5))*.18*gain:0);
@@ -29,7 +29,8 @@ export function makeSheep(animal:Animal){
    head.rotation.x=action==='eat'?(.45+Math.sin(cycle)*.07)*weight:action==='love'?-.22*gain:Math.sin(speed*2)*.04;grass.visible=action==='eat'&&weight>.05;
    head.rotation.z=action==='love'?Math.sin(cycle*.25)*.22*gain:0;
    ears.forEach((ear,i)=>{ear.rotation.z=(i?1:-1)*(micro?Math.sin(t*16)*.18:Math.sin(speed*2.8+i)*.045);});
-   legs.forEach((leg,i)=>{leg.rotation.x=Math.sin(cycle+(i%2?Math.PI:0))*(walking*.36+(action==='dance'?.17*gain:0));});
+   const gait=reduced?0:walkingDistance===undefined?cycle:walkingDistance/.9*Math.PI*2;
+   legs.forEach((leg,i)=>{const phase=i%2?Math.PI:0;leg.rotation.x=Math.sin(gait+phase)*Math.min(1,Math.max(0,walking/1.15))*.36+Math.sin(cycle+phase)*(action==='dance'?.17*gain:0);});
    tail.rotation.x=Math.sin(speed*5)*.15;bow.scale.y=.11+(action==='love'?gain*.03:0);
    stars.visible=a.appearance==='starlit'||(a.growthEligible&&!a.growthChoiceMade);stars.scale.setScalar(a.appearance==='starlit'?1:1.18);stars.rotation.y=Math.sin(speed*.7)*.1;
    stars.children.forEach((m,i)=>{m.visible=a.appearance==='starlit'||i<2;(m as THREE.Mesh).scale.setScalar(.85+Math.sin(speed*3+i)*.15);});

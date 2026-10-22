@@ -1,16 +1,14 @@
 import {Vector3,type Camera} from 'three';
-import {findPath,isWalkable,buildingFootprint,type Building,type Layout,type GridPoint} from './layout.ts';
+import {isWalkable,buildingFootprint,type Building,type Layout,type GridPoint} from './layout.ts';
 import type {EstateAnimal,Profile} from './estate.ts';
 import type {Animal,Action} from '../model.ts';
 import type {SheepAction} from '../sheep.ts';
+import {findActorPath} from './actor-navigation.ts';
 export const gridToWorld=(p:GridPoint):GridPoint=>({x:p.x-5.5,z:p.z-5.5});
 export const worldToGrid=(p:GridPoint):GridPoint=>({x:Math.round(p.x+5.5),z:Math.round(p.z+5.5)});
 /** Interpolation only renders already-authorized progress, following legal graph edges. */
 export function interpolationRoute(layout:Layout,from:GridPoint,to:GridPoint):GridPoint[]{
- const a={x:Math.round(from.x),z:Math.round(from.z)},b={x:Math.round(to.x),z:Math.round(to.z)};
- if(a.x===b.x&&a.z===b.z)return [{...to}];
- const path=findPath(layout,a,b);if(!path)return [];
- return [...path,{...to}].filter((p,i,all)=>i===0||Math.hypot(p.x-all[i-1].x,p.z-all[i-1].z)>.001);
+ return findActorPath(layout,from,to)?.slice(1)??[];
 }
 /** Diagonal input resolves to one cardinal edge; rejected cells stay rejected. */
 export function movementCell(layout:Layout,position:GridPoint,direction:GridPoint):GridPoint|null{

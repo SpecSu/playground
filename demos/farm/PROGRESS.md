@@ -78,3 +78,19 @@
 - 13:02:44UTC localrollout succeeded: verified/stopped onlyownedoldPID42322; latestSQLiteconsistentbackupintegrityok; olddistpreserved; installedexacttestedsource6489597. SameMacloopback5190nowindependentPID90141.
 - 13:04:00UTC separatecall verifieddarwinhost,PID90141/PPID1/cwd/listener,releasev5.2-camera-opening,24byte-matchedassets,currentlocalSQLiteAPI,diagnostics0. Original7farmrowsbyte-unchanged; bothpriorV5records retainplayerIDs/allanimalIDs/nondecreasingrevisions. Noreset/push/Sitesoperation.
 - Finalscopeheld atcamera+opening perlatestpriority; naturalonlineevent/caretaker/duck modules were notadded. Remainingacceptance: actualChrome/WebGLcomposition/touch/framepacing; callableindependentChromepluginstillmissing, no prohibitedfallbackused. Temporary5193testserverstopped; user5190leftalive.
+
+## Urgent6489597 production click/motion diagnosis
+
+- AllV5.3workersstopped. Exact13ownfiles+diff archivedin.local/checkpoints/v53-paused-20261022T131925Z; restoredonlyourtrackedchangesfromknownHEADd039ac5 andmovednewtestsoutoftheglob. Noreset/stash,dist/service/SQLitechange.
+- Read-onlyactualMac:PID90141stillservesv5.2-camera-opening. Actualplayprofileis tutorialdefend/openingdone/threatcomplete; completionoverlay+Worldlock+servergatepreventgroundwalkuntilcareconfirmation. Thisiscurrentpersistedstate, notanassumednew-sourceeffect.
+- RuntimeChrome/node_repl/browsertoolsearchfoundnoindependentChromepluginentry. NoCUA/Playwright/alternatebrowserused. ModelmetadataonlyconfirmsCodexbasedGPT-6; exactsubmodel/effortnotexposed, unknown.
+- ExecutedactualdeployedsourceEstateWorld.syncMover/moveVisual methodswithoutWebGLconstructor. Fractionalroute6.4→6.9becomes6→7→6.9, provingbackstep+overshoot. Lowfrequency500msupdateschasedat3.5/4/6u/screatebackwardandstationaryframesforsheep/wolf/guardian. Rawtrajectoryevidence.local/diagnostics/deployed-motion.json. Thisisnumericalmotionproof, notvisualbrowseracceptance.
+
+## 2026-10-22 · Resumed playability repair
+
+- User resumed development after stopping the prior task. Verified same Mac worktree, codex/animal-farm-companion-demo HEAD d039ac5; retained the prior diagnostics and isolated V5.3 checkpoints. No save/reset or live build change during development.
+- Actual commandEstate ticks reproduced fractional progress being erased by rounded replans for sheep, peaceful/threat guardians and pursuing wolves. Shared findActorPath now preserves fractional endpoints and intermediate collision nodes; 16 new authority/navigation regressions passed.
+- Actual EstateWorld method tests reproduced backtracking, stop/go between snapshots and changing historical foot locations. Added timestamped route/arclength tracks, 200ms authority pulses and 220ms presentation buffer; distance-driven steps and continuous turning. Shelter transitions render through legal open doors instead of resetting actors to beds.
+- Fixed completed-opening movement lock, queued stale sessions, reconnect without enter, refreshed feed selection, profile-switch covered opening, action-menu target switching and hidden rejected-command feedback. Nine real React/controller flow tests passed.
+- First combined full run: 304/304 pass; lint/typecheck pass. Subsequent review reproduced two additional motion cases: whole opening routes replaying their past prefix (fixed and tested), and UI-only set calls resetting the clock (final fix/review in progress). Final full validation and staged production HTTP/DOM still pending here.
+- Runtime tool discovery still exposes no independent Chrome/node_repl control. Actual WebGL composition, click hit regions in Chrome, touch and frame pacing are not visually verified; no prohibited browser fallback used.
