@@ -1,0 +1,52 @@
+{
+  "version": "v5.2-camera-opening",
+  "tests": {
+    "total": 252,
+    "passed": 252,
+    "failed": 0,
+    "lint": "pass",
+    "typecheck": "pass",
+    "productionBuild": "pass"
+  },
+  "http": {
+    "http": true,
+    "currentApi": true,
+    "guardianPersisted": true,
+    "templateApplied": true,
+    "receiptDuplicate": true,
+    "ownerBoundary": true,
+    "labIsolation": true,
+    "legacyBypassClosed": true,
+    "sameOrigin": true,
+    "resourcesByteMatched": 24,
+    "webgl": "not verified"
+  },
+  "builtEntryNodeDom": {
+    "actualBuiltReactEntry": true,
+    "tutorialRoutes": true,
+    "preChoiceGated": true,
+    "independentReplayNoEconomyMutation": true,
+    "selectionSetup": "isolated API and explicit test readiness clock; WebGL unavailable",
+    "defaultLX": true,
+    "rapidIndividualCards": true,
+    "responseLossRetrySameId": true,
+    "targetSwitchCancelsWithoutCharge": true,
+    "actualWalkAndThreeSecondFeed": true,
+    "templateApplyUndo": true,
+    "privateWork": true,
+    "avatarIdentity": true,
+    "labSeparation": true,
+    "worldHostRetained": true,
+    "escape": true,
+    "webgl": "not verified (Node DOM)"
+  },
+  "review": "No remaining Critical/Important findings after four reproduced fixes",
+  "visual": "Real Chrome/WebGL/touch not verified; no independent Chrome plugin exposed",
+  "localUpdate": "pending backup and controlled restart",
+  "unchangedScope": [
+    "original three demos",
+    "original GitHub remote",
+    "Sites permissions/deployments",
+    "existing user save identities"
+  ]
+}

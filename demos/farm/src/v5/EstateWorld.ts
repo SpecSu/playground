@@ -1,18 +1,20 @@
 import * as THREE from 'three';
 import {createClubAvatar,type ClubAvatar,type ClubAvatarKind} from '../avatars/club-avatar-rig.ts';
 import type {ClubMotionState} from '../avatars/club-scene-motion.ts';
-import {ClubCameraController,projectCameraLabel,createCameraObstacle,type CameraObstacle,type ClubCameraMode} from '../avatars/club-camera.ts';
+import {projectCameraLabel,createCameraObstacle,type CameraObstacle,type ClubCameraMode} from '../avatars/club-camera.ts';
 import {CLUB_AVATAR_SCALE} from '../avatars/club-avatar-scale.ts';
-import {CameraMovementGesture} from '../farm-camera.ts';
+import {EstateCameraController,screenMovement} from './isometric-camera.ts';
+import {playerSegmentClear,findPlayerPath} from './player-navigation.ts';
+import {openingPresentation,type OpeningState} from './opening.ts';
 import {SceneTapGesture,pickSceneEntity,bindEntityLabel} from '../picking.ts';
 import {makeSheep} from '../sheep.ts';
 import {AVATAR_LABEL} from '../model.ts';
 import {animalScale} from './life.ts';
 import {terrainAt,regionAt,findPath,buildingFootprint,BUILDING_RULES,type BuildingKind,type GridPoint,type Building} from './layout.ts';
-import {gridToWorld,worldToGrid,interpolationRoute,movementCell,sceneResponse,sceneBuilding,legacyAnimal,scenePalette,cameraCapture} from './estate-scene.ts';
+import {gridToWorld,worldToGrid,interpolationRoute,sceneResponse,sceneBuilding,legacyAnimal,scenePalette,cameraCapture} from './estate-scene.ts';
 import type {EstateSnapshot,EstateAnimal} from './estate.ts';
 import type {GuardianKind,ThreatWolf} from './threat.ts';
-export type EstateWorldHandlers={select:(id:string)=>void;destination:(p:GridPoint)=>void;status:(message:string)=>void};
+export type EstateWorldHandlers={select:(id:string)=>void;destination:(p:GridPoint)=>void;status:(message:string)=>void;steer?:(direction:GridPoint)=>void;assetsReady?:(ready:boolean)=>void};
 export type EstateGhost={x:number;z:number;kind:BuildingKind;valid:boolean};
 type SheepVisual=ReturnType<typeof makeSheep>&{label:HTMLButtonElement;name:HTMLElement;memory:HTMLElement;bubble:HTMLElement;cleanup:()=>void};
 type Mover={root:THREE.Group;path:GridPoint[];target:GridPoint;distance:number};
@@ -50,20 +52,20 @@ function wolfModel(){
 /** V5 renders the persisted graph and actor state; no gameplay rules settle here. */
 export class EstateWorld{
  private host:HTMLDivElement;private handlers:EstateWorldHandlers;private data:EstateSnapshot;
- private scene=new THREE.Scene();private layoutGroup=new THREE.Group();private routeGroup=new THREE.Group();private effectGroup=new THREE.Group();private ghostGroup=new THREE.Group();
- private cameraController=new ClubCameraController();private camera:THREE.Camera=this.cameraController.overview;private cameraMode:ClubCameraMode='third-person';private obstacles:CameraObstacle[]=[];
+ private scene=new THREE.Scene();private introBush=new THREE.Group();private layoutGroup=new THREE.Group();private routeGroup=new THREE.Group();private effectGroup=new THREE.Group();private ghostGroup=new THREE.Group();
+ private cameraController=new EstateCameraController();private camera:THREE.Camera=this.cameraController.camera;private cameraMode:ClubCameraMode='third-person';private obstacles:CameraObstacle[]=[];
  private renderer:THREE.WebGLRenderer;private resize:ResizeObserver;private frame=0;private disposed=false;private prev=0;private offset=0;private enteredAt=0;
  private playerAvatar:ClubAvatar|undefined;private guardianAvatar:ClubAvatar|undefined;private guardianKind:GuardianKind|null=null;
  private player:Mover={root:new THREE.Group(),path:[],target:{x:0,z:0},distance:0};private guardian:Mover={root:new THREE.Group(),path:[],target:{x:0,z:0},distance:0};
  private sheep=new Map<string,SheepVisual>();private animalMovers=new Map<string,Mover>();private wolves=new Map<string,ReturnType<typeof wolfModel>&{mover:Mover}>();
  private guardianLabel:HTMLButtonElement;private playerLabel:HTMLDivElement;private visitorGroup=new THREE.Group();private visitors=new Map<string,{avatar:ClubAvatar;kind:EstateSnapshot['avatar'];mover:Mover;label:HTMLDivElement}>();private visitorLabels:HTMLDivElement[]=[];private careProp=new THREE.Group();private previewTheme:keyof typeof scenePalette|undefined;private labels:HTMLDivElement[]=[];private selected='';private reduced=false;private ghost:EstateGhost|undefined;
- private listenerCleanup:(()=>void)[]=[];private projection=new THREE.Vector3();private keys=new Set<string>();private direction:GridPoint={x:0,z:0};private movementGesture=new CameraMovementGesture();private tap=new SceneTapGesture();private ray=new THREE.Raycaster();private cursor=new THREE.Vector2();private sentAt=-Infinity;private lastDestination='';private mapKey='';private playerStatus='loading';private guardianStatus='';
+ private listenerCleanup:(()=>void)[]=[];private projection=new THREE.Vector3();private keys=new Set<string>();private direction:GridPoint={x:0,z:0};private openingState:OpeningState|undefined;private attention:GridPoint|null=null;private inputLocked=false;private steering=false;private tap=new SceneTapGesture();private ray=new THREE.Raycaster();private cursor=new THREE.Vector2();private sentAt=-Infinity;private mapKey='';private playerStatus='loading';private guardianStatus='';
  constructor(host:HTMLDivElement,data:EstateSnapshot,handlers:EstateWorldHandlers){
   this.host=host;this.handlers=handlers;this.data=data;this.offset=data.now-Date.now();this.enteredAt=data.now;
   this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.18;
   const canvas=this.renderer.domElement;canvas.tabIndex=0;canvas.setAttribute('aria-label','农场连续地图：点地面行走，点动物打开卡片；WASD或方向键移动');host.append(canvas);
   this.scene.add(this.layoutGroup,this.routeGroup,this.effectGroup,this.ghostGroup,this.visitorGroup,this.careProp,this.player.root,this.guardian.root);
-  this.makeCareProps();
+  this.makeCareProps();this.scene.add(this.introBush);for(const [x,y,z] of [[0,.2,0],[.25,.3,0],[-.2,.22,.15],[0,.38,-.15]])ball(this.introBush,'#6e965d',x,y,z,.25,.3,.23);
   this.scene.add(new THREE.HemisphereLight('#fff5df','#78936c',2.4));const sun=new THREE.DirectionalLight('#fff1d8',3);sun.position.set(-9,17,8);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-16;sun.shadow.camera.right=16;sun.shadow.camera.top=15;sun.shadow.camera.bottom=-15;sun.shadow.normalBias=.05;this.scene.add(sun);
   this.guardian.root.userData.entityId='guardian';this.guardianLabel=document.createElement('button');this.guardianLabel.className='guardian-label';this.guardianLabel.setAttribute('aria-label','查看守护伙伴');host.append(this.guardianLabel);this.listenerCleanup.push(bindEntityLabel(this.guardianLabel,'guardian',handlers.select));
   this.playerLabel=document.createElement('div');this.playerLabel.className='player-label';host.append(this.playerLabel);
@@ -74,7 +76,7 @@ export class EstateWorld{
   on(canvas,'pointerup',((e:PointerEvent)=>{if(this.tap.end(e))this.point(e);if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);}) as EventListener);
   on(canvas,'pointercancel',((e:PointerEvent)=>this.tap.cancel(e.pointerId)) as EventListener);on(canvas,'lostpointercapture',((e:PointerEvent)=>this.tap.cancel(e.pointerId)) as EventListener);
   on(canvas,'keydown',((e:KeyboardEvent)=>{if(['w','a','s','d','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){this.keys.add(e.key);e.preventDefault();}}) as EventListener);on(canvas,'keyup',((e:KeyboardEvent)=>{this.keys.delete(e.key);}) as EventListener);
-  const stop=()=>{this.keys.clear();this.direction={x:0,z:0};this.movementGesture.reset();};on(canvas,'blur',stop);on(window,'blur',stop);on(document,'visibilitychange',()=>{if(document.hidden)stop();});
+  const stop=()=>{this.keys.clear();this.direction={x:0,z:0};this.stopSteering();};on(canvas,'blur',stop);on(window,'blur',stop);on(document,'visibilitychange',()=>{if(document.hidden)stop();});
   on(canvas,'webglcontextlost',((e:Event)=>{e.preventDefault();handlers.status('3D画面连接中断，刷新可恢复存档');}) as EventListener);
   this.resize=new ResizeObserver(()=>this.fit());this.resize.observe(host);this.fit();this.frame=requestAnimationFrame(t=>this.animate(t));
  }
@@ -87,28 +89,31 @@ export class EstateWorld{
   const animal=this.animalMovers.get(a.id)?.root.position??new THREE.Vector3(...[a.position.x-5.5,0,a.position.z-5.5] as [number,number,number]);const player=this.player.root.position;this.careProp.position.set(animal.x*.8+player.x*.2,.75*animalScale(a.life),animal.z*.8+player.z*.2);this.careProp.rotation.z=job?.food==='milk'?.5:0;
   this.careProp.getObjectByName('milk-bottle')!.visible=job?.food==='milk';this.careProp.getObjectByName('feed-bowl')!.visible=job?.food!=='milk';
  }
- private reportAssets(){this.handlers.status(this.playerStatus==='error'?'LX分身模型加载失败，刷新重试':this.guardianStatus==='error'?'守护伙伴模型加载失败，规则与存档仍在':this.playerStatus==='loading'||this.guardianStatus==='loading'?'正在载入分身与伙伴…':'点击动物看卡片 · 点地面或摇杆行走');}
+ private reportAssets(){this.handlers.assetsReady?.(this.playerStatus==='ready'&&(!this.guardianKind||this.guardianStatus==='ready'));this.handlers.status(this.playerStatus==='error'?'LX分身模型加载失败，刷新重试':this.guardianStatus==='error'?'守护伙伴模型加载失败，规则与存档仍在':this.playerStatus==='loading'||this.guardianStatus==='loading'?'正在载入分身与伙伴…':'点击动物看卡片 · 点地面或摇杆行走');}
  private installPlayer(kind:EstateSnapshot['avatar']){
   this.playerAvatar?.dispose();this.player.root.clear();const avatar=createClubAvatar(kind,'estate-player');this.playerAvatar=avatar;this.player.root.add(avatar.root);this.playerStatus='loading';this.reportAssets();
   void avatar.ready.then(()=>{if(!this.disposed&&avatar===this.playerAvatar){avatar.root.scale.setScalar(CLUB_AVATAR_SCALE);this.playerStatus='ready';this.reportAssets();}}).catch(()=>{if(!this.disposed&&avatar===this.playerAvatar){this.playerStatus='error';this.reportAssets();}});
  }
  private installGuardian(kind:GuardianKind|null){
-  this.guardianAvatar?.dispose();this.guardian.root.clear();this.guardianKind=kind;this.guardian.root.visible=!!kind;this.guardianLabel.hidden=!kind;if(!kind){this.guardianAvatar=undefined;this.guardianStatus='';return;}
+  this.guardianAvatar?.dispose();this.guardian.root.clear();this.guardianKind=kind;this.guardian.root.visible=!!kind;this.guardianLabel.hidden=!kind;if(!kind){this.guardianAvatar=undefined;this.guardianStatus='';this.reportAssets();return;}
   const avatar=createClubAvatar(guardianKinds[kind],`estate-guardian-${kind}`);this.guardianAvatar=avatar;this.guardian.root.add(avatar.root);this.guardianStatus='loading';this.reportAssets();
   void avatar.ready.then(()=>{if(!this.disposed&&avatar===this.guardianAvatar){avatar.root.scale.setScalar(CLUB_AVATAR_SCALE);this.guardianStatus='ready';this.reportAssets();}}).catch(()=>{if(!this.disposed&&avatar===this.guardianAvatar){this.guardianStatus='error';this.reportAssets();}});
  }
- set(data:EstateSnapshot,target:string,reduced:boolean,cameraMode:ClubCameraMode='third-person',ghost?:EstateGhost,previewTheme?:keyof typeof scenePalette){
+ set(data:EstateSnapshot,target:string,reduced:boolean,cameraMode:ClubCameraMode='third-person',ghost?:EstateGhost,previewTheme?:keyof typeof scenePalette,opening?:OpeningState,replay=false,attention:GridPoint|null=null){
   if(data.avatar!==this.data.avatar)this.installPlayer(data.avatar);
   const profileChanged=data.activeProfile!==this.data.activeProfile;
   if(profileChanged){this.enteredAt=data.now;this.mapKey='';}
-  if(cameraMode!==this.cameraMode){this.movementGesture.reset();this.keys.clear();this.direction={x:0,z:0};}
+  if(cameraMode!==this.cameraMode){this.stopSteering();this.keys.clear();this.direction={x:0,z:0};}
+  this.attention=attention;this.openingState=opening??data.profile.opening;this.inputLocked=replay||!!this.openingState&&(openingPresentation(this.openingState).controlsLocked||data.profile.tutorial!=='done'&&(this.openingState.stage==='done'||data.profile.threat?.phase==='complete'));if(this.inputLocked){this.keys.clear();this.direction={x:0,z:0};this.stopSteering();}
   this.data=data;this.offset=data.now-Date.now();this.selected=target;this.reduced=reduced;this.cameraMode=cameraMode;this.ghost=ghost;this.previewTheme=previewTheme;this.sync(data,profileChanged);this.drawGhost();
  }
- move(v:GridPoint){this.direction={x:Number.isFinite(v.x)?v.x:0,z:Number.isFinite(v.z)?v.z:0};if(!this.direction.x&&!this.direction.z){this.movementGesture.reset();this.lastDestination='';}}
+ private stopSteering(){if(this.steering){this.steering=false;this.handlers.steer?.({x:0,z:0});}}
+ stopInput(){this.keys.clear();this.direction={x:0,z:0};this.stopSteering();}
+ move(v:GridPoint){if(this.inputLocked){this.direction={x:0,z:0};return;}this.direction={x:Number.isFinite(v.x)?v.x:0,z:Number.isFinite(v.z)?v.z:0};if(!this.direction.x&&!this.direction.z){this.stopSteering();}}
  private syncMover(m:Mover,to:GridPoint,reset=false){
   if(reset){const w=gridToWorld(to);m.root.position.set(w.x,0,w.z);m.target={...to};m.path=[];return;}
   if(Math.hypot(to.x-m.target.x,to.z-m.target.z)<.0001)return;
-  const from={x:m.root.position.x+5.5,z:m.root.position.z+5.5};m.path=interpolationRoute(this.data.profile.layout,from,to);m.target={...to};
+  const from={x:m.root.position.x+5.5,z:m.root.position.z+5.5};m.path=m===this.player?(playerSegmentClear(this.data.profile.layout,from,to)?[{...to}]:(findPlayerPath(this.data.profile.layout,from,to)??[])):interpolationRoute(this.data.profile.layout,from,to);m.target={...to};
  }
  private sync(data:EstateSnapshot,reset=false){
   const p=data.profile,theme=this.previewTheme??p.creation.theme;
@@ -176,7 +181,7 @@ export class EstateWorld{
  }
  private drawRoutes(){
   disposeTree(this.routeGroup);disposeTree(this.effectGroup);const p=this.data.profile;
-  pathLine(this.routeGroup,[p.position,...p.path],'#fff4b1');
+  pathLine(this.routeGroup,[p.position,...p.path],'#fff4b1');const destination=p.path.at(-1);if(destination){const goal=gridToWorld(destination);ring(this.routeGroup,'#fff3a7',goal.x,goal.z,.25,.95);}
   for(const a of p.animals){const actor=p.threat?.actors.find(item=>item.id===a.id);const route=actor?actor.path.slice(actor.pathIndex):a.path;if(p.threat||this.selected===a.id)pathLine(this.routeGroup,[a.position,...route],a.color,.085);}
   for(const w of p.threat?.wolves??[])if(!['retreated','boundary'].includes(w.status))pathLine(this.routeGroup,[w.position,...w.path.slice(w.pathIndex)],'#d88e73',.09);
   for(const door of p.threat?.doors??[]){const w=gridToWorld(door.position);ring(this.effectGroup,door.queue.length?'#f4d28a':'#d1e5ba',w.x,w.z,.48,.85);}
@@ -200,6 +205,7 @@ export class EstateWorld{
   disposeTree(this.ghostGroup);if(!this.ghost)return;const rule=BUILDING_RULES[this.ghost.kind],w=gridToWorld(this.ghost);box(this.ghostGroup,this.ghost.valid?'#a1d8b5':'#e7a090',w.x+(rule.width-1)/2,.25,w.z+(rule.depth-1)/2,rule.width-.04,.5,rule.depth-.04,.36);this.ghostGroup.traverse(o=>o.userData.pickThrough=true);
  }
  private point(e:PointerEvent){
+  if(this.inputLocked)return;this.keys.clear();this.direction={x:0,z:0};this.stopSteering();
   const r=this.renderer.domElement.getBoundingClientRect(),entity=pickSceneEntity(this.scene.children,this.camera,e,r);if(entity){this.handlers.select(entity);return;}
   this.cursor.set((e.clientX-r.left)/r.width*2-1,1-(e.clientY-r.top)/r.height*2);this.ray.setFromCamera(this.cursor,this.camera);const p=new THREE.Vector3();if(this.ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),p))this.handlers.destination(worldToGrid(p));
  }
@@ -208,21 +214,25 @@ export class EstateWorld{
  }
  private locomotion(m:Mover,speed:number):ClubMotionState{const origin=m.root.position.clone(),heading=m.root.rotation.y,distance=m.distance;return {slot:0,x:origin.x,z:origin.z,heading,speed,distance,walkBlend:clamp(speed/2.4,0,1),action:'dance',sampleAtDistance:d=>({x:origin.x+Math.sin(heading)*(d-distance),z:origin.z+Math.cos(heading)*(d-distance),heading})};}
  private place(el:HTMLElement,point:THREE.Vector3,lift:number){this.projection.copy(point);this.projection.y+=lift;const p=projectCameraLabel(this.projection,this.camera,this.host.clientWidth,this.host.clientHeight);el.hidden=!p;if(p)el.style.transform=`translate(-50%,-100%) translate(${p.x}px,${p.y}px)`;}
- private cameraUpdate(dt:number){this.camera=this.cameraController.update({width:this.host.clientWidth,height:this.host.clientHeight,mode:this.cameraMode,orbit:{yaw:0,pitch:0},headingLock:this.movementGesture.headingLock,subject:{id:'estate-player',position:this.player.root.position,heading:this.player.root.rotation.y,height:(this.playerAvatar?.height??1.5)*CLUB_AVATAR_SCALE,radius:(this.playerAvatar?.footprintRadius??.6)*CLUB_AVATAR_SCALE,displayScale:CLUB_AVATAR_SCALE,groundLift:(this.playerAvatar?.groundLift??0)*CLUB_AVATAR_SCALE},deltaSeconds:dt,reducedMotion:this.reduced,obstacles:this.obstacles});}
+ private cameraUpdate(dt:number){
+  const owned=this.data.profile.layout.owned,focus=this.attention,attention=focus?gridToWorld(focus):undefined;
+  this.camera=this.cameraController.update({dt,aspect:this.host.clientWidth/Math.max(1,this.host.clientHeight),mode:this.openingState&&!['defend','done'].includes(this.openingState.stage)?'overview':this.cameraMode,position:this.player.root.position,bounds:{minX:Math.min(...owned.map(p=>p.x))-5.5,maxX:Math.max(...owned.map(p=>p.x))-5.5,minZ:Math.min(...owned.map(p=>p.z))-5.5,maxZ:Math.max(...owned.map(p=>p.z))-5.5},...(attention?{attention:{...attention,zoom:this.reduced?1:1.06}}:{})});
+ }
  private fit(){const w=this.host.clientWidth,h=this.host.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.cameraUpdate(0);}
  private updateSheep(a:EstateAnimal,t:number,now:number,dt:number){
   const s=this.sheep.get(a.id)!,m=this.animalMovers.get(a.id)!,speed=this.moveVisual(m,dt,3.5),event=this.data.profile.threat,inDanger=!!event&&event.phase!=='complete',response=sceneResponse(a,inDanger?null:this.data.profile.lastVisual,now,inDanger?0:this.enteredAt,inDanger?undefined:this.data.profile.onlineMs),actor=event?.actors.find(item=>item.id===a.id);
   const feeding=this.data.profile.job?.type==='feed'&&this.data.profile.job.target===a.id&&this.data.profile.job.phase==='act',action=actor?.status==='safe'||a.restAssignment?.phase==='admitted'?'rest':feeding?'eat':response.action;s.update(legacyAnimal(a),response.action?response.elapsed:t,action,feeding?1:response.weight||Number(action==='rest'),speed,response.micro,this.selected===a.id,this.reduced);if(action==='eat'&&a.life.stage==='baby'){const grass=s.root.getObjectByName('feeding-grass');if(grass)grass.visible=false;}
   this.place(s.label,s.root.position,1.6*animalScale(a.life)+.24);if(!s.root.visible)s.label.hidden=true;s.label.classList.toggle('selected',this.selected===a.id);s.name.textContent=`${a.name}${a.appearance==='starlit'?' ✦':''}`;
   const stage=a.life.stage==='baby'?'幼崽':a.life.stage==='juvenile'?'少年':'成年';s.memory.textContent=actor?.status==='queued'?'正在排队回棚':actor?.status==='safe'?'已经安全入棚':a.life.hunger<30?'肚子饿了':a.restAssignment?.phase==='admitted'?'安稳休息中':a.life.energy<30?'想休息':`${stage}${a.following?' · 陪你散步':''}`;
-  s.bubble.textContent=response.text;s.bubble.hidden=!response.text;
+  const startled=this.openingState&&['startle','choose','arrival'].includes(this.openingState.stage);s.root.rotation.z=startled&&!this.reduced?Math.sin(t*9)*.025:0;s.bubble.textContent=startled?(a.personality==='shy'?'咩…先躲近一点':a.personality==='independent'?'我往围栏边退一退':'有动静，回小家！'):response.text;s.bubble.hidden=!s.bubble.textContent;
  }
  private updateWolf(w:ThreatWolf,t:number,dt:number){const visual=this.wolves.get(w.id);if(!visual)return;const speed=this.moveVisual(visual.mover,dt,4);visual.legs.forEach((leg,i)=>leg.rotation.x=Math.sin(t*10+(i%2?Math.PI:0))*clamp(speed,0,1)*.5);visual.bubble.visible=w.slowedUntil>(this.data.profile.threat?.elapsed??Infinity);visual.tell.visible=w.status==='windup'||w.status==='grabbing';visual.tell.scale.setScalar(1+Math.sin(t*7)*.09);visual.head.rotation.x=w.status==='grabbing'?.3:0;visual.body.position.y=w.status==='windup'?Math.sin(t*8)*.035:0;}
  private animate(time:number){
   if(this.disposed)return;this.frame=requestAnimationFrame(t=>this.animate(t));const dt=Math.min(.06,(time-this.prev)/1000||.016);this.prev=time;const t=time/1000,now=Date.now()+this.offset,p=this.data.profile;
+  this.introBush.visible=this.openingState?.stage==='rustle';if(this.introBush.visible&&this.attention){const w=gridToWorld(this.attention);this.introBush.position.set(w.x,.02,w.z);this.introBush.rotation.z=this.reduced?0:Math.sin(t*21)*.09;}
   const dx=(this.keys.has('d')||this.keys.has('ArrowRight')?1:0)-(this.keys.has('a')||this.keys.has('ArrowLeft')?1:0)+this.direction.x,dz=(this.keys.has('s')||this.keys.has('ArrowDown')?1:0)-(this.keys.has('w')||this.keys.has('ArrowUp')?1:0)+this.direction.z;
-  if(dx||dz){const direction=this.movementGesture.sample(this.camera,this.cameraMode,dx,dz);if(time-this.sentAt>=300){const to=movementCell(p.layout,p.position,direction);if(to&&(key(to)!==this.lastDestination||time-this.sentAt>650)){this.handlers.destination(to);this.lastDestination=key(to);this.sentAt=time;}}}else{this.movementGesture.reset();this.lastDestination='';}
-  const playerSpeed=this.moveVisual(this.player,dt),visual=p.lastVisual,age=visual?now-visual.at:Infinity,active=!!visual&&age>=0&&age<6000&&visual.action!=='eat'&&visual.action!=='rest';this.playerAvatar?.update(active?age/500:t*2,active?visual!.action as 'dance'|'bounce'|'love':'dance',this.reduced||(!active&&playerSpeed<.02),active?.8:.2,this.locomotion(this.player,playerSpeed));
+  if(!this.inputLocked&&(dx||dz)){const direction=screenMovement(this.camera,dx,dz);if(time-this.sentAt>=150){this.handlers.steer?.(direction);this.steering=true;this.sentAt=time;}}else this.stopSteering();
+  const playerSpeed=this.moveVisual(this.player,dt,2.7),visual=p.lastVisual,age=visual?now-visual.at:Infinity,active=!!visual&&age>=0&&age<6000&&visual.action!=='eat'&&visual.action!=='rest';const reacting=this.openingState?.stage==='startle';this.playerAvatar?.update(active?age/500:t*2,reacting?'bounce':active?visual!.action as 'dance'|'bounce'|'love':'dance',this.reduced||(!reacting&&!active&&playerSpeed<.02),reacting?.25:active?.8:.2,this.locomotion(this.player,playerSpeed));
   const guardSpeed=this.moveVisual(this.guardian,dt),guard=p.threat?.guardian,group=active&&visual?.target==='all';this.guardianAvatar?.update(group?age/500:t*2,'dance',this.reduced||(!group&&!guard?.ability&&guardSpeed<.02),group?.8:guard?.ability?.6:.25,this.locomotion(this.guardian,guardSpeed));
   p.animals.forEach(a=>this.updateSheep(a,t,now,dt));this.updateCareProp();for(const wolf of p.threat?.wolves??[])this.updateWolf(wolf,t,dt);for(const visit of this.visitors.values()){const speed=this.moveVisual(visit.mover,dt,4);visit.avatar.update(t*2,'dance',this.reduced||speed<.02,.2,this.locomotion(visit.mover,speed));this.place(visit.label,visit.mover.root.position,visit.avatar.height*CLUB_AVATAR_SCALE+.3);}this.cameraUpdate(dt);
   this.playerLabel.textContent=`▼ 我 · ${AVATAR_LABEL[this.data.avatar]}`;this.place(this.playerLabel,this.player.root.position,(this.playerAvatar?.height??1.5)*CLUB_AVATAR_SCALE+.3);
@@ -235,5 +245,5 @@ export class EstateWorld{
    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(source.width*scale));canvas.height=Math.max(1,Math.round(source.height*scale));const context=canvas.getContext('2d');if(!context)return undefined;context.drawImage(source,0,0,canvas.width,canvas.height);const thumbnail=canvas.toDataURL('image/webp',.65);if(!/^data:image\/(?:webp|jpeg|png);base64,/.test(thumbnail)||thumbnail.length>40000)return {camera};return {camera,thumbnail};
   }catch{return undefined;}
  }
- dispose(){this.disposed=true;cancelAnimationFrame(this.frame);this.resize.disconnect();this.listenerCleanup.forEach(fn=>fn());this.sheep.forEach(s=>s.cleanup());this.playerAvatar?.dispose();this.guardianAvatar?.dispose();this.visitors.forEach(v=>v.avatar.dispose());disposeTree(this.careProp);disposeTree(this.layoutGroup);disposeTree(this.routeGroup);disposeTree(this.effectGroup);disposeTree(this.ghostGroup);disposeTree(this.visitorGroup);this.wolves.forEach(w=>disposeTree(w.root));this.sheep.forEach(s=>disposeTree(s.root));this.renderer.dispose();this.host.replaceChildren();}
+ dispose(){this.disposed=true;cancelAnimationFrame(this.frame);this.resize.disconnect();this.listenerCleanup.forEach(fn=>fn());this.sheep.forEach(s=>s.cleanup());this.playerAvatar?.dispose();this.guardianAvatar?.dispose();this.visitors.forEach(v=>v.avatar.dispose());disposeTree(this.introBush);disposeTree(this.careProp);disposeTree(this.layoutGroup);disposeTree(this.routeGroup);disposeTree(this.effectGroup);disposeTree(this.ghostGroup);disposeTree(this.visitorGroup);this.wolves.forEach(w=>disposeTree(w.root));this.sheep.forEach(s=>disposeTree(s.root));this.renderer.dispose();this.host.replaceChildren();}
 }

@@ -65,3 +65,13 @@
 
 - 12:19:53UTC rolloutresolved:receivednewexplicitMacdeploymentauthorizationhistoryfromparent; retriedtheexactsameactiononce, accepted. OldPID85673wasverified/stopped; olddistpreserved; freshSQLitebackupintegrityok; testedbuildinstalledat5190; independentnewPID42322.
 - 12:20:36UTC cross-callcheck:version5API,23resourcesbyte-match,PPID1loopback-only,healthidentity/legacyname/bondphasepreserved,original7farmrowsunchanged,SQLiteintegrityok. Userprofileslazymigrateonrefresh; noreset/gameplaytestwrites. ActualChrome/WebGLstillunverified.
+
+## 2026-10-22 · Priority camera and opening package
+
+- Same branch and clean baseline01bb1ea verified. V5.1 nature/caretaker/duck work paused with no unfinished writes. Mac exec transport briefly disconnected; actual file reads and test processes subsequently succeeded.
+- Diagnosed two concrete causes: ClubCameraController derives follow angle from LX heading/obstacle orbit, and manual movementCell collapses diagonal input to cardinal cells. Farm now has an independent fixed orthographic45°/52° controller; old demos remain untouched.
+- Test-first modules landed: 9 fixed-camera/projection tests; 12 opening state/order/pause/skip tests; 4 continuous navigation/steering tests; 2 opening estate persistence/gating tests. These focused checks passed; world/UI integration and full regression still in progress.
+- New opening persists establish→rustle→approach→startle→choose→arrival→defend→done. Choice cannot happen early, danger freezes before readiness and during arrival. Independent replay will use presentation clones and no gameplay rewards.
+- Stable5190 build/process and user SQLite have not been replaced or reset. No Chrome execution tool exposed; pure Three math/Node tests are not visual WebGL acceptance.
+- Priority code freeze:252/252 fulltests; lint,typecheck,staged productionbuild passed. FinalisolatedHTTP24resources andactualbuiltReactNodeDOMpassed, with explicitAPI/testreadiness setup becauseNodehasnoWebGL. Fourreviewed Importantissues reproduced/fixed:assetreadiness,defensepause,feed-before-cancelcharge,outropaneldeadlock. No remainingCritical/Importantcodefindings.
+- Read-onlyMaccheck:existingPID42322 stillPPID1 and127.0.0.1:5190listener, correctcwd. Nextstep islatestSQLitebackup+oldbuildpreservation+controlledsameportrestart; user data notreset. ActualChrome/WebGLstillunverified.

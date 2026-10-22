@@ -1,0 +1,131 @@
+/* Overlay only: the archived Feed continues to own all viewport dimensions. */
+.feed-v020 .opening-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  color: #fff;
+  background: linear-gradient(#0002, transparent 24%, transparent 56%, #0507059c 86%);
+  pointer-events: auto;
+  touch-action: none;
+}
+.feed-v020 .opening-overlay--defend { pointer-events: none; background: none; }
+.feed-v020 .opening-overlay--defend button { pointer-events: auto; }
+.feed-v020 .opening-tools {
+  position: absolute;
+  top: 76px;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.feed-v020 .opening-label {
+  padding: 7px 9px;
+  max-width: 188px;
+  border: 1px solid #ffffff1c;
+  border-radius: 8px;
+  background: #0b100bd9;
+  color: #e0e5dc;
+  font-size: 10px;
+  line-height: 16px;
+}
+.feed-v020 .opening-tool-buttons { display: flex; align-items: center; gap: 6px; }
+.feed-v020 .opening-tool-buttons button {
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid #ffffff30;
+  border-radius: 9px;
+  background: #101610d9;
+  color: #e7eae2;
+  white-space: nowrap;
+  font-size: 10px;
+}
+.feed-v020 .opening-caption {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 210px;
+  text-align: center;
+  text-shadow: 0 2px 9px #000e;
+}
+.feed-v020 .opening-caption p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.8;
+  font-weight: 550;
+  letter-spacing: .2px;
+}
+.feed-v020 .opening-caption--action {
+  left: 35px;
+  right: 35px;
+  bottom: 174px;
+}
+.feed-v020 .opening-caption--action p { font-size: 13px; }
+.feed-v020 button.opening-primary {
+  min-height: 48px;
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px 16px;
+  border: 1px solid #ffffff40;
+  border-radius: 13px;
+  background: #f2f3ed;
+  color: #20291d;
+  box-shadow: 0 5px 20px #0003;
+  font-size: 14px;
+  font-weight: 650;
+  text-shadow: none;
+}
+.feed-v020 .opening-choice-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 86px;
+  max-height: calc(100% - 225px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  border: 1px solid #ffffff17;
+  border-bottom: 0;
+  border-radius: 24px 24px 0 0;
+  padding: 9px 16px 22px;
+  background: #161916f5;
+  box-shadow: 0 -16px 50px #0006;
+}
+.feed-v020 .opening-sheet-handle { width: 32px; height: 3px; border-radius: 3px; background: #ffffff35; margin: 0 auto 17px; }
+.feed-v020 .opening-choice-sheet h2 { font-size: 18px; line-height: 26px; font-weight: 600; margin: 0; }
+.feed-v020 .opening-choice-note { margin: 7px 0 15px; font-size: 10px; line-height: 1.8; color: #afb7a8; }
+.feed-v020 .opening-choices { display: grid; gap: 8px; }
+.feed-v020 button.opening-choice {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 70px;
+  padding: 10px;
+  gap: 11px;
+  border: 1px solid #ffffff19;
+  border-radius: 12px;
+  background: #ffffff07;
+  text-align: left;
+}
+.feed-v020 .opening-choice img { flex: none; width: 48px; height: 48px; object-fit: cover; border-radius: 11px; background: #ffffff0a; }
+.feed-v020 .opening-choice > span:not(.opening-choice-arrow) { min-width: 0; flex: 1; }
+.feed-v020 .opening-choice b { display: block; font-size: 13px; line-height: 20px; font-weight: 600; }
+.feed-v020 .opening-choice small { display: block; font-size: 10px; line-height: 17px; color: #afb7a8; margin-top: 2px; }
+.feed-v020 .opening-choice-arrow { font-size: 24px; color: #afbaa5; }
+.feed-v020 .opening-loading { font-size: 10px; line-height: 1.7; color: #c5d5b9; margin: 0 0 13px; }
+.feed-v020 .opening-error {
+  position: absolute;
+  top: 135px;
+  left: 18px;
+  right: 18px;
+  border: 1px solid #d0a48d55;
+  border-radius: 10px;
+  background: #2e211df5;
+  padding: 10px 12px;
+  color: #e9c7b6;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.feed-v020 .opening-error p { margin: 0; }
+.feed-v020 .opening-error button { padding: 8px 12px; margin-top: 8px; border-radius: 7px; background: #ffffff15; font-size: 11px; }
