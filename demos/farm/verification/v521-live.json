@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-22T14:59:44.825322+00:00",
+  "url": "http://127.0.0.1:5190",
+  "host": "darwin",
+  "pid": 95061,
+  "ppid": 1,
+  "version": "v5.2.1-playability",
+  "sourceCommit": "a2800a9323a8d81dbf69ce94d891b237e5cd8d18",
+  "resourcesByteMatched": 24,
+  "sqliteIntegrity": "ok",
+  "backup": "/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-22T14-59-03-064Z-before-v521.sqlite",
+  "previousBuild": "/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v521-20261022T145903Z",
+  "originalFarmRecords": 7,
+  "originalFarmRecordsUnchanged": true,
+  "v5RecordsPreserved": 2,
+  "playerAndAnimalIdsPreserved": true,
+  "relationshipScoresNotReduced": true,
+  "gameplayWritesDuringVerification": false,
+  "webgl": "not verified: no independent Chrome plugin control tool"
+}
