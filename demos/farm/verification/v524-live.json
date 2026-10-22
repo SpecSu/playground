@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-22T16:45:53.870468+00:00",
+  "sourceCommit": "2c0c1abe6dc64c8a592c6d89099b7e2a4d81f1b0",
+  "version": "v5.2.4-scene-cards",
+  "host": "darwin",
+  "url": "http://127.0.0.1:5190",
+  "pid": 73712,
+  "ppid": 1,
+  "resourcesByteMatched": 24,
+  "sqliteIntegrity": "ok",
+  "databaseBackup": "/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-22T16-45-37-020Z-before-v524.sqlite",
+  "previousBuild": "/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v524-20261022T164536Z",
+  "originalFarmRecordsUnchanged": 7,
+  "v5IdentitiesPreserved": 2,
+  "v5ProfilesAndRunIdsPreserved": 2,
+  "v5RecordsExactlyUnchanged": 2,
+  "resetExecutedByAgent": false,
+  "webgl": "not verified",
+  "listening": "not verified"
+}

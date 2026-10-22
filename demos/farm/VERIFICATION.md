@@ -91,3 +91,5 @@ V5.2.2 deployed locally from `ffc524a7ff9a7961bae6129269a8c45c0517c41a` at15:43:
 审查修复：紧凑卡挡住全局重试按钮；未满饱却说吃饱；LX在南花谷时建设位置落在镜头外。新增Three投影回归确认设施中心和四角在顶部HUD与底卡之间，固定朝向且收卡后平滑回LX；独立最后审查无剩余Important/Critical。
 
 **Chrome/WebGL实际画面、触控和音乐听感仍未验收**；没有可调用独立Chrome插件入口，未使用CUA/Playwright等替代。Node DOM不创建WebGL，其预期告警不代表视觉测试。证据 `verification/v524.json`，本机安装与存档保留另记 `verification/v524-live.json`。
+
+本机安装与跨调用检查成功：源码 `2c0c1abe6dc64c8a592c6d89099b7e2a4d81f1b0`，PID73712/PPID1，原 `http://127.0.0.1:5190`；24资源与最终构建一致，7旧记录和2V5记录完全不变，未重置。最新备份 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-22T16-45-37-020Z-before-v524.sqlite`；旧构建 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v524-20261022T164536Z`。证据 `verification/v524-live.json`。
