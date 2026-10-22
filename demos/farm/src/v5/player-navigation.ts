@@ -1,4 +1,4 @@
-import {isWalkable,type GridPoint,type Layout} from './layout.ts';
+import {isPlayerWalkable,type GridPoint,type Layout} from './layout.ts';
 const cell=(p:GridPoint)=>({x:Math.round(p.x),z:Math.round(p.z)});
 const key=(p:GridPoint)=>`${p.x},${p.z}`;
 const length=(a:GridPoint,b:GridPoint)=>Math.hypot(a.x-b.x,a.z-b.z);
@@ -7,7 +7,7 @@ export function playerSegmentClear(layout:Layout,from:GridPoint,to:GridPoint):bo
  const steps=Math.max(1,Math.ceil(length(from,to)/.08));
  for(let i=0;i<=steps;i++){
   const x=from.x+(to.x-from.x)*i/steps,z=from.z+(to.z-from.z)*i/steps;
-  for(const [dx,dz] of [[0,0],[.16,.16],[.16,-.16],[-.16,.16],[-.16,-.16]])if(!isWalkable(layout,cell({x:x+dx,z:z+dz})))return false;
+  for(const [dx,dz] of [[0,0],[.16,.16],[.16,-.16],[-.16,.16],[-.16,-.16]])if(!isPlayerWalkable(layout,cell({x:x+dx,z:z+dz})))return false;
  }
  return true;
 }
@@ -18,7 +18,7 @@ export function advancePlayer(layout:Layout,position:GridPoint,direction:GridPoi
 }
 /** Eight-way shortest path, with blocked-corner checks. Animal routes retain their own cardinal graph. */
 export function findPlayerPath(layout:Layout,from:GridPoint,to:GridPoint):GridPoint[]|null{
- const start=cell(from),goal=cell(to);if(!isWalkable(layout,start)||!isWalkable(layout,goal))return null;
+ const start=cell(from),goal=cell(to);if(!isPlayerWalkable(layout,start)||!isPlayerWalkable(layout,goal))return null;
  const open=[start],cost=new Map([[key(start),0]]),previous=new Map<string,GridPoint>(),visited=new Set<string>();
  while(open.length){open.sort((a,b)=>cost.get(key(a))!+length(a,goal)-cost.get(key(b))!-length(b,goal));const p=open.shift()!,k=key(p);if(visited.has(k))continue;visited.add(k);
   if(k===key(goal)){

@@ -11,6 +11,7 @@ export type Region = 'pen'|'meadow'|'shore'|'home';
 export type BuildingKind = 'shelter'|'trough'|'workbench'|'tower'|'factory'|'ramp'|'decor';
 export type Rotation = 0|90|180|270;
 export type Terrain = 'grass'|'shallow'|'deep';
+export interface WorldBounds {minX:number;maxX:number;minZ:number;maxZ:number}
 export interface Door extends GridPoint {id:string;open:boolean;paidCost:number}
 export interface Building extends GridPoint {
   id:string;kind:BuildingKind;rotation:Rotation;paidCost:number;doors:Door[];capacity:number;
@@ -66,6 +67,9 @@ export const BUILDING_RULES:Record<BuildingKind,{cost:number;width:number;depth:
 export const LAYOUT_RULES = {doorCost:8,expansionCost:30,expansionMs:60_000,roadCellMs:2_000,moveMs:10_000,refundRate:0.8};
 export const INITIAL_ACTOR_POINTS:GridPoint[] = [{x:4,z:4},{x:5,z:4},{x:4,z:5}];
 export const INITIAL_PLAYER_POINT:GridPoint = {x:5,z:7};
+// The surrounding valley is explorable before it is owned. Its outer water ring
+// is rendered from the same cells used by collision, rather than an invisible wall.
+const VALLEY_BOUNDS:WorldBounds = {minX:-6,maxX:23,minZ:-6,maxZ:17};
 const STEPS:GridPoint[] = [{x:0,z:1},{x:1,z:0},{x:0,z:-1},{x:-1,z:0}];
 const key = (p:GridPoint) => `${p.x},${p.z}`;
 const same = (a:GridPoint,b:GridPoint) => a.x===b.x&&a.z===b.z;
@@ -98,6 +102,7 @@ export function regionAt(p:GridPoint):Region {
 }
 
 export function terrainAt(p:GridPoint):Terrain {
+  if(p.x<=VALLEY_BOUNDS.minX||p.x>=VALLEY_BOUNDS.maxX||p.z<=VALLEY_BOUNDS.minZ||p.z>=VALLEY_BOUNDS.maxZ) return 'deep';
   if(p.x===11&&p.z>=10&&p.z<=11) return 'deep';
   return p.x>=10&&p.x<=11&&p.z>=8&&p.z<=11 ? 'shallow' : 'grass';
 }
@@ -121,11 +126,34 @@ export function createLayout():Layout {
     makeBuilding('initial-trough','trough',5,3),makeBuilding('initial-workbench','workbench',2,8)],history:[],receipts:[]};
 }
 
-/** Sheep/LX/guardians share this land graph. Ramps do not grant swimming. */
-export function isWalkable(layout:Layout,p:GridPoint):boolean {
-  if(!cell(p)||terrainAt(p)!=='grass'||!layout.owned.some(c=>same(c,p))) return false;
+export function layoutWorldBounds():WorldBounds {return {...VALLEY_BOUNDS};}
+
+/** Includes the visible water boundary. Ownership is a separate building right. */
+export function worldCells():GridPoint[] {
+  const cells:GridPoint[]=[];
+  for(let x=VALLEY_BOUNDS.minX;x<=VALLEY_BOUNDS.maxX;x++)
+    for(let z=VALLEY_BOUNDS.minZ;z<=VALLEY_BOUNDS.maxZ;z++) cells.push({x,z});
+  return cells;
+}
+
+export function isOwned(layout:Layout,p:GridPoint):boolean {
+  return !!cell(p)&&layout.owned.some(c=>same(c,p));
+}
+
+const clearGround = (layout:Layout,p:GridPoint):boolean => {
+  if(!cell(p)||terrainAt(p)!=='grass') return false;
   if(layout.buildings.some(b=>solid(b)&&buildingFootprint(b).some(c=>same(c,p)))) return false;
   return !layout.construction?.footprint.some(c=>same(c,p));
+};
+
+/** Animals and guardians stay on managed land. Threat avoidance can mask owned cells. */
+export function isWalkable(layout:Layout,p:GridPoint):boolean {
+  return isOwned(layout,p)&&clearGround(layout,p);
+}
+
+/** LX may explore the finite valley; water, facilities and construction still block. */
+export function isPlayerWalkable(layout:Layout,p:GridPoint):boolean {
+  return clearGround(layout,p);
 }
 
 export function findPath(layout:Layout,from:GridPoint,to:GridPoint):GridPoint[]|null {

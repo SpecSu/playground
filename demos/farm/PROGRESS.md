@@ -105,3 +105,12 @@
 - Server validates explicit confirmation, current profile and nonempty live session; replaces only that profile, advances runId/session, retains receipts for exact retry and rejects old-session requests. UI clears queued intent/replay/preview/selection; same-profile world tracks reset by runId.
 - New tests were observed RED before implementation. Independent review reproduced/fixed retreat auto-close interfering with confirmation. Final323/323 pass, full lint/typecheck/build pass; isolatedHTTP24resources and actual built React confirmation/cancel/reset flows pass. User5190 was not reset by tests. Real Chrome visual acceptance remains unavailable.
 - V5.2.2 rollout15:43:02UTC succeeded, implementationffc524a. LatestSQLitebackup integrityok; olddist preserved; sameMac5190 now independentPID35364. Separate-call15:43:35 confirms PPID1,24 byte-matchedresources,7 legacyrows unchanged and2V5records exactly unchanged. No user save reset; button awaits explicit in-game confirmation. Evidence verification/v522-live.json.
+
+## 2026-10-22 · V5.2.3 开放山谷与连续引导
+
+- 核实原地块外围逐格画围栏、保护棚有屋顶、疏散后缺少可操作目标、无音频模块。实现边界与验收在 OPEN_VALLEY.md。
+- 新增独立LX山谷导航，动物/威胁仍用owned图；三处发现只有在线真实到达才各奖励8材料一次。已完成三口喂食→生活区→三处发现→实际建造→真实演练→勘察→拓荒的规则链回归。
+- 保护区改低围栏/无屋顶；地面按材质实例化渲染，避免扩大地图增加数百次地面draw call。新增探索与发展抽屉和可点击下一步；三种设施用已有真实预算/施工事务。
+- 原创32小节WebAudio轻音乐、狼啸与完成声已接入，显式声音开关。审查复现“首次点音乐却静音”，已补实际pointerdown→click App回归并修复。
+- 仍缺独立Chrome/node_repl入口，未使用CUA/其他浏览器替代。完整回归/生产构建与隔离HTTP检查进行中；用户5190尚未切换，存档未动。
+- 最终360/360测试、lint/typecheck/build通过；24项实际静态资源字节匹配。独立生产React/HTTP链确认真实山谷移动与发现、设施预览/施工、原开场/喂养/回放/重置链。第二次审查发现并修复建设覆盖驻守伙伴，两项Important现均已复核解决。

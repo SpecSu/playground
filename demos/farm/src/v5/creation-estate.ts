@@ -5,7 +5,7 @@ import {
   type BlueprintComponent,type LocalVisit,
 } from './creation.ts';
 import {
-  buildingFootprint,commitEdit,findPath,isWalkable,previewEdit,regionAt,tickConstruction,validateLayout,
+  buildingFootprint,commitEdit,findPath,isWalkable,isOwned,previewEdit,regionAt,tickConstruction,validateLayout,
   type GridPoint,type Layout,type LayoutGeometry,type LayoutHistory,type Region,
 } from './layout.ts';
 
@@ -24,7 +24,7 @@ const key=(p:GridPoint)=>`${p.x},${p.z}`;
 function geometry(layout:Layout):LayoutGeometry {
   return structuredClone({owned:layout.owned,roads:layout.roads,buildings:layout.buildings,roadPaidCost:layout.roadPaidCost});
 }
-function actors(p:CreationProfile):GridPoint[] {return [p.position,p.guardianAt,...p.animals.filter(a=>!a.memorial).map(a=>a.position)].map(cell);}
+function actors(p:CreationProfile):GridPoint[] {return [...(isOwned(p.layout,cell(p.position))?[p.position]:[]),p.guardianAt,...p.animals.filter(a=>!a.memorial).map(a=>a.position)].map(cell);}
 function locked(p:CreationProfile):boolean {return !!p.threat;}
 function validateSafe(layout:Layout,p:CreationProfile):void {
   const result=validateLayout(layout,actors(p));ensure(result.ok,result.reasons.join('；'));

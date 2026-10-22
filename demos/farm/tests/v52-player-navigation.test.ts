@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createLayout,isWalkable} from '../src/v5/layout.ts';
+import {createLayout,isPlayerWalkable} from '../src/v5/layout.ts';
 import {advancePlayer,findPlayerPath,playerSegmentClear} from '../src/v5/player-navigation.ts';
 import {createEstate,currentProfile,commandEstate} from '../src/v5/estate.ts';
 
@@ -22,10 +22,10 @@ test('player movement stops at obstacles, deep water and world boundary without 
  const layout=createLayout();
  assert.equal(findPlayerPath(layout,{x:4,z:4},{x:2,z:2}),null);
  assert.equal(playerSegmentClear(layout,{x:4,z:3},{x:3,z:4}),false);
- for(const [start,dir] of [[{x:0,z:6},{x:-1,z:0}],[{x:9,z:9},{x:1,z:1}],[{x:4,z:2},{x:-1,z:0}]] as const){
+ for(const [start,dir] of [[{x:-5,z:6},{x:-1,z:0}],[{x:9,z:9},{x:1,z:1}],[{x:4,z:2},{x:-1,z:0}]] as const){
   const end=advancePlayer(layout,start,dir,3);
   assert.ok(playerSegmentClear(layout,start,end));
-  assert.ok(isWalkable(layout,{x:Math.round(end.x),z:Math.round(end.z)}));
+  assert.ok(isPlayerWalkable(layout,{x:Math.round(end.x),z:Math.round(end.z)}));
  }
 });
 test('authoritative steering expires and explicit stop cancels motion without changing identity',()=>{

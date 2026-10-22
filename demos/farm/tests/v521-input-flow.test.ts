@@ -218,3 +218,17 @@ test('a lost reset response keeps confirmation and retries the same command once
   assert.equal(h.profile.runId,requests[0].id);assert.equal(doc.querySelector('[data-reset-confirmation]'),null);
  }finally{await h.close();}
 });
+
+test('the first sound-button gesture starts music instead of immediately muting it',async()=>{
+ const previous=Object.getOwnPropertyDescriptor(globalThis,'AudioContext');
+ class Param{value=0;setValueAtTime(){}linearRampToValueAtTime(){}exponentialRampToValueAtTime(){}setTargetAtTime(){}}
+ class AudioNode{gain=new Param();frequency=new Param();Q=new Param();onended:unknown=null;connect(){}disconnect(){}start(){}stop(){}}
+ class Context{state='suspended';currentTime=0;destination=new AudioNode();createGain(){return new AudioNode();}createOscillator(){return new AudioNode();}createBiquadFilter(){return new AudioNode();}async resume(){this.state='running';}async close(){this.state='closed';}}
+ Object.defineProperty(globalThis,'AudioContext',{value:Context,configurable:true});const h=await mount({stage:'done'});
+ try{const button=h.browser.document.querySelector('.estate-sound')!;assert.match(button.textContent,/点一下听音乐/);
+  await act(async()=>{button.dispatchEvent(new h.browser.PointerEvent('pointerdown',{bubbles:true}));});
+  await act(async()=>{(button as unknown as HTMLButtonElement).click();});
+  assert.equal(button.getAttribute('aria-pressed'),'true','first sound interaction enables music');assert.equal(button.getAttribute('aria-label'),'关闭音乐与音效');
+  await act(async()=>{button.dispatchEvent(new h.browser.PointerEvent('pointerdown',{bubbles:true}));(button as unknown as HTMLButtonElement).click();});assert.equal(button.getAttribute('aria-pressed'),'false');
+ }finally{await h.close();if(previous)Object.defineProperty(globalThis,'AudioContext',previous);else Reflect.deleteProperty(globalThis,'AudioContext');}
+});

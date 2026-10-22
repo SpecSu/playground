@@ -69,3 +69,13 @@ Fresh full suite **323/323 passed** (0 skipped/failed), ESLint/typecheck and pro
 Evidence: `verification/v522.json`. Production deployment does not invoke reset. Tests used only isolated data. Chrome/WebGL visual acceptance remains not run; no independent Chrome control tool and no prohibited fallback.
 
 V5.2.2 deployed locally from `ffc524a7ff9a7961bae6129269a8c45c0517c41a` at15:43:02UTC. Cross-call15:43:35 confirms PID35364/PPID1 on127.0.0.1:5190,24 byte-identical built resources, SQLite integrityok,7 original farm rows and2 V5 records exactly unchanged. Fresh backup: `.local/backups/2026-10-22T15-43-02-463Z-before-v522.sqlite`. Agent did not invoke production reset. Evidence: `verification/v522-live.json`.
+
+## V5.2.3 开放山谷、连续目标与音乐
+
+最终全套 **360/360通过**，零失败/跳过；ESLint、显式typecheck、生产构建（1845模块，`.local/v523-dist`）通过。独立5193/临时SQLite匹配24个构建资源，HTTP/API、幂等与隔离通过。真实生产React入口在Node DOM中完成疏散后目标、行走到西侧山谷并真实结算发现、免费预览、确认扣料与实际施工完成；原喂养/重试/分身/回放/重置链均通过。
+
+新增规则测试覆盖野外往返、水边碰撞、探索不赠产权/动物路线、三地点奖励与刷新去重、从照料到拓荒的完整链、野外蓝图校验、低围栏门口与无屋顶、32小节音乐/手势/静音/后台/事件去重。审查两项Important（首次点音乐反而静音、建造覆盖驻守伙伴）均已复现RED、修复GREEN并独立复核。
+
+**实际Chrome/WebGL画面、帧率、触控与音乐听感仍未验收。** 工具搜索仍无独立Chrome/node_repl入口；没有CUA或其他浏览器绕行。Node DOM的WebGL缺失警告属于明确测试边界。没有将360项逻辑通过写成视觉或听感通过。
+
+证据：`verification/v523.json`；范围/玩法：`OPEN_VALLEY.md`、`GAMEPLAY.md`。用户5190不用于玩法/重置测试，安装前备份记录另见`verification/v523-live.json`。

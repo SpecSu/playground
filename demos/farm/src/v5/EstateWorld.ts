@@ -11,7 +11,8 @@ import {SceneTapGesture,pickSceneEntity,bindEntityLabel} from '../picking.ts';
 import {makeSheep} from '../sheep.ts';
 import {AVATAR_LABEL} from '../model.ts';
 import {animalScale} from './life.ts';
-import {terrainAt,regionAt,findPath,buildingFootprint,BUILDING_RULES,type BuildingKind,type GridPoint,type Building} from './layout.ts';
+import {terrainAt,regionAt,findPath,buildingFootprint,worldCells,layoutWorldBounds,isOwned,BUILDING_RULES,type BuildingKind,type GridPoint,type Building} from './layout.ts';
+import {LANDMARKS,discoveredLandmarkIds,currentJourneyGoal} from './journey.ts';
 import {gridToWorld,worldToGrid,sceneResponse,sceneBuilding,legacyAnimal,scenePalette,cameraCapture} from './estate-scene.ts';
 import type {EstateSnapshot,EstateAnimal} from './estate.ts';
 import type {GuardianKind,ThreatWolf} from './threat.ts';
@@ -131,7 +132,7 @@ export class EstateWorld{
  }
  private sync(data:EstateSnapshot,reset=false){
   const p=data.profile,theme=this.previewTheme??p.creation.theme;
-  const layoutKey=`${p.id}:${p.layout.version}:${theme}:${p.layout.construction?.eventId??''}`;
+  const layoutKey=`${p.id}:${p.layout.version}:${theme}:${p.layout.construction?.eventId??''}:${discoveredLandmarkIds(p).join(',')}`;
   if(layoutKey!==this.mapKey){this.mapKey=layoutKey;this.buildMap();}
   this.syncMover(this.player,p.position,reset,p.path);
   const guardian=p.threat?.guardian,kind=guardian?.kind??p.guardian;if(kind!==this.guardianKind)this.installGuardian(kind);this.syncMover(this.guardian,guardian?.position??p.guardianAt,reset,guardian?guardian.path.slice(guardian.pathIndex):p.guardianPath);
@@ -146,13 +147,14 @@ export class EstateWorld{
  private buildMap(){
   disposeTree(this.layoutGroup);this.labels.forEach(el=>el.remove());this.labels=[];this.obstacles=[];
   const p=this.data.profile,theme=this.previewTheme??p.creation.theme,palette=scenePalette[theme];this.scene.background=new THREE.Color(palette.sky);this.scene.fog=new THREE.Fog(palette.sky,26,60);
-  const maxX=Math.max(...p.layout.owned.map(c=>c.x)),center=gridToWorld({x:maxX/2,z:5.5});box(this.layoutGroup,'#7b9363',center.x,-.34,center.z,maxX+1,.5,12);
-  const owned=new Set(p.layout.owned.map(key));
-  for(const c of p.layout.owned){const w=gridToWorld(c),terrain=terrainAt(c),region=regionAt(c);const color=terrain==='deep'?'#68a9b7':terrain==='shallow'?'#8ac3be':region==='meadow'?palette.meadow:region==='home'?palette.home:region==='shore'?palette.shore:palette.grass;
-   const tile=box(this.layoutGroup,color,w.x,-.055,w.z,1.006,.12,1.006);tile.castShadow=false;
-   if(terrain!=='grass'){tile.position.y=-.035;tile.material=new THREE.MeshStandardMaterial({color,roughness:.28,transparent:true,opacity:.92});for(let i=0;i<2;i++){const ripple=ring(this.layoutGroup,'#d6f0dd',w.x+(i-.5)*.28,w.z,.19+i*.05,.23);ripple.position.y=.005;}}
-   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]])if(!owned.has(`${c.x+dx},${c.z+dz}`)&&!(c.x===0&&c.z===4&&dx===-1))this.fence(w.x+dx*.5,w.z+dz*.5,dx===0);
+  const bounds=layoutWorldBounds(),center=gridToWorld({x:(bounds.minX+bounds.maxX)/2,z:(bounds.minZ+bounds.maxZ)/2});box(this.layoutGroup,'#7b9363',center.x,-.34,center.z,bounds.maxX-bounds.minX+1,.5,bounds.maxZ-bounds.minZ+1);
+  const tileBatches=new Map<string,{water:boolean;positions:THREE.Vector3[]}>();
+  for(const c of worldCells()){const w=gridToWorld(c),terrain=terrainAt(c),region=regionAt(c);const color=terrain==='deep'?'#68a9b7':terrain==='shallow'?'#8ac3be':!isOwned(p.layout,c)?(c.x<0?'#a0b684':c.z>11?'#a4b995':palette.meadow):region==='meadow'?palette.meadow:region==='home'?palette.home:region==='shore'?palette.shore:palette.grass;
+   const batch=tileBatches.get(color)??{water:terrain!=='grass',positions:[]};batch.positions.push(new THREE.Vector3(w.x,terrain==='grass'?-.055:-.035,w.z));tileBatches.set(color,batch);
+   if(terrain==='shallow')for(let i=0;i<2;i++){const ripple=ring(this.layoutGroup,'#d6f0dd',w.x+(i-.5)*.28,w.z,.19+i*.05,.23);ripple.position.y=.005;}
   }
+  // Expanded ground uses a handful of draw calls, not one per world tile.
+  const transform=new THREE.Matrix4();for(const [color,batch] of tileBatches){const tiles=new THREE.InstancedMesh(new THREE.BoxGeometry(1.006,.12,1.006),new THREE.MeshStandardMaterial({color,roughness:batch.water?.28:.88}),batch.positions.length);tiles.name='valley-ground';tiles.receiveShadow=true;batch.positions.forEach((position,index)=>tiles.setMatrixAt(index,transform.makeTranslation(position)));this.layoutGroup.add(tiles);}
   for(const r of p.layout.roads){const w=gridToWorld(r);box(this.layoutGroup,palette.road,w.x,.016,w.z,.84,.035,.84).castShadow=false;}
   // Ground-only flowers never introduce unmodelled navigation blockers.
   for(let i=0;i<56;i++){const x=(i*47%113)/10,z=(i*31%113)/10,c={x:Math.round(x),z:Math.round(z)};if(terrainAt(c)!=='grass'||p.layout.roads.some(r=>r.x===c.x&&r.z===c.z)||p.layout.buildings.some(b=>buildingFootprint(b).some(q=>q.x===c.x&&q.z===c.z)))continue;const w=gridToWorld({x,z});const flower=ball(this.layoutGroup,i%3?'#e7dfae':'#efd8c3',w.x,.05,w.z,.035,.04,.035);flower.castShadow=false;}
@@ -160,24 +162,28 @@ export class EstateWorld{
   if(theme==='starlit')for(let i=0;i<18;i++){const w=gridToWorld({x:(i*7%12),z:(i*5%12)});const star=mesh(this.layoutGroup,new THREE.OctahedronGeometry(.045),'#ffe9b6',w.x,1.5+(i%3)*.4,w.z);(star.material as THREE.MeshStandardMaterial).emissive.set('#ffe9b6');(star.material as THREE.MeshStandardMaterial).emissiveIntensity=.7;star.userData.pickThrough=true;}
   for(const b of p.layout.buildings)this.building(b,palette.accent);
   if(p.layout.construction){const c=p.layout.construction;for(const cell of c.footprint){const w=gridToWorld(cell);box(this.layoutGroup,'#eeb76e',w.x,.045,w.z,.94,.08,.94,.4);}const point=c.footprint[0];if(point){const w=gridToWorld(point);const label=document.createElement('div');label.className='player-label';label.textContent='施工中';label.dataset.worldX=String(w.x);label.dataset.worldZ=String(w.z);this.host.append(label);this.labels.push(label);}}
-  const landmarks=[{x:4,z:5,text:'圈养区'},{x:8,z:2,text:'散养草场'},{x:9,z:8,text:'池岸 · 羊留岸上'},{x:3,z:10,text:'家园工作台'}];
+  const landmarks=[{x:4,z:5,text:'保护区'},{x:8,z:2,text:'散养草场'},{x:9,z:8,text:'池岸 · 羊留岸上'},{x:3,z:10,text:'家园工作台'}];
+  for(const landmark of LANDMARKS){const w=gridToWorld(landmark.position),known=discoveredLandmarkIds(p).includes(landmark.id);landmarks.push({...landmark.position,text:`${known?'✓':'◇'} ${landmark.name}`});
+   ring(this.layoutGroup,known?'#d2edb5':'#ffe5ad',w.x,w.z,.75,.7);
+   // Ground-level scenery keeps the walkable discovery point unobstructed.
+   for(let i=0;i<7;i++){const angle=i*Math.PI*2/7;ball(this.layoutGroup,landmark.position.x<0?'#f1d7cb':landmark.position.z>11?'#d4dde6':'#ecdca9',w.x+Math.cos(angle)*.72,.1,w.z+Math.sin(angle)*.72,.1,.12,.1);}
+  }
   for(const landmark of landmarks){const w=gridToWorld(landmark);const label=document.createElement('div');label.className='player-label estate-region-label';label.textContent=landmark.text;label.dataset.worldX=String(w.x);label.dataset.worldZ=String(w.z);label.style.fontSize='10px';label.style.opacity='.7';this.host.append(label);this.labels.push(label);}
-  // Trees are outside the playable ownership boundary, matching graph limits.
-  for(let i=0;i<14;i++){const x=i<7?-7:8+(maxX-11),z=-6+i%7*2;box(this.layoutGroup,'#aa8a60',x,.7,z,.24,1.4,.24);ball(this.layoutGroup,theme==='starlit'?'#71869c':'#91aa6f',x,1.9,z,.65,.9,.65);}
+  // The distant bank, beyond the actual navigable valley, carries the tall scenery.
+  for(let i=0;i<18;i++){const w=gridToWorld({x:i<9?bounds.minX-1:bounds.maxX+1,z:bounds.minZ+i%9*3});box(this.layoutGroup,'#aa8a60',w.x,.7,w.z,.24,1.4,.24);ball(this.layoutGroup,theme==='starlit'?'#71869c':'#91aa6f',w.x,1.9,w.z,.65,.9,.65);}
  }
- private fence(x:number,z:number,alongX:boolean){
-  for(const offset of [-.46,.46])box(this.layoutGroup,'#ddd1ac',x+(alongX?offset:0),.37,z+(alongX?0:offset),.1,.78,.1);
-  for(const height of [.28,.57])box(this.layoutGroup,'#e6d9b9',x,height,z,alongX?1:.075,.075,alongX?.075:1);
+ private fence(x:number,z:number,alongX:boolean,parent:THREE.Object3D=this.layoutGroup){
+  const fence=new THREE.Group();fence.name='protection-fence';parent.add(fence);
+  for(const offset of [-.46,.46])box(fence,'#ddd1ac',x+(alongX?offset:0),.31,z+(alongX?0:offset),.09,.65,.09);
+  for(const height of [.23,.47])box(fence,'#e6d9b9',x,height,z,alongX?1:.075,.065,alongX?.075:1);
  }
  private building(b:Building,accent:string){
   const g=sceneBuilding(b),root=new THREE.Group();root.position.set(g.center.x,0,g.center.z);root.userData.entityId=`building:${b.id}`;this.layoutGroup.add(root);const w=g.width,d=g.depth;
   if(b.kind==='shelter'){
    const floor=box(root,'#c6a576',0,.04,0,w-.08,.1,d-.08);floor.castShadow=false;
-   for(const x of [-w/2+.14,w/2-.14])for(const z of [-d/2+.14,d/2-.14])box(root,'#ac865b',x,.76,z,.16,1.45,.16);
-   box(root,'#d4bd90',0,.36,-d/2+.06,w-.12,.65,.1);for(const x of [-w/2+.06,w/2-.06])box(root,'#d4bd90',x,.36,0,.1,.65,d-.12);
-   const roof=mesh(root,new THREE.ConeGeometry(Math.max(w,d)*.77,.8,4),accent,0,1.72,0);roof.rotation.y=Math.PI/4;roof.scale.z=d/w;
+   const footprint=buildingFootprint(b),cells=new Set(footprint.map(key));
+   for(const c of footprint)for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){const outside={x:c.x+dx,z:c.z+dz};if(cells.has(key(outside))||b.doors.some(door=>door.x===outside.x&&door.z===outside.z))continue;const at=gridToWorld(c);this.fence(at.x-g.center.x+dx*.5,at.z-g.center.z+dz*.5,dx===0,root);}
    for(const offset of [-.55,0,.55])ball(root,'#e9d6a2',offset,.14,.22,.28,.1,.31);
-   this.obstacles.push(createCameraObstacle(roof));
   }else if(b.kind==='trough'){
    box(root,'#a98059',0,.2,0,.87,.4,.68);box(root,'#e4d3a6',0,.43,0,.73,.08,.55);for(let i=0;i<5;i++)ball(root,'#849e61',(i%3-1)*.19,.51,(Math.floor(i/3)-.5)*.2,.13,.09,.12);
   }else if(b.kind==='workbench'){
@@ -200,6 +206,7 @@ export class EstateWorld{
   for(const w of p.threat?.wolves??[])if(!['retreated','boundary'].includes(w.status))pathLine(this.routeGroup,[w.position,...w.path.slice(w.pathIndex)],'#d88e73',.09);
   for(const door of p.threat?.doors??[]){const w=gridToWorld(door.position);ring(this.effectGroup,door.queue.length?'#f4d28a':'#d1e5ba',w.x,w.z,.48,.85);}
   const guardian=p.threat?.guardian;if(guardian?.ability&&guardian.abilityUntil>p.threat!.elapsed){const w=gridToWorld(guardian.abilityPosition);ring(this.effectGroup,guardian.ability==='calm'?'#b7e5cd':guardian.ability==='gather'?'#eddda4':guardian.ability==='bubble'?'#9cd8ec':'#f4b976',w.x,w.z,guardian.ability==='calm'||guardian.ability==='gather'?4:1,.45);}
+  const goal=currentJourneyGoal(p);if(p.tutorial==='done'&&goal.action.kind==='move'&&!p.path.length){const w=gridToWorld(goal.action.to);ring(this.effectGroup,'#ffe8a8',w.x,w.z,.55,.8);}
  }
  private drawVisits(){
   const p=this.data.profile,active=p.creation.visits.filter(v=>v.status==='active');
@@ -234,8 +241,8 @@ export class EstateWorld{
  private locomotion(m:Mover,speed:number):ClubMotionState{const origin=m.root.position,heading=m.root.rotation.y,distance=m.distance;return {slot:0,x:origin.x,z:origin.z,heading,speed,distance,walkBlend:clamp(speed/2.4,0,1),action:'dance',sampleAtDistance:d=>{const p=m.track?.sampleAtDistance(d);return p?{...gridToWorld(p),heading:p.heading}:{x:origin.x,z:origin.z,heading};}};}
  private place(el:HTMLElement,point:THREE.Vector3,lift:number){this.projection.copy(point);this.projection.y+=lift;const p=projectCameraLabel(this.projection,this.camera,this.host.clientWidth,this.host.clientHeight);el.hidden=!p;if(p)el.style.transform=`translate(-50%,-100%) translate(${p.x}px,${p.y}px)`;}
  private cameraUpdate(dt:number){
-  const owned=this.data.profile.layout.owned,focus=this.attention,attention=focus?gridToWorld(focus):undefined;
-  this.camera=this.cameraController.update({dt,aspect:this.host.clientWidth/Math.max(1,this.host.clientHeight),mode:this.openingState&&!['defend','done'].includes(this.openingState.stage)?'overview':this.cameraMode,position:this.player.root.position,bounds:{minX:Math.min(...owned.map(p=>p.x))-5.5,maxX:Math.max(...owned.map(p=>p.x))-5.5,minZ:Math.min(...owned.map(p=>p.z))-5.5,maxZ:Math.max(...owned.map(p=>p.z))-5.5},...(attention?{attention:{...attention,zoom:this.reduced?1:1.06}}:{})});
+  const bounds=layoutWorldBounds(),focus=this.attention,attention=focus?gridToWorld(focus):undefined;
+  this.camera=this.cameraController.update({dt,aspect:this.host.clientWidth/Math.max(1,this.host.clientHeight),mode:this.openingState&&!['defend','done'].includes(this.openingState.stage)?'overview':this.cameraMode,position:this.player.root.position,bounds:{minX:bounds.minX-5.5,maxX:bounds.maxX-5.5,minZ:bounds.minZ-5.5,maxZ:bounds.maxZ-5.5},...(attention?{attention:{...attention,zoom:this.reduced?1:1.06}}:{})});
  }
  private fit(){const w=this.host.clientWidth,h=this.host.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.cameraUpdate(0);}
  private updateSheep(a:EstateAnimal,t:number,now:number,dt:number){

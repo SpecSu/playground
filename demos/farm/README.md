@@ -50,3 +50,5 @@ FARM_URL=http://127.0.0.1:5193 FARM_DIST="$PWD/.local/v5-dist" PATH="$PWD/.local
 HTTP/Node DOM脚本拒绝5190，使用临时测试存档。真实Chrome/WebGL与手机触控尚未验收：独立Chrome插件工具缺失，没有使用CUA或其他浏览器绕行。标准Node SQLite ExperimentalWarning不代表保存失败。
 
 实现/验收清单：[V5_PLAN.md](./V5_PLAN.md)；外部AI/好友接口边界：[V5_INTEGRATION.md](./V5_INTEGRATION.md)；实际验证证据：[VERIFICATION.md](./VERIFICATION.md)；进展：[PROGRESS.md](./PROGRESS.md)。本轮不发布Sites、不推原GitHub、不改旧三个Demo。
+
+开放山谷与疏散后连续引导：见 [OPEN_VALLEY.md](./OPEN_VALLEY.md)。现存档刷新后可继续；要演示全开场，用设置中的“重置当前存档 · 从头演示”，确认后才清空该档。声音需首次用户交互，顶部可静音。
