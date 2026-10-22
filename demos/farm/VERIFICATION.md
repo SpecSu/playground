@@ -79,3 +79,5 @@ V5.2.2 deployed locally from `ffc524a7ff9a7961bae6129269a8c45c0517c41a` at15:43:
 **实际Chrome/WebGL画面、帧率、触控与音乐听感仍未验收。** 工具搜索仍无独立Chrome/node_repl入口；没有CUA或其他浏览器绕行。Node DOM的WebGL缺失警告属于明确测试边界。没有将360项逻辑通过写成视觉或听感通过。
 
 证据：`verification/v523.json`；范围/玩法：`OPEN_VALLEY.md`、`GAMEPLAY.md`。用户5190不用于玩法/重置测试，安装前备份记录另见`verification/v523-live.json`。
+
+本机更新已成功：运行源码 `a7774bb60711d9a579935524b8f813316363efbf`，PID58409/PPID1，原 `http://127.0.0.1:5190`。16:14:37UTC跨调用确认24资源逐字节一致、SQLite integrityok，7条legacy与2条V5存档均完全不变。最新备份 `.local/backups/2026-10-22T16-13-29-336Z-before-v523.sqlite`；旧构建 `.local/backups/dist-before-v523-20261022T161329Z`。只做静态与只读数据检查，未执行生产重置；临时测试服务已停止。证据 `verification/v523-live.json`。
