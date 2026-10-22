@@ -10,8 +10,8 @@
     "dev": "node --experimental-strip-types server/index.ts --dev",
     "start": "node --experimental-strip-types server/index.ts",
     "test": "node --import ./tests/view-loader.mjs --experimental-strip-types --test --test-concurrency=1 tests/*.test.ts",
-    "test:dom": "node scripts/dom-smoke.mjs",
-    "test:http": "node scripts/complete-http-smoke.mjs",
+    "test:dom": "node scripts/v5-dom-smoke.mjs",
+    "test:http": "node scripts/v5-http-smoke.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src server tests",
     "build": "tsc --noEmit && vite build"

@@ -1,0 +1,18 @@
+/** HTTP only, independent SQLite identity/server. Never mutates the user's5190 save. */
+import assert from 'node:assert/strict';import {randomUUID,createHash} from 'node:crypto';import {readFileSync,readdirSync,statSync} from 'node:fs';import {join,resolve} from 'node:path';
+const base=process.env.FARM_URL,dist=resolve(process.env.FARM_DIST||'dist');if(!base||new URL(base).port==='5190')throw new Error('Use isolated test server');
+let cookie='';async function request(path,init){const r=await fetch(base+path,{...init,headers:{...init?.headers,...(cookie?{Cookie:cookie}:{})}});if(r.headers.has('set-cookie'))cookie=r.headers.get('set-cookie').split(';')[0];return r;}
+let s=await (await request('/api/estate')).json();assert.equal(s.version,5);assert.equal(s.avatar,'human-lx');assert.equal(s.profile.animals.length,3);assert.equal(s.profile.materials,60);
+async function command(type,extra={},id=randomUUID()){const r=await request('/api/estate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,type,session:s.profile.session,...extra})});assert.equal(r.status,200);const reply=await r.json();s=reply.snapshot;return reply;}
+assert.equal((await command('enter')).accepted,true);assert.equal((await command('guardian',{guardian:'cat'})).accepted,true);assert.equal(s.profile.guardian,'cat');
+const eventId=s.profile.threat.id;await command('avatar',{avatar:'banana-cat'});const owner=s.playerId;
+await new Promise(r=>setTimeout(r,200));await command('pulse');assert.equal(s.profile.threat.id,eventId);assert.ok(s.profile.threat.elapsed>0);
+const before=s.profile.inventory.hand;const id=randomUUID();const first=await command('creation',{command:{id:randomUUID(),type:'themePreview',theme:'lotus'}});assert.equal(first.accepted,true);const draft=s.profile.creation.drafts.at(-1).id;
+assert.equal((await command('creation',{command:{id:randomUUID(),type:'themeApply',draftId:draft}},id)).accepted,true);assert.equal(s.profile.creation.theme,'lotus');const again=await command('creation',{command:{id:'different-inner',type:'themeUndo'}},id);assert.equal(again.duplicate,true);assert.equal(s.profile.creation.theme,'lotus');
+assert.equal((await command('challenge',{confirmed:true,participants:['pipi']})).accepted,false);assert.equal((await command('feed',{actor:'local-visitor-a',target:'pipi'})).accepted,false);assert.equal(s.profile.inventory.hand,before);
+await command('profile',{profile:'lab'});assert.ok(s.profile.animals.every(a=>a.id.startsWith('lab-')));assert.equal(s.profile.creation.theme,'pasture');await command('profile',{profile:'home'});assert.equal(s.playerId,owner);assert.equal(s.profile.creation.theme,'lotus');assert.equal(s.avatar,'banana-cat');
+assert.equal((await request('/api/farm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:randomUUID(),type:'claim'})})).status,410);
+assert.equal((await request('/api/estate',{method:'POST',headers:{'Content-Type':'application/json',Origin:'https://untrusted.example'},body:'{}'})).status,403);
+const hash=b=>createHash('sha256').update(b).digest('hex');let count=0;
+async function walk(dir){for(const name of readdirSync(dir)){const file=join(dir,name);if(statSync(file).isDirectory())await walk(file);else{const path='/'+file.slice(dist.length+1);const r=await request(path==='/'?'/':path);assert.equal(r.status,200,path);assert.equal(hash(Buffer.from(await r.arrayBuffer())),hash(readFileSync(file)),path);count++;}}}
+await walk(dist);console.log(JSON.stringify({http:true,currentApi:true,guardianPersisted:true,templateApplied:true,receiptDuplicate:true,ownerBoundary:true,labIsolation:true,legacyBypassClosed:true,sameOrigin:true,resourcesByteMatched:count,webgl:'not verified'}));

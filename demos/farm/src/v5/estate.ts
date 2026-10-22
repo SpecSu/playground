@@ -1,0 +1,342 @@
+import {createFarm,type Farm,type Avatar,type Action,type Personality} from '../model.ts';
+import {createLayout,findPath,isWalkable,regionAt,buildingApproaches,shelterEntries,INITIAL_ACTOR_POINTS,INITIAL_PLAYER_POINT,previewEdit,commitEdit,tickConstruction,cancelConstruction,type GridPoint,type Layout,type LayoutEdit} from './layout.ts';
+import {createLife,settleOffline,advanceLife,feedingResult,growthSummary,playWith,claimProducts,type LifeState} from './life.ts';
+import {createThreat,stepThreat,guardianCommand,type ThreatState,type GuardianKind} from './threat.ts';
+import {createCreation,type CreationState,type CreationCommand,type WorkCapture} from './creation.ts';
+import {applyEstateCreation,type CreationLayoutReceipt} from './creation-estate.ts';
+export type EstateAnimal={id:string;name:string;personality:Personality;preference:Action;color:string;appearance:'plain'|'starlit';life:LifeState;position:GridPoint;path:GridPoint[];following:boolean;memorial?:{at:number;eventId:string};restAssignment?:{buildingId:string;doorId:string;slot:number;door:GridPoint;phase:'walk'|'admitted';ordered:boolean;admitMs:number};offlineNeeds?:{pulseAt:number;hunger:number;energy:number}};
+export type EstateJob={id:string;type:'feed'|'refill'|'delivery'|'survey';target?:string;food?:'milk'|'feed';progress:number;phase:'walk'|'act'|'out'|'unload'|'back';to:GridPoint;source?:GridPoint;rounds?:number;carried?:number};
+export type Profile={id:'home'|'lab';createdAt:number;lastSeenAt:number;lastPulseAt:number;onlineMs:number;session:string;tutorial:'choose'|'defend'|'done';materials:number;troughFood?:Record<string,number>;inventory:{hand:number;pantry:number;workbenchMs:number};layout:Layout;animals:EstateAnimal[];position:GridPoint;path:GridPoint[];job:EstateJob|null;guardian:GuardianKind|null;guardianAt:GridPoint;guardianBehavior?:'follow'|'station'|'patrol';guardianPath?:GridPoint[];guardianTarget?:GridPoint;guardianPatrolIndex?:number;guardianSwitchAt:number;guardianReadyMs:number;threat:ThreatState|null;lastThreat?:ThreatState;rescueIntent?:{target:string;findBack?:boolean;wolfId?:string};creation:CreationState;creationLayouts?:CreationLayoutReceipt[];milestones:string[];regions:string[];surveyed:boolean;assistance:boolean;nextEventCheckMs:number;lastPlayAt:number;sharedRhythm:boolean;notice:string;events:{id:string;text:string;at:number;layoutVersion?:number}[];factory:{stock:number;ms:number;at:number};lastVisual:{id:string;action:Action|'eat'|'rest';target:string;at:number}|null};
+export type Estate={version:5;playerId:string;avatar:Avatar;activeProfile:'home'|'lab';profiles:{home:Profile;lab?:Profile};revision:number;legacy?:Farm};
+export type EstateCommand={id:string;type:string;[key:string]:unknown};
+export type EstateReply={state:Estate;accepted:boolean;message:string};
+export type EstateSnapshot=Estate&{now:number;storage:'local-sqlite';profile:Profile};
+export const GUARDIAN_LABEL:Record<GuardianKind,string>={dog:'刀盾狗',cat:'喵脆角',frog:'奶蛙'};
+export function currentProfile(s:Estate):Profile{return s.profiles[s.activeProfile]!;}
+function freshProfile(owner:string,id:'home'|'lab',now:number,legacy?:Farm):Profile{
+ const old=legacy??createFarm(owner,now),layout=createLayout();
+ const spawn=[...INITIAL_ACTOR_POINTS,...layout.owned.filter(q=>regionAt(q)==='pen'&&isWalkable(layout,q)&&!INITIAL_ACTOR_POINTS.some(a=>a.x===q.x&&a.z===q.z))];
+ const animals:EstateAnimal[]=old.animals.map((a,i)=>{
+  const life=createLife(now,{legacyBond:a.bond,legacyHabits:a.habits,ageMultiplier:id==='lab'?240:1});
+  life.memory=(a.experiences??[]).map(e=>({kind:'legacy',text:e.text,at:e.at}));
+  return {id:id==='lab'?`lab-${a.id}`:a.id,name:a.name,personality:a.personality,preference:a.preference,color:a.color,appearance:a.appearance,life,position:{...(spawn[i]??INITIAL_ACTOR_POINTS[0])},path:[],following:false};
+ });
+ return {id,createdAt:now,lastSeenAt:now,lastPulseAt:now,onlineMs:0,session:'',tutorial:'choose',materials:60,troughFood:{},inventory:{hand:3,pantry:3,workbenchMs:0},layout,animals,position:{...INITIAL_PLAYER_POINT},path:[],job:null,guardian:null,guardianAt:{x:5,z:5},guardianBehavior:'patrol',guardianPath:[],guardianPatrolIndex:0,guardianSwitchAt:0,guardianReadyMs:0,threat:createThreat({id:`${id}-opening`,seed:17,mode:'tutorial',actors:animals.map(a=>({id:a.id,position:a.position})),guardianPosition:{x:5,z:5}},layout),creation:createCreation(owner,id),milestones:[],regions:[],surveyed:false,assistance:false,nextEventCheckMs:1_200_000,lastPlayAt:0,sharedRhythm:false,notice:'选一位伙伴，陪幼崽守住小家',events:[],factory:{stock:0,ms:0,at:now},lastVisual:null};
+}
+export function createEstate(owner:string,now:number,legacy?:Farm):Estate{return {version:5,playerId:owner,avatar:legacy?.avatar??'human-lx',activeProfile:'home',profiles:{home:freshProfile(owner,'home',now,legacy)},revision:0,...(legacy?{legacy:structuredClone(legacy)}:{})};}
+export function estateSnapshot(s:Estate,now:number):EstateSnapshot{return {...structuredClone(s),now,storage:'local-sqlite',profile:structuredClone(currentProfile(s))};}
+function remember(p:Profile,id:string,text:string,now:number){p.events=[...p.events,{id,text,at:now,layoutVersion:p.layout.version}].slice(-60);p.notice=text;}
+function milestone(p:Profile,id:string,amount:number,text:string,now:number){if(p.milestones.includes(id))return;p.milestones.push(id);p.materials+=amount;remember(p,id,text,now);}
+const dist=(a:GridPoint,b:GridPoint)=>Math.hypot(a.x-b.x,a.z-b.z);
+const cell=(a:GridPoint)=>({x:Math.round(a.x),z:Math.round(a.z)});
+function pathTo(p:Profile,to:GridPoint){return findPath(p.layout,cell(p.position),cell(to));}
+function nearestApproach(p:Profile,target:GridPoint){return [{x:Math.round(target.x),z:Math.round(target.z)},...[[1,0],[-1,0],[0,1],[0,-1]].map(([x,z])=>({x:Math.round(target.x)+x,z:Math.round(target.z)+z}))].filter(q=>isWalkable(p.layout,q)).map(q=>({q,path:pathTo(p,q)})).filter(v=>v.path).sort((a,b)=>a.path!.length-b.path!.length)[0];}
+function walk(position:GridPoint,path:GridPoint[],distance:number):boolean{let moved=false;while(path.length&&distance>0){const next=path[0],length=dist(position,next);if(length<.001){path.shift();continue;}const amount=Math.min(length,distance);position.x+=(next.x-position.x)/length*amount;position.z+=(next.z-position.z)/length*amount;distance-=amount;moved=true;if(amount===length)path.shift();}return moved;}
+function cancelJob(p:Profile){if(p.job?.type==='delivery'&&p.job.carried){p.factory.stock+=p.job.carried;p.job.carried=0;}p.job=null;p.path=[];}
+/** Release a certified slot and reset unfinished rest; completed records remain. */
+export function releaseRest(p:Profile,animalId?:string):void{
+ for(const a of p.animals){
+  if(animalId!==undefined&&a.id!==animalId)continue;
+  const assignment=a.restAssignment;
+  if(assignment){
+   if(assignment.phase==='admitted'&&isWalkable(p.layout,assignment.door))a.position={...assignment.door};
+   a.path=[];delete a.restAssignment;
+  }
+  a.life.rest={bedId:null,sessionId:null,elapsedMs:0,completed:false};
+ }
+}
+/** Reserve shared building capacity first, then route to one actual open door. */
+export function requestRest(p:Profile,animalId:string,ordered=true):{ok:boolean;message:string}{
+ const a=p.animals.find(a=>a.id===animalId);
+ if(!a||a.memorial)return {ok:false,message:'先选一只在家的羊'};
+ if(p.threat)return {ok:false,message:'先结束当前守护事件，再安排日常休息'};
+ if(p.job?.type==='feed'&&p.job.target===animalId)return {ok:false,message:'先完成或取消这次喂食'};
+ if(a.restAssignment){a.restAssignment.ordered ||= ordered;return {ok:true,message:'已经安排了安全休息位'};}
+ const choices=shelterEntries(p.layout).flatMap(entry=>{
+  const used=new Set(p.animals.filter(other=>other.restAssignment?.buildingId===entry.buildingId).map(other=>other.restAssignment!.slot));
+  const slot=Array.from({length:entry.capacity},(_,i)=>i).find(i=>!used.has(i));
+  if(slot===undefined)return [];
+  const path=findPath(p.layout,cell(a.position),{x:entry.x,z:entry.z});
+  return path?[{entry,slot,path}]:[];
+ }).sort((a,b)=>a.path.length-b.path.length||a.entry.doorId.localeCompare(b.entry.doorId));
+ const best=choices[0];if(!best)return {ok:false,message:'没有空闲且可达的安全休息位'};
+ a.following=false;a.path=best.path;
+ a.restAssignment={buildingId:best.entry.buildingId,doorId:best.entry.doorId,slot:best.slot,door:{x:best.entry.x,z:best.entry.z},phase:'walk',ordered,admitMs:0};
+ return {ok:true,message:'已预约床位，沿入口回棚后安稳休息60秒'};
+}
+/** One offline absence retains its needs baseline across GETs and stale pulses. */
+export function settleProfileOffline(p:Profile,now:number):void{
+ if(!Number.isFinite(now)||now<=p.lastPulseAt)return;
+ for(const a of p.animals){
+  if(a.memorial||now<=a.life.lastSettledAt)continue;
+  a.offlineNeeds??={pulseAt:a.life.lastSettledAt,hunger:a.life.hunger,energy:a.life.energy};
+  const baseline=a.offlineNeeds;
+  a.life=settleOffline({...a.life,lastSettledAt:baseline.pulseAt,hunger:baseline.hunger,energy:baseline.energy},now);
+ }
+ if(now>p.factory.at&&p.layout.buildings.some(b=>b.kind==='factory')){
+  const capacity=12-(p.job?.type==='delivery'?(p.job.carried??0):0);
+  const elapsed=p.factory.ms+now-p.factory.at,intervals=Math.floor(elapsed/60_000);
+  if(p.factory.stock<capacity)p.factory.stock=Math.min(capacity,p.factory.stock+intervals*3);
+  p.factory.ms=p.factory.stock>=capacity?0:elapsed-intervals*60_000;p.factory.at=now;
+ }
+}
+export function settleEstate(original:Estate,now:number):Estate{
+ const s=structuredClone(original);if(!Number.isFinite(now))return s;
+ for(const p of Object.values(s.profiles)){
+  if(!p)continue;
+  if(now-p.lastPulseAt>5000)settleProfileOffline(p,now);
+  if(p.id===s.activeProfile)p.lastSeenAt=Math.max(p.lastSeenAt,now);
+ }
+ return s;
+}
+function tick(p:Profile,now:number,dtMs:number){
+ if(!Number.isFinite(now)||!Number.isFinite(dtMs)||now<p.lastPulseAt)return;
+ const elapsed=now-p.lastPulseAt;
+ if(elapsed>5000){settleProfileOffline(p,now);p.lastSeenAt=now;p.lastPulseAt=now;return;}
+ dtMs=Math.min(1500,Math.max(0,dtMs),elapsed);if(!dtMs)return;
+ const seconds=dtMs/1000,previousOnline=p.onlineMs,event=p.threat,guardianReadyBefore=p.guardianReadyMs;
+ p.onlineMs+=dtMs;p.lastSeenAt=now;p.lastPulseAt=now;p.factory.at=now;
+ for(const a of p.animals)delete a.offlineNeeds;
+ if(!event){const built=tickConstruction(p.layout,dtMs);p.layout=built.layout;p.materials+=built.materialDelta;if(built.completed)remember(p,`built-${p.layout.version}`,'布置完成，新的路线已经生效',now);}
+ if(p.guardianReadyMs>0)p.guardianReadyMs=Math.max(0,p.guardianReadyMs-dtMs);
+ for(const [id,stock] of Object.entries(p.troughFood??{})){if(!p.layout.buildings.some(b=>b.kind==='trough'&&b.id===id)){p.inventory.pantry+=stock;delete p.troughFood![id];}}
+ p.inventory.workbenchMs+=dtMs;while(p.inventory.workbenchMs>=30_000){p.inventory.workbenchMs-=30_000;p.inventory.pantry+=Math.max(0,Math.min(3,12-p.inventory.pantry));}
+ if(p.layout.buildings.some(b=>b.kind==='factory')){
+  const capacity=12-(p.job?.type==='delivery'?(p.job.carried??0):0);
+  if(p.factory.stock>=capacity)p.factory.ms=0;
+  else {p.factory.ms+=dtMs;const intervals=Math.floor(p.factory.ms/60_000);p.factory.stock=Math.min(capacity,p.factory.stock+intervals*3);p.factory.ms=p.factory.stock>=capacity?0:p.factory.ms-intervals*60_000;}
+ }
+ const feedTarget=p.job?.type==='feed'?p.job.target:undefined;
+ if(p.job?.type==='feed'){
+  const target=p.animals.find(a=>a.id===p.job!.target);
+  const check=target&&feedingResult(target.life,{now,food:p.job.food!,manual:true});
+  if(!target||!check?.accepted||p.inventory.hand<1){p.notice=check?.message??'目标或食物已变化，食物没有扣除';cancelJob(p);}
+ }
+ if(!event&&p.job?.type==='delivery'){
+  const job=p.job;
+  const trough=p.layout.buildings.find(b=>b.kind==='trough'&&(job.target?b.id===job.target:buildingApproaches(p.layout,b).some(q=>dist(q,job.to)<.001)));
+  if(!trough){cancelJob(p);p.notice='配送食槽已不存在，手持食物已退回工厂';}
+  else if(!buildingApproaches(p.layout,trough).some(q=>dist(q,job.to)<.001)){cancelJob(p);p.notice='食槽入口已变化，手持食物已退回工厂';}
+  else if(job.phase!=='back'&&(p.troughFood?.[trough.id]??0)>=trough.capacity){cancelJob(p);p.notice='食槽已满，手持食物已退回工厂';}
+  else job.target=trough.id;
+ }
+ if(p.path.some(q=>!isWalkable(p.layout,q))){cancelJob(p);p.notice='行走路线已变化，请重新选择';}
+ const speed=p.job?.type==='delivery'?1:2.4;
+ let routeDistance=0,previous=p.position;for(const point of p.path){routeDistance+=dist(previous,point);previous=point;}
+ const mayWalk=!event||!p.job;
+ if(mayWalk)walk(p.position,p.path,seconds*speed);
+ const actionMs=mayWalk?Math.max(0,dtMs-routeDistance/speed*1000):0;
+ if(event){
+  for(const a of p.animals)if(a.restAssignment)releaseRest(p,a.id);
+  const before=new Map(p.animals.map(a=>[a.id,{...a.position}]));
+  const rescue=p.rescueIntent;
+  p.threat=stepThreat(event,p.layout,{dt:seconds,playerPosition:p.position,rescueActorId:rescue?.target,findBackActorId:rescue?.findBack?rescue.target:undefined,driveOff:rescue?.wolfId});
+  for(const a of p.animals){
+   if(a.memorial){a.path=[];a.following=false;continue;}
+   const actor=p.threat.actors.find(actor=>actor.id===a.id);a.path=[];
+   if(actor)a.position={...actor.position};
+   const moved=!!actor&&dist(before.get(a.id)!,actor.position)>.001;
+   const safe=actor?.status==='safe'&&actor.reservation?`event:${actor.reservation.buildingId}:${actor.reservation.slot}`:null;
+   a.life=advanceLife(a.life,{now,dtMs,sessionId:p.session,moving:moved,safeBedId:safe});
+  }
+  if(p.threat.guardian)p.guardianAt={...p.threat.guardian.position};
+ }else{
+  const entries=shelterEntries(p.layout),slots=new Set<string>(),servedDoors=new Set<string>();
+  for(const a of p.animals){
+   const r=a.restAssignment;if(!r)continue;
+   const entry=entries.find(e=>e.buildingId===r.buildingId&&e.doorId===r.doorId);
+   const key=`${r.buildingId}:${r.slot}`;
+   if(!entry||!Number.isSafeInteger(r.slot)||r.slot<0||r.slot>=entry.capacity||slots.has(key)
+    ||entry.x!==r.door.x||entry.z!==r.door.z||(r.phase==='admitted'&&dist(a.position,r.door)>.02))releaseRest(p,a.id);
+   else slots.add(key);
+  }
+  for(const a of p.animals){
+   if(a.memorial){releaseRest(p,a.id);a.path=[];a.following=false;continue;}
+   if(a.id===feedTarget){a.path=[];a.life=advanceLife(a.life,{now,dtMs,sessionId:p.session});continue;}
+   if(!a.restAssignment&&a.life.energy<30)requestRest(p,a.id,false);
+   let r=a.restAssignment,target:GridPoint|undefined;
+   if(r&&r.phase==='walk'){
+    if(!a.path.length&&dist(a.position,r.door)>.02){const route=findPath(p.layout,cell(a.position),r.door);if(route)a.path=route;else releaseRest(p,a.id);}
+   }else if(!r){
+    if(a.following){if(dist(a.position,p.position)>1.6)target=cell(p.position);else a.path=[];}
+    else if(a.life.energy>=30&&!a.path.length&&Math.floor(p.onlineMs/5000)!==Math.floor(previousOnline/5000)){
+     const region=a.life.stage==='baby'?'pen':'meadow';const options=p.layout.owned.filter(q=>regionAt(q)===region&&isWalkable(p.layout,q));
+     target=options[(Math.floor(p.onlineMs/5000)+p.animals.indexOf(a)*7)%options.length];
+    }
+    if(target){const route=findPath(p.layout,cell(a.position),target);if(route)a.path=route;}
+   }
+   r=a.restAssignment;
+   let length=0,from=a.position;for(const point of a.path){length+=dist(from,point);from=point;}
+   const animalSpeed=a.personality==='shy'?.6:a.personality==='eager'?1.15:.9;
+   if(a.path.some(q=>!isWalkable(p.layout,q))){const target=a.path.at(-1);a.path=target?findPath(p.layout,cell(a.position),target)??[]:[];if(!a.path.length)p.notice='有一段动物路线被施工挡住，已停下等待新路线';}
+   const moved=walk(a.position,a.path,seconds*animalSpeed),movingMs=moved?Math.min(dtMs,length/animalSpeed*1000):0;
+   let safeMs=r?.phase==='admitted'?dtMs:0;
+   if(r?.phase==='walk'&&!a.path.length&&dist(a.position,r.door)<.02&&!servedDoors.has(r.doorId)){
+    servedDoors.add(r.doorId);
+    const available=dtMs-movingMs,needed=Math.max(0,1000-r.admitMs);
+    r.admitMs=Math.min(1000,r.admitMs+available);
+    if(r.admitMs>=1000){r.phase='admitted';a.position={...r.door};safeMs=Math.max(0,available-needed);}
+   }
+   const exploring=!r&&regionAt(cell(a.position))==='meadow',withPlayer=dist(a.position,p.position)<3;
+   if(movingMs>0)a.life=advanceLife(a.life,{now,dtMs:movingMs,sessionId:p.session,moving:true,exploring,withPlayer});
+   const waitingMs=Math.max(0,dtMs-movingMs-safeMs);
+   if(waitingMs>0)a.life=advanceLife(a.life,{now,dtMs:waitingMs,sessionId:p.session,exploring,withPlayer});
+   if(safeMs>0&&r)a.life=advanceLife(a.life,{now,dtMs:safeMs,sessionId:p.session,safeBedId:`${r.buildingId}:${r.slot}`});
+   if(r?.phase==='admitted'&&!r.ordered&&a.life.energy>=95&&a.life.rest.completed)releaseRest(p,a.id);
+  }
+ }
+ if(!event&&p.job&&!p.path.length){const job=p.job;
+  if(job.type==='feed'){
+   const a=p.animals.find(a=>a.id===job.target);
+   if(!a||dist(p.position,a.position)>1.1||p.inventory.hand<1){cancelJob(p);p.notice='目标走远了，食物还在背包里';}
+   else {job.phase='act';job.progress+=actionMs;if(job.progress>=3000){
+    const result=feedingResult(a.life,{now,food:job.food!,manual:true});
+    if(result.accepted){a.life=result.life;p.inventory.hand--;p.lastVisual={id:job.id,action:'eat',target:a.id,at:now};remember(p,job.id,`${a.name}吃到了${job.food==='milk'?'奶':'饲料'} · ${result.message}`,now);
+     if(!p.milestones.includes(`fed-${a.id}`))p.milestones.push(`fed-${a.id}`);
+     if(p.animals.every(animal=>p.milestones.includes(`fed-${animal.id}`)))milestone(p,'first-meal',8,'第一顿完成 · +8材料',now);
+    }else p.notice=result.message;
+    cancelJob(p);
+   }}
+  }else if(job.type==='refill'){
+   const trough=job.target?p.layout.buildings.find(b=>b.id===job.target&&b.kind==='trough'):undefined;
+   if(job.target&&(!trough||!buildingApproaches(p.layout,trough).some(q=>dist(q,p.position)<.02))){cancelJob(p);p.notice='食槽或取食位置已变化，食物没有扣除';}
+   else {job.progress+=actionMs;if(job.progress>=2000){
+    const available=job.target?(p.troughFood?.[job.target]??0):p.inventory.pantry,n=Math.max(0,Math.min(3-p.inventory.hand,available));
+    if(job.target){p.troughFood??={};p.troughFood[job.target]=available-n;}else p.inventory.pantry-=n;
+    p.inventory.hand+=n;p.notice=n?`从${job.target?'食槽':'工作台'}补充了${n}份食物`:job.target?'食槽暂时没有食物，可以从工作台免费补充':'工作台正在准备，基础食物免费';cancelJob(p);
+   }}
+  }
+  else if(job.type==='survey'){job.progress+=actionMs;if(job.progress>=5000){p.surveyed=true;p.notice='边界勘察完成，可预览相邻36格';cancelJob(p);}}
+  else if(job.type==='delivery'){
+   if(job.phase==='walk'){
+    const source=job.source;
+    if(!source||dist(p.position,source)>.02||!p.layout.buildings.some(b=>b.kind==='factory'&&buildingApproaches(p.layout,b).some(q=>dist(q,source)<.001))){cancelJob(p);p.notice='工厂装货位置已变化，食物仍在工厂';}
+    else {job.progress+=actionMs;if(job.progress>=2000){
+     job.carried=Math.min(3,p.factory.stock);p.factory.stock-=job.carried;job.progress=0;job.phase='out';
+     const route=job.carried>0?pathTo(p,job.to):null;
+     if(route)p.path=route;else {const held=job.carried;cancelJob(p);p.notice=held?'配送断路，食物退回工厂':'工厂暂时没有可配送的食物';}
+    }}
+   }else if(job.phase==='out'||job.phase==='unload'){
+    const trough=p.layout.buildings.find(b=>b.id===job.target&&b.kind==='trough');
+    if(!trough||dist(p.position,job.to)>.02){cancelJob(p);p.notice='配送目标已变化，食物退回工厂';}
+    else {job.phase='unload';job.progress+=actionMs;if(job.progress>=2000){
+     p.troughFood??={};const stored=p.troughFood[trough.id]??0,carried=job.carried??0;
+     const unloaded=Math.max(0,Math.min(trough.capacity-stored,carried));
+     p.troughFood[trough.id]=stored+unloaded;job.carried=carried-unloaded;
+     if(p.troughFood[trough.id]>=trough.capacity)job.rounds=1;
+     p.notice=job.carried?`食槽已满，卸下${unloaded}份，剩余${job.carried}份带回工厂`:`向食槽卸下${unloaded}份食物`;
+     job.phase='back';job.progress=0;
+     const route=job.source?pathTo(p,job.source):null;
+     if(route)p.path=route;else {cancelJob(p);p.notice='返回路线已断，剩余食物退回工厂一次';}
+    }}
+   }else if(job.phase==='back'){
+    const returned=job.carried??0;if(returned){p.factory.stock+=returned;job.carried=0;}
+    job.rounds=(job.rounds??1)-1;
+    if(job.rounds>0&&p.factory.stock>0){job.phase='walk';job.progress=0;}
+    else {cancelJob(p);p.notice=returned?`配送结束，剩余${returned}份食物已退回工厂`:'配送完成，LX回到工厂';}
+   }
+  }
+ }
+ if(!event&&p.guardian&&p.guardianReadyMs===0&&isWalkable(p.layout,cell(p.guardianAt))){
+  const movementMs=Math.max(0,dtMs-guardianReadyBefore),behavior=p.guardianBehavior??'patrol';
+  p.guardianBehavior=behavior;p.guardianPath??=[];
+  if(p.guardianPath.some(q=>!isWalkable(p.layout,q)))p.guardianPath=[];
+  if(behavior==='follow'){
+   const target=cell(p.position),last=p.guardianPath.at(-1);
+   if(dist(p.guardianAt,p.position)<=1.8+1e-9)p.guardianPath=[];
+   else if(!last||dist(last,target)>.001)p.guardianPath=findPath(p.layout,cell(p.guardianAt),target)??[];
+   p.guardianTarget=target;
+  }else if(behavior==='station'){
+   const target=p.guardianTarget;
+   if(target&&dist(p.guardianAt,target)>.001&&!p.guardianPath.length)p.guardianPath=findPath(p.layout,cell(p.guardianAt),target)??[];
+  }else if(!p.guardianPath.length){
+   const anchors:Record<GuardianKind,GridPoint[]>={
+    frog:[{x:8,z:8},{x:4,z:8},{x:7,z:4},{x:4,z:4}],
+    dog:[{x:4,z:4},{x:4,z:7},{x:7,z:4},{x:8,z:7}],
+    cat:[{x:0,z:4},{x:0,z:9},{x:9,z:0},{x:9,z:9}],
+   };
+   const towerPoints=p.guardian==='cat'?p.layout.buildings.filter(b=>b.kind==='tower').flatMap(b=>buildingApproaches(p.layout,b)):[];
+   const goals=anchors[p.guardian].map(anchor=>{
+    const preferred=towerPoints.find(q=>regionAt(q)===regionAt(anchor))??anchor;
+    return p.layout.owned.filter(q=>regionAt(q)===regionAt(anchor)&&isWalkable(p.layout,q))
+     .sort((a,b)=>dist(a,preferred)-dist(b,preferred)).find(q=>findPath(p.layout,cell(p.guardianAt),q));
+   }).filter((q):q is GridPoint=>!!q);
+   let index=(p.guardianPatrolIndex??0)%Math.max(1,goals.length);
+   for(let attempt=0;attempt<goals.length;attempt++){
+    const target=goals[index];if(dist(p.guardianAt,target)>.001){p.guardianTarget={...target};p.guardianPath=findPath(p.layout,cell(p.guardianAt),target)??[];break;}
+    index=(index+1)%goals.length;
+   }
+   p.guardianPatrolIndex=index;
+  }
+  const speed=p.guardian==='dog'?1.8:p.guardian==='cat'?2.2:1.2;
+  let allowance=speed*movementMs/1000;
+  if(behavior==='follow'){
+   let length=0,from=p.guardianAt;for(const point of p.guardianPath){length+=dist(from,point);from=point;}
+   allowance=Math.min(allowance,Math.max(0,length-1.8));
+  }
+  walk(p.guardianAt,p.guardianPath,allowance);
+  if(behavior==='patrol'&&!p.guardianPath.length&&p.guardianTarget&&dist(p.guardianAt,p.guardianTarget)<.001)p.guardianPatrolIndex=((p.guardianPatrolIndex??0)+1)%4;
+ }
+ const region=regionAt(cell(p.position));if(!p.regions.includes(region)){p.regions.push(region);if(['meadow','shore','home'].every(r=>p.regions.includes(r)))milestone(p,'walk-home',8,'生活路线走通 · +8材料',now);}
+}
+export function commandEstate(original:Estate,c:EstateCommand,now:number):EstateReply{
+ const s=structuredClone(original),p=currentProfile(s);const reject=(message:string):EstateReply=>({state:original,accepted:false,message});let message='已保存';
+ if(c.actor&&c.actor!==s.playerId&&c.type!=='creation')return reject('本地访客投影不能操作主人的动物或库存');
+ if(!['enter','profile','avatar'].includes(c.type)&&p.session&&c.session!==p.session)return reject('这段会话已更新，请重新进入');
+ if(c.type==='enter'){if(now-p.lastPulseAt>5000)settleProfileOffline(p,now);p.session=c.id;p.lastPulseAt=now;p.lastSeenAt=now;message=p.events.length?'欢迎回家，它们记着与你的经历':'选一位伙伴，开始照顾幼崽';}
+ else if(c.type==='pulse'){
+  if(c.session!==p.session)return reject('这段会话已更新，请重新进入');const elapsed=Math.max(0,now-p.lastPulseAt);if(elapsed>5000){settleProfileOffline(p,now);p.lastPulseAt=now;p.lastSeenAt=now;}else tick(p,now,Math.min(1500,elapsed));if(p.assistance&&!p.threat&&!p.job){const last=p.events.findLast(e=>e.id.startsWith('reminder-'));const animal=p.animals.filter(a=>!a.memorial&&a.life.hunger<30).sort((a,b)=>a.life.hunger-b.life.hunger)[0];if(animal&&(!last||now-last.at>=60000))remember(p,`reminder-${c.id}`,`${animal.name}饿了 · 点卡片喂食，工作台可免费补充`,now);}message=p.notice;
+ }else if(c.type==='profile'){
+  if(c.profile!=='home'&&c.profile!=='lab')return reject('请选择自然档或独立演示档');if(c.profile==='lab'&&!s.profiles.lab)s.profiles.lab=freshProfile(s.playerId,'lab',now);s.activeProfile=c.profile;if(now-currentProfile(s).lastPulseAt>5000)settleProfileOffline(currentProfile(s),now);currentProfile(s).lastPulseAt=now;currentProfile(s).session=c.id;message=c.profile==='lab'?'独立演示档 · 年龄240倍，照料与风险仍按规则':'回到自然档 · 关系和物品原样保留';
+ }else if(c.type==='avatar'){
+  if(!['human-lx','miaocuijiao','banana-cat'].includes(String(c.avatar)))return reject('这个分身尚未开放');s.avatar=c.avatar as Avatar;message='换好分身，关系身份没有变化';
+ }else if(c.type==='move'){
+  if(c.session!==p.session)return reject('会话已更新');const q=c.to as GridPoint;if(!q||!Number.isFinite(q.x)||!Number.isFinite(q.z))return reject('请选择可走的地面');const path=pathTo(p,cell(q));if(!path)return reject('这里被设施或水域挡住，换一条路吧');cancelJob(p);p.path=path;message='正在走过去';
+ }else if(c.type==='cancel'){if(c.jobId!==undefined&&c.jobId!==p.job?.id)return reject('这项行动已经变化，旧取消请求不会影响新行动');cancelJob(p);message='取消了这次行动，食物不会扣除';}
+ else if(c.type==='feed'){
+  if(p.job?.type==='feed'&&p.job.target!==c.target)cancelJob(p);if(p.job)return reject('先完成或取消手上的行动');const a=p.animals.find(a=>a.id===c.target&&!a.memorial&&!p.threat?.actors.some(t=>t.id===a.id&&t.status==='memorial'));if(!a)return reject('先选一只在家的羊');if(p.inventory.hand<1)return reject('背包空了，去工作台免费补充');const food=c.food??(a.life.stage==='baby'?'milk':'feed');if(food!=='milk'&&food!=='feed')return reject('请选择适配食物');const check=feedingResult(a.life,{now,food});if(!check.accepted)return reject(check.message);releaseRest(p,a.id);const to=nearestApproach(p,a.position);if(!to)return reject('走不到它身边，请先连通道路');p.path=to.path!;p.job={id:c.id,type:'feed',target:a.id,food,progress:0,phase:'walk',to:to.q};message=`LX走近${a.name}再${food==='milk'?'喂奶':'喂食'}`;
+ }else if(c.type==='refill'){
+  if(p.inventory.hand>=3)return reject('背包已装满3份');const b=c.source==='trough'?p.layout.buildings.find(b=>b.kind==='trough'&&b.id===c.target):p.layout.buildings.find(b=>b.kind==='workbench');
+  if(c.source==='trough'&&(!b||!(p.troughFood?.[b.id]??0)))return reject('这个食槽还没有可装的食物');const approach=b&&buildingApproaches(p.layout,b).map(q=>({q,path:pathTo(p,q)})).filter(v=>v.path).sort((a,b)=>a.path!.length-b.path!.length)[0];if(!approach)return reject('补给点暂时不可达');cancelJob(p);p.path=approach.path!;p.job={id:c.id,type:'refill',...(c.source==='trough'?{target:b!.id}:{}),to:approach.q,progress:0,phase:'walk'};message=c.source==='trough'?'走到食槽装食物':'去工作台免费补充';
+ }else if(c.type==='play'){
+  if(p.threat)return reject('先收好守护记录，再一起玩');  if(now-p.lastPlayAt<6000)return reject('它们还在回应，稍等一会儿');const a=p.animals.find(a=>a.id===c.target&&!a.memorial&&!p.threat?.actors.some(t=>t.id===a.id&&t.status==='memorial'));if(!a||!['dance','bounce','love'].includes(String(c.action)))return reject('选一只羊和一个动作');if(dist(a.position,p.position)>4)return reject('先走近它，再一起玩');releaseRest(p,a.id);const result=playWith(a.life,{now,sessionId:p.session,action:c.action as Action,manual:true});a.life=result.life;p.lastPlayAt=now;p.lastVisual={id:c.id,action:c.action as Action,target:a.id,at:now};message=result.message;remember(p,c.id,`${a.name}：${message}`,now);
+ }else if(c.type==='follow'){
+  if(p.threat)return reject('先收好守护记录，再一起散步');  const a=p.animals.find(a=>a.id===c.target);if(!a||a.memorial)return reject('先选一只在家的羊');releaseRest(p,a.id);a.following=!a.following;message=a.following?`${a.name}愿意在附近陪你走`:`${a.name}回到自己的活动`;
+ }else if(c.type==='rest'){
+  const r=requestRest(p,String(c.target));if(!r.ok)return reject(r.message);message=r.message;
+ }else if(c.type==='rename'){
+  const a=p.animals.find(a=>a.id===c.target);const name=typeof c.name==='string'?c.name.trim().slice(0,12):'';if(!a||!name)return reject('名字需要1至12个字');a.name=name;message=`以后叫你${name}`;
+ }else if(c.type==='appearance'){
+  const a=p.animals.find(a=>a.id===c.target);if(!a||!['plain','starlit'].includes(String(c.appearance)))return reject('请选择外观');if(c.appearance==='starlit'&&!p.sharedRhythm&&a.appearance!=='starlit')return reject('先与奶蛙一起玩一段节奏');a.appearance=c.appearance as 'plain'|'starlit';message='外观已更换，名字与关系保留';
+ }else if(c.type==='rhythm'){
+  if(p.threat)return reject('先收好守护记录，再一起合拍');  if(p.guardian!=='frog')return reject('请在小屋选择奶蛙伙伴');p.sharedRhythm=true;p.lastVisual={id:c.id,action:'dance',target:'all',at:now};message='奶蛙带大家一起跳舞 · 规则驱动的星点外观已可体验';
+ }else if(c.type==='guardian'){
+  if(!['dog','cat','frog'].includes(String(c.guardian)))return reject('请选择一位伙伴');if(p.threat&&p.threat.phase!=='choosing')return reject('先收好当前守护记录，再换伙伴');if(p.tutorial==='done'&&p.guardian!==null&&p.onlineMs-p.guardianSwitchAt<300000)return reject('伙伴换岗需要间隔5分钟');p.guardian=c.guardian as GuardianKind;p.guardianSwitchAt=p.onlineMs;p.guardianReadyMs=p.tutorial==='choose'?0:20000;if(p.tutorial==='choose'){p.tutorial='defend';if(p.threat?.phase==='choosing'){const choice=guardianCommand(p.threat,p.layout,{kind:'select',guardian:p.guardian});if(!choice.ok)return reject(choice.reason??'请选择伙伴');p.threat=choice.state;}else p.threat=createThreat({id:c.id,seed:17,mode:'tutorial',actors:p.animals.map(a=>({id:a.id,position:cell(a.position)})),guardian:p.guardian,guardianPosition:cell(p.guardianAt)},p.layout);}message=`${GUARDIAN_LABEL[p.guardian]}来守护小家`;
+ }else if(c.type==='guardianCommand'){
+  if(!p.guardian)return reject('先选择一位伙伴');const command=c.command as Parameters<typeof guardianCommand>[2];if(!command)return reject('请选择伙伴指令');if(!p.threat){if(!['follow','station','patrol'].includes(command.kind))return reject('当前没有威胁，可以跟随、驻守或巡游');if(p.guardianReadyMs>0)return reject('伙伴还在准备换岗');if(command.kind==='station'){const q=command.target?cell(command.target):cell(p.position);const route=findPath(p.layout,cell(p.guardianAt),q);if(!route)return reject('伙伴走不到驻守点，请换个位置');p.guardianTarget=q;p.guardianPath=route;}else p.guardianPath=[];p.guardianBehavior=command.kind as 'follow'|'station'|'patrol';message=command.kind==='follow'?'伙伴会沿路陪着LX':command.kind==='station'?'伙伴走到指定位置驻守':'伙伴开始沿路巡游';}else{const r=guardianCommand(p.threat,p.layout,command);if(!r.ok)return reject(r.reason??'伙伴暂时做不到');p.threat=r.state;message='伙伴正在执行命令';}
+ }else if(c.type==='rehearse'||c.type==='challenge'){
+  if(!p.guardian)return reject('先选一位守护伙伴');if(p.guardianReadyMs>0)return reject('伙伴还在准备换岗');if(p.threat)return reject('先在守护面板收好当前事件记录');const challenge=c.type==='challenge';if(challenge&&(p.id!=='lab'||c.confirmed!==true||!Array.isArray(c.participants)||!c.participants.length))return reject('真实风险仅在独立演示档明确选择名单后开启');p.threat=createThreat({id:c.id,seed:typeof c.seed==='number'?c.seed:17,mode:challenge?'challenge':'rehearsal',actors:p.animals.filter(a=>!a.memorial).map(a=>({id:a.id,position:cell(a.position),participant:challenge&&(c.participants as string[]).includes(a.id)})),guardian:p.guardian,guardianPosition:cell(p.guardianAt),challengeAuthorized:challenge,confirmedParticipants:challenge?c.participants as string[]:undefined},p.layout);if(p.job?.type!=='delivery')cancelJob(p);message=challenge?'独立演示挑战开始 · 仅确认名单承担风险':'无损演练开始，看它们沿实际路线回家';
+ }else if(c.type==='endEvent'){
+  if(!p.threat||p.threat.phase!=='complete')return reject('先完成当前事件或救援');if(p.threat.actors.some(a=>a.status==='lost'))return reject('还有走失的伙伴，先选择免费找回');for(const a of p.animals){const outcome=p.threat.actors.find(t=>t.id===a.id);if(outcome?.status==='memorial'){a.memorial={at:now,eventId:p.threat.id};a.path=[];continue;}if(!isWalkable(p.layout,cell(a.position))){const actor=p.threat.actors.find(t=>t.id===a.id);const b=p.layout.buildings.find(b=>b.id===actor?.reservation?.buildingId);const q=b&&buildingApproaches(p.layout,b)[0];a.position=q?{...q}:{x:4,z:4};}a.path=[];}p.lastThreat=p.threat;p.threat=null;p.rescueIntent=undefined;if(p.job?.type!=='delivery')cancelJob(p);message='演练记录已保存，回到安心生活';
+ }else if(c.type==='finishTutorial'){
+  if(p.tutorial!=='defend')return reject('先选择伙伴');if(p.threat?.phase!=='complete')return reject('伙伴正在护送，请等大家回到棚里');p.tutorial='done';if(p.threat){for(const a of p.animals){if(!isWalkable(p.layout,cell(a.position))){const actor=p.threat.actors.find(t=>t.id===a.id);const b=p.layout.buildings.find(b=>b.id===actor?.reservation?.buildingId);const q=b&&buildingApproaches(p.layout,b)[0];a.position=q?{...q}:{x:4,z:4};}a.path=[];}p.lastThreat=p.threat;}p.threat=null;if(p.job?.type!=='delivery')cancelJob(p);message='伙伴守住了小家，现在给幼崽第一口奶';
+ }else if(c.type==='rescue'){
+  if(!p.threat)return reject('现在没有需要救援的事件');p.rescueIntent={target:String(c.target),findBack:c.findBack===true,wolfId:typeof c.wolfId==='string'?c.wolfId:undefined};message='靠近后持续救援，安全模式可以免费找回';
+ }else if(c.type==='layout'){
+  const edit=c.edit as LayoutEdit;if(!edit||typeof edit!=='object')return reject('请选择合法设施操作');const r=commitEdit(p.layout,edit,{eventId:c.id,materials:p.materials,baseVersion:Number(c.baseVersion),actors:[p.position,...p.animals.filter(a=>!a.memorial).map(a=>a.position)].map(cell),surveyed:p.surveyed,locked:!!p.threat});if(!r.ok)return reject(r.reasons.join('；'));p.layout=r.layout;p.materials+=r.materialDelta;milestone(p,'arrange',12,'第一次布置小家 · +12材料',now);message='方案已确认，施工只在在线时推进';
+ }else if(c.type==='cancelBuild'){
+  const r=cancelConstruction(p.layout,c.id);if(!r.ok)return reject(r.reasons.join('；'));p.layout=r.layout;p.materials+=r.materialDelta;message='施工取消，预留材料退回一次';
+ }else if(c.type==='survey'){
+  if(p.position.x<10)return reject('走到东侧边界再勘察');cancelJob(p);p.job={id:c.id,type:'survey',to:p.position,progress:0,phase:'act'};message='在边界观察5秒';
+ }else if(c.type==='claimProducts'){
+  let n=0;for(const a of p.animals.filter(a=>!a.memorial)){const r=claimProducts(a.life,now);a.life=r.life;n+=r.materials;}if(!n)return reject('成年后才会积累有限日常产物');p.materials+=n;message=`领取${n}材料，每只最多存6份`;
+ }else if(c.type==='delivery'){
+  const f=p.layout.buildings.find(b=>b.kind==='factory'),t=p.layout.buildings.find(b=>b.kind==='trough'&&(c.target===undefined||b.id===c.target));const source=f&&buildingApproaches(p.layout,f)[0],to=t&&buildingApproaches(p.layout,t)[0];if(!source||!to||!findPath(p.layout,source,to)||p.factory.stock<1)return reject('需要已连通的工厂、食槽与食物库存');cancelJob(p);p.path=pathTo(p,source)??[];p.job={id:c.id,type:'delivery',target:t!.id,source,to,progress:0,phase:'walk',rounds:2,carried:0};message='LX每次搬3份，按实际路线装卸配送';
+ }else if(c.type==='creation'){
+  const r=applyEstateCreation(p,s.playerId,{command:c.command as CreationCommand,actor:typeof c.actor==='string'?c.actor:undefined,capture:c.capture&&typeof c.capture==='object'?c.capture as WorkCapture:undefined},now);s.profiles[s.activeProfile]=r.profile;if(r.ok&&r.profile.layout.construction&&!p.layout.construction)milestone(r.profile,'arrange',12,'第一次布置小家 · +12材料',now);if(r.ok&&(c.command as CreationCommand)?.type==='themeApply')remember(r.profile,c.id,'应用了喜欢的小家主题',now);if(!r.ok){s.revision++;return {state:s,accepted:false,message:r.message};}message=r.message;
+ }else if(c.type==='assistance'){p.assistance=c.enabled===true;message=p.assistance?'开启基础提醒；建设与风险仍需你确认':'关闭基础提醒';}
+ else return reject('此版本不接受这个指令');
+ s.revision++;currentProfile(s).notice=message;return {state:s,accepted:true,message};
+}
+export function layoutPreview(p:Profile,edit:LayoutEdit){return previewEdit(p.layout,edit,{materials:p.materials,baseVersion:p.layout.version,actors:[p.position,...p.animals.filter(a=>!a.memorial).map(a=>a.position)].map(cell),surveyed:p.surveyed,locked:!!p.threat});}
+export {growthSummary};
