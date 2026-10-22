@@ -42,11 +42,13 @@
   },
   "review": "No remaining Critical/Important findings after four reproduced fixes",
   "visual": "Real Chrome/WebGL/touch not verified; no independent Chrome plugin exposed",
-  "localUpdate": "pending backup and controlled restart",
+  "localUpdate": "installed and verified across calls on the real Mac",
   "unchangedScope": [
     "original three demos",
     "original GitHub remote",
     "Sites permissions/deployments",
     "existing user save identities"
-  ]
+  ],
+  "sourceCommit": "6489597398207f0fc55bcaf5508bc7a2c67b294b",
+  "liveEvidence": "verification/v52-live.json"
 }
