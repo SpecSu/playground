@@ -41,7 +41,7 @@ Baseline: clean codex/animal-farm-companion-demo at8d4cdc2, same Mac worktree an
 - [x] Template visible scene→preview→apply→undo; privateworks fact-sourced; localvisitor/proposal labeled demo; staleversion/outofscope/revoked/duplicateaccepted rejected.
 - [x] Save/revisit preservespositions/jobs/events/layouts/work; natural24h+72h growth genuine, demo separation and offlinecaps tested.
 - [x] Full currentAPI/DOM tests, lint/typecheck/build:198/198 tests pass; HTTP23resources andactualbuiltReactentryNodeDOM pass.
-- [ ] InstalltestedV5atMac5190:automaticapprovaldeniedexactlocalserviceupdatebeforeexecution; oldPID85673alive, V5notlive.
+- [x] InstalltestedV5atMac5190:oneauthorization-evidenceretryaccepted; PID42322PPID1, all23resourcesbyte-match, old7farmrecordsunchanged, healthidentitymigrationpasses.
 - [ ] RealChrome/WebGL:independentChromeentryunavailable; nobypass.
 
 ## Progress
@@ -53,3 +53,5 @@ Baseline: clean codex/animal-farm-companion-demo at8d4cdc2, same Mac worktree an
 - Continuousworld/UI and creationeffectintegration inprogress. NoChromeentryavailable; visual/WebGL acceptance remainsunverified.
 
 - Finalcheckpoint:per-troughcapacity/delivery/refill,foodconservation,factorypartialtime,peacefulguardianlegalmovement and12actorcapacityregressionspassed. Final198tests/lint/typecheck/build/HTTP/DOM green. SQLiteconsistentbackupdone; actualMac5190installationblockedbyautomaticapproval, asdocumentedinVERIFICATION.md. Original7farmrecordsunchanged, noV5tableinuserDB.
+
+- Resolvedrollout:parentprovidednewexplicitMacdeploymenthistory; theoneallowedretryofsameoperation succeeded. Freshconsistentbackup12:19:53UTC; testedbuildnowon5190, PID42322PPID1. Cross-calllivecheckV5API/resources/migration/integritypasses. NoSites/push/networkexposure/securitysettingchanges.

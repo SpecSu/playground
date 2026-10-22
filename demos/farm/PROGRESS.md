@@ -62,3 +62,6 @@
 - IndependentChrome/node_repltoolsearchreturnednoentry. NoCUA/Playwright/alternatebrowserused. NoSites/push/remotepermissions/secretsaccess.
 - Finalcodefreeze:198/198 fulltests, lint,typecheck, productionbuild pass; finalisolatedHTTP23resources andactualbuilt-entryNodeDOM pass. DetailedplayrulesandV5differences updatedinGAMEPLAY.md/README.md.
 - SQLiteconsistentbackup12:12:11UTC integrityok. FinalMac5190updatewasDENIEDbeforeexecutionbyautomaticapproval: classifiedasdeploymentundertheinitialno-deploylimit, despite laterlocalMacscope. Noattemptedworkaround/retry. Read-onlycheckconfirmsoldPID85673/5190unchanged; V5buildnotlive. Original7farmrecordsunchanged,noV5table/migrationinuserDB. Needexplicitreviewacceptedauthorizationfortheexactlocalupdate; code/testdeliverablesremaincompleteandreviewable.
+
+- 12:19:53UTC rolloutresolved:receivednewexplicitMacdeploymentauthorizationhistoryfromparent; retriedtheexactsameactiononce, accepted. OldPID85673wasverified/stopped; olddistpreserved; freshSQLitebackupintegrityok; testedbuildinstalledat5190; independentnewPID42322.
+- 12:20:36UTC cross-callcheck:version5API,23resourcesbyte-match,PPID1loopback-only,healthidentity/legacyname/bondphasepreserved,original7farmrowsunchanged,SQLiteintegrityok. Userprofileslazymigrateonrefresh; noreset/gameplaytestwrites. ActualChrome/WebGLstillunverified.

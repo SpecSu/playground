@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-22T12:20:36.768Z",
+  "url": "http://127.0.0.1:5190",
+  "version": 5,
+  "resourcesByteMatched": 23,
+  "originalRecords": 7,
+  "originalRecordsUnchanged": true,
+  "v5Records": 1,
+  "healthIdentityPreserved": true,
+  "legacyNamesAndBondPhasesPreserved": true,
+  "integrity": "ok",
+  "legacyEndpointStatus": 410,
+  "webgl": "not verified",
+  "pid": 42322,
+  "ppid": 1,
+  "codeCommit": "cd8aa0df629cabfc40fbe9af76232690a1c53cd3",
+  "tests": {
+    "total": 198,
+    "passed": 198,
+    "failed": 0,
+    "lint": "pass",
+    "typecheck": "pass",
+    "productionBuild": "pass",
+    "http": "pass",
+    "builtEntryNodeDom": "pass"
+  }
+}

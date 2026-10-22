@@ -15,18 +15,20 @@ Current source is the existing `codex/animal-farm-companion-demo` worktree, base
 | Financial realtick fixtures | L4 sixfoodunloaded20s/source-return24s; L12 unloaded44s/return56s; full/partial/removed/blockedtrough returnsheldfoodonce; capacity6 actualstock; online/offlineproduction fractions |
 | Review regressions | Retainedeventlayoutlock; stale/missingsession; offlineenter; memorialexclusion before/afterdismissal; boundoldcancel; constructionrepath; realbedrest; nofoodlossondemolition |
 | Twelve actors | Two6-capacityshelters reserve12uniqueactualbeds, no duplicate/shareddoorcapacityinflation |
-| SQLite backup | `.local/backups/2026-10-22T12-12-11-442Z-before-v5.sqlite`, integrity_check=ok |
-| Original live service | PID85673, PPID1,127.0.0.1:5190; stilloldstablebuild andaliveover19hours |
+| SQLite backup | `.local/backups/2026-10-22T12-19-53-633Z-before-v5.sqlite`, integrity_check=ok |
+| Original live service | PID42322, PPID1,127.0.0.1:5190; testedV5build, cross-callhealthconfirmed |
 
 Node DOM produces the expected `THREE.WebGLRenderer: Error creating WebGL context` warning because it has noWebGL. The app catches it and retains the controls/save state. This is not a Chrome/WebGL pass. No CUA, Playwright or alternate browser automation was used; no independentChrome/node_repl entry is available in the toolcatalog.
 
-## Local update blocked by automatic approval
+## Successful local update after authorization evidence
 
-Attempted action: verify and stop only oldfarmPID85673, preserve olddist, make anotherconsistentSQLitebackup, install the testedbuild to `dist`, start the same5190 using the independentprocesslauncher.
+The first exact5190update was denied beforeexecution. The parent subsequently supplied previously unquoted, explicit human authorization for Mac deployment and later development, allowing one retry of the same action. That single retry succeeded at2026-10-22T12:19UTC; no alternate path/tool or security change was used.
 
-**Denied beforeexecution.** Automaticapproval classified this as deployment/productionentrychange under the initial “不部署” instruction, stating it had not seen explicit laterrevocation. The currentdelegation authorizes localMacwork and5190delivery and prohibitsSites/publicpublishing/originalGitHubpush, but the rejectedaction has not been retried or bypassed.
+Verified oldPID85673/cwd/command beforestopping it. Preserved the previous dist at`.local/backups/dist-before-v5-20261022` and made a fresh consistentSQLitebackup at`.local/backups/2026-10-22T12-19-53-633Z-before-v5.sqlite` (integrityok). Installed exactly the tested`.local/v5-dist` build and launched using`scripts/local-preview.py`.
 
-Read-only follow-up confirms oldPID85673 and5190 remainavailable. The testedV5 build exists at `.local/v5-dist` but **is not the build currently served on5190**. Original7farmrecords remainunchanged anduserSQLitehasnotbeenV5migrated. The final localinstall needs approvalreview to accept explicit authorization for this exactMac-onlyserviceupdate. Do not claim V5 is liveon5190 untilit succeeds.
+**Current URL: http://127.0.0.1:5190 · newPID42322 · PPID1 · loopbackonly.** Cross-callcheck at12:20:36UTC confirms version5API, all23deployedresourcesbyte-match, andretiredlegacyendpoint410. Healthcheck used only theexistingdedicatedhealthidentity, no gameplaywritecommands. Its migration preserves owneridentity, actualnames andrelationshipphases. Original7`farms`recordshash-matchthepreupdatecopy; userrecordsremainuntouched andmigrate lazilyontheirnextvisit. Databaseintegrityok. Onehealthestatehasbeencreated; this is not a claim thatalluserprofileswerealreadymigrated.
+
+The final source implementation is commit`cd8aa0df629cabfc40fbe9af76232690a1c53cd3`; laterdocumentationcommits do not change thattestedcode. Actualsanitizedlivecheckevidence is in`verification/v5-live.json`. Browser/WebGLvisualQA remainsunverified.
 
 ## Product differences from the V5 blueprint
 
