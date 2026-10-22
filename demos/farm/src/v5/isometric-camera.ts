@@ -10,6 +10,8 @@ export interface EstateCameraOptions{
  bounds:{minX:number;maxX:number;minZ:number;maxZ:number};
  /** Interaction framing only: it never supplies an orbit or body heading. */
  attention?:{x:number;z:number;zoom?:number};
+ /** Explicit build inspection can travel away from LX; opening attention stays limited. */
+ previewFocus?:{x:number;z:number};
 }
 
 const YAW=Math.PI/4,PITCH=MathUtils.degToRad(52),DISTANCE=32,FOCUS_HEIGHT=.6;
@@ -27,6 +29,7 @@ export class EstateCameraController{
  readonly camera=new OrthographicCamera(-5,5,5,-5,.08,160);
  private focus=new Vector3();
  private span=10;
+ private previewFraming=0;
  private initialized=false;
 
  reset(){this.initialized=false;}
@@ -34,22 +37,24 @@ export class EstateCameraController{
  update(options:EstateCameraOptions):OrthographicCamera{
   const aspect=MathUtils.clamp(finite(options.aspect,390/844),.1,10);
   const position=new Vector3(finite(options.position.x,0),finite(options.position.y,0)+FOCUS_HEIGHT,finite(options.position.z,0));
-  const target=position.clone();
-  if(options.attention){
+  const target=options.previewFocus?new Vector3(finite(options.previewFocus.x,position.x),position.y,finite(options.previewFocus.z,position.z)):position.clone();
+  if(options.attention&&!options.previewFocus){
    const attention=new Vector3(finite(options.attention.x,position.x)-position.x,0,finite(options.attention.z,position.z)-position.z);
    attention.multiplyScalar(.35).clampLength(0,2.5);target.add(attention);
   }
   const {bounds}=options;
   const minX=finite(bounds.minX,-5.5),maxX=finite(bounds.maxX,5.5),minZ=finite(bounds.minZ,-5.5),maxZ=finite(bounds.maxZ,5.5);
   target.x=clampFocus(target.x,minX,maxX);target.z=clampFocus(target.z,minZ,maxZ);
-  const zoom=MathUtils.clamp(finite(options.attention?.zoom,1),.85,1.2);
+  const zoom=options.previewFocus?1:MathUtils.clamp(finite(options.attention?.zoom,1),.85,1.2);
   const span=(options.mode==='overview'?14:10)/zoom;
   const alpha=this.initialized?1-Math.exp(-8*MathUtils.clamp(finite(options.dt,0),0,.1)):1;
   this.focus.lerp(target,alpha);this.span+=(span-this.span)*alpha;
+  this.previewFraming+=((options.previewFocus ? 0.24 : 0)-this.previewFraming)*alpha;
   // Bounds can shrink after a layout change; never leave the current focus outside them.
   this.focus.x=clampFocus(this.focus.x,minX,maxX);this.focus.z=clampFocus(this.focus.z,minZ,maxZ);
   const camera=this.camera;
-  camera.left=-this.span/2;camera.right=this.span/2;camera.top=this.span/aspect/2;camera.bottom=-camera.top;
+  const halfHeight=this.span/aspect/2,verticalOffset=halfHeight*this.previewFraming;
+  camera.left=-this.span/2;camera.right=this.span/2;camera.top=halfHeight-verticalOffset;camera.bottom=-halfHeight-verticalOffset;
   camera.position.copy(this.focus).add(OFFSET);camera.lookAt(this.focus);
   camera.updateProjectionMatrix();camera.updateMatrixWorld();this.initialized=true;
   return camera;

@@ -1,0 +1,63 @@
+import {useEffect,useMemo,useRef,useState} from 'react';
+import type {Profile} from './estate.ts';
+import {BUILDING_RULES,previewEdit,type BuildingKind,type LayoutEdit} from './layout.ts';
+import {developmentActors,developmentPreviewKey,suggestDevelopment,type DevelopmentKind} from './development.ts';
+
+type Ghost={x:number;z:number;kind:BuildingKind;valid:boolean};
+type Send=(type:string,extra?:Record<string,unknown>)=>void;
+export type QuickBuildPanelProps={profile:Profile;busy:boolean;send:Send;onGhost:(ghost?:Ghost)=>void;onClose:()=>void;onPlanner:()=>void;onTheme?:()=>void;onExplore?:()=>void};
+type Selection={edit:Extract<LayoutEdit,{type:'place'}>;version:number};
+const choices:{kind:DevelopmentKind;name:string;effect:string}[]=[
+ {kind:'tower',name:'瞭望台',effect:'猫咪看得更远'},
+ {kind:'shelter',name:'保护围栏',effect:'多6个安全小窝'},
+ {kind:'factory',name:'饲料坊',effect:'做饲料给小羊'},
+];
+/** Small original facility drawings mirror the existing playable models. */
+function FacilityArt({kind}:{kind:DevelopmentKind}){
+ return <svg viewBox="0 0 100 62" aria-hidden="true" focusable="false">
+  <ellipse cx="50" cy="54" rx="35" ry="6" fill="#8baf82" opacity=".3"/>
+  {kind==='tower'?<>
+   <path d="M31 25v28m38-28v28M40 23v26m20-26v26" stroke="#b88b5e" strokeWidth="4"/>
+   <path d="m24 23 26-12 26 12-26 13z" fill="#e3c18c"/>
+   <path d="m25 20 25-16 25 16-25 8z" fill="#9dbea4"/>
+   <path d="m41 36-8 18m21-16-8 18M38 43l12 2m-15 4 12 2" stroke="#d5ad78" strokeWidth="2.5"/>
+  </>:kind==='shelter'?<>
+   <path d="m15 40 33-17 38 15-34 19z" fill="#c9ba7b"/>
+   <path d="M16 24v22m16-30v22m16-29v22M48 9l37 14m0 0v22M69 18v20" stroke="#d2b58a" strokeWidth="4"/>
+   <path d="m16 31 32-16 37 15M16 39l32-16 37 15" fill="none" stroke="#e6ce9d" strokeWidth="3"/>
+   <ellipse cx="44" cy="38" rx="12" ry="8" fill="#f8efdc"/><circle cx="55" cy="37" r="5" fill="#d4b9a0"/>
+   <path d="M16 35v15m17-8v15m35-14v14m17-20v15m-69-8 17 7m35 0 17-8" stroke="#d9bc8d" strokeWidth="4"/>
+  </>:<>
+   <path d="m24 24 25-12 27 13v27L49 60 24 49z" fill="#dbcaa1"/>
+   <path d="m49 36 27-11v27l-27 8z" fill="#b6ba91"/>
+   <path d="m20 24 29-15 31 15-31 14z" fill="#90b6a0"/>
+   <path d="M62 16V6l9-3v16" fill="#b39e82"/>
+   <path d="M36 37v16l10 4V40z" fill="#9d8868"/>
+   <path d="m58 38 11-4v9l-11 4z" fill="#d7ead1"/>
+   <ellipse cx="25" cy="49" rx="9" ry="5" fill="#acb679"/><path d="m20 47 3 4 4-4m-1 7 5-5" stroke="#e2daaa" strokeWidth="2"/>
+  </>}
+ </svg>;
+}
+
+export default function QuickBuildPanel({profile:p,busy,send,onGhost,onClose,onPlanner,onTheme,onExplore}:QuickBuildPanelProps){
+ const [selection,setSelection]=useState<Selection|null>(null),[reason,setReason]=useState('');
+ const submitted=useRef(false),legalityKey=developmentPreviewKey(p);
+ const preview=useMemo(()=>selection?previewEdit(p.layout,selection.edit,{materials:p.materials,baseVersion:selection.version,actors:developmentActors(p),surveyed:p.surveyed,locked:!!p.threat}):null,[legalityKey,selection]);
+ const blocked=!!p.threat||!!p.layout.construction;
+ const selected=choices.find(choice=>choice.kind===selection?.edit.kind);
+ const shortReason=p.threat?'先陪大家回家，再布置小家':p.layout.construction?'正在建造，回到场景看看吧':selection&&selection.version!==p.layout.version?'小家刚有变化，请重新选一次':preview&&!preview.ok&&p.materials<preview.cost?`还差${preview.cost-p.materials}份材料，去山谷找找吧`:preview&&!preview.ok?'这里现在放不下，请重新选一次':reason;
+ useEffect(()=>{onGhost(selection&&!blocked?{...selection.edit,valid:!!preview?.ok}:undefined);return()=>onGhost();},[selection,blocked,preview?.ok,onGhost]);
+ const choose=(kind:DevelopmentKind)=>{
+  const plan=suggestDevelopment(p,kind);submitted.current=false;setSelection(plan.edit?{edit:plan.edit,version:p.layout.version}:null);
+  setReason(plan.edit?'':kind==='factory'&&p.layout.buildings.some(b=>b.kind==='factory')?'已经有饲料坊啦，先把饲料送给小羊':'暂时没有合适空地，可以自己摆放');
+ };
+ const confirm=()=>{if(submitted.current||busy||blocked||!selection||!preview?.ok)return;submitted.current=true;send('layout',{edit:selection.edit,baseVersion:selection.version});onClose();};
+ return <div className="quick-build-panel" data-quick-build-panel>
+  <div className="quick-build-caption"><span>选一件，放进小家</span><small>现有 {p.materials} 份材料</small></div>
+  <div className="quick-build-choices">{choices.map(choice=><button key={choice.kind} type="button" className={selected?.kind===choice.kind?'selected':''} data-quick-kind={choice.kind} disabled={busy||blocked} aria-pressed={selected?.kind===choice.kind} onClick={()=>choose(choice.kind)}><FacilityArt kind={choice.kind}/><b>{choice.name}</b><span>{choice.effect}</span><small>{BUILDING_RULES[choice.kind].cost} 材料</small></button>)}</div>
+  {shortReason?<p className="quick-build-status" role="status">{shortReason}</p>:selection?<p className="quick-build-status" role="status">看看场景里的位置，喜欢就建在这里</p>:<p className="quick-build-status">先看看位置，确认后才花材料</p>}
+  {selection&&!blocked&&<button type="button" className="quick-build-confirm" data-command="quick-build-confirm" disabled={busy||!preview?.ok} onClick={confirm}>建这里 · 花{preview?.cost??0}材料</button>}
+  {p.layout.construction&&<button type="button" className="quick-build-confirm" onClick={onClose}>回去看建造</button>}
+  <div className="quick-build-links"><button type="button" data-quick-planner onClick={onPlanner}>自己摆放</button>{onTheme&&<button type="button" data-quick-theme onClick={onTheme}>换个主题</button>}{onExplore&&<button type="button" data-quick-explore onClick={onExplore}>去探索</button>}</div>
+ </div>;
+}

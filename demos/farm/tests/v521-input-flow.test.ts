@@ -28,7 +28,7 @@ async function until(check:()=>boolean,label:string,ms=1800){
  assert.ok(check(),label);
 }
 
-async function mount(options:{stage?:'complete'|'retreat'|'done'|'choose';holdEnter?:boolean;loseFinish?:boolean;loseReset?:boolean;failInitialGet?:boolean;feeding?:string}={}){
+async function mount(options:{stage?:'complete'|'retreat'|'done'|'choose';holdEnter?:boolean;loseFinish?:boolean;loseReset?:boolean;loseFeed?:boolean;failInitialGet?:boolean;feeding?:string}={}){
  const browser=new Window({url:'http://farm-test.invalid/'});
  browser.document.body.innerHTML='<div id="root"></div>';
  const old=new Map<string,PropertyDescriptor|undefined>();
@@ -39,7 +39,7 @@ async function mount(options:{stage?:'complete'|'retreat'|'done'|'choose';holdEn
  }
  old.set('IS_REACT_ACT_ENVIRONMENT',Object.getOwnPropertyDescriptor(globalThis,'IS_REACT_ACT_ENVIRONMENT'));
  Object.defineProperty(globalThis,'IS_REACT_ACT_ENVIRONMENT',{value:true,configurable:true});
- const now=Date.now();let estate=createEstate('input-flow',now),lose=!!options.loseFinish,loseReset=!!options.loseReset,failGet=!!options.failInitialGet,releaseEnter:undefined|(()=>void);
+ const now=Date.now();let estate=createEstate('input-flow',now),lose=!!options.loseFinish,loseReset=!!options.loseReset,loseFeed=!!options.loseFeed,failGet=!!options.failInitialGet,releaseEnter:undefined|(()=>void);
  const profile=currentProfile(estate);profile.session='prior-session';
  const stage=options.stage??'complete';
  if(stage==='done'){profile.tutorial='done';profile.threat=null;profile.opening={version:1,stage:'done',elapsed:0,guardian:'dog'};}
@@ -54,6 +54,7 @@ async function mount(options:{stage?:'complete'|'retreat'|'done'|'choose';holdEn
   let receipt=receipts.get(c.id);const duplicate=!!receipt;
   if(!receipt){const result=commandEstate(estate,c,Date.now());estate=result.state;receipt={accepted:result.accepted,message:result.message};receipts.set(c.id,receipt);}
   const result={...receipt,duplicate,snapshot:estateSnapshot(estate,Date.now())};responses.push(result);
+  if(c.type==='feed'&&loseFeed){loseFeed=false;throw new Error('TEST feed response lost');}
   if(c.type==='resetProfile'&&loseReset){loseReset=false;throw new Error('TEST reset response lost');}
   if(c.type==='finishTutorial'&&lose){lose=false;throw new Error('TEST response lost after saved finish');}
   return Response.json(result);
@@ -116,7 +117,7 @@ test('a rejected destination is visible on the home screen without turning it in
   await h.move({x:-100,z:-100});await until(()=>h.posts.some(c=>c.type==='move'),'invalid click submitted');
   const reason=h.responses.at(-1)?.message;assert.equal(h.responses.at(-1)?.accepted,false);assert.ok(reason);
   assert.ok(h.browser.document.querySelector('.creator-caption')?.textContent.includes(reason));
-  assert.equal(h.browser.document.querySelector('.farm-toast'),null,'a rule rejection is not an uncertain save');
+  assert.equal(!!h.browser.document.querySelector('.farm-toast button'),false,'a rule rejection has no uncertain-save retry');
   await h.move({x:6,z:7});await until(()=>h.profile.path.length>0,'a new legal click still works');
  }finally{await h.close();}
 });
@@ -231,4 +232,41 @@ test('the first sound-button gesture starts music instead of immediately muting 
   assert.equal(button.getAttribute('aria-pressed'),'true','first sound interaction enables music');assert.equal(button.getAttribute('aria-label'),'关闭音乐与音效');
   await act(async()=>{button.dispatchEvent(new h.browser.PointerEvent('pointerdown',{bubbles:true}));(button as unknown as HTMLButtonElement).click();});assert.equal(button.getAttribute('aria-pressed'),'false');
  }finally{await h.close();if(previous)Object.defineProperty(globalThis,'AudioContext',previous);else Reflect.deleteProperty(globalThis,'AudioContext');}
+});
+
+test('animal care closes only the compact card before sending, retaining target and visible motion',async()=>{
+ const h=await mount({stage:'done'});try{const doc=h.browser.document,host=doc.querySelector('.farm-world');
+  await act(async()=>bridge.callbacks!.select('momo'));await until(()=>!!doc.querySelector('[data-scene-card="animal"]'),'compact card opens');
+  assert.equal(doc.querySelector('[aria-label="首页"]')?.hasAttribute('inert'),false);assert.equal(doc.querySelector('.sheet-backdrop'),null);
+  await until(()=>!(doc.querySelector('[data-command="feed"]') as unknown as HTMLButtonElement).disabled,'ready to feed');
+  await act(async()=>{const button=doc.querySelector('[data-command="feed"]') as unknown as HTMLButtonElement;button.click();button.click();});
+  assert.equal(doc.querySelector('[role="dialog"]'),null,'the animation is not covered by its action card');assert.equal(doc.querySelector('.farm-world'),host);assert.equal(h.posts.filter(c=>c.type==='feed').length,1);
+  assert.equal(h.profile.job?.target,'momo');await act(async()=>{await delay(260);});assert.equal(h.profile.job?.target,'momo','closing must not change target and cancel the job');
+  assert.equal(h.posts.filter(c=>c.type==='pulse').at(-1)?.presentationCovered,false);assert.equal(h.posts.some(c=>c.type==='cancel'),false);
+ }finally{await h.close();}
+});
+test('ground movement dismisses a nonmodal card and materials open simple choices first',async()=>{
+ const h=await mount({stage:'done'});try{const doc=h.browser.document;
+  await act(async()=>bridge.callbacks!.select('pipi'));await until(()=>!!doc.querySelector('[data-scene-card="animal"]'),'animal card');await h.move({x:6,z:7});assert.equal(doc.querySelector('[role="dialog"]'),null);assert.equal(h.responses.at(-1)?.accepted,true);
+  await act(async()=>{(doc.querySelector('.farm-target-pill') as unknown as HTMLButtonElement).click();});await until(()=>!!doc.querySelector('[data-quick-build-panel]'),'simple material choices');assert.equal(doc.querySelector('.estate-map'),null);assert.equal(doc.querySelector('[aria-label="首页"]')?.hasAttribute('inert'),false);
+  await act(async()=>{(doc.querySelector('[data-quick-planner]') as unknown as HTMLButtonElement).click();});await until(()=>!!doc.querySelector('.estate-map'),'advanced grid requires explicit choice');assert.equal(doc.querySelector('[aria-label="首页"]')?.hasAttribute('inert'),true);
+ }finally{await h.close();}
+});
+
+
+test('a lost feed result stays retryable after the compact card closes and reopens',async()=>{
+ const h=await mount({stage:'done',loseFeed:true});try{const doc=h.browser.document;
+  await act(async()=>bridge.callbacks!.select('momo'));
+  await act(async()=>{(doc.querySelector('[data-command="feed"]') as unknown as HTMLButtonElement).click();});
+  await until(()=>doc.body.textContent.includes('TEST feed response lost'),'failed result stays visible');
+  assert.equal(!!doc.querySelector('[role="dialog"]'),false);assert.equal(h.profile.job?.target,'momo');
+  await act(async()=>bridge.callbacks!.select('momo'));
+  assert.ok(doc.querySelector('[data-scene-card="animal"]'));assert.ok(doc.querySelector('.farm-toast button'));
+  assert.equal((doc.querySelector('[data-command="feed"]') as unknown as HTMLButtonElement).disabled,true);
+  await act(async()=>{(doc.querySelector('.farm-toast button') as unknown as HTMLButtonElement).click();});
+  const requests=h.posts.filter(c=>c.type==='feed');assert.equal(requests.length,2);assert.deepEqual(requests[0],requests[1]);
+  assert.equal(h.profile.inventory.hand,3);assert.equal(h.profile.job?.target,'momo');assert.equal(!!doc.querySelector('.farm-toast button'),false);
+  const more=doc.querySelector('.compact-more') as unknown as HTMLButtonElement;more.focus();
+  await act(async()=>{await delay(260);});assert.equal(Object.is(doc.activeElement,more),true,'quiet updates must not steal focus inside the card');
+ }finally{await h.close();}
 });

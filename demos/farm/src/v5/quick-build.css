@@ -1,0 +1,10 @@
+/* Compact content only: the host owns the nonmodal card and its close control. */
+.estate-feed .quick-build-panel{padding:0 2px;color:#e9eddf}
+.estate-feed .quick-build-caption{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 9px;font-size:11px}.estate-feed .quick-build-caption small{font-size:10px;color:#aeb8a4}
+.estate-feed .quick-build-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.estate-feed .quick-build-choices>button{display:flex;flex-direction:column;align-items:center;min-width:0;padding:5px 3px 8px;border:1px solid #ffffff1a;border-radius:12px;background:#ffffff05;color:#e9eddf;text-align:center}
+.estate-feed .quick-build-choices>button.selected{border-color:#cee6a6;background:#a7c88e1c;box-shadow:inset 0 0 0 1px #cee6a655}
+.estate-feed .quick-build-choices svg{width:100%;height:38px;display:block;margin:0 0 3px}.estate-feed .quick-build-choices b{font-size:12px;line-height:18px;font-weight:550}.estate-feed .quick-build-choices span{font-size:9px;line-height:15px;white-space:nowrap;color:#b3bea9}.estate-feed .quick-build-choices small{font-size:10px;color:#ead8a5;line-height:17px}
+.estate-feed .quick-build-status{font-size:10px;line-height:16px;min-height:16px;margin:8px 0;color:#bdc9b1}
+.estate-feed .quick-build-confirm{width:100%;min-height:36px;padding:7px 10px;border-radius:10px;background:#e4edd7;color:#21301b;font-size:12px;font-weight:600;border:1px solid #e9efdc4d}
+.estate-feed .quick-build-links{display:flex;justify-content:center;gap:22px;margin-top:5px}.estate-feed .quick-build-links button{padding:6px 0;font-size:10px;color:#aeb9a4;text-decoration:underline;text-decoration-color:#aeb9a444;text-underline-offset:3px}

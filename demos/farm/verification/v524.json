@@ -1,0 +1,70 @@
+{
+  "version": "v5.2.4-scene-cards",
+  "at": "2026-10-22T16:45:08.307992+00:00",
+  "fullTests": {
+    "passed": 385,
+    "failed": 0,
+    "skipped": 0
+  },
+  "lint": "passed",
+  "typecheck": "passed",
+  "productionBuild": {
+    "status": "passed",
+    "directory": ".local/v524-dist",
+    "modules": 1851
+  },
+  "isolatedHttp": {
+    "http": true,
+    "currentApi": true,
+    "guardianPersisted": true,
+    "templateApplied": true,
+    "receiptDuplicate": true,
+    "ownerBoundary": true,
+    "labIsolation": true,
+    "legacyBypassClosed": true,
+    "sameOrigin": true,
+    "resourcesByteMatched": 24,
+    "confirmedReset": true,
+    "resetRetryPreservesNewProgress": true,
+    "webgl": "not verified"
+  },
+  "actualBuiltReactNodeDom": {
+    "actualBuiltReactEntry": true,
+    "tutorialRoutes": true,
+    "preChoiceGated": true,
+    "independentReplayNoEconomyMutation": true,
+    "selectionSetup": "isolated API and explicit test readiness clock; WebGL unavailable",
+    "defaultLX": true,
+    "rapidIndividualCards": true,
+    "nonmodalCompactCard": true,
+    "careClosesCard": true,
+    "simpleBuildChoices": true,
+    "responseLossRetrySameId": true,
+    "targetSwitchCancelsWithoutCharge": true,
+    "actualWalkAndThreeSecondFeed": true,
+    "templateApplyUndo": true,
+    "privateWork": true,
+    "avatarIdentity": true,
+    "labSeparation": true,
+    "worldHostRetained": true,
+    "escape": true,
+    "actualValleyDiscovery": true,
+    "developmentPreviewAndConstruction": true,
+    "nextCareGoal": true,
+    "confirmedResetAndCancel": true,
+    "freshOpeningAfterReset": true,
+    "webgl": "not verified (Node DOM)"
+  },
+  "reviewRegressions": {
+    "cardPreservesFeedTarget": "passed",
+    "lostResultRetriesExactRequest": "passed",
+    "cardDoesNotStealFocusOnPulse": "passed",
+    "saveRetryAboveCard": "passed",
+    "feedingCueRequiresRealSatiety": "RED then GREEN",
+    "remoteBuildPreviewVisibility": "RED then GREEN",
+    "previewReturnAndFixedOrientation": "passed",
+    "remainingImportantFindings": 0
+  },
+  "browser": "NOT VERIFIED: no independent Chrome/node_repl entry",
+  "productionResetExecuted": false
+}

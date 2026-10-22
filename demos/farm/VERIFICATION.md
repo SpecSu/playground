@@ -81,3 +81,13 @@ V5.2.2 deployed locally from `ffc524a7ff9a7961bae6129269a8c45c0517c41a` at15:43:
 证据：`verification/v523.json`；范围/玩法：`OPEN_VALLEY.md`、`GAMEPLAY.md`。用户5190不用于玩法/重置测试，安装前备份记录另见`verification/v523-live.json`。
 
 本机更新已成功：运行源码 `a7774bb60711d9a579935524b8f813316363efbf`，PID58409/PPID1，原 `http://127.0.0.1:5190`。16:14:37UTC跨调用确认24资源逐字节一致、SQLite integrityok，7条legacy与2条V5存档均完全不变。最新备份 `.local/backups/2026-10-22T16-13-29-336Z-before-v523.sqlite`；旧构建 `.local/backups/dist-before-v523-20261022T161329Z`。只做静态与只读数据检查，未执行生产重置；临时测试服务已停止。证据 `verification/v523-live.json`。
+
+## V5.2.4 日常小卡与图示建设
+
+最终全套 **385/385通过**，零失败/跳过；ESLint、显式typecheck、生产构建（1851模块，`.local/v524-dist`）通过。新App回归17/17通过，包括收卡保留目标、切对象、地面点击关闭非模态卡、保存失败重开后原请求重试、不抢焦点。最初两个旧文案断言已按按需详情/简短目标更新；新增测试中的Node DOM元素类型比较经typecheck指出后改为Object.is并重新通过。
+
+独立5193/临时SQLite核对24资源；最终生产React入口在Node DOM中通过小卡无scrim、真实走近+3秒喂养后扣一份、动作收卡、错误重试、三建设选项及原开场/探索/建设/主题/重置完整链。原用户5190未用于任何玩法测试。
+
+审查修复：紧凑卡挡住全局重试按钮；未满饱却说吃饱；LX在南花谷时建设位置落在镜头外。新增Three投影回归确认设施中心和四角在顶部HUD与底卡之间，固定朝向且收卡后平滑回LX；独立最后审查无剩余Important/Critical。
+
+**Chrome/WebGL实际画面、触控和音乐听感仍未验收**；没有可调用独立Chrome插件入口，未使用CUA/Playwright等替代。Node DOM不创建WebGL，其预期告警不代表视觉测试。证据 `verification/v524.json`，本机安装与存档保留另记 `verification/v524-live.json`。

@@ -12,7 +12,8 @@ import {makeSheep} from '../sheep.ts';
 import {AVATAR_LABEL} from '../model.ts';
 import {animalScale} from './life.ts';
 import {terrainAt,regionAt,findPath,buildingFootprint,worldCells,layoutWorldBounds,isOwned,BUILDING_RULES,type BuildingKind,type GridPoint,type Building} from './layout.ts';
-import {LANDMARKS,discoveredLandmarkIds,currentJourneyGoal} from './journey.ts';
+import {LANDMARKS,discoveredLandmarkIds} from './journey.ts';
+import {playPrompt} from './play-prompt.ts';
 import {gridToWorld,worldToGrid,sceneResponse,sceneBuilding,legacyAnimal,scenePalette,cameraCapture} from './estate-scene.ts';
 import type {EstateSnapshot,EstateAnimal} from './estate.ts';
 import type {GuardianKind,ThreatWolf} from './threat.ts';
@@ -57,7 +58,7 @@ export class EstateWorld{
  private scene=new THREE.Scene();private introBush=new THREE.Group();private layoutGroup=new THREE.Group();private routeGroup=new THREE.Group();private effectGroup=new THREE.Group();private ghostGroup=new THREE.Group();
  private cameraController=new EstateCameraController();private camera:THREE.Camera=this.cameraController.camera;private cameraMode:ClubCameraMode='third-person';private obstacles:CameraObstacle[]=[];
  private renderer:THREE.WebGLRenderer;private resize:ResizeObserver;private frame=0;private disposed=false;private prev=0;private offset=0;private enteredAt=0;
- private replay=false;
+ private replay=false;private careTarget:string|undefined;private careMarker:THREE.Mesh|undefined;
  private playerAvatar:ClubAvatar|undefined;private guardianAvatar:ClubAvatar|undefined;private guardianKind:GuardianKind|null=null;
  private player:Mover={root:new THREE.Group(),path:[],target:{x:0,z:0},distance:0};private guardian:Mover={root:new THREE.Group(),path:[],target:{x:0,z:0},distance:0};
  private sheep=new Map<string,SheepVisual>();private animalMovers=new Map<string,Mover>();private wolves=new Map<string,ReturnType<typeof wolfModel>&{mover:Mover}>();
@@ -206,7 +207,12 @@ export class EstateWorld{
   for(const w of p.threat?.wolves??[])if(!['retreated','boundary'].includes(w.status))pathLine(this.routeGroup,[w.position,...w.path.slice(w.pathIndex)],'#d88e73',.09);
   for(const door of p.threat?.doors??[]){const w=gridToWorld(door.position);ring(this.effectGroup,door.queue.length?'#f4d28a':'#d1e5ba',w.x,w.z,.48,.85);}
   const guardian=p.threat?.guardian;if(guardian?.ability&&guardian.abilityUntil>p.threat!.elapsed){const w=gridToWorld(guardian.abilityPosition);ring(this.effectGroup,guardian.ability==='calm'?'#b7e5cd':guardian.ability==='gather'?'#eddda4':guardian.ability==='bubble'?'#9cd8ec':'#f4b976',w.x,w.z,guardian.ability==='calm'||guardian.ability==='gather'?4:1,.45);}
-  const goal=currentJourneyGoal(p);if(p.tutorial==='done'&&goal.action.kind==='move'&&!p.path.length){const w=gridToWorld(goal.action.to);ring(this.effectGroup,'#ffe8a8',w.x,w.z,.55,.8);}
+  const prompt=playPrompt(p,this.data.now);this.careTarget=undefined;this.careMarker=undefined;
+  if(p.tutorial==='done'&&prompt.action?.kind==='move'&&!p.path.length){const w=gridToWorld(prompt.action.to);ring(this.effectGroup,'#ffe8a8',w.x,w.z,.55,.8);}
+  if(p.tutorial==='done'&&prompt.action?.kind==='inspect'){
+   const target=prompt.action.target,animal=p.animals.find(a=>a.id===target&&!a.memorial);
+   if(animal){const w=gridToWorld(animal.position);this.careTarget=animal.id;this.careMarker=ring(this.effectGroup,'#fff0bd',w.x,w.z,.55,.65);this.careMarker.name='next-care-target';this.careMarker.userData.targetId=animal.id;}
+  }
  }
  private drawVisits(){
   const p=this.data.profile,active=p.creation.visits.filter(v=>v.status==='active');
@@ -242,7 +248,8 @@ export class EstateWorld{
  private place(el:HTMLElement,point:THREE.Vector3,lift:number){this.projection.copy(point);this.projection.y+=lift;const p=projectCameraLabel(this.projection,this.camera,this.host.clientWidth,this.host.clientHeight);el.hidden=!p;if(p)el.style.transform=`translate(-50%,-100%) translate(${p.x}px,${p.y}px)`;}
  private cameraUpdate(dt:number){
   const bounds=layoutWorldBounds(),focus=this.attention,attention=focus?gridToWorld(focus):undefined;
-  this.camera=this.cameraController.update({dt,aspect:this.host.clientWidth/Math.max(1,this.host.clientHeight),mode:this.openingState&&!['defend','done'].includes(this.openingState.stage)?'overview':this.cameraMode,position:this.player.root.position,bounds:{minX:bounds.minX-5.5,maxX:bounds.maxX-5.5,minZ:bounds.minZ-5.5,maxZ:bounds.maxZ-5.5},...(attention?{attention:{...attention,zoom:this.reduced?1:1.06}}:{})});
+  const ghost=this.ghost,rule=ghost?BUILDING_RULES[ghost.kind]:undefined,previewFocus=ghost&&rule?gridToWorld({x:ghost.x+(rule.width-1)/2,z:ghost.z+(rule.depth-1)/2}):undefined;
+  this.camera=this.cameraController.update({dt,aspect:this.host.clientWidth/Math.max(1,this.host.clientHeight),mode:this.openingState&&!['defend','done'].includes(this.openingState.stage)?'overview':this.cameraMode,position:this.player.root.position,bounds:{minX:bounds.minX-5.5,maxX:bounds.maxX-5.5,minZ:bounds.minZ-5.5,maxZ:bounds.maxZ-5.5},...(attention?{attention:{...attention,zoom:this.reduced?1:1.06}}:{}),...(previewFocus?{previewFocus}:{})});
  }
  private fit(){const w=this.host.clientWidth,h=this.host.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.cameraUpdate(0);}
  private updateSheep(a:EstateAnimal,t:number,now:number,dt:number){
@@ -250,7 +257,8 @@ export class EstateWorld{
   const feeding=this.data.profile.job?.type==='feed'&&this.data.profile.job.target===a.id&&this.data.profile.job.phase==='act',action=actor?.status==='safe'||a.restAssignment?.phase==='admitted'?'rest':feeding?'eat':response.action;s.update(legacyAnimal(a),response.action?response.elapsed:t,action,feeding?1:response.weight||Number(action==='rest'),speed,response.micro,this.selected===a.id,this.reduced,m.distance);if(action==='eat'&&a.life.stage==='baby'){const grass=s.root.getObjectByName('feeding-grass');if(grass)grass.visible=false;}
   this.place(s.label,s.root.position,1.6*animalScale(a.life)+.24);if(!s.root.visible)s.label.hidden=true;s.label.classList.toggle('selected',this.selected===a.id);s.name.textContent=`${a.name}${a.appearance==='starlit'?' ✦':''}`;
   const stage=a.life.stage==='baby'?'幼崽':a.life.stage==='juvenile'?'少年':'成年';s.memory.textContent=actor?.status==='queued'?'正在排队回棚':actor?.status==='safe'?'已经安全入棚':a.life.hunger<30?'肚子饿了':a.restAssignment?.phase==='admitted'?'安稳休息中':a.life.energy<30?'想休息':`${stage}${a.following?' · 陪你散步':''}`;
-  const startled=this.openingState&&['startle','choose','arrival'].includes(this.openingState.stage);s.root.rotation.z=startled&&!this.reduced?Math.sin(t*9)*.025:0;s.bubble.textContent=startled?(a.personality==='shy'?'咩…先躲近一点':a.personality==='independent'?'我往围栏边退一退':'有动静，回小家！'):response.text;s.bubble.hidden=!s.bubble.textContent;
+  const nextCare=this.careTarget===a.id;if(nextCare&&this.careMarker){this.careMarker.position.x=s.root.position.x;this.careMarker.position.z=s.root.position.z;}
+  const startled=this.openingState&&['startle','choose','arrival'].includes(this.openingState.stage);s.root.rotation.z=startled&&!this.reduced?Math.sin(t*9)*.025:0;s.bubble.textContent=startled?(a.personality==='shy'?'咩…先躲近一点':a.personality==='independent'?'我往围栏边退一退':'有动静，回小家！'):response.text||(nextCare?(a.life.stage==='baby'?'喂奶':'喂食'):'');s.bubble.hidden=!s.bubble.textContent;
  }
  private updateWolf(w:ThreatWolf,t:number,dt:number){const visual=this.wolves.get(w.id);if(!visual)return;const speed=this.moveVisual(visual.mover,dt);visual.legs.forEach((leg,i)=>leg.rotation.x=Math.sin(visual.mover.distance/1.1*Math.PI*2+(i%2?Math.PI:0))*clamp(speed,0,1)*.5);visual.bubble.visible=w.slowedUntil>(this.data.profile.threat?.elapsed??Infinity);visual.tell.visible=w.status==='windup'||w.status==='grabbing';visual.tell.scale.setScalar(1+Math.sin(t*7)*.09);visual.head.rotation.x=w.status==='grabbing'?.3:0;visual.body.position.y=w.status==='windup'?Math.sin(t*8)*.035:0;}
  private animate(time:number){
