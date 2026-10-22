@@ -98,3 +98,9 @@
 - Final V5.2.1: 313/313 tests, lint/typecheck/build passed; isolated HTTP24 resources and built React flow passed. Both independent-review findings fixed with observed RED→GREEN. Source a2800a9323a8d81dbf69ce94d891b237e5cd8d18.
 - Mac rollout at14:59:03UTC: stopped only verified oldPID90141, preserved old build and latest consistent SQLite backup, launched independent PID95061 on same127.0.0.1:5190. Separate-call14:59:44 check confirms PPID1, exact24 resources, integrityok, all7 legacy rows unchanged, both V5 identities/animalIDs and relationship scores preserved. No production gameplay writes during verification.
 - Implementation and finite follow-on roadmap saved in PLAYABILITY.md. Natural events/caretaker/ducks remain isolated and unintegrated. No Sites/GitHub push/old-demo change. Chrome/WebGL/touch/frame pacing remain explicitly unverified.
+
+## V5.2.2 · explicit demo reset
+
+- Added settings entry and in-opening restart entry, both opening one clear current-profile confirmation. Cancel preserves progress; confirmed reset starts the full opening with fresh animals/memory/growth/economy/layout/works. Other profile, device identity and avatar remain.
+- Server validates explicit confirmation, current profile and nonempty live session; replaces only that profile, advances runId/session, retains receipts for exact retry and rejects old-session requests. UI clears queued intent/replay/preview/selection; same-profile world tracks reset by runId.
+- New tests were observed RED before implementation. Independent review reproduced/fixed retreat auto-close interfering with confirmation. Final323/323 pass, full lint/typecheck/build pass; isolatedHTTP24resources and actual built React confirmation/cancel/reset flows pass. User5190 was not reset by tests. Real Chrome visual acceptance remains unavailable.

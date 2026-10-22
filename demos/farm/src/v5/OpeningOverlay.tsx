@@ -4,7 +4,7 @@ import type { GuardianKind } from './threat.ts';
 export interface OpeningOverlayProps {
   opening: OpeningState; ready: boolean; replay: boolean; busy: boolean; error?: string;
   retreating?:boolean;onSkip: () => void; onSelect: (kind: GuardianKind) => void; onDefend: () => void;
-  onExitReplay: () => void; onCare: () => void; onRetry?: () => void;
+  onExitReplay: () => void; onCare: () => void; onRetry?: () => void; onReset?: () => void;
 }
 
 const guardians: { kind: GuardianKind; name: string; asset: string; ability: string }[] = [
@@ -31,6 +31,7 @@ export default function OpeningOverlay(props: OpeningOverlayProps) {
       <span className="opening-label">{replay ? '独立开场演示 · 不改存档' : '第一次回家'}</span>
       <div className="opening-tool-buttons">
         {presentation.canSkip && <button type="button" className="opening-skip" data-opening-action="skip" disabled={busy} onClick={onSkip}>跳过动画</button>}
+        {!replay && props.onReset && <button type="button" data-opening-action="reset" disabled={busy||!!error} onClick={props.onReset}>重新开始</button>}
         {replay && <button type="button" className="opening-exit" onClick={onExitReplay}>退出演示</button>}
       </div>
     </div>

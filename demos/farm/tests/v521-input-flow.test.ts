@@ -28,7 +28,7 @@ async function until(check:()=>boolean,label:string,ms=1800){
  assert.ok(check(),label);
 }
 
-async function mount(options:{stage?:'complete'|'retreat'|'done'|'choose';holdEnter?:boolean;loseFinish?:boolean;failInitialGet?:boolean;feeding?:string}={}){
+async function mount(options:{stage?:'complete'|'retreat'|'done'|'choose';holdEnter?:boolean;loseFinish?:boolean;loseReset?:boolean;failInitialGet?:boolean;feeding?:string}={}){
  const browser=new Window({url:'http://farm-test.invalid/'});
  browser.document.body.innerHTML='<div id="root"></div>';
  const old=new Map<string,PropertyDescriptor|undefined>();
@@ -39,7 +39,7 @@ async function mount(options:{stage?:'complete'|'retreat'|'done'|'choose';holdEn
  }
  old.set('IS_REACT_ACT_ENVIRONMENT',Object.getOwnPropertyDescriptor(globalThis,'IS_REACT_ACT_ENVIRONMENT'));
  Object.defineProperty(globalThis,'IS_REACT_ACT_ENVIRONMENT',{value:true,configurable:true});
- const now=Date.now();let estate=createEstate('input-flow',now),lose=!!options.loseFinish,failGet=!!options.failInitialGet,releaseEnter:undefined|(()=>void);
+ const now=Date.now();let estate=createEstate('input-flow',now),lose=!!options.loseFinish,loseReset=!!options.loseReset,failGet=!!options.failInitialGet,releaseEnter:undefined|(()=>void);
  const profile=currentProfile(estate);profile.session='prior-session';
  const stage=options.stage??'complete';
  if(stage==='done'){profile.tutorial='done';profile.threat=null;profile.opening={version:1,stage:'done',elapsed:0,guardian:'dog'};}
@@ -54,6 +54,7 @@ async function mount(options:{stage?:'complete'|'retreat'|'done'|'choose';holdEn
   let receipt=receipts.get(c.id);const duplicate=!!receipt;
   if(!receipt){const result=commandEstate(estate,c,Date.now());estate=result.state;receipt={accepted:result.accepted,message:result.message};receipts.set(c.id,receipt);}
   const result={...receipt,duplicate,snapshot:estateSnapshot(estate,Date.now())};responses.push(result);
+  if(c.type==='resetProfile'&&loseReset){loseReset=false;throw new Error('TEST reset response lost');}
   if(c.type==='finishTutorial'&&lose){lose=false;throw new Error('TEST response lost after saved finish');}
   return Response.json(result);
  };
@@ -167,5 +168,53 @@ test('changing the action target retains the action drawer and sends the chosen 
   assert.equal(h.posts.find(c=>c.type==='play')?.target,'momo');
   await act(async()=>bridge.callbacks!.select('pipi'));
   assert.ok(h.browser.document.querySelector('[data-resident-id="pipi"]'),'scene animal click still opens its own card');
+ }finally{await h.close();}
+});
+
+test('reset asks for confirmation, cancel preserves state, and confirm starts exactly one fresh opening',async()=>{
+ const h=await mount({stage:'done'});try{
+  const doc=h.browser.document;
+  await act(async()=>{(doc.querySelector('[aria-label="庄园设置"]') as unknown as HTMLButtonElement).click();});
+  const openReset=()=>{const b=doc.querySelector('[data-command="request-reset"]') as unknown as HTMLButtonElement;assert.ok(b,'settings exposes reset');b.click();};
+  await act(async()=>openReset());
+  assert.ok(doc.querySelector('[data-reset-confirmation="home"]'),'clearly identifies current profile');
+  assert.equal(h.posts.some(c=>c.type==='resetProfile'),false);
+  await act(async()=>{(doc.querySelector('[data-command="cancel-reset"]') as unknown as HTMLButtonElement).click();});
+  assert.equal(h.profile.tutorial,'done');assert.equal(h.posts.some(c=>c.type==='resetProfile'),false);
+  await act(async()=>openReset());
+  await act(async()=>{const b=doc.querySelector('[data-command="confirm-reset"]') as unknown as HTMLButtonElement;b.click();b.click();});
+  await until(()=>h.posts.some(c=>c.type==='resetProfile'),'reset sent');
+  assert.equal(h.posts.filter(c=>c.type==='resetProfile').length,1);
+  await until(()=>!!doc.querySelector('[data-opening-stage="establish"]'),'fresh opening visible');
+  assert.equal(doc.querySelector('[data-reset-confirmation]'),null);
+  assert.equal(h.profile.tutorial,'choose');assert.equal(h.profile.inventory.hand,3);
+  assert.equal(h.profile.events.length,0);assert.ok(h.profile.animals.every(a=>a.life.bond===0&&a.life.memory.length===0));
+ }finally{await h.close();}
+});
+
+for(const phase of ['choose','retreat'] as const)test(`opening ${phase} can request a restart and cancel returns to the same opening`,async()=>{
+ const h=await mount({stage:phase});try{
+  const doc=h.browser.document,stage=h.profile.opening!.stage;
+  await act(async()=>{const b=doc.querySelector('[data-opening-action="reset"]') as unknown as HTMLButtonElement;assert.ok(b);b.click();});
+  assert.ok(doc.querySelector('[data-reset-confirmation="home"]'));
+  await act(async()=>{(doc.querySelector('[data-command="cancel-reset"]') as unknown as HTMLButtonElement).click();});
+  assert.equal(h.posts.some(c=>c.type==='resetProfile'),false);assert.equal(h.profile.opening!.stage,stage);
+  assert.ok(doc.querySelector('[data-opening-stage]'));
+ }finally{await h.close();}
+});
+
+
+test('a lost reset response keeps confirmation and retries the same command once',async()=>{
+ const h=await mount({stage:'done',loseReset:true});try{
+  const doc=h.browser.document;
+  await act(async()=>{(doc.querySelector('[aria-label="庄园设置"]') as unknown as HTMLButtonElement).click();});
+  await act(async()=>{(doc.querySelector('[data-command="request-reset"]') as unknown as HTMLButtonElement).click();});
+  await act(async()=>{(doc.querySelector('[data-command="confirm-reset"]') as unknown as HTMLButtonElement).click();});
+  await until(()=>doc.body.textContent.includes('TEST reset response lost'),'lost result remains retryable');
+  assert.equal(h.profile.tutorial,'choose');assert.ok(doc.querySelector('[data-reset-confirmation]'));
+  await act(async()=>{(doc.querySelector('.farm-sheet-error button') as unknown as HTMLButtonElement).click();});
+  await until(()=>!!doc.querySelector('[data-opening-stage="establish"]'),'retry closes reset and shows opening');
+  const requests=h.posts.filter(c=>c.type==='resetProfile');assert.equal(requests.length,2);assert.deepEqual(requests[1],requests[0]);
+  assert.equal(h.profile.runId,requests[0].id);assert.equal(doc.querySelector('[data-reset-confirmation]'),null);
  }finally{await h.close();}
 });

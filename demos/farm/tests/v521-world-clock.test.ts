@@ -63,3 +63,10 @@ test('profile and replay changes reset the motion source instead of mixing previ
  const lab=snapshot(600,8);lab.activeProfile='lab';lab.profile.id='lab';wall=T+700;
  world.set(lab,'',false);close(render(),8);
 });
+
+test('resetting the same profile replaces prior motion tracks immediately',context=>{
+ let wall=T;context.mock.method(Date,'now',()=>wall);const {world,snapshot,render}=fixture();
+ wall=T+200;world.set(snapshot(200),'',false);wall=T+400;world.set(snapshot(400),'',false);close(render(),4.18);
+ const reset=snapshot(600,7);Object.assign(reset.profile,{runId:'new-demo-run'});wall=T+600;
+ world.set(reset,'',false);close(render(),7);
+});

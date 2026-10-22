@@ -103,7 +103,7 @@ export class EstateWorld{
  }
  set(data:EstateSnapshot,target:string,reduced:boolean,cameraMode:ClubCameraMode='third-person',ghost?:EstateGhost,previewTheme?:keyof typeof scenePalette,opening?:OpeningState,replay=false,attention:GridPoint|null=null){
   if(data.avatar!==this.data.avatar)this.installPlayer(data.avatar);
-  const profileChanged=data.activeProfile!==this.data.activeProfile||replay!==this.replay;this.replay=replay;
+  const profileChanged=data.activeProfile!==this.data.activeProfile||data.profile.runId!==this.data.profile.runId||replay!==this.replay;this.replay=replay;
   // Props and replay frames can reuse an older snapshot. Keep the clock mapping
   // stable until its motion source changes, or those updates rewind render time.
   if(profileChanged){this.enteredAt=data.now;this.mapKey='';this.offset=data.now-Date.now();}

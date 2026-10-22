@@ -1,4 +1,4 @@
-import {useCallback,useEffect,useMemo,useState,type CSSProperties,type RefObject,type ReactNode} from 'react';
+import {useCallback,useEffect,useMemo,useRef,useState,type CSSProperties,type RefObject,type ReactNode} from 'react';
 import {Backpack,BookOpen,Check,ChevronRight,Cloud,Hammer,Heart,Leaf,Maximize,PersonStanding,ScanEye,Shield,Sprout,Users} from 'lucide-react';
 import PhoneViewport from '../feed/PhoneViewport.tsx';
 import FeedSheet from '../feed/FeedSheet.tsx';
@@ -14,7 +14,7 @@ import {BUILDING_RULES,buildingFootprint,previewEdit,regionAt,terrainAt,validate
 import {threatSummary,type GuardianKind} from './threat.ts';
 import {LOCAL_VISITORS,THEME_TEMPLATES,type CreationCommand,type Theme} from './creation.ts';
 
-export type EstateSheet = null|'animal'|'actions'|'guardian'|'build'|'creation'|'visits'|'works'|'settings'|'view'|'avatar'|'journal';
+export type EstateSheet = null|'animal'|'actions'|'guardian'|'build'|'creation'|'visits'|'works'|'settings'|'reset'|'view'|'avatar'|'journal';
 type Ghost={x:number;z:number;kind:BuildingKind;valid:boolean};
 type Send=(type:string,extra?:Record<string,unknown>)=>void;
 export type EstateViewProps={
@@ -225,16 +225,27 @@ function VisitsPanel({profile:p,busy,now,create}:{profile:Profile;busy:boolean;n
   </>;
 }
 
+function ResetPanel({profile:p,busy,send,onCancel}:{profile:Profile;busy:boolean;send:Send;onCancel:()=>void}){
+ const submitted=useRef(false);
+ useEffect(()=>{if(!busy)submitted.current=false;},[busy]);
+ return <div data-reset-confirmation={p.id}>
+  <div className="estate-callout"><b>重置{p.id==='home'?'自然档':'独立演示档'}，重新开始？</b><p>这份存档的动物关系、习惯、名字、成长、游戏记忆、物品、布局和作品都会清空，回到最初的幼崽与开场。</p></div>
+  <p className="sheet-note">另一个存档、你的设备身份和分身选择保留。此操作不能在游戏中撤销。</p>
+  <button className="estate-primary" data-command="confirm-reset" disabled={busy} onClick={()=>{if(submitted.current||busy)return;submitted.current=true;send('resetProfile',{confirmed:true,profile:p.id});}}>确认清空，从头开始</button>
+  <button className="farm-text-link" data-command="cancel-reset" disabled={busy} onClick={onCancel}>取消，保留现在的进度</button>
+ </div>;
+}
+
 export default function EstateView(props:EstateViewProps){
   const {data,target,sheet,camera,reduced,busy:saving,error,message,assetStatus}=props,p=data.profile,busy=saving||!!error;
-  const close=useCallback(()=>props.onSheet(null),[props.onSheet]);
+  const close=useCallback(()=>props.onSheet(sheet==='reset'&&p.tutorial==='done'?'settings':null),[props.onSheet,sheet,p.tutorial]);
   const send:Send=(type,extra={})=>props.onCommand(type,extra);
   const create=(command:CreationInput,actor?:string)=>send('creation',{command:{id:crypto.randomUUID(),...command},...(actor?{actor}:{})});
   const animal=p.animals.find(a=>a.id===target)??p.animals[0];
   const status=error?'保存待重试':busy?'保存中':'已保存';
   const activeEvent=!!p.threat&&p.threat.phase!=='complete';
   const failure=error?<div className="farm-sheet-error" role="alert">{error}<button disabled={saving} onClick={()=>send('retry')}>重试保存</button></div>:undefined;
-  const titles:Record<Exclude<EstateSheet,null>,string>={animal:'住在这里的朋友',actions:'一起相处',guardian:'守护小家',build:'布置小家',creation:'给小家换个主题',visits:'拜访与共同创造',works:'我的私有作品',settings:'慢慢相处就好',view:'看见你的庄园',avatar:'我的分身',journal:'相处手账'};
+  const titles:Record<Exclude<EstateSheet,null>,string>={animal:'住在这里的朋友',actions:'一起相处',guardian:'守护小家',build:'布置小家',creation:'给小家换个主题',visits:'拜访与共同创造',works:'我的私有作品',settings:'慢慢相处就好',reset:'从头演示',view:'看见你的庄园',avatar:'我的分身',journal:'相处手账'};
   const tabs=['build','creation','visits','works'] as const;
   const themePreview=sheet==='creation'&&p.creation.drafts.some(d=>d.kind==='theme'&&d.status==='draft'&&d.baseThemeVersion===p.creation.themeVersions.at(-1)?.version);
   return <main className="app-shell app-shell-v020"><PhoneViewport><section className={`feed-window feed-v020 farm-feed estate-feed joined ${themePreview?'estate-theme-preview-active':''}`} aria-label="绒绒庄园互动空间">
@@ -252,7 +263,7 @@ export default function EstateView(props:EstateViewProps){
     </section>
     <div className="status-bar" aria-hidden="true"><span className="status-time">{new Date(data.now).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'})}</span><div className="status-symbols"><img className="signal" src="/feed-ui/icons/signal.svg" alt=""/><img className="wifi" src="/feed-ui/icons/wifi.svg" alt=""/><img className="battery" src="/feed-ui/icons/battery.svg" alt=""/></div></div>
     <nav className="bottom-nav" aria-label="主导航" inert={props.interactionLocked}><button className={!sheet?'selected':''} onClick={close}>首页</button><button className="create-button" onClick={()=>props.onSheet('build')} aria-label="打开布置与创作"><img src="/feed-ui/icons/plus.svg" alt=""/></button><button className={sheet==='avatar'?'selected':''} onClick={()=>props.onSheet('avatar')}>我的</button></nav>
-    {props.openingOverlay}
+    {sheet!=='reset'&&props.openingOverlay}
     {sheet&&<FeedSheet title={titles[sheet]} subtitle={sheet==='animal'?'照顾眼前的需要，记住一起度过的时光':undefined} onClose={close} notice={failure}>
       {tabs.includes(sheet as typeof tabs[number])&&<div className="estate-sheet-tabs" role="tablist" aria-label="庄园创作与共创">{tabs.map((tab,i)=><button key={tab} role="tab" aria-selected={sheet===tab} className={sheet===tab?'selected':''} onClick={()=>props.onSheet(tab)}>{['布置','主题','拜访','作品'][i]}</button>)}</div>}
       {sheet==='animal'&&animal&&<><div className="farm-resident-picker">{p.animals.map(a=><button key={a.id} aria-label={`查看${a.name}的卡片`} className={animal.id===a.id?'selected':''} onClick={()=>props.onInspect(a.id)} style={{'--resident-color':a.color} as CSSProperties}><span className="farm-sheep-mark"><Cloud/></span><b>{a.name}</b><small>{STAGE_LABEL[a.life.stage]} · {PERSONALITY_LABEL[a.personality]}</small></button>)}</div><AnimalCard key={animal.id} animal={animal} profile={p} now={data.now} busy={busy||!!error} send={send}/><Inventory profile={p} busy={busy||!!error} send={send}/></>}
@@ -265,7 +276,8 @@ export default function EstateView(props:EstateViewProps){
       {sheet==='journal'&&<><p className="sheet-note">每一步都来自当前存档。教学材料8+8+12各结算一次。</p><div className="estate-journal">{p.events.length?p.events.toReversed().map(event=><article key={event.id}><small>{timestamp(event.at)} UTC</small><p>{event.text}</p></article>):<p>先选一位伙伴，再给幼崽第一口奶。</p>}</div><button className="actions-join" onClick={()=>props.onSheet('works')}>把这次相处存成私有作品</button></>}
       {sheet==='avatar'&&<><p className="sheet-note">换个样子，它们仍然认得你。当前分身：{AVATAR_LABEL[data.avatar]}。</p><div className="option-grid farm-avatar-grid">{(['human-lx','miaocuijiao','banana-cat'] as const).map(id=><button key={id} className={`option-card ${data.avatar===id?'selected':''}`} aria-pressed={data.avatar===id} disabled={busy} onClick={()=>send('avatar',{avatar:id})}><img src={`/avatars/portraits/${id}.webp`} alt=""/><span>{AVATAR_LABEL[id]}</span></button>)}</div><button className="actions-join" onClick={()=>props.onSheet('works')}>看看我的私有作品</button><button className="actions-join" onClick={()=>props.onSheet('settings')}>存档与体验设置</button></>}
       {sheet==='view'&&<div className="option-grid view-grid">{([{id:'overview',label:'庄园总览',hint:'同一斜俯方向，看更大的邻域'},{id:'third-person',label:'斜俯随行',hint:'固定朝向，镜头随LX平移'}] as const).map(v=><button key={v.id} className={`option-card view-option ${camera===v.id?'selected':''}`} onClick={()=>{props.onCamera(v.id);close();}}>{v.id==='overview'?<Maximize/>:<ScanEye/>}<span>{v.label}</span><small>{v.hint}</small></button>)}</div>}
-      {sheet==='settings'&&<><button className="actions-join" disabled={busy} onClick={()=>send('replayOpening')}>重看开场 · 独立演示，不改存档</button><div className="estate-callout"><b>{p.id==='home'?'自然档 · 安心相处':'独立演示档 · 年龄240倍'}</b><p>自然成长：幼崽至少24小时，少年再至少72小时，同时完成有效照料、探索与休息。离线不推进威胁、救援与施工。</p></div><div className="estate-secondary"><button className={p.id==='home'?'selected':''} disabled={busy||p.id==='home'} onClick={()=>send('profile',{profile:'home'})}>自然档</button><button className={p.id==='lab'?'selected':''} disabled={busy||p.id==='lab'} onClick={()=>send('profile',{profile:'lab'})}>独立演示档</button></div><p className="sheet-note">两个存档的动物、材料、作品和权限分别保存。演示档年龄门槛6/18分钟，照料条件仍要真实完成。</p><button className="actions-join" onClick={props.onReduced}>{reduced?'简化动效已开启':'简化动效'}<Check size={14} style={{opacity:reduced?1:0}}/></button><button className="actions-join" disabled={busy} onClick={()=>send('assistance',{enabled:!p.assistance})}>{p.assistance?'关闭基础提醒':'开启基础提醒'}</button><p className="sheet-note">记录保存在这台Mac。基础提醒不替你花建设材料、不替你开启挑战或发布作品。</p><p className="sheet-note">{assetStatus}</p></>}
+      {sheet==='reset'&&<ResetPanel key={`${p.id}:${p.session}`} profile={p} busy={busy} send={send} onCancel={close}/>}
+      {sheet==='settings'&&<><button className="actions-join" data-command="request-reset" disabled={busy} onClick={()=>send('requestReset')}>重置当前存档 · 从头演示</button><button className="actions-join" disabled={busy} onClick={()=>send('replayOpening')}>重看开场 · 独立演示，不改存档</button><div className="estate-callout"><b>{p.id==='home'?'自然档 · 安心相处':'独立演示档 · 年龄240倍'}</b><p>自然成长：幼崽至少24小时，少年再至少72小时，同时完成有效照料、探索与休息。离线不推进威胁、救援与施工。</p></div><div className="estate-secondary"><button className={p.id==='home'?'selected':''} disabled={busy||p.id==='home'} onClick={()=>send('profile',{profile:'home'})}>自然档</button><button className={p.id==='lab'?'selected':''} disabled={busy||p.id==='lab'} onClick={()=>send('profile',{profile:'lab'})}>独立演示档</button></div><p className="sheet-note">两个存档的动物、材料、作品和权限分别保存。演示档年龄门槛6/18分钟，照料条件仍要真实完成。</p><button className="actions-join" onClick={props.onReduced}>{reduced?'简化动效已开启':'简化动效'}<Check size={14} style={{opacity:reduced?1:0}}/></button><button className="actions-join" disabled={busy} onClick={()=>send('assistance',{enabled:!p.assistance})}>{p.assistance?'关闭基础提醒':'开启基础提醒'}</button><p className="sheet-note">记录保存在这台Mac。基础提醒不替你花建设材料、不替你开启挑战或发布作品。</p><p className="sheet-note">{assetStatus}</p></>}
       {message&&<p className="estate-sheet-message" role="status">{message}</p>}
     </FeedSheet>}
   </section></PhoneViewport></main>;

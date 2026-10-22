@@ -1,0 +1,52 @@
+{
+  "version": "v5.2.2-demo-reset",
+  "at": "2026-10-22T15:42:35.828424+00:00",
+  "tests": {
+    "passed": 323,
+    "failed": 0,
+    "skipped": 0
+  },
+  "lint": "passed",
+  "typecheck": "passed",
+  "productionBuild": "passed: 1841 modules",
+  "http": {
+    "http": true,
+    "currentApi": true,
+    "guardianPersisted": true,
+    "templateApplied": true,
+    "receiptDuplicate": true,
+    "ownerBoundary": true,
+    "labIsolation": true,
+    "legacyBypassClosed": true,
+    "sameOrigin": true,
+    "resourcesByteMatched": 24,
+    "confirmedReset": true,
+    "resetRetryPreservesNewProgress": true,
+    "webgl": "not verified"
+  },
+  "builtReact": {
+    "actualBuiltReactEntry": true,
+    "tutorialRoutes": true,
+    "preChoiceGated": true,
+    "independentReplayNoEconomyMutation": true,
+    "selectionSetup": "isolated API and explicit test readiness clock; WebGL unavailable",
+    "defaultLX": true,
+    "rapidIndividualCards": true,
+    "responseLossRetrySameId": true,
+    "targetSwitchCancelsWithoutCharge": true,
+    "actualWalkAndThreeSecondFeed": true,
+    "templateApplyUndo": true,
+    "privateWork": true,
+    "avatarIdentity": true,
+    "labSeparation": true,
+    "worldHostRetained": true,
+    "escape": true,
+    "confirmedResetAndCancel": true,
+    "freshOpeningAfterReset": true,
+    "webgl": "not verified (Node DOM)"
+  },
+  "reviewRegression": "retreat overlay no longer closes reset confirmation; observed RED then GREEN",
+  "scope": "confirmed current profile only; preserve other profile, player identity and avatar; fresh session and runId; retain idempotent receipts",
+  "productionResetExecuted": false,
+  "webgl": "not verified; no independent Chrome plugin control entry"
+}

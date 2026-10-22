@@ -61,3 +61,9 @@ Two independent-review findings (past route replay; same-snapshot clock reset) w
 Structured evidence: `verification/v521.json`; rollout and save preservation recorded separately in `verification/v521-live.json`. See `PLAYABILITY.md` for the finite patch and the genuinely unintegrated V5 features.
 
 V5.2.1 Mac rollout **succeeded**: source `a2800a9323a8d81dbf69ce94d891b237e5cd8d18`, PID95061/PPID1, same127.0.0.1:5190. Independent14:59:44UTC call byte-matched all24 resources and verified SQLite integrity,7 unchanged legacy rows,2 preserved V5 owners/animalID sets, and no reduction in saved relationship scores. Latest backup `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-22T14-59-03-064Z-before-v521.sqlite`; previous dist `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v521-20261022T145903Z`. Only static HTTP and read-only database checks touched production. No visual acceptance claim.
+
+## V5.2.2 demo reset
+
+Fresh full suite **323/323 passed** (0 skipped/failed), ESLint/typecheck and production build passed. Isolated5193/newSQLite verified confirmed reset, rejected unconfirmed/stale/visitor/wrong-profile requests, both profile isolation, no legacy memory reimport, atomic persistence, same-request retry after new progress/reopen, actual built React confirmation/cancel/fresh opening, and24 byte-matching assets. UI double click sends one request; lost-response retry retains exact request; same-profile runId clears previous render tracks. Review caught the retreat stage closing the reset sheet; its new failing regression passed after correction.
+
+Evidence: `verification/v522.json`. Production deployment does not invoke reset. Tests used only isolated data. Chrome/WebGL visual acceptance remains not run; no independent Chrome control tool and no prohibited fallback.
