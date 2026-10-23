@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createEstate,currentProfile,commandEstate,settleEstate,type Estate} from '../src/v5/estate.ts';
 import {isWalkable,shelterEntries} from '../src/v5/layout.ts';
 import {findActorPath} from '../src/v5/actor-navigation.ts';
+import {previewHatch,recoveryPoint} from '../src/v5/v7-economy.ts';
 import {RAID_RULES} from '../src/v5/raid-cycle.ts';
 
 const T=1_800_000_000_000;
@@ -53,10 +54,11 @@ test('real pulse commands complete warning, safe evacuation and wrapping before 
  h.pulse();assert.equal(h.profile.threat,null);assert.equal(h.profile.raidCycle!.remainingMs,cycle.remainingMs-1000);
 });
 
-test('V6 herd count and rarity retain one legal boundary wolf after the same full warning',()=>{
- for(const scenario of [{count:3,rare:false,wolves:1},{count:6,rare:false,wolves:1},{count:3,rare:true,wolves:1}]){
+test('V7 herd count and rarity select one two or three legal boundary wolves after the same full warning',()=>{
+ for(const scenario of [{count:3,rare:false,wolves:1},{count:6,rare:false,wolves:2},{count:3,rare:true,wolves:3}]){
   const h=run();
-  while(h.profile.animals.length<scenario.count){const result=h.send('adopt',{expectedCount:h.profile.animals.length});assert.equal(result.accepted,true,result.message);}
+  h.profile.materials=2000;h.profile.v7!.productionFeed=1000;
+  while(h.profile.animals.length<scenario.count){assert.equal(h.send('v7-buy-box',{species:'sheep',tier:'white'}).accepted,true);const box=h.profile.v7!.eggs.at(-1)!;assert.equal(h.send('v7-preview-hatch',{boxId:box.id}).accepted,true);const preview=previewHatch(h.profile,box.tier);const result=h.send('v7-hatch',{boxId:box.id,expectedCount:preview.expectedCount,expectedLayoutVersion:preview.layoutVersion,expectedVersion:preview.version});assert.equal(result.accepted,true,result.message);}
   if(scenario.rare)for(const a of h.profile.animals)a.husbandry!.rarity='gold';
   beginWarning(h);assert.equal(h.profile.raidCycle!.pending!.wolves,scenario.wolves);finishWarning(h);
   const p=h.profile,event=p.threat!,owned=new Set(p.layout.owned.map(q=>`${q.x},${q.z}`));
@@ -97,7 +99,7 @@ test('launched natural event preserves positions and rescue clocks during unload
  h.pulse(8000);assert.deepEqual(h.profile.threat,before);h.pulse(500);assert.ok(Math.abs(h.profile.threat!.elapsed-before.elapsed-.5)<1e-8);assert.equal(h.profile.raidCycle!.history.length,1);
 });
 
-test('a real natural boundary rescue pauses its 180-second window offline and a missed window keeps free recovery',()=>{
+test('a real V7 boundary rescue pauses offline and requires three seconds of paid care after a missed window',()=>{
  const state=fixture(),p=currentProfile(state);p.guardian='frog';p.guardianAt={x:10,z:0};p.guardianBehavior='station';p.guardianTarget={x:10,z:0};
  p.layout.buildings.find(b=>b.kind==='shelter')!.capacity=1;p.animals.forEach((a,i)=>{a.position={x:0,z:4+i};});
  const h=run(state);beginWarning(h);finishWarning(h);
@@ -110,7 +112,9 @@ test('a real natural boundary rescue pauses its 180-second window offline and a 
  for(let i=0;i<181&&h.profile.threat!.actors.find(a=>a.id===id)!.status!=='lost';i++)h.pulse();
  assert.equal(h.profile.threat!.actors.find(a=>a.id===id)!.status,'lost');assert.ok(h.profile.animals.find(a=>a.id===id));assert.ok(h.profile.animals.every(a=>!a.memorial));
  const earlyEnd=h.send('endEvent');assert.equal(earlyEnd.accepted,false);
- assert.equal(h.send('rescue',{target:id,findBack:true}).accepted,true);h.pulse();
+ const coins=h.profile.materials,feed=h.profile.v7!.productionFeed;h.profile.position={...recoveryPoint(h.profile,id)!};
+ assert.equal(h.send('rescue',{target:id,findBack:true}).accepted,true);h.pulse();assert.equal(h.profile.materials,coins);assert.equal(h.profile.v7!.productionFeed,feed);assert.equal(h.profile.threat!.actors.find(a=>a.id===id)!.status,'lost');
+ h.pulse();assert.equal(h.profile.materials,coins);h.pulse();assert.equal(h.profile.materials,coins-16);assert.equal(h.profile.v7!.productionFeed,feed-4);assert.equal(h.profile.v7!.recovery[id],undefined);
  assert.notEqual(h.profile.threat!.actors.find(a=>a.id===id)!.status,'lost');assert.ok(h.profile.threat!.events.some(e=>e.type==='find-back'&&e.actorId===id));assert.ok(h.profile.animals.every(a=>!a.memorial));
 });
 
@@ -139,3 +143,4 @@ test('a warning with no legal sheltered boundary route postpones safely without 
  assert.equal(h.profile.threat,null);assert.equal(h.profile.raidCycle!.phase,'peace');assert.equal(h.profile.raidCycle!.history.length,0);assert.equal(h.profile.raidCycle!.sequence,1);
  assert.match(h.profile.notice,/推迟/);assert.ok(h.profile.animals.every(a=>!a.memorial));
 });
+test('V7 event snapshots exclude animals already admitted to real shelter and block instant claims',()=>{const state=fixture(),p=currentProfile(state),a=p.animals[0];a.position={x:2,z:4};a.restAssignment={buildingId:'initial-shelter',doorId:'initial-door',slot:0,door:{x:2,z:4},phase:'admitted',ordered:true,admitMs:0};p.production!.pending=[{id:'safe-opening',tier:'white',amount:10,animalId:a.id,version:'v7',source:'paid-production',cycle:1},{id:'exposed-opening',tier:'white',amount:10,animalId:p.animals[1].id,version:'v7',source:'paid-production',cycle:1}];const h=run(state);beginWarning(h);finishWarning(h);const event=h.profile.threat!,ledger=h.profile.v7!.raidLosses[event.id];assert.equal(event.actors.find(t=>t.id===a.id)!.status,'safe');assert.deepEqual(ledger.opening.map(l=>l.id),['exposed-opening']);assert.equal(ledger.cap,2);const pending=structuredClone(h.profile.production!.pending);assert.equal(h.send('claimWool').accepted,false);assert.deepEqual(h.profile.production!.pending,pending);});

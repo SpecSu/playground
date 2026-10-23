@@ -47,8 +47,8 @@ test('legacy products migrate once through durable GET, and the old claim comman
   const retry=io.command(claim);assert.equal(retry.duplicate,true);assert.equal(retry.snapshot.profile.economy?.warehouse.white,4);
   const fresh=io.command({...claim,id:'legacy-alias-again'});assert.equal(fresh.accepted,false);assert.equal(fresh.snapshot.profile.economy?.warehouse.white,4);
   const later=io.command({id:'new-production',type:'claimWool',target:a.id},T+43_200_000);
-  assert.equal(later.accepted,true,later.message);assert.deepEqual(later.snapshot.profile.economy?.warehouse,{...emptyStacks(),white:6});
-  assert.equal(later.snapshot.profile.animals[0].id,a.id);assert.equal(later.snapshot.profile.animals[0].life.products.stored,0);
+  assert.equal(later.accepted,true,later.message);assert.deepEqual(later.snapshot.profile.economy?.warehouse,{...emptyStacks(),white:7});
+  assert.equal(later.snapshot.profile.economy?.lots?.filter(l=>l.version==='legacy'&&l.tier==='white').reduce((n,l)=>n+l.amount,0),4);assert.equal(later.snapshot.profile.economy?.lots?.find(l=>l.version==='v7'&&l.animalId===a.id)?.amount,3);assert.equal(later.snapshot.profile.animals[0].id,a.id);assert.equal(later.snapshot.profile.animals[0].life.products.stored,0);
  });
 });
 
@@ -57,21 +57,23 @@ test('V6 pauses pure label cultivation while preserving old balances and rarity'
  withStore(fixture,io=>{const r=io.command({id:'pause-cultivation',type:'cultivate',target:a.id,expectedRarity:'white'});assert.equal(r.accepted,false);assert.match(r.message,/已暂停/);assert.deepEqual(r.snapshot.profile.economy?.warehouse,p.economy!.warehouse);assert.equal(r.snapshot.profile.animals[0].husbandry?.rarity,'white');});
 });
 
-test('receipts for claiming, exchanging, two upgrades and adoption survive reopening without a second debit',()=>{
+test('receipts for claiming, exchanging, two upgrades and explicit box hatching survive reopening without a second debit',()=>{
  const fixture=ready(),p=currentProfile(fixture);p.materials=100;p.animals[0].husbandry!.pending.gold=2;delete p.production;
  const commands:EstateCommand[]=[
   {id:'claim-once',type:'claimWool',target:p.animals[0].id},
   {id:'exchange-once',type:'exchangeWool',tier:'gold',amount:2,woolVersion:'legacy'},
   {id:'guardian-once',type:'upgradeGuardian',guardian:'dog',expectedLevel:1},
   {id:'shelter-once',type:'upgradeShelter',buildingId:'initial-shelter',expectedLevel:1},
-  {id:'adopt-once',type:'adopt',expectedCount:3},
+  {id:'buy-once',type:'v7-buy-box',species:'sheep',tier:'white'},
+  {id:'preview-once',type:'v7-preview-hatch',boxId:'box-buy-once'},
+  {id:'hatch-once',type:'v7-hatch',boxId:'box-buy-once',expectedCount:3,expectedLayoutVersion:p.layout.version,expectedVersion:1},
  ];
  withStore(fixture,io=>{
   for(const command of commands){const result=io.command(command);assert.equal(result.accepted,true,result.message);}
-  const before=io.get();assert.equal(before.profile.materials,64);assert.equal(before.profile.animals.length,4);assert.equal(before.profile.upgrades?.guardians.dog,2);assert.equal(before.profile.upgrades?.shelters['initial-shelter'],2);
+  const before=io.get();assert.equal(before.profile.materials,24);assert.equal(before.profile.animals.length,4);assert.equal(before.profile.upgrades?.guardians.dog,2);assert.equal(before.profile.upgrades?.shelters['initial-shelter'],2);
   io.reopen();for(const command of [...commands].reverse()){const retry=io.command(command);assert.equal(retry.duplicate,true);assert.equal(retry.accepted,true);}
-  const after=io.get();assert.deepEqual(after.profile.economy,before.profile.economy);assert.deepEqual(after.profile.upgrades,before.profile.upgrades);assert.equal(after.profile.materials,64);assert.deepEqual(after.profile.animals.map(a=>a.id),before.profile.animals.map(a=>a.id));
-  for(const command of commands.slice(2)){const stale=io.command({...command,id:`${command.id}-fresh`});assert.equal(stale.accepted,false,command.type);assert.equal(stale.snapshot.profile.materials,64);}
+  const after=io.get();assert.deepEqual(after.profile.economy,before.profile.economy);assert.deepEqual(after.profile.upgrades,before.profile.upgrades);assert.equal(after.profile.materials,24);assert.deepEqual(after.profile.animals.map(a=>a.id),before.profile.animals.map(a=>a.id));
+  for(const command of commands.slice(2,4)){const stale=io.command({...command,id:`${command.id}-fresh`});assert.equal(stale.accepted,false,command.type);assert.equal(stale.snapshot.profile.materials,24);}
  });
 });
 

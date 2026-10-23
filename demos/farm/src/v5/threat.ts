@@ -14,6 +14,9 @@ import { buildingApproaches, buildingFootprint, isWalkable, lineOfSight, shelter
 import { findActorPath } from './actor-navigation.ts';
 import {shieldLayout,shieldSafety,type ShieldTactic,type FoldingShieldState} from './tactical-shield.ts';
 
+export type PressureBand='low'|'medium'|'high';
+export const PRESSURE_RULES={low:{speed:1,windup:2},medium:{speed:1.1,windup:1.8},high:{speed:1.2,windup:1.5}} as const;
+const wolfRules=(s:ThreatState)=>s.mode==='reassure'&&s.pressureBand?PRESSURE_RULES[s.pressureBand]:PRESSURE_RULES.low;
 export type GuardianKind = 'dog' | 'cat' | 'frog';
 export type ThreatMode = 'tutorial' | 'rehearsal' | 'reassure' | 'challenge';
 export type ActorStatus = 'waiting' | 'evacuating' | 'queued' | 'safe' | 'carried' | 'boundary' | 'lost' | 'memorial';
@@ -48,7 +51,7 @@ export interface ThreatActor {
   status: ActorStatus; reservation: ShelterReservation | null;
   discoveredAt: number | null; departAt: number | null; doorArrivalAt: number | null;
   enteredAt: number | null; exposedAt: number | null; injuredAt: number | null;
-  rescuedAt: number | null; memorialAt: number | null; timely: boolean;
+  rescuedAt: number | null; careCompletedAt?:number; memorialAt: number | null; timely: boolean;
   serviceStartedAt: number | null; rescueStartedAt: number | null; rescueRemaining: number | null; rescueProgress: number;
   rescuePoint: GridPoint | null; reattackAfter: number; reason: string;
 }
@@ -81,16 +84,16 @@ export interface ThreatState {
   elapsed: number; discoveredAt: number | null; actors: ThreatActor[]; wolves: ThreatWolf[];
   guardian: GuardianState | null; guardianStart: GridPoint; doors: ThreatDoor[];
   confirmedParticipants: string[]; lockedLayoutVersion: number; howled: boolean; upgrades?:ThreatUpgrades;
-  events: ThreatTelemetry[]; rewards: 0; notice: string; tacticalShield?: FoldingShieldState;
+  events: ThreatTelemetry[]; rewards: 0; notice: string; tacticalShield?: FoldingShieldState; pressureBand?:PressureBand;
 }
 export interface CreateThreatOptions {
   id: string; seed: number; mode: ThreatMode; actors: ThreatActorInput[];
   guardian?: GuardianKind; guardianPosition?: GridPoint; wolfSpawns?: GridPoint[];
-  challengeAuthorized?: boolean; confirmedParticipants?: string[]; howled?: boolean; upgrades?:ThreatUpgrades; tactic?:ShieldTactic;
+  challengeAuthorized?: boolean; confirmedParticipants?: string[]; howled?: boolean; upgrades?:ThreatUpgrades; tactic?:ShieldTactic; pressureBand?:PressureBand;
 }
 export interface ThreatStepInput {
   dt: number; playerPosition?: GridPoint; driveOff?: string; rescueActorId?: string;
-  findBackActorId?: string; abandonActorId?: string; abandonConfirmed?: boolean;
+  findBackActorId?: string; recoveryAuthorizedActorId?:string; abandonActorId?: string; abandonConfirmed?: boolean;
 }
 export interface GuardianCommand {
   kind: 'shield' | 'select' | 'follow' | 'station' | 'patrol' | 'block' | 'gather' | 'calm' | 'bubble' | 'rescue';
@@ -185,6 +188,7 @@ export function createThreat(options: CreateThreatOptions, layout: Layout): Thre
   if (!isWalkable(layout, cell(start))) throw new Error('守护者起点不可达');
   const s: ThreatState = {
     version: 1, id: options.id, seed: options.seed, mode: options.mode,
+    ...(options.mode==='reassure'&&options.pressureBand&&['low','medium','high'].includes(options.pressureBand)?{pressureBand:options.pressureBand}:{}),
     phase: options.mode === 'tutorial' && !options.guardian ? 'choosing' : 'active', elapsed: 0, discoveredAt: null,
     actors: options.actors.map(a => ({ id: a.id, role: a.role ?? 'animal', participant: options.mode === 'challenge' && participants.includes(a.id),
       position: point(a.position), path: [], pathIndex: 0, pathLength: 0, status: 'waiting', reservation: null,
@@ -487,7 +491,7 @@ function actorStep(s: ThreatState, layout: Layout, dt: number, previous: number)
       actor.reservation = null; actor.path = []; reserve(s, layout); continue;
     }
     const start = Math.max(previous, actor.departAt), available = Math.min(dt, s.elapsed - start);
-    const spent = move(actor, actor.injuredAt === null ? THREAT_RULES.animalSpeed : THREAT_RULES.injuredSpeed, available);
+    const spent = move(actor, actor.injuredAt === null || (actor.careCompletedAt!==undefined&&actor.careCompletedAt>=actor.injuredAt) ? THREAT_RULES.animalSpeed : THREAT_RULES.injuredSpeed, available);
     if (actor.pathIndex >= actor.path.length && equal(actor.position, door.position)) {
       actor.status = 'queued'; actor.doorArrivalAt = rounded(start + spent);
       emit(s, 'door-arrival', { actorId: actor.id, position: point(actor.position), reason: `等待${door.doorId}入棚` }, actor.doorArrivalAt);
@@ -553,11 +557,11 @@ function wolfStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: nu
     if (['windup', 'grabbing'].includes(wolf.status)) {
       if (!target || !liveActor(target) || target.reattackAfter > s.elapsed) { release(s, layout, wolf, '目标已离开'); continue; }
       if (distance(wolf.position, target.position) > THREAT_RULES.contact) {
-        setPath(wolf, pathTo(layout, wolf.position, target.position)); move(wolf, THREAT_RULES.wolfSpeed, dt);
+        setPath(wolf, pathTo(layout, wolf.position, target.position)); move(wolf, wolfRules(s).speed, dt);
       }
       if (distance(wolf.position, target.position) > THREAT_RULES.contact || !lineOfSight(layout, wolf.position, target.position, THREAT_RULES.contact)) { wolf.stageProgress = 0; wolf.status = 'windup'; continue; }
       wolf.stageProgress = rounded(wolf.stageProgress + dt);
-      if (wolf.status === 'windup' && wolf.stageProgress >= THREAT_RULES.windup) {
+      if (wolf.status === 'windup' && wolf.stageProgress >= wolfRules(s).windup) {
         if (target.injuredAt === null) { target.injuredAt = s.elapsed; target.reason = '受伤后速度0.7，仍可回棚与救援'; emit(s, 'injury', { actorId: target.id, wolfId: wolf.id, position: point(target.position) }); }
         wolf.status = 'grabbing'; wolf.stageProgress = 0; emit(s, 'grab-start', { actorId: target.id, wolfId: wolf.id, position: point(target.position), reason: '4秒连续抓取，可打断' });
       } else if (wolf.status === 'grabbing' && wolf.stageProgress >= THREAT_RULES.grab) {
@@ -567,12 +571,12 @@ function wolfStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: nu
       }
       continue;
     }
-    let speed = THREAT_RULES.wolfSpeed;
+    let speed = wolfRules(s).speed;
     if (wolf.slowedUntil > previous && wolf.bubbleDelay < THREAT_RULES.frog.bubbleMaxDelay) {
       speed *= 0.5;
     }
     const spent = move(wolf, speed, dt);
-    if (speed < THREAT_RULES.wolfSpeed) wolf.bubbleDelay = Math.min(THREAT_RULES.frog.bubbleMaxDelay, rounded(wolf.bubbleDelay + spent * 0.5));
+    if (speed < wolfRules(s).speed) wolf.bubbleDelay = Math.min(THREAT_RULES.frog.bubbleMaxDelay, rounded(wolf.bubbleDelay + spent * 0.5));
     const door = s.doors.find(d => d.doorId === wolf.targetDoorId);
     if (door && equal(wolf.position, door.position) && wolf.arrivedAt === null) {
       wolf.arrivedAt = rounded(previous + spent); door.wolfArrivedAt = Math.min(door.wolfArrivedAt ?? Infinity, wolf.arrivedAt);
@@ -583,7 +587,7 @@ function wolfStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: nu
         .sort((a, b) => distance(a.position, wolf.position) - distance(b.position, wolf.position) || byId(a, b));
       if (candidates[0]) {
         const actor = candidates[0]; wolf.targetActorId = actor.id; wolf.status = 'windup'; wolf.stageProgress = 0;
-        expose(s, actor, '狼已接近1格，正在2秒攻击前摇'); emit(s, 'attack-windup', { actorId: actor.id, wolfId: wolf.id, position: point(wolf.position), reason: '2秒可见前摇，可驱赶或让伙伴打断' });
+        expose(s, actor, `狼已接近1格，正在${wolfRules(s).windup}秒攻击前摇`); emit(s, 'attack-windup', { actorId: actor.id, wolfId: wolf.id, position: point(wolf.position), reason: `${wolfRules(s).windup}秒可见前摇，可驱赶或让伙伴打断` });
       } else if (wolf.arrivedAt !== null) {
         const chase = s.actors.filter(liveActor).map(a => ({ actor: a, path: pathTo(layout, wolf.position, a.position) })).filter(p => p.path.length).sort((a, b) => length(a.path) - length(b.path) || byId(a.actor, b.actor));
         if (chase[0]) setPath(wolf, chase[0].path); else wolf.status = 'retreated';
@@ -601,7 +605,14 @@ function markLost(s: ThreatState, actor: ThreatActor, reason: string) {
 }
 function rescueStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: number) {
   for (const actor of s.actors) {
-    if (actor.status === 'lost' && input.findBackActorId === actor.id) {
+    if(input.recoveryAuthorizedActorId===actor.id){
+      actor.careCompletedAt=s.elapsed;
+      if(actor.status==='carried'){
+        const carrier=s.wolves.find(w=>w.status==='carrying'&&w.targetActorId===actor.id);
+        if(carrier)release(s,layout,carrier,'完成3秒付费营救，已在实际位置救回');
+      }
+    }
+    if (actor.status === 'lost' && input.findBackActorId === actor.id && (!s.pressureBand || input.recoveryAuthorizedActorId===actor.id)) {
       actor.status = 'evacuating'; actor.position = point(actor.rescuePoint ?? actor.position); actor.rescuedAt = s.elapsed;
       actor.reattackAfter = s.elapsed + THREAT_RULES.windup; actor.departAt = s.elapsed;
       const door = s.doors.find(d => d.doorId === actor.reservation?.doorId);
@@ -616,7 +627,7 @@ function rescueStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: 
     const nearbyPlayer = input.rescueActorId === actor.id && input.playerPosition && distance(input.playerPosition, actor.position) <= THREAT_RULES.contact && lineOfSight(layout, input.playerPosition, actor.position, THREAT_RULES.contact);
     const nearbyGuardian = g?.behavior === 'rescue' && g.targetActorId === actor.id && distance(g.position, actor.position) <= THREAT_RULES.contact && lineOfSight(layout, g.position, actor.position, THREAT_RULES.contact);
     actor.rescueProgress = nearbyPlayer || nearbyGuardian ? rounded(actor.rescueProgress + onlineDt) : 0;
-    if (actor.rescueProgress >= THREAT_RULES.rescueWork) {
+    if ((actor.rescueProgress >= THREAT_RULES.rescueWork || input.recoveryAuthorizedActorId===actor.id) && (!s.pressureBand || input.recoveryAuthorizedActorId===actor.id)) {
       actor.status = 'evacuating'; actor.rescuedAt = s.elapsed; actor.rescueRemaining = null; actor.rescueProgress = 0;
       actor.departAt = s.elapsed; actor.doorArrivalAt = null; actor.serviceStartedAt = null;
       actor.reattackAfter = s.elapsed + THREAT_RULES.windup;
@@ -659,10 +670,12 @@ function shieldStep(s:ThreatState,layout:Layout,dt:number){
 export function stepThreat(state: ThreatState, layout: Layout, input: ThreatStepInput): ThreatState {
   if (!Number.isFinite(input.dt) || input.dt < 0) throw new Error('在线步长必须是非负有限秒数');
   if (input.dt === 0 || state.phase === 'choosing') return clone(state);
-  const recovery = state.phase === 'complete' && state.actors.some(a => a.id === input.findBackActorId && a.status === 'lost');
+  const recovery = state.phase === 'complete' && state.actors.some(a => a.id === input.findBackActorId && a.status === 'lost' && (!state.pressureBand || input.recoveryAuthorizedActorId===a.id));
   if (layout.version !== state.lockedLayoutVersion && !recovery && state.phase !== 'complete') throw new Error('事件期间布局已锁定，不能改变路线与入口');
   if (state.phase === 'complete' && !input.findBackActorId) {
     const ended=clone(state);
+    const cared=ended.actors.find(a=>a.id===input.recoveryAuthorizedActorId);
+    if(cared)cared.careCompletedAt=ended.elapsed;
     if(ended.tacticalShield?.status==='active'){ended.elapsed=rounded(ended.elapsed+input.dt);shieldStep(ended,layout,input.dt);}
     return ended;
   }

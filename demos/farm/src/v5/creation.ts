@@ -133,7 +133,7 @@ export function chargeProjectBudget(state:CreationState,proposalId:string,transa
   requireRule(grant?.projectId,'提案项目授权不存在');const project=state.projects[grant.projectId];
   requireRule(project&&integer(cost)&&integer(project.budget)&&integer(project.spent)&&integer(project.reserved),'项目预算账本无效');
   requireRule(!project.receipts.some(r=>r.transactionId===transactionId||r.proposalId===proposalId),'项目事务已记账');
-  requireRule(project.spent+project.reserved+cost<=project.budget,'项目累计材料费用超出主人已确认预算');
+  requireRule(project.spent+project.reserved+cost<=project.budget,'项目累计金币费用超出主人已确认预算');
   project.spent+=cost;project.receipts.push({transactionId,proposalId,cost});
 }
 
@@ -265,7 +265,7 @@ export function reduceCreation(original:CreationState,command:CreationCommand,ct
       }
       case 'blueprintApply': {
         const d=state.drafts.find(d=>d.id===command.draftId);requireRule(d?.kind==='blueprint'&&d.status==='draft','蓝图草稿不存在或已经应用');
-        const data=blueprint(d,ctx);requireRule(data.components.reduce((n,c)=>n+c.estimatedCost,0)<=ctx.materials,'现有材料不足，请重新确认方案');
+        const data=blueprint(d,ctx);requireRule(data.components.reduce((n,c)=>n+c.estimatedCost,0)<=ctx.materials,'现有金币不足，请重新确认方案');
         effects.push(effectFor({...data,source:d.source},command.id,d.id,'draft'));d.status='applied';message='蓝图待规则引擎重新校验并原子应用';break;
       }
       case 'grant': {
@@ -341,7 +341,7 @@ export function reduceCreation(original:CreationState,command:CreationCommand,ct
         requireRule(Array.isArray(selected)&&selected.length>0&&new Set(selected).size===selected.length&&selected.every(id=>p.components.some(c=>c.id===id)),'请选择有效且不重复的蓝图组件');
         const data=blueprint({...p,components:p.components.filter(c=>selected.includes(c.id))},ctx,true);
         requireRule(data.scope.every(r=>g.regions.includes(r))&&data.budget<=g.budget&&data.components.every(c=>g.editTypes.includes(c.edit.type)),'授权范围或预算已变化');
-        requireRule(data.components.reduce((n,c)=>n+c.estimatedCost,0)<=ctx.materials,'现有材料不足，请重新确认方案');
+        requireRule(data.components.reduce((n,c)=>n+c.estimatedCost,0)<=ctx.materials,'现有金币不足，请重新确认方案');
         p.status='accepted';p.acceptedAt=ctx.now;p.acceptedComponentIds=[...selected];
         state.proposalReceipts.push({proposalId:p.id,transactionId:command.id,baseVersion:p.baseVersion,componentIds:[...selected],undoState:'available'});
         effects.push(effectFor({...data,source:p.source},command.id,p.id,'proposal'));message='主人已选择组件，待规则引擎重新检查导航、成本和容量后原子应用';break;

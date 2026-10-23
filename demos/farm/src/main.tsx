@@ -1,6 +1,11 @@
 import {createRoot} from 'react-dom/client';
+import {lazy,Suspense} from 'react';
 import {FarmBoundary} from './FarmBoundary.tsx';
 import EstateApp from './v5/EstateApp.tsx';
 import './style.css';
 import './v5/estate.css';
-createRoot(document.getElementById('root')!).render(<FarmBoundary><EstateApp/></FarmBoundary>);
+const ConvoyApp=lazy(()=>import('./v7/ConvoyApp.tsx'));
+const HarvestVisitApp=lazy(()=>import('./v7/HarvestVisitApp.tsx'));
+const params=new URLSearchParams(window.location.search);
+const destination=params.has('harvest')?<HarvestVisitApp/>:params.has('convoy')?<ConvoyApp/>:<EstateApp/>;
+createRoot(document.getElementById('root')!).render(<FarmBoundary><Suspense fallback={<p className="farm-loading">正在准备小家…</p>}>{destination}</Suspense></FarmBoundary>);

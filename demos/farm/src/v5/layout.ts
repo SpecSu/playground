@@ -215,7 +215,7 @@ export function validateLayout(layout:Layout,actors:GridPoint[]=INITIAL_ACTOR_PO
     if(ids.has(building.id)||!building.id) reasons.push('设施ID重复或为空');
     ids.add(building.id);
     if(!cell(building)||![0,90,180,270].includes(building.rotation)||!BUILDING_RULES[building.kind]) {reasons.push('设施坐标或类型无效');continue;}
-    if(!Number.isSafeInteger(building.paidCost)||building.paidCost<0) reasons.push('已付材料账目无效');
+    if(!Number.isSafeInteger(building.paidCost)||building.paidCost<0) reasons.push('已付金币账目无效');
     if(building.capacity!==BUILDING_RULES[building.kind].capacity) reasons.push('设施容量与规则不符');
     const footprint=buildingFootprint(building);
     for(const p of footprint) {
@@ -229,7 +229,7 @@ export function validateLayout(layout:Layout,actors:GridPoint[]=INITIAL_ACTOR_PO
     for(const door of building.doors) {
       if(building.kind!=='shelter'||!cell(door)||!pointOnBoundary(building,door)||!isWalkable(layout,door)) reasons.push('入口须在棚外相邻的合法陆地');
       if(doorIds.has(door.id)||doorCells.has(key(door))) reasons.push('入口重复');
-      if(!Number.isSafeInteger(door.paidCost)||door.paidCost<0) reasons.push('入口材料账目无效');
+      if(!Number.isSafeInteger(door.paidCost)||door.paidCost<0) reasons.push('入口金币账目无效');
       doorIds.add(door.id);doorCells.add(key(door));
     }
   }
@@ -272,7 +272,7 @@ export function previewEdit(layout:Layout,edit:LayoutEdit,context:PreviewContext
   if(context.locked) reasons.push('事件进行中，布局已锁定');
   if(context.baseVersion!==undefined&&context.baseVersion!==layout.version) reasons.push('布局版本已变更，请重新预览');
   if(layout.construction) reasons.push('已有一项工程正在施工');
-  if(!Number.isSafeInteger(context.materials)||context.materials<0) reasons.push('材料余额无效');
+  if(!Number.isSafeInteger(context.materials)||context.materials<0) reasons.push('金币余额无效');
   const target='id' in edit?after.buildings.find(b=>b.id===edit.id):undefined;
   if(edit.type==='place') {
     if(edit.kind==='factory'&&layout.buildings.some(b=>b.kind==='factory'))reasons.push('当前原型每档仅支持一座饲料厂，请搬迁已有工厂');
@@ -335,7 +335,7 @@ export function previewEdit(layout:Layout,edit:LayoutEdit,context:PreviewContext
   } else reasons.push('未知布局操作');
   const validation=validateLayout(after,actors);
   reasons.push(...validation.reasons);
-  if(cost>context.materials) reasons.push('材料不足');
+  if(cost>context.materials) reasons.push('金币不足');
   // During relocation both the old footprint and the future footprint coexist.
   // Verify that this reservation cannot seal the sole existing evacuation route.
   if(!reasons.length&&(edit.type==='place'||edit.type==='move')) {

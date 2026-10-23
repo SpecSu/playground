@@ -1,3 +1,6 @@
+import {encounterCommand,type EncounterState} from '../v7/encounter.ts';
+import {v7Command,advanceV7Recovery,recoveryPoint,type V7State} from './v7-economy.ts';
+import {observeV7Raid} from './v7-risk.ts';
 import {initialOpening,advanceOpening,skipOpening,selectOpeningGuardian,completeOpening,type OpeningState} from './opening.ts';
 import {advancePlayer,findPlayerPath} from './player-navigation.ts';
 import {findActorPath} from './actor-navigation.ts';
@@ -15,7 +18,7 @@ import type {ProductionState} from './v6-production.ts';
 import {ensureWorkshop,workshopCommand,workshopTactic,type WorkshopState} from './workshop.ts';
 export type EstateAnimal={husbandry?:AnimalHusbandry;id:string;name:string;personality:Personality;preference:Action;color:string;appearance:'plain'|'starlit';life:LifeState;position:GridPoint;path:GridPoint[];following:boolean;memorial?:{at:number;eventId:string};restAssignment?:{buildingId:string;doorId:string;slot:number;door:GridPoint;phase:'walk'|'admitted';ordered:boolean;admitMs:number};offlineNeeds?:{pulseAt:number;hunger:number;energy:number}};
 export type EstateJob={id:string;type:'feed'|'refill'|'delivery'|'survey';target?:string;food?:'milk'|'feed';progress:number;phase:'walk'|'act'|'out'|'unload'|'back';to:GridPoint;source?:GridPoint;rounds?:number;carried?:number};
-export type Profile={production?:ProductionState;workshop?:WorkshopState;economy?:HerdEconomy;upgrades?:FarmUpgrades;raidCycle?:RaidCycle;id:'home'|'lab';journey?:JourneyState;runId?:string;createdAt:number;lastSeenAt:number;lastPulseAt:number;onlineMs:number;session:string;opening?:OpeningState;openingActed?:boolean;openingRetreatMs?:number;tutorial:'choose'|'defend'|'done';materials:number;troughFood?:Record<string,number>;inventory:{hand:number;pantry:number;workbenchMs:number};layout:Layout;animals:EstateAnimal[];position:GridPoint;path:GridPoint[];steering?:{direction:GridPoint;at:number};job:EstateJob|null;guardian:GuardianKind|null;guardianAt:GridPoint;guardianBehavior?:'follow'|'station'|'patrol';guardianPath?:GridPoint[];guardianTarget?:GridPoint;guardianPatrolIndex?:number;guardianSwitchAt:number;guardianReadyMs:number;threat:ThreatState|null;lastThreat?:ThreatState;rescueIntent?:{target:string;findBack?:boolean;wolfId?:string};creation:CreationState;creationLayouts?:CreationLayoutReceipt[];milestones:string[];regions:string[];surveyed:boolean;assistance:boolean;nextEventCheckMs:number;lastPlayAt:number;sharedRhythm:boolean;notice:string;events:{id:string;text:string;at:number;layoutVersion?:number}[];factory:{stock:number;ms:number;at:number};lastVisual:{id:string;action:Action|'eat'|'rest';target:string;at:number}|null};
+export type Profile={encounter?:EncounterState;v7?:V7State;production?:ProductionState;workshop?:WorkshopState;economy?:HerdEconomy;upgrades?:FarmUpgrades;raidCycle?:RaidCycle;id:'home'|'lab';journey?:JourneyState;runId?:string;createdAt:number;lastSeenAt:number;lastPulseAt:number;onlineMs:number;session:string;opening?:OpeningState;openingActed?:boolean;openingRetreatMs?:number;tutorial:'choose'|'defend'|'done';materials:number;troughFood?:Record<string,number>;inventory:{hand:number;pantry:number;workbenchMs:number};layout:Layout;animals:EstateAnimal[];position:GridPoint;path:GridPoint[];steering?:{direction:GridPoint;at:number};job:EstateJob|null;guardian:GuardianKind|null;guardianAt:GridPoint;guardianBehavior?:'follow'|'station'|'patrol';guardianPath?:GridPoint[];guardianTarget?:GridPoint;guardianPatrolIndex?:number;guardianSwitchAt:number;guardianReadyMs:number;threat:ThreatState|null;lastThreat?:ThreatState;rescueIntent?:{target:string;findBack?:boolean;wolfId?:string};creation:CreationState;creationLayouts?:CreationLayoutReceipt[];milestones:string[];regions:string[];surveyed:boolean;assistance:boolean;nextEventCheckMs:number;lastPlayAt:number;sharedRhythm:boolean;notice:string;events:{id:string;text:string;at:number;layoutVersion?:number}[];factory:{stock:number;ms:number;at:number};lastVisual:{id:string;action:Action|'eat'|'rest';target:string;at:number}|null};
 export type Estate={version:5;playerId:string;avatar:Avatar;activeProfile:'home'|'lab';profiles:{home:Profile;lab?:Profile};revision:number;legacy?:Farm};
 export type EstateCommand={id:string;type:string;[key:string]:unknown};
 export type EstateReply={state:Estate;accepted:boolean;message:string};
@@ -75,6 +78,7 @@ export function requestRest(p:Profile,animalId:string,ordered=true):{ok:boolean;
 }
 /** One offline absence retains its needs baseline across GETs and stale pulses. */
 export function settleProfileOffline(p:Profile,now:number):void{
+ for(const r of Object.values(p.v7?.recovery??{})){r.remainingOnlineMs=3000;r.lastOnlineMs=p.onlineMs;}
  if(!Number.isFinite(now)||now<=p.lastPulseAt)return;
  ensureFarmCycle(p,now);
  for(const a of p.animals){
@@ -142,15 +146,19 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
  if(p.path.some(q=>!isPlayerWalkable(p.layout,q))){cancelJob(p);p.notice='行走路线已变化，请重新选择';}
  const speed=p.job?.type==='delivery'?1:2.4;
  let routeDistance=0,previous=p.position;for(const point of p.path){routeDistance+=dist(previous,point);previous=point;}
+ const recoveryStartPosition={...p.position};
  const mayWalk=!event||!p.job;
  if(p.steering&&now-p.steering.at>700)delete p.steering;
  if(mayWalk){if(p.steering)p.position=advancePlayer(p.layout,p.position,p.steering.direction,seconds*speed);else walk(p.position,p.path,seconds*speed);}
  const actionMs=mayWalk?Math.max(0,dtMs-routeDistance/speed*1000):0;
  if(event){
+  observeV7Raid(p,event);
+  const recoveryAuthorizedActorId=advanceV7Recovery(p,dtMs,presentation?.ready===true&&!presentation.covered,recoveryStartPosition);
   for(const a of p.animals)if(a.restAssignment)releaseRest(p,a.id);
   const before=new Map(p.animals.map(a=>[a.id,{...a.position}]));
   const rescue=p.rescueIntent;
-  p.threat=stepThreat(event,p.layout,{dt:seconds,playerPosition:p.position,rescueActorId:rescue?.target,findBackActorId:rescue?.findBack?rescue.target:undefined,driveOff:rescue?.wolfId});
+  p.threat=stepThreat(event,p.layout,{dt:seconds,playerPosition:p.position,rescueActorId:rescue?.target,findBackActorId:rescue?.findBack?rescue.target:undefined,driveOff:rescue?.wolfId,recoveryAuthorizedActorId});
+  observeV7Raid(p,p.threat);
   for(const a of p.animals){
    if(a.memorial){a.path=[];a.following=false;continue;}
    const actor=p.threat.actors.find(actor=>actor.id===a.id);a.path=[];
@@ -161,6 +169,7 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
   }
   if(p.threat.guardian)p.guardianAt={...p.threat.guardian.position};
  }else{
+  advanceV7Recovery(p,dtMs,presentation?.ready===true&&!presentation.covered,recoveryStartPosition);
   const entries=shelterEntries(p.layout),slots=new Set<string>(),servedDoors=new Set<string>();
   for(const a of p.animals){
    const r=a.restAssignment;if(!r)continue;
@@ -173,6 +182,7 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
   for(const a of p.animals){
    if(a.memorial){releaseRest(p,a.id);a.path=[];a.following=false;continue;}
    if(a.id===feedTarget){a.path=[];a.life=advanceLife(a.life,{now,dtMs,sessionId:p.session});continue;}
+   if(p.v7?.recovery[a.id]){a.path=[];a.following=false;a.life=advanceLife(a.life,{now,dtMs,sessionId:p.session});continue;}
    if(!a.restAssignment&&a.life.energy<30)requestRest(p,a.id,false);
    let r=a.restAssignment,target:GridPoint|undefined;
    if(r&&r.phase==='walk'){
@@ -213,7 +223,7 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
     const result=feedingResult(a.life,{now,food:job.food!,manual:true});
     if(result.accepted){a.life=result.life;p.inventory.hand--;p.lastVisual={id:job.id,action:'eat',target:a.id,at:now};remember(p,job.id,`${a.name}吃到了${job.food==='milk'?'奶':'饲料'} · ${result.message}`,now);
      if(!p.milestones.includes(`fed-${a.id}`))p.milestones.push(`fed-${a.id}`);
-     if(p.animals.every(animal=>p.milestones.includes(`fed-${animal.id}`)))milestone(p,'first-meal',8,'第一顿完成 · +8材料',now);
+     if(p.animals.every(animal=>p.milestones.includes(`fed-${animal.id}`)))milestone(p,'first-meal',8,'第一顿完成 · +8金币',now);
     }else p.notice=result.message;
     cancelJob(p);
    }}
@@ -297,8 +307,8 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
   walk(p.guardianAt,p.guardianPath,allowance);
   if(behavior==='patrol'&&!p.guardianPath.length&&p.guardianTarget&&dist(p.guardianAt,p.guardianTarget)<.001)p.guardianPatrolIndex=((p.guardianPatrolIndex??0)+1)%4;
  }
- const region=regionAt(cell(p.position));if(isOwned(p.layout,cell(p.position))&&!p.regions.includes(region)){p.regions.push(region);if(['meadow','shore','home'].every(r=>p.regions.includes(r)))milestone(p,'walk-home',8,'生活路线走通 · +8材料',now);}
- for(const landmark of newlyReachedLandmarks(p)){p.journey??={discovered:[]};p.journey.discovered.push(landmark.id);milestone(p,`discovery-${landmark.id}`,landmark.reward,`发现${landmark.name} · +${landmark.reward}材料`,now);}
+ const region=regionAt(cell(p.position));if(isOwned(p.layout,cell(p.position))&&!p.regions.includes(region)){p.regions.push(region);if(['meadow','shore','home'].every(r=>p.regions.includes(r)))milestone(p,'walk-home',8,'生活路线走通 · +8金币',now);}
+ for(const landmark of newlyReachedLandmarks(p)){p.journey??={discovered:[]};p.journey.discovered.push(landmark.id);milestone(p,`discovery-${landmark.id}`,landmark.reward,`发现${landmark.name} · +${landmark.reward}金币`,now);}
  settleFarmProducts(p,now);advanceFarmRaids(p,now,presentation);
 }
 export function commandEstate(original:Estate,c:EstateCommand,now:number):EstateReply{
@@ -307,7 +317,11 @@ export function commandEstate(original:Estate,c:EstateCommand,now:number):Estate
  if(c.actor&&c.actor!==s.playerId&&c.type!=='creation')return reject('本地访客投影不能操作主人的动物或库存');
  if(!['enter','profile','avatar'].includes(c.type)&&p.session&&c.session!==p.session)return reject('这段会话已更新，请重新进入');
  if(p.opening&&p.tutorial!=='done'&&p.opening.stage!=='defend'&&!['enter','pulse','skipOpening','guardian','profile','finishTutorial','resetProfile'].includes(c.type))return reject('先看完或跳过开场，再一起照顾幼崽');
- ensureFarmCycle(p,now);ensureWorkshop(p,now);
+ ensureFarmCycle(p,now);ensureWorkshop(p,now);settleFarmProducts(p,now);
+ const encounter=encounterCommand(p,c,now,s.avatar);
+ if(encounter){s.revision++;p.notice=encounter.message;return {state:s,accepted:encounter.accepted,message:encounter.message};}
+ const economyCommand=v7Command(p,c,now);
+ if(economyCommand){s.revision++;p.notice=economyCommand.message;return {state:s,accepted:economyCommand.accepted,message:economyCommand.message};}
  const workshop=workshopCommand(p,c,now);
  if(workshop){s.revision++;p.notice=workshop.message;return {state:s,accepted:workshop.accepted,message:workshop.message};}
  const cycle=farmCycleCommand(p,c,now);
@@ -334,7 +348,7 @@ export function commandEstate(original:Estate,c:EstateCommand,now:number):Estate
   if(magnitude)p.steering={direction:{x:direction.x/magnitude,z:direction.z/magnitude},at:now};else delete p.steering;message='';
  }else if(c.type==='move'){
   if(c.session!==p.session)return reject('会话已更新');const q=c.to as GridPoint;if(!q||!Number.isFinite(q.x)||!Number.isFinite(q.z))return reject('请选择可走的地面');const path=findPlayerPath(p.layout,p.position,cell(q));if(!path)return reject('这里被设施或水域挡住，换一条路吧');cancelJob(p);delete p.steering;p.path=path;message='正在走过去';
- }else if(c.type==='cancel'){if(c.jobId!==undefined&&c.jobId!==p.job?.id)return reject('这项行动已经变化，旧取消请求不会影响新行动');cancelJob(p);message='取消了这次行动，食物不会扣除';}
+ }else if(c.type==='cancel'){if(c.jobId!==undefined&&c.jobId!==p.job?.id)return reject('这项行动已经变化，旧取消请求不会影响新行动');cancelJob(p);p.rescueIntent=undefined;for(const r of Object.values(p.v7?.recovery??{}))r.remainingOnlineMs=3000;message='取消了这次行动，食物不会扣除';}
  else if(c.type==='feed'){
   if(p.job?.type==='feed'&&p.job.target!==c.target)cancelJob(p);if(p.job)return reject('先完成或取消手上的行动');const a=p.animals.find(a=>a.id===c.target&&!a.memorial&&!p.threat?.actors.some(t=>t.id===a.id&&t.status==='memorial'));if(!a)return reject('先选一只在家的羊');if(p.inventory.hand<1)return reject('背包空了，去工作台免费补充');const food=c.food??(a.life.stage==='baby'?'milk':'feed');if(food!=='milk'&&food!=='feed')return reject('请选择适配食物');const check=feedingResult(a.life,{now,food});if(!check.accepted)return reject(check.message);releaseRest(p,a.id);const to=nearestApproach(p,a.position);if(!to)return reject('走不到它身边，请先连通道路');p.path=to.path!;p.job={id:c.id,type:'feed',target:a.id,food,progress:0,phase:'walk',to:to.q};message=`LX走近${a.name}再${food==='milk'?'喂奶':'喂食'}`;
  }else if(c.type==='refill'){
@@ -359,21 +373,26 @@ export function commandEstate(original:Estate,c:EstateCommand,now:number):Estate
  }else if(c.type==='rehearse'||c.type==='challenge'){
   if(!p.guardian)return reject('先选一位守护伙伴');if(p.guardianReadyMs>0)return reject('伙伴还在准备换岗');if(p.threat)return reject('先在守护面板收好当前事件记录');const challenge=c.type==='challenge';if(challenge&&(p.id!=='lab'||c.confirmed!==true||!Array.isArray(c.participants)||!c.participants.length))return reject('真实风险仅在独立演示档明确选择名单后开启');p.threat=createThreat({id:c.id,seed:typeof c.seed==='number'?c.seed:17,mode:challenge?'challenge':'rehearsal',actors:p.animals.filter(a=>!a.memorial).map(a=>({id:a.id,position:cell(a.position),participant:challenge&&(c.participants as string[]).includes(a.id)})),guardian:p.guardian,guardianPosition:cell(p.guardianAt),challengeAuthorized:challenge,confirmedParticipants:challenge?c.participants as string[]:undefined,upgrades:threatUpgrades(p),tactic:workshopTactic(p)},p.layout);if(p.job?.type!=='delivery')cancelJob(p);message=challenge?'独立演示挑战开始 · 仅确认名单承担风险':'无损演练开始，看它们沿实际路线回家';
  }else if(c.type==='endEvent'){
-  if(!p.threat||p.threat.phase!=='complete')return reject('先完成当前事件或救援');if(p.threat.actors.some(a=>a.status==='lost'))return reject('还有走失的伙伴，先选择免费找回');for(const a of p.animals){const outcome=p.threat.actors.find(t=>t.id===a.id);if(outcome?.status==='memorial'){a.memorial={at:now,eventId:p.threat.id};a.path=[];continue;}if(!isWalkable(p.layout,cell(a.position))){const actor=p.threat.actors.find(t=>t.id===a.id);const b=p.layout.buildings.find(b=>b.id===actor?.reservation?.buildingId);const q=b&&buildingApproaches(p.layout,b)[0];a.position=q?{...q}:{x:4,z:4};}a.path=[];}if(p.threat.mode==='rehearsal'&&!p.milestones.includes('journey-rehearsed'))p.milestones.push('journey-rehearsed');p.lastThreat=p.threat;p.threat=null;finishFarmRaid(p);p.rescueIntent=undefined;if(p.job?.type!=='delivery')cancelJob(p);message=p.lastThreat.mode==='rehearsal'?'演练记录已保存，回到安心生活':'守护记录已保存，继续收获和建设小家';
+  if(!p.threat||p.threat.phase!=='complete')return reject('先完成当前事件或救援');if(p.threat.actors.some(a=>a.status==='lost'))return reject(p.threat.pressureBand?'还有走失动物；先完成3秒营救并支付16金币和4生产粮':'还有走失的伙伴，先选择免费找回');for(const a of p.animals){const outcome=p.threat.actors.find(t=>t.id===a.id);if(outcome?.status==='memorial'){a.memorial={at:now,eventId:p.threat.id};a.path=[];continue;}if(!isWalkable(p.layout,cell(a.position))){const actor=p.threat.actors.find(t=>t.id===a.id);const b=p.layout.buildings.find(b=>b.id===actor?.reservation?.buildingId);const q=b&&buildingApproaches(p.layout,b)[0];a.position=q?{...q}:{x:4,z:4};}a.path=[];}if(p.threat.mode==='rehearsal'&&!p.milestones.includes('journey-rehearsed'))p.milestones.push('journey-rehearsed');p.lastThreat=p.threat;p.threat=null;finishFarmRaid(p);p.rescueIntent=undefined;if(p.job?.type!=='delivery')cancelJob(p);message=p.lastThreat.mode==='rehearsal'?'演练记录已保存，回到安心生活':'守护记录已保存，继续收获和建设小家';
  }else if(c.type==='finishTutorial'){
   if(p.tutorial!=='defend')return reject('先选择伙伴');if(p.threat?.phase!=='complete')return reject('伙伴正在护送，请等大家回到棚里');if(p.opening&&p.opening.stage!=='done')return reject('狼正在退走，再等一小会儿');p.tutorial='done';p.opening=completeOpening(p.opening??initialOpening('defend'));if(p.threat){for(const a of p.animals){if(!isWalkable(p.layout,cell(a.position))){const actor=p.threat.actors.find(t=>t.id===a.id);const b=p.layout.buildings.find(b=>b.id===actor?.reservation?.buildingId);const q=b&&buildingApproaches(p.layout,b)[0];a.position=q?{...q}:{x:4,z:4};}a.path=[];}p.lastThreat=p.threat;}p.threat=null;if(p.job?.type!=='delivery')cancelJob(p);message='伙伴守住了小家，现在给幼崽第一口奶';
- }else if(c.type==='rescue'){
-  if(!p.threat)return reject('现在没有需要救援的事件');p.rescueIntent={target:String(c.target),findBack:c.findBack===true,wolfId:typeof c.wolfId==='string'?c.wolfId:undefined};message='靠近后持续救援，安全模式可以免费找回';
+ }else if(c.type==='rescue'||c.type==='v7-recover'){
+  const recovery=p.v7?.recovery[String(c.target)];
+  if(!p.threat&&!recovery)return reject('现在没有需要救援或治疗的动物');
+  if(c.type==='v7-recover'&&!recovery)return reject('这只动物当前不需要付费恢复');
+  p.rescueIntent={target:String(c.target),findBack:recovery?.kind==='lost'||c.findBack===true,wolfId:typeof c.wolfId==='string'?c.wolfId:undefined};
+  if(recovery){const target=recoveryPoint(p,String(c.target));const approach=target&&nearestApproach(p,target);if(approach)p.path=approach.path??[];message=recovery.kind==='injury'?'走近后连续照料3秒；完成时支付8金币和2生产粮':'走近后连续营救3秒；完成时支付16金币和4生产粮';}
+  else message='靠近后持续救援，安全模式可以免费找回';
  }else if(c.type==='layout'){
-  const edit=c.edit as LayoutEdit;if(!edit||typeof edit!=='object')return reject('请选择合法设施操作');const r=commitEdit(p.layout,edit,{eventId:c.id,materials:p.materials,baseVersion:Number(c.baseVersion),actors:layoutActors(p),surveyed:p.surveyed,locked:!!p.threat});if(!r.ok)return reject(r.reasons.join('；'));p.layout=r.layout;p.materials+=r.materialDelta;milestone(p,'arrange',12,'第一次布置小家 · +12材料',now);message='方案已确认，施工只在在线时推进';
+  const edit=c.edit as LayoutEdit;if(!edit||typeof edit!=='object')return reject('请选择合法设施操作');const r=commitEdit(p.layout,edit,{eventId:c.id,materials:p.materials,baseVersion:Number(c.baseVersion),actors:layoutActors(p),surveyed:p.surveyed,locked:!!p.threat});if(!r.ok)return reject(r.reasons.join('；'));p.layout=r.layout;p.materials+=r.materialDelta;milestone(p,'arrange',12,'第一次布置小家 · +12金币',now);message='方案已确认，施工只在在线时推进';
  }else if(c.type==='cancelBuild'){
-  const r=cancelConstruction(p.layout,c.id);if(!r.ok)return reject(r.reasons.join('；'));p.layout=r.layout;p.materials+=r.materialDelta;message='施工取消，预留材料退回一次';
+  const r=cancelConstruction(p.layout,c.id);if(!r.ok)return reject(r.reasons.join('；'));p.layout=r.layout;p.materials+=r.materialDelta;message='施工取消，预留金币退回一次';
  }else if(c.type==='survey'){
   if(p.position.x<10)return reject('走到东侧边界再勘察');cancelJob(p);p.job={id:c.id,type:'survey',to:p.position,progress:0,phase:'act'};message='在边界观察5秒';
  }else if(c.type==='delivery'){
   const f=p.layout.buildings.find(b=>b.kind==='factory'),t=p.layout.buildings.find(b=>b.kind==='trough'&&(c.target===undefined||b.id===c.target));const source=f&&buildingApproaches(p.layout,f)[0],to=t&&buildingApproaches(p.layout,t)[0];if(!source||!to||!findPath(p.layout,source,to)||p.factory.stock<1)return reject('需要已连通的工厂、食槽与食物库存');cancelJob(p);p.path=pathTo(p,source)??[];p.job={id:c.id,type:'delivery',target:t!.id,source,to,progress:0,phase:'walk',rounds:2,carried:0};message='LX每次搬3份，按实际路线装卸配送';
  }else if(c.type==='creation'){
-  const r=applyEstateCreation(p,s.playerId,{command:c.command as CreationCommand,actor:typeof c.actor==='string'?c.actor:undefined,capture:c.capture&&typeof c.capture==='object'?c.capture as WorkCapture:undefined},now);s.profiles[s.activeProfile]=r.profile;if(r.ok&&r.profile.layout.construction&&!p.layout.construction)milestone(r.profile,'arrange',12,'第一次布置小家 · +12材料',now);if(r.ok&&(c.command as CreationCommand)?.type==='themeApply')remember(r.profile,c.id,'应用了喜欢的小家主题',now);if(!r.ok){s.revision++;return {state:s,accepted:false,message:r.message};}message=r.message;
+  const r=applyEstateCreation(p,s.playerId,{command:c.command as CreationCommand,actor:typeof c.actor==='string'?c.actor:undefined,capture:c.capture&&typeof c.capture==='object'?c.capture as WorkCapture:undefined},now);s.profiles[s.activeProfile]=r.profile;if(r.ok&&r.profile.layout.construction&&!p.layout.construction)milestone(r.profile,'arrange',12,'第一次布置小家 · +12金币',now);if(r.ok&&(c.command as CreationCommand)?.type==='themeApply')remember(r.profile,c.id,'应用了喜欢的小家主题',now);if(!r.ok){s.revision++;return {state:s,accepted:false,message:r.message};}message=r.message;
  }else if(c.type==='assistance'){p.assistance=c.enabled===true;message=p.assistance?'开启基础提醒；建设与风险仍需你确认':'关闭基础提醒';}
  else return reject('此版本不接受这个指令');
  settleFarmProducts(currentProfile(s),now);

@@ -5,9 +5,10 @@ import {createThreat,guardianCommand,stepThreat,type CreateThreatOptions} from '
 const T=1_800_000_000_000;
 const herd=Array.from({length:3},(_,i)=>({id:`a${i}`,rarity:1}));
 async function api(){const module=await import('../src/v5/raid-cycle.ts').catch(()=>null);assert.ok(module,'a persisted online raid cycle must exist');return module;}
-test('V6 natural risk ignores wealth and rarity and uses one wolf at 8–14 minutes',async()=>{
+test('V7 natural risk uses herd rarity pressure while wealth does not enter risk',async()=>{
  const {raidRisk}=await api();const base=raidRisk(herd),more=raidRisk([...herd,...herd.map(a=>({...a,id:a.id+'b'}))]),rare=raidRisk(herd.map(a=>({...a,rarity:5})));
- assert.equal(more.count,6);assert.deepEqual(rare,base);for(const r of [base,more,rare]){assert.equal(r.wolves,1);assert.equal(r.minIntervalMs,480000);assert.equal(r.maxIntervalMs,840000);}
+ assert.equal(more.count,6);assert.equal(base.wolves,1);assert.equal(base.minIntervalMs,480000);assert.equal(base.maxIntervalMs,840000);assert.equal(more.band,'medium');assert.equal(more.wolves,2);assert.equal(more.minIntervalMs,300000);assert.equal(more.maxIntervalMs,540000);assert.equal(rare.pressure,12);assert.equal(rare.band,'high');assert.equal(rare.wolves,3);assert.equal(rare.minIntervalMs,180000);assert.equal(rare.maxIntervalMs,360000);
+ const wealthy=herd.map(a=>({...a,coins:999999,inventory:{gold:999}}));assert.deepEqual(raidRisk(wealthy),base);
 });
 test('pre-care, covered and offline time cannot turn a peaceful visit into an instant attack',async()=>{
  const {createRaidCycle,advanceRaidCycle}=await api();const start=createRaidCycle(42,T,0);

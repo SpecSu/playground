@@ -4,7 +4,7 @@ export type DevelopmentKind='tower'|'shelter'|'factory';
 export type DevelopmentChoice={kind:DevelopmentKind;title:string;description:string;tradeoff:string;anchor:GridPoint};
 export const DEVELOPMENT_CHOICES:DevelopmentChoice[]=[
  {kind:'tower',title:'看得更远',description:'喵脆角站到观察台附近，实际视距增加4格。',tradeoff:'仍会被设施遮挡；狗和奶蛙不会因此获得额外视距。',anchor:{x:8,z:1}},
- {kind:'shelter',title:'多一处安全家',description:'新增6个保护位，按实际路程分流到可达入口。',tradeoff:'需要24材料；位置比数量重要，远端仍可能排队。',anchor:{x:7,z:4}},
+ {kind:'shelter',title:'多一处安全家',description:'新增6个保护位，按实际路程分流到可达入口。',tradeoff:'需要24金币；位置比数量重要，远端仍可能排队。',anchor:{x:7,z:4}},
  {kind:'factory',title:'照料更从容',description:'每60秒准备3份饲料，最多储存12份，LX可搬去食槽。',tradeoff:'工厂到食槽越远，配送越慢；仍保留免费基础食物。',anchor:{x:3,z:7}},
 ];
 export type DevelopmentPlan={edit:Extract<LayoutEdit,{type:'place'}>|null;preview:LayoutPreview|null;reason?:string};

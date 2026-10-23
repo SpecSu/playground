@@ -45,7 +45,7 @@ export default function QuickBuildPanel({profile:p,busy,placementPoint,send,onGh
  const preview=useMemo(()=>selection?previewEdit(p.layout,selection.edit,{materials:p.materials,baseVersion:selection.version,actors:developmentActors(p),surveyed:p.surveyed,locked:!!p.threat}):null,[legalityKey,selection]);
  const blocked=!!p.threat||!!p.layout.construction;
  const selected=choices.find(choice=>choice.kind===selection?.edit.kind);
- const shortReason=p.threat?'先陪大家回家，再布置小家':p.layout.construction?'正在建造，回到场景看看吧':selection&&selection.version!==p.layout.version?'小家刚有变化，请重新选一次':preview&&!preview.ok&&p.materials<preview.cost?`还差${preview.cost-p.materials}份材料，去山谷找找吧`:preview&&!preview.ok?'这里放不下，拖到空地再试试':reason;
+ const shortReason=p.threat?'先陪大家回家，再布置小家':p.layout.construction?'正在建造，回到场景看看吧':selection&&selection.version!==p.layout.version?'小家刚有变化，请重新选一次':preview&&!preview.ok&&p.materials<preview.cost?`还差${preview.cost-p.materials}金币，去山谷找找吧`:preview&&!preview.ok?'这里放不下，拖到空地再试试':reason;
  useEffect(()=>{onGhost(selection&&!blocked?{...selection.edit,valid:!!preview?.ok,interactive:true}:undefined);return()=>onGhost();},[selection,blocked,preview?.ok,onGhost]);
  useEffect(()=>{if(!placementPoint||!Number.isFinite(placementPoint.x)||!Number.isFinite(placementPoint.z))return;setSelection(old=>old?{...old,edit:{...old.edit,x:Math.round(placementPoint.x),z:Math.round(placementPoint.z)}}:old);},[placementPoint]);
  const choose=(kind:DevelopmentKind)=>{
@@ -54,12 +54,12 @@ export default function QuickBuildPanel({profile:p,busy,placementPoint,send,onGh
  };
  const confirm=()=>{if(submitted.current||busy||blocked||!selection||!preview?.ok)return;submitted.current=true;send('layout',{edit:selection.edit,baseVersion:selection.version});onClose();};
  return <div className={`quick-build-panel ${selection?'is-placing':''}`} data-quick-build-panel>
-  {!selection&&<div className="quick-build-caption"><span>选一件，放进小家</span><small>现有 {p.materials} 份材料</small></div>}
-  {!selection&&<div className="quick-build-choices">{choices.map(choice=><button key={choice.kind} type="button" className={selected?.kind===choice.kind?'selected':''} data-quick-kind={choice.kind} disabled={busy||blocked} aria-pressed={selected?.kind===choice.kind} onClick={()=>choose(choice.kind)}><FacilityArt kind={choice.kind}/><b>{choice.name}</b><span>{choice.effect}</span><small>{BUILDING_RULES[choice.kind].cost} 材料</small></button>)}</div>}
+  {!selection&&<div className="quick-build-caption"><span>选一件，放进小家</span><small>现有 {p.materials} 金币</small></div>}
+  {!selection&&<div className="quick-build-choices">{choices.map(choice=><button key={choice.kind} type="button" className={selected?.kind===choice.kind?'selected':''} data-quick-kind={choice.kind} disabled={busy||blocked} aria-pressed={selected?.kind===choice.kind} onClick={()=>choose(choice.kind)}><FacilityArt kind={choice.kind}/><b>{choice.name}</b><span>{choice.effect}</span><small>{BUILDING_RULES[choice.kind].cost} 金币</small></button>)}</div>}
   {selection&&<div className="quick-build-drag-title" data-placement-controls><b>{selected?.name}</b><span>拖动虚影，放到喜欢的位置</span><button data-placement-cancel onClick={()=>{setSelection(null);setReason('');submitted.current=false;}}>换一个</button></div>}
-  {shortReason?<p className="quick-build-status" role="status">{shortReason}</p>:selection?<p className="quick-build-status" role="status">绿色可放 · 拖到屏幕边缘移动视野</p>:<p className="quick-build-status">先看看位置，确认后才花材料</p>}
-  {selection&&!blocked&&<button type="button" className="quick-build-confirm" data-command="quick-build-confirm" disabled={busy||!preview?.ok} onClick={confirm}>建这里 · 花{preview?.cost??0}材料</button>}
-  {selection&&preview&&p.materials<preview.cost&&onExplore&&<button className="quick-build-explore" data-quick-explore onClick={onExplore}>去探索找材料</button>}
+  {shortReason?<p className="quick-build-status" role="status">{shortReason}</p>:selection?<p className="quick-build-status" role="status">绿色可放 · 拖到屏幕边缘移动视野</p>:<p className="quick-build-status">先看看位置，确认后才花金币</p>}
+  {selection&&!blocked&&<button type="button" className="quick-build-confirm" data-command="quick-build-confirm" disabled={busy||!preview?.ok} onClick={confirm}>建这里 · 花{preview?.cost??0}金币</button>}
+  {selection&&preview&&p.materials<preview.cost&&onExplore&&<button className="quick-build-explore" data-quick-explore onClick={onExplore}>去探索找金币</button>}
   {p.layout.construction&&<button type="button" className="quick-build-confirm" onClick={onClose}>回去看建造</button>}
   {!selection&&<div className="quick-build-links"><button type="button" data-quick-planner onClick={onPlanner}>自己摆放</button>{onTheme&&<button type="button" data-quick-theme onClick={onTheme}>做件作品</button>}{onExplore&&<button type="button" data-quick-explore onClick={onExplore}>去探索</button>}</div>}
  </div>;

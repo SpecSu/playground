@@ -1,3 +1,29 @@
+# V7 当前验证 · 2026-10-23
+
+本节覆盖当前实现；下方V5/V6为历史记录，其“未实现”清单不代表当前状态。完整可玩规则与明确缺口见 [V7_GAMEPLAY.md](docs/V7_GAMEPLAY.md)。
+
+| 检查 | 最终结果 |
+|---|---|
+| 全量规则/SQLite/实际组件与Three方法回归 | 586/586通过，0失败、0跳过 |
+| lint / typecheck | 均通过 |
+| 生产构建 | 1875模块，输出隔离.local/v7-dist |
+| 实际HTTP经济 | 购买/预览/取消/孵化、出售、合成、粮食、重复请求、身份关系、未连接生成不扣费、全路由同源限制通过 |
+| 静态资源/API | 28项逐字节匹配；旧接口封闭、存档隔离、显式重置及重试通过 |
+| 实际生产React（Node DOM） | 原开场/小卡/走近3秒喂养/切目标取消/布置虚影控制/披风制作装配/主题/换分身/回放/重置通过 |
+| 新生产入口（Node DOM） | 分享链接直接打开采收页；新设备不触发自己的开场；连续点击只一次实际扣增 |
+| 同服务双cookie护送HTTP | 分工、真实开门、技能、暂停、重连、实际送达通过；无奖励、无资产转移 |
+| 双存档采收HTTP | 成熟普通料累计10%、主人扣访客增、每日限额、稀有和入库保护、丢响应重试、撤权通过 |
+| 旧SQLite复制迁移 | 原库只读，副本两份存档六只动物；身份、关系、布局、金币和事件时钟保持；副本integrity ok |
+| 独立审查 | 修正活动事件生产、旧孵化预览、按品质20%掠夺、治疗移动计时、入口与权限、护送方向/门碰撞；复核无未处理P1/P2 |
+
+机器可读证据：[verification/v7.json](verification/v7.json)。所有交互测试使用独立5193/5194和独立SQLite；不重置或推进用户生产存档。生成服务未连接；未创建凭据、未付费、未发送视频生成请求。
+
+Node DOM的WebGL上下文不可用警告符合该测试环境；**这些通过不等于Chrome/WebGL视觉、手机触控或音频验收**。仍无可调用独立Chrome插件入口；未使用CUA、Playwright或其他浏览器绕行。
+
+本机部署与分支推送结果另记于后续本节及verification/v7-live.json，未取得结果前不视为完成。
+
+---
+
 # V5 verification · 2026-10-22
 
 Current source is the existing `codex/animal-farm-companion-demo` worktree, based on8d4cdc2. No old demo, originalGitHub or Sites project changed.

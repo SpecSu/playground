@@ -1,0 +1,12 @@
+{
+  "copy": "/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/v7-migration-2026-10-23T04-50-56-454Z.sqlite",
+  "productionSourceReadOnly": true,
+  "integrity": "ok",
+  "estates": 2,
+  "profiles": 2,
+  "animals": 6,
+  "priorLotsPreserved": 0,
+  "identitiesRelationsLayoutsCoinsAndThreatClocksPreserved": true,
+  "sameTimeSettlementRepeated": true,
+  "resetExecuted": false
+}

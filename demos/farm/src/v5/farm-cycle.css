@@ -44,3 +44,11 @@
 .cycle-wool-grid article small{font-size:10px;line-height:1.4;text-align:center}
 .cycle-more p{overflow-wrap:anywhere}
 .cycle-heading h3{margin:14px 0 8px;font-size:15px}
+.estate-feed .v7-balance{flex-wrap:wrap;padding:10px;border:1px solid #d6e5b530;border-radius:10px;background:#c4d6ad0b;gap:6px}
+.estate-feed .v7-balance small{color:#b5c6a0}.estate-feed .v7-feed{margin:10px 0 16px;font-size:10px}
+.estate-feed .v7-actions{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}.estate-feed .v7-market h3{font-size:13px;font-weight:600;margin:14px 0 8px}
+.estate-feed .v7-market .cycle-wool-grid>button{border:1px solid var(--wool-color);border-radius:9px;min-height:52px;padding:7px 3px;color:#dce7ce;background:#ffffff06}
+.estate-feed .v7-market .cycle-wool-grid>button[aria-pressed=true]{box-shadow:inset 0 0 0 1px var(--wool-color);background:#bdd29a22}.estate-feed .v7-market .cycle-wool-grid>button span{display:block}
+.estate-feed .v7-field{display:flex;flex-direction:column;gap:5px;font-size:10px;flex:1}.estate-feed .v7-field select{width:100%;border:1px solid #d4dfc340;border-radius:8px;background:#26322b;color:#e6eddc;padding:8px;font:inherit;min-height:36px}
+.estate-feed .v7-egg{padding:8px 0;border-bottom:1px solid #ffffff15}.estate-feed .v7-hatch-preview{border:1px solid #dfd29a60;background:#d0c3950b;border-radius:11px;padding:11px;margin:10px 0;line-height:1.65;font-size:11px}
+.estate-feed .v7-hatch-preview p{margin:6px 0;color:#c0cdb2}.estate-feed .v7-producer{padding:8px 0;border-bottom:1px solid #ffffff12}.estate-feed .v7-producer span,.estate-feed .v7-producer small{display:block;font-size:10px;color:#b4c3a5}
