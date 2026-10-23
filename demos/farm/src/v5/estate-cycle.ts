@@ -44,7 +44,7 @@ export function advanceFarmRaids(p:Profile,now:number,presentation?:{ready?:bool
  if(p.job?.type==='delivery'&&p.job.carried)p.factory.stock+=p.job.carried;
  p.job=null;p.path=[];delete p.steering;
  for(const a of living(p)){a.path=[];a.following=false;delete a.restAssignment;a.life.rest={bedId:null,sessionId:null,elapsedMs:0,completed:false};}
- p.threat=createThreat({id:r.launch.id,seed:r.launch.seed,mode:'reassure',actors,guardian:p.guardian!,guardianPosition:{...p.guardianAt},wolfSpawns:spawns,upgrades:threatUpgrades(p),tactic:workshopTactic(p),pressureBand:r.launch.risk.band},p.layout);
+ p.threat=createThreat({id:r.launch.id,seed:r.launch.seed,mode:'reassure',actors,guardian:p.guardian!,guardianPosition:{...p.guardianAt},guardianLookout:p.guardianLookout,wolfSpawns:spawns,upgrades:threatUpgrades(p),tactic:workshopTactic(p),pressureBand:r.launch.risk.band},p.layout);
  for(const safe of protectedAtOpening){const a=p.threat.actors.find(a=>a.id===safe.animalId)!;a.status='safe';a.reservation={buildingId:safe.buildingId,doorId:safe.doorId,slot:safe.slot};a.enteredAt=0;a.timely=true;}
  beginV7Raid(p,p.threat);
  p.raidCycle=markRaidStarted(p.raidCycle,r.launch.id,now,p.onlineMs);p.notice=`${spawns.length}只狼从边缘靠近，带大家回保护区`;

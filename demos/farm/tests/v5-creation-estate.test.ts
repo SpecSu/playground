@@ -161,3 +161,15 @@ test('memorial animal IDs cannot receive help or count as active navigation acto
   const v=visit(p);const denied=run(v.profile,'submitHelp',{visitId:v.visitId,targetId:gone.id,food:'milk'},visitor);assert.equal(denied.ok,false);assert.equal(denied.profile.creation.localVisitors[visitor].food,1);
   const proposed=propose(p);const applied=run(proposed.profile,'acceptProposal',{proposalId:proposed.proposalId});assert.equal(applied.ok,true,applied.message);assert.deepEqual(applied.profile.animals.at(-1),gone);
 });
+
+test('a visitor removal proposal cannot replace the active tower reservation',async()=>{
+ const {startLookout}=await import('../src/v5/lookout.ts');let p=fresh();p.guardian='cat';p.guardianAt={x:7,z:11};p.layout.buildings.push({id:'occupied-watch',kind:'tower',x:7,z:9,rotation:0,paidCost:12,capacity:1,doors:[]});p.guardianLookout=startLookout(p.layout,p.guardianAt,'occupied-watch')!;assert.ok(p.guardianLookout);
+ const v=visit(p,{editTypes:['remove'],budget:0});p=v.profile;const proposed=run(p,'submitProposal',{visitId:v.visitId,baseVersion:p.layout.version,budget:0,scope:['shore'],components:[{id:'remove-occupied',region:'shore',estimatedCost:0,edit:{type:'remove',id:'occupied-watch'}}]},visitor);assert.equal(proposed.ok,true,proposed.message);
+ const r=run(proposed.profile,'acceptProposal',{proposalId:proposed.profile.creation.proposals.at(-1)!.id});assert.equal(r.ok,false);assert.match(r.message,/高台|守望|下台/);assert.deepEqual(r.profile,proposed.profile);
+});
+test('proposal undo cannot remove its tower while the guardian occupies the approach or stairs',async()=>{
+ const {startLookout}=await import('../src/v5/lookout.ts');let p=fresh();p.guardian='cat';p.guardianAt={x:7,z:9};const v=visit(p,{budget:12});p=v.profile;
+ const proposed=run(p,'submitProposal',{visitId:v.visitId,baseVersion:p.layout.version,budget:12,scope:['shore'],components:[{id:'build-watch',region:'shore',estimatedCost:12,edit:{type:'place',id:'proposal-watch',kind:'tower',x:7,z:7}}]},visitor);assert.equal(proposed.ok,true,proposed.message);const proposalId=proposed.profile.creation.proposals.at(-1)!.id;
+ const applied=run(proposed.profile,'acceptProposal',{proposalId});assert.equal(applied.ok,true,applied.message);p=finish(applied.profile);p.guardianLookout=startLookout(p.layout,p.guardianAt,'proposal-watch')!;
+ const r=run(p,'undoProposal',{proposalId});assert.equal(r.ok,false);assert.match(r.message,/高台|守望|下台/);assert.deepEqual(r.profile,p);
+});

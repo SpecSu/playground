@@ -13,7 +13,7 @@ test('opening shows the farm, rustle, approach and startled animals before offer
   assert.equal(state.stage, 'rustle');
   state = advanceOpening(state, 1.3, playing);
   assert.equal(state.stage, 'approach');
-  state = advanceOpening(state, 3, playing);
+  state = advanceOpening(state, 4.5, playing);
   assert.equal(state.stage, 'startle');
   state = advanceOpening(state, 2, playing);
   assert.equal(state.stage, 'choose');
@@ -37,7 +37,7 @@ test('asset loading, a hidden page and a covering panel pause each timed stage',
     initialOpening(),
     advanceOpening(initialOpening(), 1.6, playing),
     advanceOpening(initialOpening(), 2.9, playing),
-    advanceOpening(initialOpening(), 5.9, playing),
+    advanceOpening(initialOpening(), 7.4, playing),
     selectOpeningGuardian(skipOpening(initialOpening()), 'dog'),
   ];
   for (const state of stages) {
@@ -48,7 +48,7 @@ test('asset loading, a hidden page and a covering panel pause each timed stage',
 });
 
 test('skip reaches choice from every pre-choice phase without making a world decision', () => {
-  for (const seconds of [0, 1.6, 2.9, 5.9]) {
+  for (const seconds of [0, 1.6, 2.9, 7.4]) {
     const state = advanceOpening(initialOpening(), seconds, playing);
     const skipped = skipOpening(state);
     assert.equal(skipped.stage, 'choose');
@@ -128,7 +128,7 @@ test('invalid time cannot skip scenes or poison serializable progress', () => {
 });
 
 test('presentation provides normalized animation progress, focus and short actionable captions', () => {
-  const phases = [initialOpening(), advanceOpening(initialOpening(), 1.6, playing), advanceOpening(initialOpening(), 2.9, playing), advanceOpening(initialOpening(), 5.9, playing), skipOpening(initialOpening()), selectOpeningGuardian(skipOpening(initialOpening()), 'dog'), initialOpening('defend'), initialOpening('done')];
+  const phases = [initialOpening(), advanceOpening(initialOpening(), 1.6, playing), advanceOpening(initialOpening(), 2.9, playing), advanceOpening(initialOpening(), 7.4, playing), skipOpening(initialOpening()), selectOpeningGuardian(skipOpening(initialOpening()), 'dog'), initialOpening('defend'), initialOpening('done')];
   for (const state of phases) {
     const presentation = openingPresentation(state);
     assert.ok(presentation.progress >= 0 && presentation.progress <= 1);
@@ -139,7 +139,7 @@ test('presentation provides normalized animation progress, focus and short actio
   assert.equal(choice.requiresChoice, true);
   assert.equal(choice.canSkip, false);
   assert.equal(openingPresentation(initialOpening('defend')).controlsLocked, false);
-  assert.equal(openingPresentation(initialOpening()).controlsLocked, true);
+  assert.equal(openingPresentation(initialOpening()).controlsLocked, false);
   const captions = new Set((['dog', 'cat', 'frog'] as const).map(kind => openingPresentation(selectOpeningGuardian(skipOpening(initialOpening()), kind)).caption));
   assert.equal(captions.size, 3);
 });

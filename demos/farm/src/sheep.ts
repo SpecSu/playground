@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type {Animal,Action} from './model.ts';
-export type SheepAction=Action|'eat'|'rest';
+export type SheepAction=Action|'eat'|'suckle'|'rest';
 const sphere=new THREE.SphereGeometry(1,14,10);
 function ball(parent:THREE.Object3D,color:string,x:number,y:number,z:number,sx:number,sy=sx,sz=sx){
  const mesh=new THREE.Mesh(sphere,new THREE.MeshStandardMaterial({color,roughness:.9}));mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);mesh.castShadow=true;parent.add(mesh);return mesh;
@@ -13,7 +13,7 @@ export function makeSheep(animal:Animal){
  ball(head,'#e6d4b7',0,0,.04,.3,.33,.36);ball(head,'#f0dfc3',0,-.12,.29,.24,.17,.2);
  const ears=[new THREE.Group(),new THREE.Group()];ears.forEach((ear,i)=>{ear.position.set(i===0?-.28:.28,.13,.02);head.add(ear);ball(ear,'#e8cdb4',i===0?-.14:.14,0,0,.23,.085,.12);ball(ear,'#e6b7ae',i===0?-.16:.16,.012,.015,.14,.06,.08);});
  for(const side of [-1,1]){ball(head,'#352e29',side*.185,.06,.295,.046,.063,.034);ball(head,'#ffffff',side*.195,.08,.319,.014);ball(head,'#e8ae9e',side*.21,-.075,.291,.065,.035,.018);}
- ball(head,'#6e5449',0,-.08,.474,.055,.038,.02);
+ ball(head,'#6e5449',0,-.08,.474,.055,.038,.02);const mouth=new THREE.Object3D();mouth.name='feeding-mouth';mouth.position.set(0,-.12,.5);head.add(mouth);
  const legs=Array.from({length:4},(_,i)=>{const leg=new THREE.Group();leg.position.set(i%2?-.34:.34,.62,i<2?-.44:.4);body.add(leg);ball(leg,'#d9c8b0',0,-.19,0,.09,.24,.1);ball(leg,'#6d6354',0,-.4,.015,.115,.09,.13);return leg;});
  const bow=ball(body,animal.color,0,.83,.68,.25,.11,.1);ball(body,animal.color,-.18,.84,.7,.17,.14,.06);ball(body,animal.color,.18,.84,.7,.17,.14,.06);
  const tail=ball(body,'#fff9ed',0,1,-.76,.18,.2,.22);
@@ -26,7 +26,7 @@ export function makeSheep(animal:Animal){
    body.position.y=action==='bounce'?Math.max(0,Math.sin(cycle))*.43*gain:action==='dance'?Math.max(0,Math.sin(cycle))*.12*gain:action==='rest'&&walking<.1?-.08*gain:0;
    body.rotation.z=(action==='dance'?Math.sin(cycle*(independent?.67:.5))*.18*gain:0);
    body.rotation.y=action==='dance'&&independent?Math.sin(cycle*.25)*.65*gain:0;
-   head.rotation.x=action==='eat'?(.45+Math.sin(cycle)*.07)*weight:action==='love'?-.22*gain:Math.sin(speed*2)*.04;grass.visible=action==='eat'&&weight>.05;
+   head.rotation.x=action==='eat'?(.48+Math.sin(speed*5)*.045)*weight:action==='suckle'?(-.13+Math.sin(speed*6)*.018)*weight:action==='love'?-.22*gain:Math.sin(speed*2)*.04;grass.visible=action==='eat'&&weight>.05;
    head.rotation.z=action==='love'?Math.sin(cycle*.25)*.22*gain:0;
    ears.forEach((ear,i)=>{ear.rotation.z=(i?1:-1)*(micro?Math.sin(t*16)*.18:Math.sin(speed*2.8+i)*.045);});
    const gait=reduced?0:walkingDistance===undefined?cycle:walkingDistance/.9*Math.PI*2;
@@ -37,3 +37,4 @@ export function makeSheep(animal:Animal){
    wool.material.color.set(a.appearance==='starlit'?'#fff1cc':'#fff7e6');halo.visible=selected;
  }};
 }
+

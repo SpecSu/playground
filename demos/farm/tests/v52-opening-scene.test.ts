@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createEstate, estateSnapshot} from '../src/v5/estate.ts';
-import {findPath, isWalkable, type GridPoint} from '../src/v5/layout.ts';
+import {findPath, isWalkable, regionAt, type GridPoint} from '../src/v5/layout.ts';
 import {guardianCommand} from '../src/v5/threat.ts';
 import type {OpeningState, OpeningStage} from '../src/v5/opening.ts';
 import {deriveOpeningScene, openingAttention} from '../src/v5/opening-scene.ts';
@@ -33,10 +33,10 @@ test('establish and rustle hide wolves and guardian without touching source stat
 test('approaching wolf walks legal cells from boundary and ends at frozen real spawn', () => {
   const data = sample(), original = data.profile.threat!.wolves[0].position;
   const start = deriveOpeningScene(data, opening('approach',0)).profile.threat!.wolves[0].position;
-  assert.ok(distance(start, original) >= 3);
+  assert.ok(distance(start, original) >= 1);
   assert.ok(data.profile.layout.owned.some(p=>distance(p,start)<.001));
   let prior = start;
-  for (let i=1;i<=30;i++) {
+  for (let i=1;i<=45;i++) {
     const scene = deriveOpeningScene(data, opening('approach', i/10));
     const p = scene.profile.threat!.wolves[0].position;
     onLegalEdge(p,data); assert.ok(distance(prior,p)<=1, 'small samples cannot jump across blockers'); prior=p;
@@ -138,7 +138,8 @@ test('replay defence is a safe isolated visual event, shows chosen ability then 
     const scene=deriveOpeningScene(data,opening('defend',2,kind),{replay:true});
     assert.equal(scene.profile.threat!.mode,'tutorial');
     assert.equal(scene.profile.threat!.rewards,0);
-    assert.deepEqual(scene.profile.threat!.wolves[0].spawn,{x:0,z:4});
+    assert.equal(scene.profile.threat!.wolves.length,2);
+    assert.ok(scene.profile.threat!.wolves.every(w=>regionAt(w.spawn)!=='pen'));
     assert.equal(scene.profile.threat!.guardian?.kind,kind);
     assert.equal(scene.profile.guardian,kind);
     assert.equal(scene.profile.threat!.guardian?.ability,kind==='dog'?'block':kind==='cat'?'gather':'calm');
@@ -193,6 +194,7 @@ test('camera attention follows the presented moving guardian and wolf from the o
     const state=opening('arrival',elapsed,'frog'),scene=deriveOpeningScene(data,state);
     assert.deepEqual(openingAttention(data,state),scene.profile.threat!.guardian!.position);
     const approach=opening('approach',elapsed),wolves=deriveOpeningScene(data,approach).profile.threat!.wolves;
-    assert.deepEqual(openingAttention(data,approach),wolves[0].position);
+    const visible=wolves.filter(w=>w.opening?.visible!==false);
+    assert.deepEqual(openingAttention(data,approach),{x:visible.reduce((n,w)=>n+w.position.x,0)/visible.length,z:visible.reduce((n,w)=>n+w.position.z,0)/visible.length});
   }
 });

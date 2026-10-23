@@ -10,14 +10,16 @@
  * threatSummary(state) -> counts and per-actor factual records
  * evaluateEvacuation({actors,doors}) -> deterministic independent-door benchmark
  */
-import { buildingApproaches, buildingFootprint, isWalkable, lineOfSight, shelterEntries, type GridPoint, type Layout } from './layout.ts';
+import { buildingFootprint, isWalkable, isPlayerWalkable, regionAt, worldCells, lineOfSight, shelterEntries, type GridPoint, type Layout } from './layout.ts';
 import { findActorPath } from './actor-navigation.ts';
+import {advanceLookout,lookoutIsReady,startLookout,towerAccess,type LookoutPoint,type LookoutState} from './lookout.ts';
 import {shieldLayout,shieldSafety,type ShieldTactic,type FoldingShieldState} from './tactical-shield.ts';
 
 export type PressureBand='low'|'medium'|'high';
 export const PRESSURE_RULES={low:{speed:1,windup:2},medium:{speed:1.1,windup:1.8},high:{speed:1.2,windup:1.5}} as const;
 const wolfRules=(s:ThreatState)=>s.mode==='reassure'&&s.pressureBand?PRESSURE_RULES[s.pressureBand]:PRESSURE_RULES.low;
 export type GuardianKind = 'dog' | 'cat' | 'frog';
+export const LOOKOUT_SIGHT_BONUS:Record<GuardianKind,number>={dog:2,cat:4,frog:2};
 export type ThreatMode = 'tutorial' | 'rehearsal' | 'reassure' | 'challenge';
 export type ActorStatus = 'waiting' | 'evacuating' | 'queued' | 'safe' | 'carried' | 'boundary' | 'lost' | 'memorial';
 export type GuardianBehavior = 'patrol' | 'follow' | 'station' | 'emergency' | 'rescue' | 'respond' | 'rest';
@@ -29,7 +31,7 @@ export const THREAT_RULES = {
   rescueWindow: 180, rescueWork: 3, driveOffRange: 1, playerSight: 6, animalSight: 3,
   tutorialRetreat: 20, step: 0.05,
   dog: { speed: 1.8, sight: 6, range: 1, duration: 6, cooldown: 20 },
-  cat: { speed: 2.2, sight: 8, towerBonus: 4, range: 4, duration: 8, cooldown: 12 },
+  cat: { speed: 2.2, sight: 8, towerBonus: LOOKOUT_SIGHT_BONUS.cat, range: 4, duration: 8, cooldown: 12 },
   frog: { speed: 1.2, sight: 5, range: 4, duration: 12, cooldown: 24, bubbleRange: 6, bubbleDuration: 4, bubbleCooldown: 20, bubbleMaxDelay: 2 },
 };
 
@@ -55,7 +57,12 @@ export interface ThreatActor {
   serviceStartedAt: number | null; rescueStartedAt: number | null; rescueRemaining: number | null; rescueProgress: number;
   rescuePoint: GridPoint | null; reattackAfter: number; reason: string;
 }
+export interface OpeningWolfState {
+  entryPath: GridPoint[]; delay: number; phase: 'waiting' | 'sniffing' | 'stalking' | 'holding' | 'engaging';
+  visible: boolean; interceptedAt: number | null; waitingReason?: string;
+}
 export interface ThreatWolf {
+  opening?: OpeningWolfState;
   id: string; position: GridPoint; spawn: GridPoint; path: GridPoint[]; pathIndex: number;
   status: 'approach' | 'windup' | 'grabbing' | 'carrying' | 'boundary' | 'retreated';
   targetDoorId: string | null; targetActorId: string | null; stageProgress: number;
@@ -68,6 +75,7 @@ export interface ThreatDoor {
   serviceActorId: string | null; lastFinishedAt: number;
 }
 export interface GuardianState {
+  lookout?: LookoutState;
   kind: GuardianKind; position: GridPoint; path: GridPoint[]; pathIndex: number;
   behavior: GuardianBehavior; target: GridPoint | null; targetWolfId: string | null;
   targetActorId: string | null; pendingAbility: GuardianAbility | null;
@@ -88,7 +96,7 @@ export interface ThreatState {
 }
 export interface CreateThreatOptions {
   id: string; seed: number; mode: ThreatMode; actors: ThreatActorInput[];
-  guardian?: GuardianKind; guardianPosition?: GridPoint; wolfSpawns?: GridPoint[];
+  guardian?: GuardianKind; guardianPosition?: GridPoint; guardianLookout?:LookoutState; wolfSpawns?: GridPoint[];
   challengeAuthorized?: boolean; confirmedParticipants?: string[]; howled?: boolean; upgrades?:ThreatUpgrades; tactic?:ShieldTactic; pressureBand?:PressureBand;
 }
 export interface ThreatStepInput {
@@ -96,8 +104,8 @@ export interface ThreatStepInput {
   findBackActorId?: string; recoveryAuthorizedActorId?:string; abandonActorId?: string; abandonConfirmed?: boolean;
 }
 export interface GuardianCommand {
-  kind: 'shield' | 'select' | 'follow' | 'station' | 'patrol' | 'block' | 'gather' | 'calm' | 'bubble' | 'rescue';
-  guardian?: GuardianKind; target?: GridPoint; wolfId?: string; actorId?: string;
+  kind: 'lookout' | 'shield' | 'select' | 'follow' | 'station' | 'patrol' | 'block' | 'gather' | 'calm' | 'bubble' | 'rescue';
+  guardian?: GuardianKind; target?: GridPoint; wolfId?: string; actorId?: string; buildingId?:string;
 }
 export interface EvacuationFixture {
   actors: { id: string; doorId: string; arrivalAt?: number; path?: GridPoint[]; pathLength?: number; discoveredAt?: number; reaction?: number; speed?: number }[];
@@ -128,13 +136,23 @@ function reachableWithin(layout: Layout, from: GridPoint, to: GridPoint, range: 
 function guardianSight(s: ThreatState, layout: Layout) {
   const g = s.guardian;
   if (!g) return 0;
-  const tower = g.kind === 'cat' && layout.buildings.some(b => b.kind === 'tower' && buildingApproaches(layout, b).some(p => distance(p, g.position) <= 1));
-  return abilityRules(s,g.kind).sight + (tower ? THREAT_RULES.cat.towerBonus : 0);
+  const tower = lookoutIsReady(layout,g.lookout)&&equal(g.position,g.lookout!.position);
+  return abilityRules(s,g.kind).sight + (tower ? LOOKOUT_SIGHT_BONUS[g.kind] : 0);
+}
+function guardianCanSee(s:ThreatState,layout:Layout,to:GridPoint) {
+  const g=s.guardian;if(!g)return false;
+  // Ground rays must remain blocked by every building except the very tower
+  // whose verified top this guardian is actually standing on.
+  const view=lookoutIsReady(layout,g.lookout)&&equal(g.position,g.lookout!.position)?{...layout,buildings:layout.buildings.filter(b=>b.id!==g.lookout!.buildingId)}:layout;
+  return lineOfSight(view,g.position,to,guardianSight(s,layout));
+}
+function interruptLookout(g:GuardianState,layout:Layout) {
+  if(g.lookout&&g.lookout.phase!=='done')g.lookout=advanceLookout(layout,g.lookout,0,{cancel:true})??undefined;
 }
 function visibleThreatPositions(s: ThreatState, layout: Layout) {
   const g = s.guardian;
   return s.wolves.filter(w => !['retreated', 'boundary'].includes(w.status) &&
-    ((g && lineOfSight(layout, g.position, w.position, guardianSight(s, layout))) || s.actors.some(a => liveActor(a) && lineOfSight(layout, a.position, w.position, THREAT_RULES.animalSight))))
+    ((g && guardianCanSee(s,layout,w.position)) || s.actors.some(a => liveActor(a) && lineOfSight(layout, a.position, w.position, THREAT_RULES.animalSight))))
     .map(w => w.position);
 }
 /** Prefer a safe cardinal detour using exactly the layout walkability graph. */
@@ -175,6 +193,83 @@ function boundaryPoints(layout: Layout) {
     .sort((a, b) => a.x - b.x || a.z - b.z);
 }
 
+/** A shared, persisted entry plan. Rendering never invents another wolf or route. */
+function openingEntries(layout:Layout, actors:ThreatActorInput[]) {
+  const reserved:GridPoint[]=[];
+  const clearance=(p:GridPoint)=>actors.every(a=>distance(a.position,p)>=1.5)
+    &&reserved.every(q=>distance(q,p)>=1.1);
+  const boundary=boundaryPoints(layout).filter(p=>regionAt(p)!=='pen'&&clearance(p));
+  const doors=shelterEntries(layout);
+  const plans:{spawn:GridPoint;entryPath:GridPoint[];path:GridPoint[];doorId:string|null;waitingReason?:string}[]=[];
+  for(let index=0;index<2;index++) {
+    const choices=boundary.filter(p=>clearance(p)&&plans.every(plan=>distance(plan.spawn,p)>=3))
+      .flatMap(spawn=>doors.map(door=>({spawn,door,path:pathTo(layout,spawn,door)})).filter(c=>c.path.length))
+      .sort((a,b)=>Math.abs(length(a.path)-6)-Math.abs(length(b.path)-6)
+        ||a.spawn.x-b.spawn.x||a.spawn.z-b.spawn.z||a.door.doorId.localeCompare(b.door.doorId));
+    const choice=choices[0];
+    if(choice) {
+      const entryPath=[point(choice.spawn)];
+      // Stop outside the herd before the actual defense starts. Every edge is
+      // validated against sheep and the other entry, not merely buildings.
+      for(const next of choice.path.slice(1,3)) {
+        if(!clearance(next))break;
+        entryPath.push(point(next));
+      }
+      const position=entryPath.at(-1)!;
+      plans.push({spawn:point(choice.spawn),entryPath,path:pathTo(layout,position,choice.door),doorId:choice.door.doorId});
+      reserved.push(...entryPath);
+      continue;
+    }
+    // A DIY layout can remove every entrance. Wait on a legal, separated
+    // perimeter/valley tile rather than falling back to an animal's position.
+    const waiting=[...boundary,...worldCells().filter(p=>!layout.owned.some(q=>equal(p,q))&&regionAt(p)!=='pen'&&isPlayerWalkable(layout,p))]
+      .filter(p=>clearance(p)&&plans.every(plan=>distance(plan.spawn,p)>=3))
+      .sort((a,b)=>Math.min(...layout.owned.map(q=>distance(a,q)))-Math.min(...layout.owned.map(q=>distance(b,q)))||a.x-b.x||a.z-b.z)[0];
+    if(!waiting)throw new Error('没有可供狼群安全候场的外围位置');
+    plans.push({spawn:point(waiting),entryPath:[point(waiting)],path:[],doorId:null,waitingReason:'入口或安全路线被挡住，狼群在外围候场'});
+    reserved.push(waiting);
+  }
+  return plans;
+}
+
+/** Upgrade only an unstarted old opening, preserving its event and actor IDs. */
+export function ensureOpeningThreat(state:ThreatState,layout:Layout):ThreatState {
+  if(state.mode!=='tutorial'||state.elapsed!==0||state.phase==='complete'||state.wolves.length===2&&state.wolves.every(w=>w.opening))return state;
+  const next=createThreat({id:state.id,seed:state.seed,mode:'tutorial',actors:state.actors.map(a=>({id:a.id,position:a.position,role:a.role})),
+    guardian:state.guardian?.kind,guardianPosition:state.guardianStart,guardianLookout:state.guardian?.lookout,howled:state.howled,upgrades:state.upgrades},layout);
+  // Selection is a receipt, not another selection, when an old save resumes.
+  next.events=clone(state.events);next.guardian=clone(state.guardian);
+  return next;
+}
+
+/** A tower pose is an explicit exception to ground collision, never a height flag. */
+function certifiedLookout(layout:Layout,state:LookoutState):LookoutState|null {
+  if(!advanceLookout(layout,state,0))return null;
+  const building=layout.buildings.find(b=>b.id===state.buildingId),access=building&&towerAccess(layout,building);
+  if(!access)return null;
+  const d=(a:LookoutPoint,b:LookoutPoint)=>Math.hypot(a.x-b.x,a.z-b.z,a.height-b.height);
+  const onEdge=(p:LookoutPoint,a:LookoutPoint,b:LookoutPoint)=>Math.abs(d(a,p)+d(p,b)-d(a,b))<1e-6;
+  if(!equal(access.entry,state.access.entry)||d(access.top,state.access.top)>1e-6
+    ||access.route.length!==state.access.route.length||access.route.some((p,i)=>d(p,state.access.route[i])>1e-6))return null;
+  const pose={...state.position,height:state.height},from=state.path[Math.max(0,state.pathIndex-1)],to=state.path[state.pathIndex]??from;
+  if(!from||!to||!onEdge(pose,from,to))return null;
+  if(state.phase==='approach'||state.phase==='done') {
+    if(state.height!==0||state.path.some(p=>p.height!==0||!isWalkable(layout,cell(p))))return null;
+    for(let i=1;i<state.path.length;i++){
+      const a=state.path[i-1],b=state.path[i],path=findActorPath(layout,a,b);
+      if(!path||Math.abs(a.x-b.x)>1e-8&&Math.abs(a.z-b.z)>1e-8||Math.abs(length(path)-distance(a,b))>1e-6)return null;
+    }
+  }else{
+    const edges=access.route.slice(1).map((to,i)=>[access.route[i],to]);
+    if(!edges.some(([a,b])=>onEdge(pose,a,b))||state.path.some(p=>!edges.some(([a,b])=>onEdge(p,a,b))))return null;
+    if(state.path.slice(1).some((p,i)=>!edges.some(([a,b])=>onEdge(state.path[i],a,b)&&onEdge(p,a,b))))return null;
+    if(['settle','watching'].includes(state.phase)&&d(pose,access.top)>1e-6)return null;
+    if(state.phase==='ascent'&&d(state.path.at(-1)!,access.top)>1e-6)return null;
+    if(state.phase==='descent'&&d(state.path.at(-1)!,{...access.entry,height:0})>1e-6)return null;
+  }
+  return clone(state);
+}
+
 export function createThreat(options: CreateThreatOptions, layout: Layout): ThreatState {
   if (!options.id || !Number.isFinite(options.seed) || !['tutorial', 'rehearsal', 'reassure', 'challenge'].includes(options.mode)) throw new Error('威胁事件参数无效');
   if (options.actors.length < 1 || options.actors.length > 12 || new Set(options.actors.map(a => a.id)).size !== options.actors.length) throw new Error('事件需要1至12个稳定且不重复的动物ID');
@@ -184,8 +279,11 @@ export function createThreat(options: CreateThreatOptions, layout: Layout): Thre
     if (!options.challengeAuthorized || !participants.length) throw new Error('真实风险需要明确确认参与名单');
     if (participants.some(id => !options.actors.some(a => a.id === id && a.participant === true && (!a.role || a.role === 'animal')))) throw new Error('挑战名单只能包含明确参与的自有动物');
   }
-  const start = options.guardianPosition ?? options.actors[0].position;
-  if (!isWalkable(layout, cell(start))) throw new Error('守护者起点不可达');
+  const activeLookout=options.guardianLookout?.phase!=='done'?options.guardianLookout:undefined;
+  const lookout=activeLookout?certifiedLookout(layout,activeLookout):null;
+  if(activeLookout&&(!lookout||!options.guardian))throw new Error('守护者高台姿态或楼梯路线无效');
+  const start = lookout?.position??options.guardianPosition ?? options.actors[0].position;
+  if (!isWalkable(layout, cell(lookout?.access.entry??start))) throw new Error('守护者起点不可达');
   const s: ThreatState = {
     version: 1, id: options.id, seed: options.seed, mode: options.mode,
     ...(options.mode==='reassure'&&options.pressureBand&&['low','medium','high'].includes(options.pressureBand)?{pressureBand:options.pressureBand}:{}),
@@ -202,9 +300,21 @@ export function createThreat(options: CreateThreatOptions, layout: Layout): Thre
     confirmedParticipants: options.mode === 'challenge' ? participants : [], lockedLayoutVersion: layout.version,
     howled: options.howled ?? true, events: [], rewards: 0, notice: options.mode === 'tutorial' ? '选择期间危险暂停；三位伙伴都有教学兜底' : options.mode === 'rehearsal' ? '无损演练：只记录路线与排队，不扣动物、不发材料' : '',
   };
+  if(lookout&&s.guardian)s.guardian.lookout=lookout;
   if(options.tactic){
     if(options.tactic.kind!=='folding-shield'||options.guardian!=='dog') throw new Error('折翼盾只能装备在刀盾狗的一个战术槽');
     s.tacticalShield={...clone(options.tactic),status:'ready',startedAt:null,until:null,remaining:0,reason:'',waitingActorIds:[]};
+  }
+  if(options.mode==='tutorial'&&!options.wolfSpawns) {
+    s.wolves=openingEntries(layout,options.actors).map((entry,index)=>{
+      const wolf:ThreatWolf={id:`${s.id}:wolf:${index+1}`,spawn:point(entry.spawn),position:point(entry.entryPath.at(-1)!),
+        path:[],pathIndex:0,status:'approach',targetDoorId:entry.doorId,targetActorId:null,stageProgress:0,
+        blockedUntil:0,blockUsed:0,slowedUntil:0,bubbleDelay:0,arrivedAt:null,interruptedUntil:0,
+        opening:{entryPath:entry.entryPath.map(point),delay:index*1.5,phase:entry.waitingReason?'waiting':'holding',visible:true,interceptedAt:null,
+          ...(entry.waitingReason?{waitingReason:entry.waitingReason}:{})}};
+      setPath(wolf,entry.path);return wolf;
+    });
+    return s;
   }
   const boundary = boundaryPoints(layout).filter(p => !s.actors.some(a => equal(a.position, p)) && s.doors.some(d => pathTo(layout, p, d.position).length));
   const seededIndex = Math.abs(Math.trunc(options.seed * 1664525 + 1013904223)) % Math.max(1, boundary.length);
@@ -289,11 +399,10 @@ function discover(s: ThreatState, layout: Layout, input: ThreatStepInput) {
   if (s.discoveredAt !== null) return;
   const g = s.guardian;
   const observers = [
-    ...(g ? [{ position: g.position, sight: guardianSight(s, layout) }] : []),
     ...(input.playerPosition ? [{ position: input.playerPosition, sight: THREAT_RULES.playerSight }] : []),
     ...s.actors.map(a => ({ position: a.position, sight: THREAT_RULES.animalSight })),
   ];
-  const visible = s.wolves.filter(w => observers.some(o => distance(o.position, w.position) <= o.sight && lineOfSight(layout, o.position, w.position, o.sight)));
+  const visible = s.wolves.filter(w => guardianCanSee(s,layout,w.position)||observers.some(o => distance(o.position, w.position) <= o.sight && lineOfSight(layout, o.position, w.position, o.sight)));
   if (!visible.length) return;
   s.discoveredAt = s.elapsed;
   emit(s, 'alert', { reason: '首次实际视线发现，发出全局警报' });
@@ -328,7 +437,7 @@ function release(s: ThreatState, layout: Layout, wolf: ThreatWolf, reason: strin
 
 function cast(s: ThreatState, layout: Layout, ability: GuardianAbility, wolfId?: string) {
   const g = s.guardian;
-  if (!g || g.cooldowns[ability] > s.elapsed || (ability==='block' && s.tacticalShield)) return false;
+  if (!g || g.lookout&&g.lookout.phase!=='done' || g.cooldowns[ability] > s.elapsed || (ability==='block' && s.tacticalShield)) return false;
   if (ability === 'calm' && g.ability === 'bubble' && g.abilityUntil > s.elapsed) return false;
   if ((ability === 'block' && g.kind !== 'dog') || (ability === 'gather' && g.kind !== 'cat') || (['calm', 'bubble'].includes(ability) && g.kind !== 'frog')) return false;
   if (ability === 'block' || ability === 'bubble') {
@@ -363,7 +472,7 @@ function cast(s: ThreatState, layout: Layout, ability: GuardianAbility, wolfId?:
 
 export function guardianCommand(state: ThreatState, layout: Layout, command: GuardianCommand): { state: ThreatState; ok: boolean; reason?: string } {
   const fail = (reason: string) => ({ state, ok: false, reason });
-  if (!command || !['shield', 'select', 'follow', 'station', 'patrol', 'block', 'gather', 'calm', 'bubble', 'rescue'].includes(command.kind)) return fail('请选择合法的伙伴指令');
+  if (!command || !['lookout', 'shield', 'select', 'follow', 'station', 'patrol', 'block', 'gather', 'calm', 'bubble', 'rescue'].includes(command.kind)) return fail('请选择合法的伙伴指令');
   if (command.kind === 'select') {
     if (state.phase !== 'choosing' || state.guardian) return fail('事件期间只有一个守护槽，不能换人重置技能');
     if (!command.guardian || !['dog', 'cat', 'frog'].includes(command.guardian)) return fail('请选择一位守护者');
@@ -373,6 +482,16 @@ export function guardianCommand(state: ThreatState, layout: Layout, command: Gua
   if (!state.guardian || state.phase === 'choosing') return fail('请先选择守护者');
   if (state.phase === 'complete') return fail('本次事件已经结束');
   const g = state.guardian;
+  const groundPosition=g.lookout&&g.lookout.phase!=='done'?g.lookout.access.entry:g.position;
+  if(command.kind==='lookout'){
+    if(state.tacticalShield&&['moving','waiting','active'].includes(state.tacticalShield.status))return fail('先收好折翼盾，再去高台');
+    const lookout=startLookout(layout,g.position,command.buildingId,g.lookout);
+    if(!lookout)return fail('没有可达且楼梯畅通的高台');
+    const s=clone(state),next=s.guardian!;next.lookout=lookout;next.path=[];next.pathIndex=0;next.target=null;
+    next.pendingAbility=null;next.ability=null;next.abilityUntil=s.elapsed;next.behavior='station';
+    for(const window of next.calmWindows)window.until=Math.min(window.until,s.elapsed);
+    emit(s,'guardian-lookout',{position:point(lookout.access.entry),reason:lookout.buildingId});return {state:s,ok:true};
+  }
   if(command.kind==='block'&&state.tacticalShield)return fail('折翼盾已替代贴身拦截，请使用展开盾牌');
   if(command.kind==='shield'){
     const shield=state.tacticalShield;
@@ -386,13 +505,13 @@ export function guardianCommand(state: ThreatState, layout: Layout, command: Gua
       return destination?[{position:a.position,destination}]:[{position:a.position,destination:a.position}];
     }));
     if(!safety.ok)return fail(safety.reason);
-    if(!pathTo(layout,g.position,shield.anchor).length)return fail('狗到不了此锚点，请在事件前另选可达通路格');
+    if(!pathTo(layout,groundPosition,shield.anchor).length)return fail('狗到不了此锚点，请在事件前另选可达通路格');
     const s=clone(state);s.tacticalShield!.status='moving';s.tacticalShield!.reason='正在沿实际路线前往锚点';
-    const next=s.guardian!;next.behavior='station';next.target=point(shield.anchor);next.pendingAbility=null;next.ability=null;setPath(next,pathTo(layout,next.position,shield.anchor));
+    const next=s.guardian!;interruptLookout(next,layout);next.behavior='station';next.target=point(shield.anchor);next.pendingAbility=null;next.ability=null;setPath(next,pathTo(layout,next.position,shield.anchor));
     return {state:s,ok:true};
   }
   if(state.tacticalShield&&['moving','waiting','active'].includes(state.tacticalShield.status))return fail('狗正在驻点展开折翼盾，6秒结束后才能移动');
-  if (command.target && (!Number.isFinite(command.target.x) || !Number.isFinite(command.target.z) || !isWalkable(layout, cell(command.target)) || !pathTo(layout, g.position, cell(command.target)).length)) return fail('目标不可达，请选择同一连通区的合法地点');
+  if (command.target && (!Number.isFinite(command.target.x) || !Number.isFinite(command.target.z) || !isWalkable(layout, cell(command.target)) || !pathTo(layout, groundPosition, cell(command.target)).length)) return fail('目标不可达，请选择同一连通区的合法地点');
   if (['block', 'gather', 'calm', 'bubble'].includes(command.kind)) {
     const ability = command.kind as GuardianAbility;
     if ((ability === 'block' && g.kind !== 'dog') || (ability === 'gather' && g.kind !== 'cat') || (['calm', 'bubble'].includes(ability) && g.kind !== 'frog')) return fail('当前守护者没有这项能力');
@@ -404,9 +523,9 @@ export function guardianCommand(state: ThreatState, layout: Layout, command: Gua
     if (ability === 'block' && wolf && wolf.blockUsed >= abilityRules(state,'dog').duration) return fail(`同一威胁最多守住${abilityRules(state,'dog').duration}秒`);
     if (ability === 'bubble' && wolf && wolf.bubbleDelay >= THREAT_RULES.frog.bubbleMaxDelay) return fail('这条狼路线的泡泡延迟已到2秒上限');
     const target = command.target ? cell(command.target) : wolf?.position;
-    if (target && !pathTo(layout, g.position, target).length) return fail('守护者到不了这条威胁路线');
+    if (target && !pathTo(layout, groundPosition, target).length) return fail('守护者到不了这条威胁路线');
     if (ability === 'bubble' && wolf && (distance(g.position, wolf.position) > THREAT_RULES.frog.bubbleRange || !lineOfSight(layout, g.position, wolf.position, THREAT_RULES.frog.bubbleRange))) return fail('泡泡需要6格内且有实际视线');
-    const s = clone(state), next = s.guardian!;
+    const s = clone(state), next = s.guardian!;interruptLookout(next,layout);
     next.behavior = 'emergency'; next.target = target ? point(target) : point(next.position); next.targetWolfId = wolf?.id ?? null; next.pendingAbility = ability;
     if (!cast(s, layout, ability, wolf?.id) && target) setPath(next, pathTo(layout, next.position, target));
     return { state: s, ok: true };
@@ -415,9 +534,9 @@ export function guardianCommand(state: ThreatState, layout: Layout, command: Gua
   if (command.kind === 'rescue') {
     const actor = state.actors.find(a => a.id === command.actorId);
     if (!actor || !['carried', 'boundary'].includes(actor.status)) return fail('这只动物目前不需要追救');
-    if (!pathTo(layout, g.position, actor.position).length) return fail('救援点不可达');
+    if (!pathTo(layout, groundPosition, actor.position).length) return fail('救援点不可达');
   }
-  const s = clone(state), next = s.guardian!;
+  const s = clone(state), next = s.guardian!;interruptLookout(next,layout);
   next.behavior = command.kind === 'rescue' ? 'rescue' : command.kind as 'follow' | 'station' | 'patrol';
   next.target = command.target ? cell(command.target) : null; next.targetActorId = command.actorId ?? null;
   next.targetWolfId = null; next.pendingAbility = null; next.path = []; next.pathIndex = 0;
@@ -434,6 +553,14 @@ export function guardianCommand(state: ThreatState, layout: Layout, command: Gua
 function guardianStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: number) {
   const g = s.guardian;
   if (!g) return;
+  if(g.lookout&&g.lookout.phase!=='done'){
+    g.lookout=advanceLookout(layout,g.lookout,dt*1000,{alert:s.discoveredAt!==null})??undefined;
+    if(g.lookout){g.position=point(g.lookout.position);if(g.lookout.phase!=='done')return;}
+    g.path=[];g.pathIndex=0;
+    if(g.target)setPath(g,pathTo(layout,g.position,g.target));
+    // This substep belonged to the stair traversal, not a second ground step.
+    return;
+  }
   if(s.tacticalShield&&['moving','waiting','active'].includes(s.tacticalShield.status))return;
   if (g.ability && g.abilityUntil <= s.elapsed) g.ability = null;
   let target: GridPoint | null = null;
@@ -491,7 +618,17 @@ function actorStep(s: ThreatState, layout: Layout, dt: number, previous: number)
       actor.reservation = null; actor.path = []; reserve(s, layout); continue;
     }
     const start = Math.max(previous, actor.departAt), available = Math.min(dt, s.elapsed - start);
+    const beforePosition=point(actor.position),beforeIndex=actor.pathIndex;
     const spent = move(actor, actor.injuredAt === null || (actor.careCompletedAt!==undefined&&actor.careCompletedAt>=actor.injuredAt) ? THREAT_RULES.animalSpeed : THREAT_RULES.injuredSpeed, available);
+    const openingWolves=s.wolves.filter(w=>w.opening&&!['retreated','boundary'].includes(w.status));
+    if(openingWolves.some(w=>distance(w.position,actor.position)<.8)){
+      actor.position=beforePosition;actor.pathIndex=beforeIndex;
+      const startCell=cell(actor.position),goal=cell(door.position);
+      const safeLayout={...layout,owned:layout.owned.filter(p=>equal(p,startCell)||equal(p,goal)||openingWolves.every(w=>distance(w.position,p)>1))};
+      const detour=findActorPath(safeLayout,actor.position,door.position);
+      if(detour)setPath(actor,detour);
+      continue;
+    }
     if (actor.pathIndex >= actor.path.length && equal(actor.position, door.position)) {
       actor.status = 'queued'; actor.doorArrivalAt = rounded(start + spent);
       emit(s, 'door-arrival', { actorId: actor.id, position: point(actor.position), reason: `等待${door.doorId}入棚` }, actor.doorArrivalAt);
@@ -537,10 +674,17 @@ function wolfStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: nu
       const destination=wolf.status==='carrying'?wolf.spawn:s.actors.find(a=>a.id===wolf.targetActorId&&liveActor(a))?.position??(wolf.arrivedAt===null?s.doors.find(d=>d.doorId===wolf.targetDoorId)?.position:wolf.path.at(-1));
       if(destination)setPath(wolf,pathTo(layout,wolf.position,destination));
     }
-    if (wolf.blockedUntil > previous || wolf.interruptedUntil > previous) continue;
     if (s.mode === 'tutorial' && s.elapsed >= THREAT_RULES.tutorialRetreat) {
       wolf.status = 'retreated'; emit(s, 'tutorial-fallback', { wolfId: wolf.id, reason: '伙伴赶走教学威胁，继续按真实路线排队回棚' }); continue;
     }
+    if(wolf.opening) {
+      const g=s.guardian;
+      const defended=!!g&&g.ability!==null&&g.abilityUntil>s.elapsed
+        &&(g.ability==='block'||g.ability==='gather'||g.ability==='calm'||g.ability==='bubble');
+      if(wolf.opening.waitingReason||wolf.opening.interceptedAt===null&&!defended)continue;
+      if(wolf.opening.interceptedAt===null){wolf.opening.interceptedAt=s.elapsed;wolf.opening.phase='engaging';emit(s,'opening-intercept',{wolfId:wolf.id,position:point(g!.position),reason:'伙伴已到实际守护位置，狼群才开始接近'});}
+    }
+    if (wolf.blockedUntil > previous || wolf.interruptedUntil > previous) continue;
     const canAttack = s.mode !== 'tutorial' && s.mode !== 'rehearsal';
     if (wolf.status === 'carrying') {
       const actor = s.actors.find(a => a.id === wolf.targetActorId);
@@ -575,7 +719,13 @@ function wolfStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: nu
     if (wolf.slowedUntil > previous && wolf.bubbleDelay < THREAT_RULES.frog.bubbleMaxDelay) {
       speed *= 0.5;
     }
+    const beforePosition=point(wolf.position),beforeIndex=wolf.pathIndex;
     const spent = move(wolf, speed, dt);
+    if(wolf.opening&&(s.doors.some(d=>distance(d.position,wolf.position)<1.05)||s.actors.some(a=>liveActor(a)&&distance(a.position,wolf.position)<.8)
+      ||s.wolves.some(other=>other.id!==wolf.id&&!['retreated','boundary'].includes(other.status)&&distance(other.position,wolf.position)<.9))){
+      wolf.position=beforePosition;wolf.pathIndex=beforeIndex;wolf.opening.phase='holding';continue;
+    }
+    if(wolf.opening)wolf.opening.phase='engaging';
     if (speed < wolfRules(s).speed) wolf.bubbleDelay = Math.min(THREAT_RULES.frog.bubbleMaxDelay, rounded(wolf.bubbleDelay + spent * 0.5));
     const door = s.doors.find(d => d.doorId === wolf.targetDoorId);
     if (door && equal(wolf.position, door.position) && wolf.arrivedAt === null) {
@@ -643,7 +793,7 @@ function rescueStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: 
 }
 
 function shieldStep(s:ThreatState,layout:Layout,dt:number){
- const shield=s.tacticalShield,g=s.guardian;if(!shield||!g)return;
+ const shield=s.tacticalShield,g=s.guardian;if(!shield||!g||g.lookout&&g.lookout.phase!=='done')return;
  if(shield.status==='active'){
    shield.remaining=Math.max(0,rounded((shield.until??s.elapsed)-s.elapsed));
    if(shield.remaining===0){shield.status='expired';shield.reason='6秒路障已结束';emit(s,'shield-expired',{position:point(shield.anchor)});}
@@ -674,6 +824,11 @@ export function stepThreat(state: ThreatState, layout: Layout, input: ThreatStep
   if (layout.version !== state.lockedLayoutVersion && !recovery && state.phase !== 'complete') throw new Error('事件期间布局已锁定，不能改变路线与入口');
   if (state.phase === 'complete' && !input.findBackActorId) {
     const ended=clone(state);
+    const g=ended.guardian;
+    if(g?.lookout&&g.lookout.phase!=='done'){
+      g.lookout=advanceLookout(layout,g.lookout,input.dt*1000,{cancel:true})??undefined;
+      if(g.lookout)g.position=point(g.lookout.position);
+    }
     const cared=ended.actors.find(a=>a.id===input.recoveryAuthorizedActorId);
     if(cared)cared.careCompletedAt=ended.elapsed;
     if(ended.tacticalShield?.status==='active'){ended.elapsed=rounded(ended.elapsed+input.dt);shieldStep(ended,layout,input.dt);}
@@ -732,3 +887,4 @@ export function threatSummary(state: ThreatState) {
     recoverableLost: records.filter(a => a.status === 'lost').length, memorial: records.filter(a => a.status === 'memorial').length,
     records, reasons, recommendation: reasons.some(r => r.includes('保护位')) ? '先补充可达保护位，再增加动物' : records.some(a => a.exposedAt !== null) ? '把集合点移近保护棚，或预览增加独立入口' : '当前路线可用，可用无损演练比较下一次改造', rewards: 0 as const };
 }
+

@@ -28,7 +28,7 @@ test('stale sessions and background gaps do not advance online jobs, offline nev
  let s=createEstate('owner',now);s=cmd(s,'enter').state;const old=currentProfile(s).session;s=cmd(s,'enter',{},now+1).state;
  assert.equal(cmd(s,'pulse',{session:old},now+1000).accepted,false);
  const p=currentProfile(s);p.tutorial='done';p.threat=null;p.position={...p.animals[0].position};s=cmd(s,'feed',{target:'pipi',food:'milk',session:p.session},now+2).state;
- s=cmd(s,'pulse',{session:p.session},now+86400000).state;assert.equal(currentProfile(s).inventory.hand,3);assert.ok(currentProfile(s).job);assert.equal(currentProfile(s).animals.length,3);
+ s=cmd(s,'pulse',{session:p.session},now+86400000).state;assert.equal(currentProfile(s).inventory.hand,3);assert.equal(currentProfile(s).job,null);assert.equal(currentProfile(s).animals.length,3);
 });
 test('lab uses fresh separate actors and balances; avatar does not change relationship identity',()=>{
  let s=createEstate('owner',now);currentProfile(s).animals[0].life.bond=80;const before=structuredClone(currentProfile(s));

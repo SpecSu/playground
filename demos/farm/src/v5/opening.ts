@@ -15,7 +15,7 @@ export interface OpeningPresentation {
   guardian: GuardianKind | null; canSkip: boolean; requiresChoice: boolean; controlsLocked: boolean;
 }
 
-export const OPENING_DURATIONS = { establish: 1.6, rustle: 1.3, approach: 3, startle: 2, arrival: 3 } as const;
+export const OPENING_DURATIONS = { establish: 1.6, rustle: 1.3, approach: 4.5, startle: 2, arrival: 3 } as const;
 const durations: Partial<Record<OpeningStage, number>> = OPENING_DURATIONS;
 const next: Partial<Record<OpeningStage, OpeningStage>> = {
   establish: 'rustle', rustle: 'approach', approach: 'startle', startle: 'choose', arrival: 'defend',
@@ -60,7 +60,7 @@ export function openingPresentation(state: OpeningState): OpeningPresentation {
   const captions: Record<OpeningStage, string> = {
     establish: 'LX 到家了，幼崽们正等着你',
     rustle: '围栏外的草丛，传来了沙沙声…',
-    approach: '有狼靠近了，先看清它从哪里来',
+    approach: '两只狼错开靠近，先看清它们的路线',
     startle: '幼崽们有些害怕，需要伙伴陪着',
     choose: '选一位伙伴，和 LX 一起守住小家',
     arrival: state.guardian === 'dog' ? '刀盾狗赶来了，它会守住入口' : state.guardian === 'cat' ? '喵脆角赶来了，它会引导幼崽回家' : '奶蛙赶来了，它会安抚受惊的幼崽',
@@ -76,6 +76,17 @@ export function openingPresentation(state: OpeningState): OpeningPresentation {
   return {
     stage: state.stage, progress, caption: captions[state.stage], focus: focus[state.stage], guardian: state.guardian,
     canSkip: preChoice(state.stage) || state.stage === 'arrival', requiresChoice: state.stage === 'choose',
-    controlsLocked: state.stage !== 'defend' && state.stage !== 'done',
+    controlsLocked: false,
   };
+}
+
+
+/** Each real wolf has its own reveal and anticipation, independent of wall time. */
+export function openingWolfPresentation(state:OpeningState,index:number) {
+  const delay=Math.max(0,index)*1.5;
+  const elapsed=state.stage==='approach'?(Number.isFinite(state.elapsed)?Math.max(0,state.elapsed):0):OPENING_DURATIONS.approach;
+  const local=elapsed-delay,visible=!['establish','rustle'].includes(state.stage)&&local>=0;
+  const progress=Math.max(0,Math.min(1,(local-.65)/2.35));
+  const phase:'waiting'|'sniffing'|'stalking'|'holding'=!visible?'waiting':local<.65?'sniffing':progress<1?'stalking':'holding';
+  return {delay,visible,progress,phase};
 }

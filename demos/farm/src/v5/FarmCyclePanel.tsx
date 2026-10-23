@@ -1,11 +1,12 @@
 import {useEffect,useRef,useState} from 'react';
-import {Cloud,ArrowRight,Shield,House,TriangleAlert} from 'lucide-react';
+import {ArrowRight,Shield,House,TriangleAlert} from 'lucide-react';
 import type {EstateAnimal,Profile} from './estate.ts';
 import {GUARDIAN_LABEL} from './estate.ts';
 import {guardianUpgradeRules,shelterDoorService,type GuardianKind} from './threat.ts';
 import {tierNumber,createHusbandry,type AnimalHusbandry,type HerdEconomy} from './herd-economy.ts';
 import {type ProductionState} from './v6-production.ts';
 import MarketPanel from '../v7/MarketPanel.tsx';
+import ResourceIcon from '../v7/ResourceIcon.tsx';
 import {productionStatus} from './v7-economy.ts';
 import {RAID_RULES,raidDay,raidRisk,type RaidCycle} from './raid-cycle.ts';
 
@@ -29,7 +30,7 @@ function useIntent(busy:boolean,snapshot:unknown,send:Send){
 export function AnimalProduction({animal,busy,send,production,profile,compact=false}:{animal:EstateAnimal;now:number;busy:boolean;send:Send;economy?:HerdEconomy;production?:ProductionState;profile?:Profile;compact?:boolean;blockedReason?:string}){
  const a=animal as CycleAnimal,act=useIntent(busy,profile??animal,send);if(a.memorial)return null;
  const status=profile?productionStatus(profile,a.id):undefined,lots=(profile?.production??production)?.pending.filter(l=>l.animalId===a.id)??[],total=lots.reduce((n,l)=>n+l.amount,0),tier=status?.tier??a.husbandry?.rarity??'white';
- return <section className={`animal-production ${compact?'compact':''}`} data-animal-production={a.id}><div className="cycle-row"><b>{COLORS[tier]}色稀有度 · {COLORS[tier]}毛</b><span>{total}份待领</span></div><p className="cycle-muted">稀有度决定产色{status?` · 每批${status.quantity}份 · 耗生产粮${status.feedPerCycle}份`:''}</p>{status&&<p className="cycle-muted">{({ready:'正常生产',feed:'缺生产粮，暂停生产',injury:'受伤停产，需要照料',lost:'走失停产，需要营救',shelter:'缺可达安全床位，暂停生产',full:'已存满6批',memorial:'已纪念',event:'守护事件中，暂停生产'})[status.reason]}</p>}<button className="cycle-small-button" data-cycle-claim={a.id} disabled={busy||!total||!!profile?.threat&&profile.threat.phase!=='complete'} onClick={()=>act('claimWool',{target:a.id})}>领取羊毛</button>{!compact&&<details className="cycle-more"><summary>生产与成长</summary><p>每{profile?.id==='lab'?'30秒':'12小时'}一批，基础2份；成长与有效照料增加产量，最多4份。每只最多存6批。</p><p>缺粮、受伤、走失或缺可达安全床位时停产，不补发停产周期。动物数量与稀有度会影响来袭压力。</p></details>}</section>;
+ return <section className={`animal-production ${compact?'compact':''}`} data-animal-production={a.id}><div className="cycle-row"><b><ResourceIcon kind="wool" tier={tier} size={23}/>{COLORS[tier]}色稀有度 · {COLORS[tier]}毛</b><span>{total}份待领</span></div><p className="cycle-muted">稀有度决定产色{status?` · 每批${status.quantity}份 · 耗生产粮${status.feedPerCycle}份`:''}</p>{status&&<p className="cycle-muted">{({ready:'正常生产',feed:'缺生产粮，暂停生产',injury:'受伤停产，需要照料',lost:'走失停产，需要营救',shelter:'缺可达安全床位，暂停生产',full:'已存满6批',memorial:'已纪念',event:'守护事件中，暂停生产'})[status.reason]}</p>}<button className="cycle-small-button" data-cycle-claim={a.id} disabled={busy||!total||!!profile?.threat&&profile.threat.phase!=='complete'} onClick={()=>act('claimWool',{target:a.id})}>领取羊毛</button>{!compact&&<details className="cycle-more"><summary>生产与成长</summary><p>每{profile?.id==='lab'?'30秒':'12小时'}一批，基础2份；成长与有效照料增加产量，最多4份。每只最多存6批。</p><p>缺粮、受伤、走失或缺可达安全床位时停产，不补发停产周期。动物数量与稀有度会影响来袭压力。</p></details>}</section>;
 }
 
 export default function FarmCyclePanel({profile,now,busy,send,onInspect,onCraft}:FarmCyclePanelProps){
@@ -40,7 +41,7 @@ export default function FarmCyclePanel({profile,now,busy,send,onInspect,onCraft}
  const guarded=!!p.threat,pause=guarded?'等这次守护结束后再升级':p.layout.construction?'先等眼前设施建好':'';
  const cycle=p.raidCycle,warning=cycle?.phase==='warning'||cycle?.phase==='ready',today=cycle?.history.filter(e=>e.day===raidDay(now)).length??0;
  return <div className="farm-cycle-panel" data-farm-cycle>
-  <p className="cycle-loop"><Cloud size={13}/>收羊毛<ArrowRight size={11}/>做披风<ArrowRight size={11}/><Shield size={13}/>布置小家</p>
+  <p className="cycle-loop"><ResourceIcon kind="wool" size={20}/>收羊毛<ArrowRight size={11}/>做披风<ArrowRight size={11}/><Shield size={13}/>布置小家</p>
   {p.id==='lab'&&<p className="cycle-demo">独立演示档 · 生产周期30秒 · 来袭30–60在线秒</p>}
   <nav className="cycle-tabs" aria-label="农场经营">{(['products','defense','raids'] as const).map((id,i)=><button key={id} type="button" data-cycle-tab={id} aria-pressed={tab===id} className={tab===id?'selected':''} onClick={()=>setTab(id)}>{['产物','守护','来袭'][i]}</button>)}</nav>
   {tab==='products'&&<section data-cycle-section="products"><MarketPanel profile={p} now={now} busy={busy} send={send} onInspect={onInspect} onCraft={onCraft}/></section>}

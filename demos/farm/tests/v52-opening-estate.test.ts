@@ -1,9 +1,9 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {createEstate,currentProfile,commandEstate} from '../src/v5/estate.ts';
 const T=1800000000000;
-test('opening gates gameplay and guardian choice until safe choice node, then freezes arrival danger',()=>{
+test('opening permits movement but gates guardian choice and freezes arrival danger',()=>{
  let s=createEstate('intro',T),t=T;const run=(type:string,extra:Record<string,unknown>={})=>{const r=commandEstate(s,{id:`${type}-${++t}`,type,session:currentProfile(s).session,...extra},t);if(r.accepted)s=r.state;return r;};
- run('enter');assert.equal(currentProfile(s).opening?.stage,'establish');assert.equal(run('guardian',{guardian:'dog'}).accepted,false);assert.equal(run('move',{to:{x:6,z:7}}).accepted,false);
+ run('enter');assert.equal(currentProfile(s).opening?.stage,'establish');assert.equal(run('guardian',{guardian:'dog'}).accepted,false);assert.equal(run('move',{to:{x:6,z:7}}).accepted,true);assert.equal(currentProfile(s).threat?.elapsed,0);
  const material=currentProfile(s).materials;run('skipOpening');assert.equal(currentProfile(s).opening?.stage,'choose');assert.equal(run('guardian',{guardian:'dog'}).accepted,true);assert.equal(currentProfile(s).opening?.stage,'arrival');assert.equal(run('guardian',{guardian:'cat'}).accepted,false);
  t+=1000;run('pulse',{presentationReady:false});assert.equal(currentProfile(s).opening?.elapsed,0);assert.equal(currentProfile(s).threat?.elapsed,0);
  t+=1000;run('pulse',{presentationReady:true,presentationCovered:true});assert.equal(currentProfile(s).opening?.elapsed,0);
@@ -27,7 +27,7 @@ test('three guardian introductions require an operation, retreat visibly, resume
  for(const guardian of ['dog','cat','frog'] as const){
   let s=createEstate(`journey-${guardian}`,T),at=T;let sequence=0;
   const run=(type:string,extra:Record<string,unknown>={},delta=1)=>{at+=delta;const r=commandEstate(s,{id:`journey-${guardian}-${++sequence}`,type,session:currentProfile(s).session,...extra},at);assert.equal(r.accepted,true,`${guardian} ${type}: ${r.message}`);s=JSON.parse(JSON.stringify(r.state));};
-  run('enter');for(let i=0;i<9;i++)run('pulse',{presentationReady:true},1000);assert.equal(currentProfile(s).opening!.stage,'choose');
+  run('enter');for(let i=0;i<11;i++)run('pulse',{presentationReady:true},1000);assert.equal(currentProfile(s).opening!.stage,'choose');
   run('guardian',{guardian});for(let i=0;i<4;i++)run('pulse',{presentationReady:true},1000);assert.equal(currentProfile(s).opening!.stage,'defend');assert.equal(currentProfile(s).threat!.elapsed,0);
   const p=currentProfile(s),wolf=p.threat!.wolves[0];run('guardianCommand',{command:{kind:guardian==='dog'?'block':guardian==='cat'?'gather':'calm',target:guardian==='dog'?wolf.position:p.animals[0].position,...(guardian==='dog'?{wolfId:wolf.id}:{})}});
   for(let i=0;i<40&&currentProfile(s).opening!.stage!=='done';i++)run('pulse',{presentationReady:true},1000);

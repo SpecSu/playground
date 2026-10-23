@@ -1,11 +1,12 @@
 /** Authoritative local adapter: creation candidates + geometry + treasury commit together. */
-import type {Profile} from './estate.ts';
+import {layoutActors,type Profile} from './estate.ts';
+import {lookoutReservationSafe} from './lookout.ts';
 import {
   reduceCreation,chargeProjectBudget,migrateProjectBudgets,LOCAL_VISITORS,type CreationCommand,type CreationEffect,type WorkCapture,
   type BlueprintComponent,type LocalVisit,
 } from './creation.ts';
 import {
-  buildingFootprint,commitEdit,findPath,isWalkable,isOwned,previewEdit,regionAt,tickConstruction,validateLayout,
+  buildingFootprint,commitEdit,findPath,isWalkable,previewEdit,regionAt,tickConstruction,validateLayout,
   type GridPoint,type Layout,type LayoutGeometry,type LayoutHistory,type Region,
 } from './layout.ts';
 
@@ -19,14 +20,14 @@ export type EstateCreationResult={ok:boolean;profile:CreationProfile;message:str
 type BlueprintEffect=Extract<CreationEffect,{type:'acceptedBlueprint'}>;
 
 function ensure(value:unknown,message:string):asserts value {if(!value)throw new Error(message);}
-const cell=(p:GridPoint):GridPoint=>({x:Math.round(p.x),z:Math.round(p.z)});
 const key=(p:GridPoint)=>`${p.x},${p.z}`;
 function geometry(layout:Layout):LayoutGeometry {
   return structuredClone({owned:layout.owned,roads:layout.roads,buildings:layout.buildings,roadPaidCost:layout.roadPaidCost});
 }
-function actors(p:CreationProfile):GridPoint[] {return [...(isOwned(p.layout,cell(p.position))?[p.position]:[]),p.guardianAt,...p.animals.filter(a=>!a.memorial).map(a=>a.position)].map(cell);}
+function actors(p:CreationProfile):GridPoint[] {return layoutActors(p);}
 function locked(p:CreationProfile):boolean {return !!p.threat;}
 function validateSafe(layout:Layout,p:CreationProfile):void {
+  ensure(lookoutReservationSafe(layout,p.threat?.guardian?.lookout??p.guardianLookout),'请保留守望伙伴的高台和下台入口，等它下台再改动');
   const result=validateLayout(layout,actors(p));ensure(result.ok,result.reasons.join('；'));
   ensure(result.metrics.reachableCapacity>=p.animals.filter(a=>!a.memorial).length,'当前可达保护棚容量不足，不能应用这份蓝图');
 }

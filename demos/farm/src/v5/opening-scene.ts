@@ -3,9 +3,9 @@
  * replay gets a disposable tutorial threat and cannot settle care or rewards.
  */
 import type {EstateSnapshot, Profile} from './estate.ts';
-import {openingPresentation, type OpeningState} from './opening.ts';
+import {openingPresentation, openingWolfPresentation, type OpeningState} from './opening.ts';
 import {buildingApproaches, findPath, isWalkable, shelterEntries, type GridPoint, type Layout} from './layout.ts';
-import {createThreat, guardianCommand, type GuardianKind, type ThreatState} from './threat.ts';
+import {createThreat, ensureOpeningThreat, guardianCommand, type GuardianKind, type ThreatState} from './threat.ts';
 
 export type OpeningSceneOptions={replay?:boolean;retreatProgress?:number};
 
@@ -58,12 +58,7 @@ function replayThreat(p:Profile,guardian:GuardianKind|null):ThreatState|null {
   });
   const start=nearestLegal(p.layout,p.guardianAt);
   if(!actors.length||!start)return null;
-  const gate={x:0,z:4},owned=new Set(p.layout.owned.map(key));
-  const gateReady=isWalkable(p.layout,gate)&&neighbours(gate).some(q=>!owned.has(key(q)))
-    &&!actors.some(a=>distance(a.position,gate)<.001)
-    &&shelterEntries(p.layout).some(door=>findPath(p.layout,gate,{x:door.x,z:door.z}));
-  const event=createThreat({id:`${p.id}-opening-replay`,seed:17,mode:'tutorial',actors,guardianPosition:start,
-    ...(gateReady?{wolfSpawns:[gate]}:{})},p.layout);
+  const event=createThreat({id:`${p.id}-opening-replay`,seed:17,mode:'tutorial',actors,guardianPosition:start},p.layout);
   return guardian&&event.phase==='choosing'?guardianCommand(event,p.layout,{kind:'select',guardian}).state:event;
 }
 
@@ -73,13 +68,17 @@ function stageAnimals(p:Profile,opening:OpeningState):void {
   const progress=opening.stage==='startle'?openingPresentation(opening).progress
     :['choose','arrival'].includes(opening.stage)?1:0;
   const used=new Set<string>();
+  const saved=p.animals.filter(a=>!a.memorial).map(a=>({id:a.id,position:cell(a.position)}));
+  const wolfRoutes=p.threat?.wolves.flatMap(w=>w.opening?.entryPath??[w.position])??[];
   for(const animal of p.animals) {
     if(animal.memorial)continue;
     const target=cell(animal.position);
     if(!isWalkable(p.layout,target))continue;
     // Saved spawn positions already form the assembly beside the first shelter.
     // Begin a step farther out, then retreat to those exact saved endpoints.
-    const outward=neighbours(target).filter(q=>isWalkable(p.layout,q)&&!used.has(key(q))&&distance(q,door)>distance(target,door))
+    const outward=neighbours(target).filter(q=>isWalkable(p.layout,q)&&!used.has(key(q))
+      &&saved.every(other=>other.id===animal.id||distance(other.position,q)>=.9)
+      &&wolfRoutes.every(w=>distance(w,q)>=1.1)&&distance(q,door)>distance(target,door))
       .map(q=>findPath(p.layout,q,target)).find((route):route is GridPoint[]=>!!route);
     const route=outward??[target];used.add(key(route[0]));
     animal.position=routePoint(route,progress);animal.path=route.map(point);
@@ -109,7 +108,7 @@ function showReplayDefense(p:Profile,opening:OpeningState):void {
   if(g.ability==='calm')g.calmWindows=[{from:1.5,until:8,position:point(g.position)}];
   p.guardianAt=point(g.position);
   for(const wolf of event.wolves) {
-    const retreat=boundaryRoute(p.layout,wolf.position).reverse();
+    const retreat=wolf.opening?.entryPath.map(point).reverse()??boundaryRoute(p.layout,wolf.position).reverse();
     wolf.position=routePoint(retreat,(elapsed-4)/4);wolf.path=retreat;wolf.pathIndex=0;
     wolf.status=elapsed>=8?'retreated':'approach';
     if(g.ability==='block')wolf.blockedUntil=8;
@@ -145,15 +144,17 @@ export function deriveOpeningScene(snapshot:EstateSnapshot,opening:OpeningState,
     }
   }
   if(opening.stage==='defend'){showReplayDefense(p,opening);return scene;}
+  if(p.threat)p.threat=ensureOpeningThreat(p.threat,p.layout);
   stageAnimals(p,opening);
   const event=p.threat;
   if(event) {
     event.phase='choosing';event.elapsed=0;
     if(['establish','rustle'].includes(opening.stage))event.wolves=[];
-    else for(const wolf of event.wolves) {
-      const route=boundaryRoute(p.layout,wolf.position);
-      wolf.position=routePoint(route,opening.stage==='approach'?openingPresentation(opening).progress:1);
-      wolf.path=route;wolf.pathIndex=0;wolf.status='approach';
+    else for(const [index,wolf] of event.wolves.entries()) {
+      const cue=openingWolfPresentation(opening,index),route=wolf.opening?.entryPath??[point(wolf.position)];
+      wolf.position=routePoint(route,cue.progress);
+      wolf.path=route.map(point);wolf.pathIndex=0;wolf.status='approach';
+      if(wolf.opening){wolf.opening.visible=cue.visible;wolf.opening.phase=wolf.opening.waitingReason?'waiting':cue.phase;}
     }
   }
   if(opening.stage==='arrival'&&opening.guardian) {
@@ -177,9 +178,10 @@ export function openingAttention(snapshot:EstateSnapshot,opening:OpeningState,op
     x:points.reduce((n,q)=>n+q.x,0)/points.length,z:points.reduce((n,q)=>n+q.z,0)/points.length,
   }:point(p.position);
   if(opening.stage==='arrival')return point(p.threat?.guardian?.position??p.guardianAt);
-  if(opening.stage==='approach')return average(p.threat?.wolves.map(w=>w.position)??[]);
-  if(opening.stage==='rustle')return point(snapshot.profile.threat?.wolves[0]?.position??{x:0,z:4});
+  if(opening.stage==='approach')return average(p.threat?.wolves.filter(w=>w.opening?.visible!==false).map(w=>w.position)??[]);
+  if(opening.stage==='rustle')return point(snapshot.profile.threat?.wolves[0]?.spawn??p.position);
   if(opening.stage==='startle')return average(p.animals.filter(a=>!a.memorial).map(a=>a.position));
   if(opening.stage==='defend')return door?{x:door.x,z:door.z}:point(p.position);
   return average([p.position,...p.animals.filter(a=>!a.memorial).map(a=>a.position)]);
 }
+

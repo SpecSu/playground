@@ -179,7 +179,7 @@ test('a cat gathering window already active at discovery removes reaction locall
   assert.equal(state.guardian!.abilityUntil, 8);
 });
 
-test('LOS and an actual adjacent tower determine discovery instead of a fixed cat bonus', () => {
+test('LOS blocks discovery and an adjacent unused tower does not grant a cat bonus', () => {
   const layout = createLayout();
   const blind = createThreat({ id: 'blind', seed: 3, mode: 'rehearsal', actors: [{ id: 'a', position: { x: 5, z: 4 } }], guardian: 'cat', guardianPosition: { x: 4, z: 2 }, wolfSpawns: [{ x: 0, z: 2 }] }, layout);
   assert.equal(stepThreat(guardianCommand(blind, layout, { kind: 'station', target: { x: 4, z: 2 } }).state, layout, { dt: 0.05 }).discoveredAt, null);
@@ -188,7 +188,7 @@ test('LOS and an actual adjacent tower determine discovery instead of a fixed ca
   const without = guardianCommand(createThreat(options, layout), layout, { kind: 'station', target: { x: 14, z: 0 } }).state;
   assert.equal(stepThreat(without, layout, { dt: 0.05 }).discoveredAt, null);
   layout.buildings.push({ id: 'lookout', kind: 'tower', x: 15, z: 0, rotation: 0, doors: [], paidCost: 12, capacity: 1 });
-  assert.equal(stepThreat(createThreat(options, layout), layout, { dt: 0.05 }).discoveredAt, 0);
+  assert.equal(stepThreat(createThreat(options, layout), layout, { dt: 0.05 }).discoveredAt, null);
 });
 
 test('dog only blocks one reachable wolf for six seconds and bubble adds only actual remaining path delay', () => {

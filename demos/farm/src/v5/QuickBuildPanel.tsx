@@ -1,14 +1,14 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import type {Profile} from './estate.ts';
-import {BUILDING_RULES,previewEdit,type BuildingKind,type GridPoint,type LayoutEdit} from './layout.ts';
-import {developmentActors,developmentPreviewKey,suggestDevelopment,type DevelopmentKind} from './development.ts';
+import {BUILDING_RULES,type BuildingKind,type GridPoint,type LayoutEdit} from './layout.ts';
+import {developmentPreview,developmentPreviewKey,suggestDevelopment,type DevelopmentKind} from './development.ts';
 
 type Ghost={x:number;z:number;kind:BuildingKind;valid:boolean;interactive?:boolean};
 type Send=(type:string,extra?:Record<string,unknown>)=>void;
 export type QuickBuildPanelProps={profile:Profile;busy:boolean;placementPoint?:GridPoint;send:Send;onGhost:(ghost?:Ghost)=>void;onClose:()=>void;onPlanner:()=>void;onTheme?:()=>void;onExplore?:()=>void};
 type Selection={edit:Extract<LayoutEdit,{type:'place'}>;version:number};
 const choices:{kind:DevelopmentKind;name:string;effect:string}[]=[
- {kind:'tower',name:'瞭望台',effect:'猫咪看得更远'},
+ {kind:'tower',name:'瞭望台',effect:'登台发现远处来袭'},
  {kind:'shelter',name:'保护围栏',effect:'多6个安全小窝'},
  {kind:'factory',name:'饲料坊',effect:'做饲料给小羊'},
 ];
@@ -42,7 +42,7 @@ function FacilityArt({kind}:{kind:DevelopmentKind}){
 export default function QuickBuildPanel({profile:p,busy,placementPoint,send,onGhost,onClose,onPlanner,onTheme,onExplore}:QuickBuildPanelProps){
  const [selection,setSelection]=useState<Selection|null>(null),[reason,setReason]=useState('');
  const submitted=useRef(false),legalityKey=developmentPreviewKey(p);
- const preview=useMemo(()=>selection?previewEdit(p.layout,selection.edit,{materials:p.materials,baseVersion:selection.version,actors:developmentActors(p),surveyed:p.surveyed,locked:!!p.threat}):null,[legalityKey,selection]);
+ const preview=useMemo(()=>selection?developmentPreview(p,selection.edit,selection.version):null,[legalityKey,selection]);
  const blocked=!!p.threat||!!p.layout.construction;
  const selected=choices.find(choice=>choice.kind===selection?.edit.kind);
  const shortReason=p.threat?'先陪大家回家，再布置小家':p.layout.construction?'正在建造，回到场景看看吧':selection&&selection.version!==p.layout.version?'小家刚有变化，请重新选一次':preview&&!preview.ok&&p.materials<preview.cost?`还差${preview.cost-p.materials}金币，去山谷找找吧`:preview&&!preview.ok?'这里放不下，拖到空地再试试':reason;
