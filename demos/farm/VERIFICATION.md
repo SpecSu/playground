@@ -112,3 +112,5 @@ V5.2.2 deployed locally from `ffc524a7ff9a7961bae6129269a8c45c0517c41a` at15:43:
 - 真实原SQLite只读备份，副本迁移7个profile；已有2个estate逐项确认身份、关系、库存、旧待领量权益，重复settle不重复迁入，7行legacy表不变。原快照没有lab，不能声称已实测旧lab迁移。证据verification/v6-migration.json。
 - 独立审查修复：固定生产位容量不能靠换动物扩仓；盾到期狼继续原追逐；携带狼断路不会误判到边界；旗草稿预览传入合法位置。
 - 真实AI、生成预算、审核/持久生成服务、真人好友、视频未接通，不假报成功。真实Chrome/WebGL、触控及声音听感仍未验收，独立Chrome工具入口缺失，未用CUA/其他浏览器。完整证据verification/v6.json。
+
+V6最终本机更新已确认：源码 `ee6ef421430827559df8fc2ff660d1c740b8da8f`，PID10414/PPID1，原 `http://127.0.0.1:5190`。跨调用2026-10-23T04:05:02.431554+00:00确认24资源逐字节匹配、SQLite integrity ok、7旧记录和2个estate完全未变。最新备份 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-23T04-04-41-905Z-before-v6.sqlite`；上个构建 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v6-20261023T040441Z`，最初V5.2.5构建另存 `.local/backups/dist-before-v6-20261023T040224Z`。测试服务已停止，生产未重置，真实画面/触控/听感仍未验。

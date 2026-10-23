@@ -137,3 +137,5 @@
 - V5.2.5 已更新到原Mac5190：实现提交 `32839a1`，独立后台PID39628/PPID1。跨调用2026-10-23T01:34:12.778850+00:00确认24资源逐字节一致、SQLite integrityok、7旧记录和2个V5记录完全未变。旧构建 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v525-20261023T013359Z`；最新存档备份 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-23T01-33-59-316Z-before-v525.sqlite`。临时5193测试服务已停止，生产存档未重置。真实Chrome/WebGL/触控/听感仍未验收。
 
 2026-10-23 V6：499测试、lint/typecheck/build、实际构建React+隔离API、真实旧SQLite副本迁移通过。首件披风/旗/狗盾/永久签名与跨日批次入库已集成；生成/真人好友/视频均未连接。保留5190旧运行版至备份切换，Chrome画面仍缺验收。
+
+V6最终本机更新已确认：源码 `ee6ef421430827559df8fc2ff660d1c740b8da8f`，PID10414/PPID1，原 `http://127.0.0.1:5190`。跨调用2026-10-23T04:05:02.431554+00:00确认24资源逐字节匹配、SQLite integrity ok、7旧记录和2个estate完全未变。最新备份 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-23T04-04-41-905Z-before-v6.sqlite`；上个构建 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v6-20261023T040441Z`，最初V5.2.5构建另存 `.local/backups/dist-before-v6-20261023T040224Z`。测试服务已停止，生产未重置，真实画面/触控/听感仍未验。

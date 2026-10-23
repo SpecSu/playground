@@ -98,5 +98,40 @@
   "realFriends": "unavailable: local demonstration only",
   "video": "not implemented or requested; documentation-only concept",
   "browser": "NOT VERIFIED: no independent Chrome/node_repl tool; no alternative browser used",
-  "productionResetExecuted": false
+  "productionResetExecuted": false,
+  "sourceCommit": "ee6ef421430827559df8fc2ff660d1c740b8da8f",
+  "isolatedHttpFinalRuns": [
+    {
+      "http": true,
+      "currentApi": true,
+      "guardianPersisted": true,
+      "templateApplied": true,
+      "receiptDuplicate": true,
+      "ownerBoundary": true,
+      "labIsolation": true,
+      "legacyBypassClosed": true,
+      "sameOrigin": true,
+      "resourcesByteMatched": 24,
+      "confirmedReset": true,
+      "resetRetryPreservesNewProgress": true,
+      "webgl": "not verified"
+    },
+    {
+      "http": true,
+      "realSqlite": true,
+      "freshTestIdentity": true,
+      "firstCraftGift": true,
+      "craftRetrySameId": true,
+      "equipPersistedAcrossAvatarAndReload": true,
+      "relationshipIdentityPreserved": true,
+      "staleVersionRejected": true,
+      "patternRevertNewVersion": true,
+      "generationUnavailableNoCharge": true,
+      "generationRetrySameId": true,
+      "giftDismantleNoProfit": true,
+      "trialNotReissued": true,
+      "defaultProductionSlots": 3,
+      "webgl": "not verified"
+    }
+  ]
 }
