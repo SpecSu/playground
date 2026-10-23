@@ -41,7 +41,14 @@ export function nearShop(s:MinimalState):boolean{return distance(s.player,SHOP_A
 export function dayKey(now:number):string{return new Date(now+8*3600000).toISOString().slice(0,10);}
 export function isAdult(a:MinimalAnimal,now:number):boolean{return now-a.bornAt>=MINIMAL_RULES.adultMs;}
 export function sellValue(a:MinimalAnimal):number{return a.size==='giant'?100:a.size==='large'?65:40;}
-export function animalScale(a:MinimalAnimal):number{return a.size==='giant'?1.8:a.size==='large'?1.3:1;}
+// Visual growth is derived from birth time, including time away; it never rerolls size or sale value.
+export function animalScale(a:MinimalAnimal,now=Date.now()):number{
+ const birth=a.size==='giant'?1.8:a.size==='large'?1.3:1;
+ const adult=a.size==='giant'?2.2:a.size==='large'?1.625:1.25;
+ const progress=Math.max(0,Math.min(1,(now-a.bornAt)/MINIMAL_RULES.adultMs));
+ const eased=progress*progress*(3-2*progress);
+ return birth+(adult-birth)*eased;
+}
 export function terrainFor(p:Point):Terrain{if(p.x===4||p.x===3&&p.z>=2)return 'creek';if(p.z<=-1&&p.x>=1)return 'hill';if(p.x<=-1&&p.z>=1||p.z>=4&&p.x<3)return 'grove';return 'meadow';}
 export function createMinimalState(now:number):MinimalState{
  const time=Number.isFinite(now)?now:0,tiles:Tile[]=[];for(let x=-3;x<=6;x++)for(let z=-3;z<=6;z++)tiles.push({x,z,terrain:terrainFor({x,z}),owned:x>=0&&x<4&&z>=0&&z<4});

@@ -10,8 +10,94 @@ function material(color:string,roughness=.72){return new THREE.MeshStandardMater
 function ellipsoid(parent:THREE.Object3D,mat:THREE.Material,x:number,y:number,z:number,sx:number,sy=sx,sz=sx,segments=18){const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,segments,12),mat);mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
 function capsule(parent:THREE.Object3D,mat:THREE.Material,x:number,y:number,z:number,radius:number,length:number){const mesh=new THREE.Mesh(new THREE.CapsuleGeometry(radius,length,6,12),mat);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
 function curveTube(parent:THREE.Object3D,mat:THREE.Material,points:THREE.Vector3[],radius:number){const mesh=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),24,radius,7,false),mat);mesh.castShadow=true;parent.add(mesh);return mesh;}
+/** Pigment lives on the skin vertices, not separate floating patch meshes. */
+function cowSkin(mesh:THREE.Mesh,patches:{direction:THREE.Vector3;radius:number}[]){
+ const base=new THREE.Color('#FFF2DA'),spot=new THREE.Color('#725044');
+ const p=mesh.geometry.attributes.position,colors=new Float32Array(p.count*3),v=new THREE.Vector3();
+ for(let i=0;i<p.count;i++){
+  v.fromBufferAttribute(p,i).normalize();
+  let coverage=0;
+  for(const patch of patches){const d=v.distanceTo(patch.direction);const edge=patch.radius*(1+.09*Math.sin(v.y*15+v.z*9));coverage=Math.max(coverage,1-ease((d-edge+.025)/.05));}
+  const c=base.clone().lerp(spot,coverage);colors.set([c.r,c.g,c.b],i*3);
+ }
+ mesh.geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
+ mesh.material=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.82});
+}
+/** Four grounded hooves, connected shoulders and a rounded muzzle; +Z is forward. */
+function createPlushCow(sex:FarmSex){
+ const root=new THREE.Group();root.name='farm-cow';
+ const body=new THREE.Group();body.name='cow-body-rig';root.add(body);
+ const cream=material('#FFF2DA',.82),hoofMat=material('#624A40',.85),pink=material('#DFAEA0',.83),inner=material('#DDA199'),black=material('#302C29',.42),white=material('#FFFFFF',.3),hornMat=material('#E6D3AC');
+ const torso=ellipsoid(body,cream,0,.65,-.09,.355,.315,.47,40);torso.name='cow-torso';
+ cowSkin(torso,[{direction:new THREE.Vector3(.95,.12,-.25).normalize(),radius:.62},{direction:new THREE.Vector3(-.95,.2,.2).normalize(),radius:.58},{direction:new THREE.Vector3(.1,.8,-.6).normalize(),radius:.5}]);
+ const neck=ellipsoid(body,cream,0,.73,.27,.24,.29,.24,28);neck.name='cow-shoulders';
+ const head=new THREE.Group();head.name='cow-head';head.position.set(0,.94,.36);body.add(head);
+ const face=ellipsoid(head,cream,0,0,0,.265,.265,.245,36);face.name='cow-face';
+ cowSkin(face,[{direction:new THREE.Vector3(-.55,.6,.55).normalize(),radius:.38}]);
+ const muzzle=ellipsoid(head,pink,0,-.125,.19,.225,.135,.135,32);muzzle.name='cow-muzzle';
+ const mouth=new THREE.Object3D();mouth.name='feeding-mouth';mouth.position.set(0,-.17,.325);head.add(mouth);
+ curveTube(head,hoofMat,[new THREE.Vector3(-.065,-.185,.309),new THREE.Vector3(0,-.2,.319),new THREE.Vector3(.065,-.185,.309)],.006);
+ const eyes:THREE.Mesh[]=[],ears:THREE.Group[]=[];
+ for(const side of [-1,1]){
+  const eye=ellipsoid(head,black,side*.145,.015,.205,.031,.043,.022,20);eye.rotation.y=side*.25;eyes.push(eye);
+  ellipsoid(eye,white,-.2,.3,.85,.26,.24,.19,12);
+  ellipsoid(head,hoofMat,side*.086,-.109,.313,.025,.016,.009,16);
+  const ear=new THREE.Group();ear.position.set(side*.23,.09,-.025);ear.rotation.z=-side*.22;head.add(ear);ears.push(ear);
+  ellipsoid(ear,cream,side*.075,0,0,.125,.065,.07,24);
+  ellipsoid(ear,inner,side*.08,-.005,.049,.078,.035,.018,20);
+  // Short rounded horns grow out of the crown instead of floating sharp cones.
+  curveTube(head,hornMat,[new THREE.Vector3(side*.155,.19,-.065),new THREE.Vector3(side*.19,.27,-.07),new THREE.Vector3(side*.18,.32,-.055)],.035);
+  ellipsoid(head,hornMat,side*.18,.32,-.055,.034,.035,.034,16);
+ }
+ const legs:THREE.Group[]=[];
+ for(let i=0;i<4;i++){
+  const leg=new THREE.Group();leg.name=`cow-leg-${i}`;leg.position.set(i%2?.225:-.225,.45,i<2?-.35:.22);body.add(leg);legs.push(leg);
+  const limb=capsule(leg,cream,0,-.175,0,.078,.23);limb.name=`cow-limb-${i}`;
+  const hoof=ellipsoid(leg,hoofMat,0,-.375,.02,.09,.075,.105,24);hoof.name=`cow-hoof-${i}`;
+  // A shallow cleft on the front of each hoof gives anatomy without detached toes.
+  curveTube(leg,material('#44372F'),[new THREE.Vector3(0,-.4,.119),new THREE.Vector3(0,-.355,.119)],.004);
+ }
+ const tail=new THREE.Group();tail.name='cow-tail';tail.position.set(0,.74,-.51);body.add(tail);
+ curveTube(tail,cream,[new THREE.Vector3(),new THREE.Vector3(.045,-.12,-.06),new THREE.Vector3(.065,-.3,-.07)],.024);
+ ellipsoid(tail,hoofMat,.065,-.32,-.07,.047,.075,.042,20);
+ const ribbon=material(sex==='female'?'#C87F87':'#6DAB98');
+ // Small front pendant is attached to the chest, no disconnected torso ring.
+ const tag=ellipsoid(body,ribbon,0,.65,.488,.035,.045,.013,20);tag.name='cow-pendant';
+ if(sex==='female')for(const side of [-1,1]){const bow=ellipsoid(head,ribbon,side*.043,.225,.1,.05,.027,.024,20);bow.rotation.z=side*.35;}
+ const anchors={ground:new THREE.Object3D(),support:new THREE.Object3D(),head:new THREE.Object3D()};
+ anchors.ground.name='animal-ground';root.add(anchors.ground);
+ anchors.support.name='animal-support';anchors.support.position.set(0,.335,-.06);body.add(anchors.support);
+ anchors.head.name='animal-head';head.add(anchors.head);
+ const halo=new THREE.Mesh(new THREE.RingGeometry(.48,.515,40),new THREE.MeshBasicMaterial({color:'#FFF1AB',transparent:true,opacity:.8,side:THREE.DoubleSide,depthWrite:false}));halo.name='selection-halo';halo.rotation.x=-Math.PI/2;halo.position.y=.012;halo.visible=false;root.add(halo);
+ const height=1.31;
+ return {root,mouth,height,anchors,
+  update(p:FarmAnimalPose){
+   const t=p.time,walk=clamp(p.speed/.8),phase=p.distance/.7*Math.PI*2,carried=!!p.carried;
+   const rest=p.activity==='rest'&&!carried,feeding=['drink','eat','graze'].includes(p.activity)&&!carried;
+   const h=clamp(p.hatch??1),bounce=h<1?Math.sin(clamp((h-.1)/.9)*Math.PI)*.65:0;
+   // Feet remain at the ground datum. Breathing expands the torso, not all joints.
+   body.position.y=bounce+(rest?-.08:0);
+   torso.scale.y=.315*(1+Math.sin(t*2)*.008);
+   anchors.support.position.set(0,.65-torso.scale.y*Math.sqrt(1-(.03/.47)**2),-.06);
+   head.rotation.set(feeding?.32+Math.sin(t*4)*.025:Math.sin(t*1.5)*.018,Math.sin(t*.8)*.025,carried?Math.sin(t*1.7)*.025:0);
+   head.position.y=.94+(feeding?-.035:0);
+   legs.forEach((leg,i)=>{
+    const stride=Math.sin(phase+(i===0||i===3?0:Math.PI));
+    leg.rotation.x=carried?(i<2?-.22:.25):rest?(i<2?-.65:.6):stride*.32*walk;
+    leg.position.y=.45+(carried||rest?0:Math.max(0,stride)*.045*walk);
+   });
+   ears.forEach((ear,i)=>ear.rotation.z=(i===0?1:-1)*.22+Math.sin(t*2+i)*.025);
+   tail.rotation.y=Math.sin(t*2.4)*.16;
+   eyes.forEach(eye=>eye.scale.y=.043*((t%4.7)>4.54?.16:1));
+   halo.visible=!!p.selected&&!carried;
+  },dispose:()=>dispose(root)};
+}
+
 /** Toy-like anatomical groups. Locomotion never writes the root's world transform. */
 export function createFarmAnimal(species:FarmSpecies,sex:FarmSex){
+ return species==='cow'?createPlushCow(sex):createClassicAnimal(species,sex);
+}
+function createClassicAnimal(species:FarmSpecies,sex:FarmSex){
  const root=new THREE.Group();root.name=`farm-${species}`;
  const body=new THREE.Group(),head=new THREE.Group(),legs:THREE.Group[]=[],ears:THREE.Group[]=[],eyes:THREE.Mesh[]=[];root.add(body);body.add(head);
  const cream=material('#FFF4DD'),ivory=material('#F5EAD8'),dark=material('#493C35'),black=material('#27342C',.38),white=material('#FFFFFF',.28),pink=material('#ECA6A7'),blush=material('#E9A899');
@@ -37,9 +123,9 @@ export function createFarmAnimal(species:FarmSpecies,sex:FarmSex){
  }
  const legMat=species==='sheep'?material('#A78B72'):main;
  for(let i=0;i<4;i++){
-  const leg=new THREE.Group();leg.position.set(i%2?.22:-.22,.3,i<2?-.3:.25);body.add(leg);legs.push(leg);
+  const leg=new THREE.Group();leg.name=`${species}-leg-${i}`;leg.position.set(i%2?.22:-.22,.3,i<2?-.3:.25);body.add(leg);legs.push(leg);
   capsule(leg,legMat,0,-.11,0,species==='bunny'?.085:.075,.1);
-  ellipsoid(leg,species==='cow'?dark:ivory,0,-.22,.025,.095,.065,species==='bunny'?.15:.105);
+  ellipsoid(leg,species==='cow'?dark:ivory,0,-.22,.025,.095,.065,species==='bunny'?.15:.105).name=`${species}-hoof-${i}`;
  }
  for(const side of [-1,1]){
   const ear=new THREE.Group();ear.position.set(side*.225,.15,-.015);head.add(ear);ears.push(ear);
@@ -58,7 +144,7 @@ export function createFarmAnimal(species:FarmSpecies,sex:FarmSex){
   for(let ring=0;ring<4;ring++)for(let j=0;j<8;j++){
    const theta=j*Math.PI/4+(ring%2)*.22,z=-.32+ring*.18;
    const r=.14+(Math.sin(ring*7+j*3)+1)*.014;
-   ellipsoid(body,fleece,Math.cos(theta)*.285,.49+Math.sin(theta)*.25,z,r,r*.96,r*1.08,12);
+   ellipsoid(body,fleece,Math.cos(theta)*.285,.49+Math.sin(theta)*.25,z,r,r*.96,r*1.08,12).name=`sheep-fleece-${ring}-${j}`;
   }
   for(let j=0;j<7;j++)ellipsoid(head,fleece,(j%3-1)*.11,.18+Math.floor(j/3)*.055,-.035+(j%2)*.09,.105,.1,.095,12);
   tail=ellipsoid(body,fleece,0,.5,-.51,.105,.12,.115,12);
@@ -80,6 +166,13 @@ export function createFarmAnimal(species:FarmSpecies,sex:FarmSex){
  const tag=ellipsoid(body,ribbon,0,.49,.35,.045,.055,.02,12);tag.rotation.z=.16;
  if(sex==='female')for(const side of [-1,1]){const bow=ellipsoid(head,ribbon,side*.055,.245,.08,.064,.035,.025,12);bow.rotation.z=side*.45;}
  const halo=new THREE.Mesh(new THREE.RingGeometry(.45,.49,40),new THREE.MeshBasicMaterial({color:'#FFF1AB',transparent:true,opacity:.8,side:THREE.DoubleSide,depthWrite:false}));halo.rotation.x=-Math.PI/2;halo.position.y=.018;halo.visible=false;root.add(halo);
+ // Sample the real fleece surface directly under the support point, not its global AABB.
+ body.updateMatrixWorld(true);
+ const fleeceMeshes=body.children.filter((o):o is THREE.Mesh=>o instanceof THREE.Mesh);
+ const supportZ=species==='sheep'?.04:-.06;
+ const fleeceRay=new THREE.Raycaster(new THREE.Vector3(0,-2,supportZ),new THREE.Vector3(0,1,0));
+ const fleeceBottom=fleeceRay.intersectObjects(fleeceMeshes,false)[0]?.point.y??bodyY-belly.scale.y;
+ const support=new THREE.Object3D();support.name='animal-support';support.position.set(0,species==='sheep'?fleeceBottom:bodyY-belly.scale.y,supportZ);body.add(support);
  const originalEarRot=ears.map(e=>e.rotation.z);const tailBase=tail.rotation.y;
  const height=species==='bunny'?1.36:species==='cow'?1.18:1.08;
  return {root,mouth,height,
@@ -92,6 +185,8 @@ export function createFarmAnimal(species:FarmSpecies,sex:FarmSex){
    body.position.y=(resting?-.13:0)+(p.carried?-.08:0)+bounce+(p.carried?Math.sin(t*2)*.015:Math.abs(Math.sin(phase))*walk*.035);
    body.scale.set(1+(1-squash)*.45,squash*(1+Math.sin(t*2.1)*.008),1+(1-squash)*.22);
    belly.scale.y=(species==='bunny'?.34:.31)*(1+Math.sin(t*2)*.014);
+   // Fleece is the sheep's physical underside; other bellies use their breathing radius.
+   support.position.set(0,species==='sheep'?fleeceBottom:bodyY-belly.scale.y,supportZ);
    head.rotation.x=feeding?.38+Math.sin(t*4)*.045:resting?.13:Math.sin(t*1.5)*.035;
    head.rotation.y=walk>.15?0:Math.sin(t*.8)*.055;
    head.position.y=(species==='bunny'?.76:.7)+(feeding?-.08:0);

@@ -6,12 +6,12 @@ import {createElement} from 'react';
 import {createRoot} from 'react-dom/client';
 import {MINIMAL_STORAGE_KEY,type MinimalState,type Point} from '../src/minimal/model.ts';
 type Target={kind:'tile';x:number;z:number;worldPoint?:Point}|{kind:'animal';id:string}|{kind:'egg';id:string}|{kind:'shop'};
-type StubWorld={handlers:{select:(target:Target)=>void;arrive:(p:Point)=>void};state:MinimalState;path:Point|null;actions:string[];disposed:boolean;placementMode:boolean};
+type StubWorld={handlers:{select:(target:Target)=>void;arrive:(p:Point)=>void};state:MinimalState;path:Point|null;actions:string[];disposed:boolean;placementMode:boolean;weather?:{weather?:string;time?:string}};
 const pause=(ms=30)=>new Promise(r=>setTimeout(r,ms));
 
 test('egg UI: welcome once, physical shop purchase, ground incubation, overhead carry and explicit sale',async()=>{
  const hooks=registerHooks({load(url,context,next){
-  if(url.endsWith('/minimal/World.ts'))return {format:'module',shortCircuit:true,source:`export class MinimalWorld{constructor(host,state,handlers){this.state=state;this.handlers=handlers;this.actions=[];globalThis.__eggTestWorld=this;}update(s){this.state=s;}walkTo(p){this.path=p;return true;}setPlacementMode(active){this.placementMode=active;}focus(){}zoom(){}cancelWalk(){this.path=null;}perform(a){this.actions.push(a);}dispose(){this.disposed=true;}screenPoint(){return {x:195,y:300};}}`};
+  if(url.endsWith('/minimal/World.ts'))return {format:'module',shortCircuit:true,source:`export class MinimalWorld{constructor(host,state,handlers){this.state=state;this.handlers=handlers;this.actions=[];globalThis.__eggTestWorld=this;}update(s){this.state=s;}walkTo(p){this.path=p;return true;}setPlacementMode(active){this.placementMode=active;}setWeatherPreferences(p){this.weather=p;}focus(){}zoom(){}cancelWalk(){this.path=null;}perform(a){this.actions.push(a);}dispose(){this.disposed=true;}screenPoint(){return {x:195,y:300};}}`};
   if(url.endsWith('/feed/PhoneViewport.tsx'))return {format:'module',shortCircuit:true,source:'export default function PhoneViewport({children}){return children;}'};
   return next(url,context);
  }});
@@ -37,7 +37,8 @@ test('egg UI: welcome once, physical shop purchase, ground incubation, overhead 
   scene.handlers.select({kind:'tile',x:3,z:3,worldPoint:{x:3.2,z:2.8}});await pause();assert.deepEqual(scene.path,{x:3.2,z:2.8},'free walking preserves the actual ground tap rather than snapping to cell center');const oldDestination=scene.path!;scene.handlers.select({kind:'shop'});await pause();scene.handlers.arrive(oldDestination);await pause();assert.equal(host.querySelector('[aria-label="场景动作"]'),null);await arrive(scene);assert.ok(host.querySelector('[aria-label="场景动作"]'));
   // A canceled approach must not reopen a stale world card behind settings.
   scene.handlers.select({kind:'shop'});await pause();const stale=scene.path!;buttons().find(b=>b.getAttribute('aria-label')==='设置与说明')!.click();await pause();scene.handlers.arrive(stale);await pause();assert.equal(host.querySelector('[aria-label="场景动作"]'),null);
+  const weatherCoins=saved().coins;buttons().find(b=>b.getAttribute('aria-label')==='预览天气：雪天')!.click();await pause();buttons().find(b=>b.getAttribute('aria-label')==='昼夜：夜晚')!.click();await pause();assert.deepEqual(JSON.parse(w.localStorage.getItem('dreamina-farm-weather-v1')!),{weather:'snow',time:'night'});assert.equal(saved().coins,weatherCoins,'weather previews never debit coins');assert.deepEqual(scene.weather,{weather:'snow',time:'night'},'preview selection reaches the actual scene adapter');assert.match(host.textContent!,/模拟/);
   assert.equal(saved().eggs.some(e=>e.id===eggId),false);buttons().find(b=>b.getAttribute('aria-label')==='关闭面板')!.click();await pause();scene.handlers.select({kind:'shop'});await pause();await arrive(scene);await click('买一颗');buttons().find(b=>b.getAttribute('aria-label')==='取消放蛋')!.click();await pause();scene.handlers.select({kind:'shop'});await pause();await arrive(scene);const beforeRebuy=saved().coins;await click('买一颗');assert.equal(saved().coins,beforeRebuy-30,'cancel placement unlocks a subsequent intentional purchase');assert.equal(saved().eggs.length,2);root.unmount();assert.equal(scene.disposed,true);
-  const second=createRoot(host as unknown as HTMLElement);second.render(createElement(MinimalApp));await pause();await pause();assert.doesNotMatch(host.textContent!,/领取 120 金币/,'welcome cannot repeat after reload');second.unmount();
+  const second=createRoot(host as unknown as HTMLElement);second.render(createElement(MinimalApp));await pause();await pause();assert.doesNotMatch(host.textContent!,/领取 120 金币/,'welcome cannot repeat after reload');assert.deepEqual(JSON.parse(w.localStorage.getItem('dreamina-farm-weather-v1')!),{weather:'snow',time:'night'});second.unmount();
  }finally{Date.now=originalNow;hooks.deregister();await w.happyDOM.close();}
 });
