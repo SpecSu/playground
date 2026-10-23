@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-23T01:34:12.778850+00:00",
+  "sourceCommit": "32839a110d5689a45fe7736ded6fcf21208fb354",
+  "version": "v5.2.5-farm-cycle",
+  "host": "darwin",
+  "url": "http://127.0.0.1:5190",
+  "pid": 39628,
+  "ppid": 1,
+  "resourcesByteMatched": 24,
+  "sqliteIntegrity": "ok",
+  "databaseBackup": "/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-23T01-33-59-316Z-before-v525.sqlite",
+  "previousBuild": "/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v525-20261023T013359Z",
+  "originalFarmRecordsUnchanged": 7,
+  "v5IdentitiesPreserved": 2,
+  "v5ProfilesAndRunIdsPreserved": 2,
+  "v5RecordsExactlyUnchanged": 2,
+  "resetExecutedByAgent": false,
+  "webgl": "not verified",
+  "listening": "not verified"
+}

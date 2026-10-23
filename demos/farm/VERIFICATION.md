@@ -101,3 +101,5 @@ V5.2.2 deployed locally from `ffc524a7ff9a7961bae6129269a8c45c0517c41a` at15:43:
 - 真实EstateStore临时库验证旧产物仅迁移一次、领取/兑换/培育/升级/领养跨重启幂等、升级不染旧羊毛、离线无隐藏产出积压。Reducer链验证完整12秒预警、1–3狼合法边界、真实撤离、180秒救援/免费找回、面板/后台/离线暂停、结束重排。
 - 独立审查发现的塔顶抓取跳格、少于3住民时领养空名、救援面板覆盖导致不推进均有实际RED→GREEN回归。末轮源码审查无剩余Important/Critical。第一轮全套在UI并行落盘时出现1项禁用提示失败；冻结改动后最终全套463通过。
 - 未做Chrome/WebGL/触控/听感与长期数值平衡验收。无独立Chrome/node_repl入口，未绕用其他浏览器。自然托管/幼鸭/真实AI社交不包含在本次。
+
+- V5.2.5 已更新到原Mac5190：实现提交 `32839a1`，独立后台PID39628/PPID1。跨调用2026-10-23T01:34:12.778850+00:00确认24资源逐字节一致、SQLite integrityok、7旧记录和2个V5记录完全未变。旧构建 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v525-20261023T013359Z`；最新存档备份 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-23T01-33-59-316Z-before-v525.sqlite`。临时5193测试服务已停止，生产存档未重置。真实Chrome/WebGL/触控/听感仍未验收。

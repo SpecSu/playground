@@ -133,3 +133,5 @@
 - 自然来袭12秒预警有独立音效，默认不永久损失，不补算离线袭击。新界面整合/全回归/隔离生产验证尚待完成。Chrome/node_repl仍无可调用入口，未绕用其他浏览器。
 
 - V5.2.5最终检查：463/463、lint/typecheck/build通过；独立SQLite、生产HTTP24资源和实际React操作链通过。审查3项（塔顶跳格/领养空名/救援面板暂停）均已修复并回归。准备在原Mac5190短暂重启，最新一致性SQLite备份与旧构建会保留；不会重置用户存档。
+
+- V5.2.5 已更新到原Mac5190：实现提交 `32839a1`，独立后台PID39628/PPID1。跨调用2026-10-23T01:34:12.778850+00:00确认24资源逐字节一致、SQLite integrityok、7旧记录和2个V5记录完全未变。旧构建 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v525-20261023T013359Z`；最新存档备份 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-23T01-33-59-316Z-before-v525.sqlite`。临时5193测试服务已停止，生产存档未重置。真实Chrome/WebGL/触控/听感仍未验收。
