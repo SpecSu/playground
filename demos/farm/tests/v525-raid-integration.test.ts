@@ -53,8 +53,8 @@ test('real pulse commands complete warning, safe evacuation and wrapping before 
  h.pulse();assert.equal(h.profile.threat,null);assert.equal(h.profile.raidCycle!.remainingMs,cycle.remainingMs-1000);
 });
 
-test('actual herd count and rarity select one, two or three legal boundary wolves after the same full warning',()=>{
- for(const scenario of [{count:3,rare:false,wolves:1},{count:6,rare:false,wolves:2},{count:3,rare:true,wolves:3}]){
+test('V6 herd count and rarity retain one legal boundary wolf after the same full warning',()=>{
+ for(const scenario of [{count:3,rare:false,wolves:1},{count:6,rare:false,wolves:1},{count:3,rare:true,wolves:1}]){
   const h=run();
   while(h.profile.animals.length<scenario.count){const result=h.send('adopt',{expectedCount:h.profile.animals.length});assert.equal(result.accepted,true,result.message);}
   if(scenario.rare)for(const a of h.profile.animals)a.husbandry!.rarity='gold';

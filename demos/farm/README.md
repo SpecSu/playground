@@ -1,14 +1,15 @@
-## 当前本机版本：V5.2.5 拖拽建设与羊毛守护
+## 当前版本：V6.0 羊毛工作坊
 
 地址仍为 http://127.0.0.1:5190 。刷新加载新版，保留原390×844 Feed、固定2.5D镜头与设备存档。
 
 - 建东西：选设施后拖动场景中的悬空半透明模型，绿色可放、红色不可放，确认才扣材料；取消不扣。
-- 羊毛·守护：按Lv1–5积累白/绿/蓝/红/金羊毛，领取入库，再兑换材料或用于培育。材料能升级伙伴和保护入口。
-- 第一顿后每天在线可能多次不定时来袭；动物越多、稀有度越高，狼群和来袭频率越高。先预警12秒，后台/离线不推进，自然档不会永久失去动物。
-- 自然档每10分钟1份羊毛；独立演示档每15秒，来袭30–60在线秒，互不混用。具体试验参数和完整玩法在 [GAMEPLAY.md](./GAMEPLAY.md)。
+- 做第一件作品：点“羊毛·守护→做一件作品”或布置里的创作入口，选披风和纹样，保存图案、领取免费首件，再点“穿给伙伴”。卡片会收起，披风实际跟随守护者。旗面可预览和拖动摆放，作品、来源和版本保存在本机。
+- 自然档每12小时每生产位2白毛，初始3位、最多6位，每位保留6批；白2加工绿1。蓝/红/金按选定动物目标累计2/6/14周期；旧库存单独保留原1/2/4/7/12材料兑换权。新蓝毛做狗盾、金毛解锁永久签名；红毛配方尚未开放。演示档生产周期30秒，独立存档。
+- 伙伴披风/庭院旗4材料+白1；路标8+绿1；狗盾16+蓝1；动物签名8+金1。首件披风或旗面赠送；拆解按实付返80%材料和原羊毛，赠品不生料。演示档可免费借狗盾，定点展开6秒路障，不能与贴身拦截叠加。
+- 第一顿后每天在线可能多次不定时来袭；安心区固定1狼、约8–14在线分钟一轮，稀有标签和财富不增加压力。预警12秒，后台/离线暂停，自然档不会永久失去动物。更多动物仍需要足够保护位与可达路线。
 - 动物卡保持轻量，点击喂养/玩耍/救援后收起看动作。设置里可以确认重置当前档，从开场重新演示；代理更新不会重置存档。
-- 验证证据在 [VERIFICATION.md](./VERIFICATION.md) 和 `verification/v525*.json`。真实Chrome/WebGL画面、触控和听感仍未验收，未使用其他浏览器绕行。
-- 托管、幼鸭水域生活、真实AI/好友联网尚未集成，不宣称完整V5已完成。
+- 验证证据在 [VERIFICATION.md](./VERIFICATION.md) 和 `verification/v6*.json`。真实Chrome/WebGL画面、触控和听感仍未验收，未使用其他浏览器绕行。
+- 真实AI、账号生成预算、审核与持久生成资产、真人好友、偶遇卡视频均未接通；工作坊明确显示未连接，模板可独立使用，不兑换即梦积分。源码调查见 [连接核实](docs/V6_CONNECTIVITY.md)。托管、幼鸭水域生活、猫铃/蛙帐等仍未集成。
 
 # 绒绒庄园 V5 · 用户 Mac 本地版本
 
@@ -41,11 +42,12 @@ PATH="$PWD/.local/runtime:$PATH" npm run build
 构建默认输出dist。开发中可用隔离目录，避免正在运行的前后端版本不一致：
 
 ```sh
-PATH="$PWD/.local/runtime:$PATH" npm run build -- --outDir .local/v5-dist
-PORT=5193 FARM_DB=/tmp/farm-v5-test.sqlite FARM_DIST="$PWD/.local/v5-dist" PATH="$PWD/.local/runtime:$PATH" npm start
+PATH="$PWD/.local/runtime:$PATH" npm run build -- --outDir .local/v6-dist
+PORT=5193 FARM_DB=/tmp/farm-v6-test.sqlite FARM_DIST="$PWD/.local/v6-dist" PATH="$PWD/.local/runtime:$PATH" npm start
 # 另一个终端，同一目录
-FARM_URL=http://127.0.0.1:5193 FARM_DIST="$PWD/.local/v5-dist" PATH="$PWD/.local/runtime:$PATH" npm run test:http
-FARM_URL=http://127.0.0.1:5193 FARM_DIST="$PWD/.local/v5-dist" PATH="$PWD/.local/runtime:$PATH" npm run test:dom
+FARM_URL=http://127.0.0.1:5193 FARM_DIST="$PWD/.local/v6-dist" PATH="$PWD/.local/runtime:$PATH" npm run test:http
+FARM_URL=http://127.0.0.1:5193 .local/runtime/node scripts/v6-http-smoke.mjs
+FARM_URL=http://127.0.0.1:5193 FARM_DIST="$PWD/.local/v6-dist" PATH="$PWD/.local/runtime:$PATH" npm run test:dom
 ```
 
 HTTP/Node DOM脚本拒绝5190，使用临时测试存档。真实Chrome/WebGL与手机触控尚未验收：独立Chrome插件工具缺失，没有使用CUA或其他浏览器绕行。标准Node SQLite ExperimentalWarning不代表保存失败。

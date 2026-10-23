@@ -1,9 +1,11 @@
 /** Integration of persisted production, upgrades and natural events. No browser clocks. */
 import type {Profile,EstateCommand} from './estate.ts';
 import {createLife} from './life.ts';
-import {createHerdEconomy,createHusbandry,syncHusbandry,claimWool,exchangeWool,cultivateHusbandry,tierNumber,type MaterialTier} from './herd-economy.ts';
+import {createHerdEconomy,createHusbandry,syncHusbandry,exchangeWool,cultivateHusbandry,tierNumber,migrateWoolLots,restoreWool,consumeWool,emptyStacks,TIERS,type MaterialTier} from './herd-economy.ts';
+import {createProduction,settleProduction,setProductionSlots,setRareTarget,claimProduction,type RareTier} from './v6-production.ts';
 import {createRaidCycle,advanceRaidCycle,markRaidStarted,finishRaidCycle,naturalRaidSpawns} from './raid-cycle.ts';
 import {createThreat,type GuardianKind} from './threat.ts';
+import {workshopTactic} from './workshop.ts';
 import {isWalkable,shelterEntries,type GridPoint} from './layout.ts';
 import {findActorPath} from './actor-navigation.ts';
 export type FarmUpgrades={guardians:Record<GuardianKind,number>;shelters:Record<string,number>};
@@ -14,11 +16,18 @@ const hash=(s:string)=>{let n=2166136261;for(const c of s)n=Math.imul(n^c.charCo
 export function ensureFarmCycle(p:Profile,now:number){
  p.economy??=createHerdEconomy();p.upgrades??={guardians:{dog:1,cat:1,frog:1},shelters:{}};
  p.raidCycle??=createRaidCycle(hash(`${p.id}:${p.runId??p.createdAt}:${p.session}`),now,p.onlineMs,p.id==='lab');
+ const migrating=!p.production;
  for(const a of p.animals){if(!a.husbandry)a.husbandry=createHusbandry(now,p.id,a.life,a.appearance);a.life.products.stored=0;a.life.products.settledAt=now;}
+ if(migrating){
+  p.economy=migrateWoolLots(p.economy);
+  p.production=createProduction(now,p.id,living(p).slice(0,3).map(a=>a.id));
+  for(const a of p.animals){const h=a.husbandry!;for(const tier of TIERS){const amount=h.pending[tier];if(amount)p.production.pending.push({id:`legacy-pending-${a.id}-${tier}`,tier,amount,animalId:a.id,version:'legacy',source:'legacy-pending',cycle:0});}h.pending=emptyStacks();h.progressMs=0;h.settledAt=Math.max(h.settledAt,now);}
+ }
 }
 export function settleFarmProducts(p:Profile,now:number){
  ensureFarmCycle(p,now);
- for(const a of living(p))a.husbandry=syncHusbandry(a.husbandry!,a.life,now);
+ for(const a of living(p)){const h=a.husbandry!;h.settledAt=Math.max(h.settledAt,now);a.husbandry=syncHusbandry(h,a.life,now);a.husbandry.pending=emptyStacks();a.husbandry.progressMs=0;}
+ p.production=settleProduction(p.production!,now,living(p).map(a=>a.id));
  // The former flat-material clock is retired after its one-time import.
  for(const a of p.animals){a.life.products.stored=0;a.life.products.settledAt=Math.max(a.life.products.settledAt,now);}
 }
@@ -33,24 +42,34 @@ export function advanceFarmRaids(p:Profile,now:number,presentation?:{ready?:bool
  if(p.job?.type==='delivery'&&p.job.carried)p.factory.stock+=p.job.carried;
  p.job=null;p.path=[];delete p.steering;
  for(const a of living(p)){a.path=[];a.following=false;delete a.restAssignment;a.life.rest={bedId:null,sessionId:null,elapsedMs:0,completed:false};}
- p.threat=createThreat({id:r.launch.id,seed:r.launch.seed,mode:'reassure',actors,guardian:p.guardian!,guardianPosition:{...p.guardianAt},wolfSpawns:spawns,upgrades:threatUpgrades(p)},p.layout);
+ p.threat=createThreat({id:r.launch.id,seed:r.launch.seed,mode:'reassure',actors,guardian:p.guardian!,guardianPosition:{...p.guardianAt},wolfSpawns:spawns,upgrades:threatUpgrades(p),tactic:workshopTactic(p)},p.layout);
  p.raidCycle=markRaidStarted(p.raidCycle,r.launch.id,now,p.onlineMs);p.notice=`${spawns.length}只狼从边缘靠近，带大家回保护区`;
  p.events=[...p.events,{id:r.launch.id,text:`山谷来袭 · ${actors.length}只住民 · ${spawns.length}只狼`,at:now,layoutVersion:p.layout.version}].slice(-60);
 }
 export function finishFarmRaid(p:Profile){if(p.raidCycle?.phase==='active')p.raidCycle=finishRaidCycle(p.raidCycle,herd(p),p.id==='lab');}
 export type CycleCommandResult={accepted:boolean;message:string};
-const recognized=new Set(['claimWool','claimProducts','exchangeWool','cultivate','upgradeGuardian','upgradeShelter','adopt']);
+const recognized=new Set(['claimWool','claimProducts','exchangeWool','cultivate','upgradeGuardian','upgradeShelter','adopt','setProductionSlots','setRareTarget','processGreen']);
 export function farmCycleCommand(p:Profile,c:EstateCommand,now:number):CycleCommandResult|null{
  if(!recognized.has(c.type))return null;
  ensureFarmCycle(p,now);settleFarmProducts(p,now);
  const reject=(message:string)=>({accepted:false,message});
  if(c.type==='claimWool'||c.type==='claimProducts'){
-  const animals=living(p).filter(a=>c.target===undefined||a.id===c.target);if(!animals.length)return reject('选一只还在家的小羊');let total=0;
-  for(const a of animals){const r=claimWool(a.husbandry!,p.economy!,now);a.husbandry=r.husbandry;p.economy=r.economy;total+=r.total;}
-  if(!total)return reject('羊毛还在慢慢积累，再等等');return {accepted:true,message:`收好${total}份羊毛，可在产物背包兑换材料`};
+  if(c.target!==undefined&&!living(p).some(a=>a.id===c.target))return reject('选一只还在家的小羊');
+  const r=claimProduction(p.production!,p.economy!,c.id,typeof c.target==='string'?c.target:undefined);if(!r.total)return reject('羊毛还在慢慢积累，再等等');p.production=r.production;p.economy=r.economy;return {accepted:true,message:`收好${r.total}份羊毛，可用于工作坊制作`};
  }
  if(c.type==='exchangeWool'){
-  const r=exchangeWool(p.economy!,c.tier as MaterialTier,Number(c.amount));if(!r.accepted)return reject(r.message);p.economy=r.economy;p.materials+=r.materials;return {accepted:true,message:`兑换了${r.materials}份建设材料`};
+  const r=exchangeWool(p.economy!,c.tier as MaterialTier,Number(c.amount),(c.woolVersion??'v6') as 'legacy'|'v6');if(!r.accepted)return reject(r.message);p.economy=r.economy;p.materials+=r.materials;return {accepted:true,message:`兑换了${r.materials}份建设材料`};
+ }
+ if(c.type==='processGreen'){
+  const amount=Number(c.amount??1);if(!Number.isSafeInteger(amount)||amount<=0)return reject('请选择有效加工数量');const r=consumeWool(p.economy!,{white:amount*2});if(!r.accepted)return reject(r.message);p.economy=restoreWool(r.economy,[{id:`green-${c.id}`,tier:'green',amount,animalId:null,version:'v6',source:`processing:${r.consumed.map(l=>l.id).join(',')}`}]);return {accepted:true,message:`加工了${amount}份绿毛`};
+ }
+ if(c.type==='setProductionSlots'){
+  const ids=c.animalIds;if(!Array.isArray(ids)||ids.length>6||new Set(ids).size!==ids.length||ids.some(id=>!living(p).some(a=>a.id===id)))return reject('请选择最多六只还在家的动物');p.production=setProductionSlots(p.production!,ids,now);return {accepted:true,message:'生产位已保存，新增位置从下个完整周期起积累'};
+ }
+ if(c.type==='setRareTarget'){
+  const tier=c.tier;if(tier!==null&&!['blue','red','gold'].includes(String(tier)))return reject('请选择蓝、红或金毛目标');
+  const a=living(p).find(a=>a.id===c.target);if(tier!==null&&(!a||a.husbandry!.level<({blue:3,red:4,gold:5}[tier as RareTier])))return reject('蓝、红、金方向分别需要照料Lv.3、4、5');
+  p.production=setRareTarget(p.production!,tier===null?null:{animalId:a!.id,tier:tier as RareTier},now);return {accepted:true,message:'稀有目标将在下个周期生效，原方向进度保留'};
  }
  if(p.threat)return reject('先完成这次守护，回家后再升级');
  if(c.type==='cultivate'){

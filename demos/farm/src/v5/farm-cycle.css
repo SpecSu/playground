@@ -35,3 +35,12 @@
 .estate-feed .compact-production-summary{color:#d5ddca}
 .estate-feed .compact-residents{overflow-x:auto;scrollbar-width:thin;padding-bottom:2px}
 .estate-feed .compact-residents button{flex:1 0 auto;min-width:63px}
+/* V6: short actions, optional detail, readable at phone width. */
+.cycle-slot-list,.cycle-rare-list>div{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.cycle-slot-list button,.cycle-rare-list button,.cycle-more .cycle-row button{border:1px solid #d6dfcc;border-radius:12px;background:#f9fbf5;color:#344b35;padding:7px 10px;min-height:36px;font:inherit;font-size:12px}
+.cycle-slot-list button[aria-pressed=true]{background:#e6f0db;border-color:#7d9d62}
+.cycle-rare-list b{flex:1;align-self:center;font-size:12px;min-width:55px}
+.cycle-slot-list button:disabled,.cycle-rare-list button:disabled{opacity:.45}
+.cycle-wool-grid article small{font-size:10px;line-height:1.4;text-align:center}
+.cycle-more p{overflow-wrap:anywhere}
+.cycle-heading h3{margin:14px 0 8px;font-size:15px}

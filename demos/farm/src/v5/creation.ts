@@ -45,6 +45,7 @@ export type PrivateWork = {
   capture:WorkCapture & {layoutVersion:number;theme:Theme;profileId:string;animalIds:string[]};
 };
 export type LocalGrant = {
+  projectId?:string;
   id:string;visitorId:string;label:'本地访客演示';regions:Region[];budget:number;editTypes:LayoutEdit['type'][];
   allowView:boolean;allowHelp:boolean;allowRemix:boolean;createdAt:number;expiresAt:number;revokedAt?:number;
 };
@@ -67,7 +68,9 @@ export type LocalProposal = {
   acceptedComponentIds?:string[];acceptedAt?:number;
 };
 export type ProposalReceipt = {proposalId:string;transactionId:string;baseVersion:number;componentIds:string[];undoState:'available'|'undone';undoTransactionId?:string};
+export type ProjectBudget = {id:string;budget:number;spent:number;reserved:number;receipts:{transactionId:string;proposalId:string;cost:number}[]};
 export type CreationState = {
+  projects:Record<string,ProjectBudget>;
   version:1;ownerId:string;profileId:string;theme:Theme;themeVersions:ThemeVersion[];
   drafts:(ThemeDraft|BlueprintDraft)[];works:PrivateWork[];visits:LocalVisit[];help:LocalHelp[];
   grants:LocalGrant[];proposals:LocalProposal[];proposalReceipts:ProposalReceipt[];
@@ -84,7 +87,7 @@ export type CreationCommand = {id:string} & (
   | {type:'themePreview';theme:Theme} | {type:'themeApply';draftId:string} | {type:'themeUndo'}
   | {type:'saveWork';title:string;eventIds?:string[]}
   | ({type:'blueprintDraft'} & BlueprintInput) | {type:'blueprintApply';draftId:string}
-  | {type:'grant';visitorId:string;regions:Region[];budget:number;editTypes:LayoutEdit['type'][];expiresAt:number;allowView?:boolean;allowHelp?:boolean;allowRemix?:boolean}
+  | {type:'grant';projectId?:string;visitorId:string;regions:Region[];budget:number;editTypes:LayoutEdit['type'][];expiresAt:number;allowView?:boolean;allowHelp?:boolean;allowRemix?:boolean}
   | {type:'revokeGrant';grantId:string}
   | {type:'enterVisit';mode:'example'|'local-visitor';grantId?:string}
   | {type:'visitMove';visitId:string} | {type:'visitInteract';visitId:string;interaction:'wave'|'photo'|'look'}
@@ -108,9 +111,30 @@ export type CreationResult = {ok:boolean;state:CreationState;message:string;effe
 export function createCreation(ownerId='local-owner',profileId='natural'):CreationState {
   return {
     version:1,ownerId,profileId,theme:'pasture',themeVersions:[{id:'theme-initial',version:0,theme:'pasture',previous:'pasture',createdAt:0}],
-    drafts:[],works:[],visits:[],help:[],grants:[],proposals:[],proposalReceipts:[],receipts:[],
+    projects:{},drafts:[],works:[],visits:[],help:[],grants:[],proposals:[],proposalReceipts:[],receipts:[],
     localVisitors:Object.fromEntries(LOCAL_VISITORS.map(v=>[v.id,{name:v.name,label:v.label,food:1}])),
   };
+}
+
+/** Legacy grants each form their own project. No pending proposal reserves owner materials. */
+export function migrateProjectBudgets(state:CreationState):void {
+  state.projects??={};
+  for(const grant of state.grants){
+    grant.projectId??=grant.id;
+    state.projects[grant.projectId]??={id:grant.projectId,budget:grant.budget,spent:0,reserved:0,receipts:[]};
+  }
+}
+
+/** Call only after authoritative spatial validation, in the same candidate transaction. */
+export function chargeProjectBudget(state:CreationState,proposalId:string,transactionId:string,cost:number):void {
+  migrateProjectBudgets(state);
+  const proposal=state.proposals.find(p=>p.id===proposalId);
+  const grant=state.grants.find(g=>g.id===proposal?.grantId);
+  requireRule(grant?.projectId,'提案项目授权不存在');const project=state.projects[grant.projectId];
+  requireRule(project&&integer(cost)&&integer(project.budget)&&integer(project.spent)&&integer(project.reserved),'项目预算账本无效');
+  requireRule(!project.receipts.some(r=>r.transactionId===transactionId||r.proposalId===proposalId),'项目事务已记账');
+  requireRule(project.spent+project.reserved+cost<=project.budget,'项目累计材料费用超出主人已确认预算');
+  project.spent+=cost;project.receipts.push({transactionId,proposalId,cost});
 }
 
 function requireRule(value:unknown,message:string):asserts value {if(!value)throw new Error(message);}
@@ -204,7 +228,7 @@ export function reduceCreation(original:CreationState,command:CreationCommand,ct
     requireRule(actor===ctx.ownerId||LOCAL_VISITORS.some(v=>v.id===actor),'仅支持明确标注的本地演示访客');
     requireRule(!ownerOnly(command.type)||actor===ctx.ownerId,'访客只能操作自己的本地演示会话，不能写主人存档');
     requireRule(!original.receipts.some(r=>r.id===command.id),'该创作指令已处理，不会重复结算');
-    state=structuredClone(original);const effects:CreationEffect[]=[];let message='已保存到本地私有草稿';
+    state=structuredClone(original);migrateProjectBudgets(state);const effects:CreationEffect[]=[];let message='已保存到本地私有草稿';
     switch(command.type) {
       case 'themePreview': {
         requireRule(THEME_TEMPLATES.some(t=>t.id===command.theme),'请选择现成主题：晴日牧场、荷叶村或星空小窝');
@@ -249,7 +273,11 @@ export function reduceCreation(original:CreationState,command:CreationCommand,ct
         requireRule(integer(command.budget)&&Number.isSafeInteger(command.expiresAt)&&command.expiresAt>ctx.now,'授权预算或到期时间无效');
         requireRule(Array.isArray(command.editTypes)&&command.editTypes.every(t=>EDIT_TYPES.includes(t))&&new Set(command.editTypes).size===command.editTypes.length,'授权编辑类型无效');
         for(const flag of [command.allowView,command.allowHelp,command.allowRemix])requireRule(flag===undefined||typeof flag==='boolean','授权开关无效');
-        state.grants.push({id:command.id,visitorId:command.visitorId,label:'本地访客演示',regions:scope,budget:command.budget,editTypes:[...command.editTypes],allowView:command.allowView??true,allowHelp:command.allowHelp??false,allowRemix:command.allowRemix??false,createdAt:ctx.now,expiresAt:command.expiresAt});
+        requireRule(command.projectId===undefined||text(command.projectId),'项目 ID 无效');
+        const projectId=command.projectId??command.id;const project=state.projects[projectId];
+        requireRule(!project||project.budget===command.budget,'已有项目总预算不能通过重新授权重置或扩大');
+        state.projects[projectId]??={id:projectId,budget:command.budget,spent:0,reserved:0,receipts:[]};
+        state.grants.push({id:command.id,projectId,visitorId:command.visitorId,label:'本地访客演示',regions:scope,budget:command.budget,editTypes:[...command.editTypes],allowView:command.allowView??true,allowHelp:command.allowHelp??false,allowRemix:command.allowRemix??false,createdAt:ctx.now,expiresAt:command.expiresAt});
         message='已开放指定区域的本地访客演示；没有远程账号权限';break;
       }
       case 'revokeGrant': {

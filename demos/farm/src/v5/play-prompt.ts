@@ -44,6 +44,6 @@ export function playPrompt(p:Profile,now:number):PlayPrompt{
  else if(goal.id==='rehearse'){title='带大家练习回保护区';progress='安心演练';label='去看看';}
  else if(goal.id==='survey'){title='去东边看看新土地';progress='';label=goal.action.kind==='move'?'带我过去':'开始勘察';}
  else if(goal.id==='expand'){title='扩大自己的小家';progress=`${p.materials}/30 材料`;label='看看新土地';}
- else if(goal.id==='free-explore'){title='收羊毛，升级小家的保护';progress='收获 → 材料 → 守护';label='羊毛·守护';}
+ else if(goal.id==='free-explore'){title='收羊毛，做自己的作品';progress='收获 → 制作 → 装配';label='羊毛·守护';}
  return {title,progress,label,action:goal.action,feedback};
 }

@@ -5,9 +5,9 @@ import {createThreat,guardianCommand,stepThreat,type CreateThreatOptions} from '
 const T=1_800_000_000_000;
 const herd=Array.from({length:3},(_,i)=>({id:`a${i}`,rarity:1}));
 async function api(){const module=await import('../src/v5/raid-cycle.ts').catch(()=>null);assert.ok(module,'a persisted online raid cycle must exist');return module;}
-test('raid risk grows with actual herd count and rarity, with readable interval and wolf limits',async()=>{
+test('V6 natural risk ignores wealth and rarity and uses one wolf at 8–14 minutes',async()=>{
  const {raidRisk}=await api();const base=raidRisk(herd),more=raidRisk([...herd,...herd.map(a=>({...a,id:a.id+'b'}))]),rare=raidRisk(herd.map(a=>({...a,rarity:5})));
- assert.ok(more.pressure>base.pressure);assert.ok(rare.pressure>base.pressure);assert.ok(rare.minIntervalMs<base.minIntervalMs);assert.equal(base.wolves,1);assert.equal(rare.wolves,3);assert.ok(rare.minIntervalMs>=180_000);assert.ok(rare.maxIntervalMs<=840_000);
+ assert.equal(more.count,6);assert.deepEqual(rare,base);for(const r of [base,more,rare]){assert.equal(r.wolves,1);assert.equal(r.minIntervalMs,480000);assert.equal(r.maxIntervalMs,840000);}
 });
 test('pre-care, covered and offline time cannot turn a peaceful visit into an instant attack',async()=>{
  const {createRaidCycle,advanceRaidCycle}=await api();const start=createRaidCycle(42,T,0);

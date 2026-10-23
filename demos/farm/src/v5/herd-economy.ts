@@ -12,7 +12,8 @@ export const TIER_COLOR:Record<MaterialTier,string>={white:'#e7e8df',green:'#8fc
 export const TIER_VALUE:Record<MaterialTier,number>={white:1,green:2,blue:4,red:7,gold:12};
 export const HERD_RULES={naturalIntervalMs:10*60_000,demoIntervalMs:15_000,offlineCreditCapMs:2*60*60_000,storedCap:6,cultivationWool:4,feedThresholds:[0,1,3,6,9]} as const;
 export type AnimalHusbandry={version:1;profile:'home'|'lab';level:AnimalLevel;rarity:MaterialTier;settledAt:number;progressMs:number;pending:MaterialStacks;effectiveFeeds:number;lastEffectiveFeedAt:number|null};
-export type HerdEconomy={version:1;warehouse:MaterialStacks};
+export type WoolLot={id:string;tier:MaterialTier;amount:number;animalId:string|null;version:'legacy'|'v6';source:string;claimedBy?:string};
+export type HerdEconomy={version:1;warehouse:MaterialStacks;lots?:WoolLot[]};
 type CareLife=Pick<LifeState,'stage'|'care'|'lastEffectiveFeedAt'|'products'>;
 export type CultivationPreview={ok:boolean;nextRarity:MaterialTier|null;requiredLevel:number;requiredFeeds:number;requiredWool:number;availableWool:number;cost:Partial<MaterialStacks>;message:string};
 export type ProductSummary={level:AnimalLevel;rarity:MaterialTier;tier:MaterialTier;total:number;pending:MaterialStacks;cap:number;intervalMs:number;nextReadyInMs:number|null;full:boolean};
@@ -64,16 +65,29 @@ export function claimWool(original:AnimalHusbandry,economy:HerdEconomy,now:numbe
 /** Call with a receipt-protected estate command. Different commands may
  * intentionally exchange/spend more than once, so this module cannot infer IDs.
  */
-export function spendWool(economy:HerdEconomy,cost:Partial<MaterialStacks>):{economy:HerdEconomy;accepted:boolean;message:string}{
- stackTotal(economy.warehouse);const reject=(message:string)=>({economy:structuredClone(economy),accepted:false,message});
- const entries=Object.entries(cost);if(!entries.length||entries.some(([tier,count])=>!isTier(tier)||!validCount(count))||entries.every(([,count])=>count===0))return reject('请选择有效的羊毛数量');
- if(entries.some(([tier,count])=>economy.warehouse[tier as MaterialTier]<count!))return reject('仓库里的羊毛还不够');
- const next=structuredClone(economy);for(const [tier,count] of entries)next.warehouse[tier as MaterialTier]-=count!;
- return {economy:next,accepted:true,message:'羊毛已经使用'};
+/** Backfill only unrepresented inventory; existing lot identities survive every operation. */
+export function migrateWoolLots(economy:HerdEconomy):HerdEconomy{
+ const e=structuredClone(economy);stackTotal(e.warehouse);e.lots??=[];
+ for(const tier of TIERS){const represented=e.lots.filter(l=>l.tier===tier).reduce((n,l)=>n+l.amount,0);const missing=e.warehouse[tier]-represented;if(missing<0)throw new RangeError('Wool lots exceed warehouse');if(missing)e.lots.push({id:`legacy-warehouse-${tier}-${e.lots.length}`,tier,amount:missing,animalId:null,version:'legacy',source:'legacy-warehouse'});}
+ return e;
 }
-export function exchangeWool(economy:HerdEconomy,tier:MaterialTier,amount:number):{economy:HerdEconomy;accepted:boolean;materials:number;message:string}{
- if(!isTier(tier)||!validCount(amount)||amount===0||!Number.isSafeInteger(amount*TIER_VALUE[tier]))return {economy:structuredClone(economy),accepted:false,materials:0,message:'请选择有效的羊毛数量'};
- const result=spendWool(economy,{[tier]:amount}),materials=result.accepted?amount*TIER_VALUE[tier]:0;
+export function consumeWool(economy:HerdEconomy,cost:Partial<MaterialStacks>,version?:WoolLot['version']):{economy:HerdEconomy;accepted:boolean;message:string;consumed:WoolLot[]}{
+ const e=migrateWoolLots(economy),entries=Object.entries(cost);
+ const reject=(message:string)=>({economy:structuredClone(economy),accepted:false,message,consumed:[]});
+ if(!entries.length||entries.some(([t,n])=>!isTier(t)||!validCount(n))||entries.every(([,n])=>n===0))return reject('请选择有效的羊毛数量');
+ for(const [t,n] of entries)if(e.lots!.filter(l=>l.tier===t&&(!version||l.version===version)).reduce((s,l)=>s+l.amount,0)<n!)return reject('仓库里的羊毛还不够');
+ const consumed:WoolLot[]=[];
+ for(const [t,n] of entries){let left=n!;for(const lot of e.lots!){if(lot.tier!==t||(version&&lot.version!==version))continue;const take=Math.min(left,lot.amount);if(take){consumed.push({...lot,amount:take});lot.amount-=take;left-=take;}if(!left)break;}e.warehouse[t as MaterialTier]-=n!;}
+ e.lots=e.lots!.filter(l=>l.amount>0);return {economy:e,accepted:true,message:'羊毛已经使用',consumed};
+}
+export function restoreWool(economy:HerdEconomy,lots:WoolLot[]):HerdEconomy{
+ const e=migrateWoolLots(economy);for(const lot of lots){if(!isTier(lot.tier)||!validCount(lot.amount))throw new RangeError('Invalid wool refund');const existing=e.lots!.find(l=>l.id===lot.id&&l.tier===lot.tier&&l.version===lot.version&&l.animalId===lot.animalId&&l.source===lot.source);if(existing)existing.amount+=lot.amount;else e.lots!.push(structuredClone(lot));e.warehouse[lot.tier]+=lot.amount;}stackTotal(e.warehouse);return e;
+}
+export function spendWool(economy:HerdEconomy,cost:Partial<MaterialStacks>){return consumeWool(economy,cost);}
+export function exchangeWool(economy:HerdEconomy,tier:MaterialTier,amount:number,version:WoolLot['version']='v6'):{economy:HerdEconomy;accepted:boolean;materials:number;message:string}{
+ if(!isTier(tier)||!validCount(amount)||amount===0||!Number.isSafeInteger(amount*TIER_VALUE[tier])||(version!=='legacy'&&version!=='v6'))return {economy:structuredClone(economy),accepted:false,materials:0,message:'请选择有效的羊毛数量'};
+ if(version==='v6'&&!['white','green'].includes(tier))return {economy:structuredClone(economy),accepted:false,materials:0,message:'新版稀有羊毛用于制作；旧库存可选择旧版兑换'};
+ const result=consumeWool(economy,{[tier]:amount},version),materials=result.accepted?amount*TIER_VALUE[tier]:0;
  return {...result,materials,message:result.accepted?`${amount}份${TIER_LABEL[tier]}羊毛换到${materials}材料`:result.message};
 }
 export function cultivationPreview(h:AnimalHusbandry,economy:HerdEconomy):CultivationPreview{
@@ -86,14 +100,8 @@ export function cultivationPreview(h:AnimalHusbandry,economy:HerdEconomy):Cultiv
  else if(nextRarity&&left)message=`还差${left}份${TIER_LABEL[h.rarity]}及以上羊毛`;
  return {ok:!!nextRarity&&h.level>=requiredLevel&&h.effectiveFeeds>=requiredFeeds&&left===0,nextRarity,requiredLevel,requiredFeeds,requiredWool:HERD_RULES.cultivationWool,availableWool,cost,message};
 }
-export function cultivateHusbandry(original:AnimalHusbandry,economy:HerdEconomy,now:number,expectedRarity:MaterialTier):{husbandry:AnimalHusbandry;economy:HerdEconomy;accepted:boolean;message:string}{
- finite(now);const reject=(message:string)=>({husbandry:structuredClone(original),economy:structuredClone(economy),accepted:false,message});
- if(now<original.settledAt)return reject('照料时间已经变化，请重新尝试');
- if(original.rarity!==expectedRarity)return reject('品质已经变化，请重新查看');
- const plan=cultivationPreview(original,economy);if(!plan.ok||!plan.nextRarity)return reject(plan.message);
- const spent=spendWool(economy,plan.cost);if(!spent.accepted)return reject(spent.message);
- const husbandry=settleHusbandry(original,now);husbandry.rarity=plan.nextRarity;
- return {husbandry,economy:spent.economy,accepted:true,message:`培育完成 · ${TIER_LABEL[husbandry.rarity]}品质`};
+export function cultivateHusbandry(original:AnimalHusbandry,economy:HerdEconomy,now:number,_expectedRarity:MaterialTier):{husbandry:AnimalHusbandry;economy:HerdEconomy;accepted:boolean;message:string}{
+ finite(now);return {husbandry:structuredClone(original),economy:structuredClone(economy),accepted:false,message:'纯标签培育已暂停；原有品质标签保留，请选择跨日稀有目标'};
 }
 export function productSummary(original:AnimalHusbandry,now:number):ProductSummary{
  const h=settleHusbandry(original,now),total=stackTotal(h.pending),full=total===HERD_RULES.storedCap;

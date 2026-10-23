@@ -135,3 +135,5 @@
 - V5.2.5最终检查：463/463、lint/typecheck/build通过；独立SQLite、生产HTTP24资源和实际React操作链通过。审查3项（塔顶跳格/领养空名/救援面板暂停）均已修复并回归。准备在原Mac5190短暂重启，最新一致性SQLite备份与旧构建会保留；不会重置用户存档。
 
 - V5.2.5 已更新到原Mac5190：实现提交 `32839a1`，独立后台PID39628/PPID1。跨调用2026-10-23T01:34:12.778850+00:00确认24资源逐字节一致、SQLite integrityok、7旧记录和2个V5记录完全未变。旧构建 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v525-20261023T013359Z`；最新存档备份 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-23T01-33-59-316Z-before-v525.sqlite`。临时5193测试服务已停止，生产存档未重置。真实Chrome/WebGL/触控/听感仍未验收。
+
+2026-10-23 V6：499测试、lint/typecheck/build、实际构建React+隔离API、真实旧SQLite副本迁移通过。首件披风/旗/狗盾/永久签名与跨日批次入库已集成；生成/真人好友/视频均未连接。保留5190旧运行版至备份切换，Chrome画面仍缺验收。

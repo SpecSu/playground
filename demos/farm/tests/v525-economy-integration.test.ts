@@ -6,7 +6,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {EstateStore} from '../server/estate-store.ts';
 import {createEstate,currentProfile,type Estate,type EstateCommand} from '../src/v5/estate.ts';
-import {createHusbandry,emptyStacks,HERD_RULES} from '../src/v5/herd-economy.ts';
+import {createHusbandry,emptyStacks} from '../src/v5/herd-economy.ts';
 import {createThreat} from '../src/v5/threat.ts';
 
 const T=1_800_000_000_000;
@@ -37,41 +37,31 @@ function qualify(fixture:Estate){
 test('legacy products migrate once through durable GET, and the old claim command cannot reimport them',()=>{
  const fixture=ready(),p=currentProfile(fixture),a=p.animals[0];
  for(const animal of p.animals)delete animal.husbandry;
- delete p.economy;delete p.upgrades;delete p.raidCycle;
+ delete p.economy;delete p.upgrades;delete p.raidCycle;delete p.production;
  a.life.stage='adult';a.life.products.stored=4;a.life.products.settledAt=T-86_400_000;a.life.bond=55;
  withStore(fixture,io=>{
-  const migrated=io.get();assert.equal(migrated.profile.animals[0].husbandry?.pending.white,4);assert.equal(migrated.profile.animals[0].life.products.stored,0);
+  const migrated=io.get();assert.equal(migrated.profile.production?.pending[0].amount,4);assert.equal(migrated.profile.animals[0].life.products.stored,0);
   const claim={id:'legacy-alias',type:'claimProducts',target:a.id};
   const first=io.command(claim);assert.equal(first.accepted,true,first.message);assert.equal(first.snapshot.profile.economy?.warehouse.white,4);assert.equal(first.snapshot.profile.materials,60);
   io.reopen();const reload=io.get();assert.equal(reload.profile.animals[0].life.bond,55);assert.equal(reload.profile.animals[0].husbandry?.pending.white,0);
   const retry=io.command(claim);assert.equal(retry.duplicate,true);assert.equal(retry.snapshot.profile.economy?.warehouse.white,4);
   const fresh=io.command({...claim,id:'legacy-alias-again'});assert.equal(fresh.accepted,false);assert.equal(fresh.snapshot.profile.economy?.warehouse.white,4);
-  const later=io.command({id:'new-production',type:'claimWool',target:a.id},T+HERD_RULES.naturalIntervalMs);
-  assert.equal(later.accepted,true,later.message);assert.deepEqual(later.snapshot.profile.economy?.warehouse,{...emptyStacks(),white:4,blue:1});
+  const later=io.command({id:'new-production',type:'claimWool',target:a.id},T+43_200_000);
+  assert.equal(later.accepted,true,later.message);assert.deepEqual(later.snapshot.profile.economy?.warehouse,{...emptyStacks(),white:6});
   assert.equal(later.snapshot.profile.animals[0].id,a.id);assert.equal(later.snapshot.profile.animals[0].life.products.stored,0);
  });
 });
 
-test('cultivation consumes the previewed mixed wool once, persists, and rejects a stale expected rarity',()=>{
+test('V6 pauses pure label cultivation while preserving old balances and rarity',()=>{
  const fixture=ready(),{p,a}=qualify(fixture);p.economy!.warehouse={...emptyStacks(),white:2,blue:3};
- a.husbandry!.pending.white=1;
- withStore(fixture,io=>{
-  const request={id:'cultivate-once',type:'cultivate',target:a.id,expectedRarity:'white'};
-  const first=io.command(request);assert.equal(first.accepted,true,first.message);
-  const after=first.snapshot.profile.animals[0];assert.equal(after.husbandry?.rarity,'green');assert.equal(after.husbandry?.pending.white,1);
-  assert.deepEqual(first.snapshot.profile.economy?.warehouse,{...emptyStacks(),blue:1});assert.equal(first.snapshot.profile.materials,60);
-  assert.equal(after.id,a.id);assert.equal(after.life.bond,23);assert.equal(after.life.stage,'baby');assert.equal(after.appearance,'plain');
-  io.reopen();const retry=io.command({...request,expectedRarity:'green'});assert.equal(retry.duplicate,true);assert.deepEqual(retry.snapshot.profile.economy,first.snapshot.profile.economy);
-  const stale=io.command({...request,id:'cultivate-stale'});assert.equal(stale.accepted,false);assert.match(stale.message,/品质已经变化/);assert.equal(stale.snapshot.profile.animals[0].husbandry?.rarity,'green');
-  const underfunded=io.command({...request,id:'cultivate-next',expectedRarity:'green'});assert.equal(underfunded.accepted,false);assert.deepEqual(underfunded.snapshot.profile.economy,first.snapshot.profile.economy);
- });
+ withStore(fixture,io=>{const r=io.command({id:'pause-cultivation',type:'cultivate',target:a.id,expectedRarity:'white'});assert.equal(r.accepted,false);assert.match(r.message,/已暂停/);assert.deepEqual(r.snapshot.profile.economy?.warehouse,p.economy!.warehouse);assert.equal(r.snapshot.profile.animals[0].husbandry?.rarity,'white');});
 });
 
 test('receipts for claiming, exchanging, two upgrades and adoption survive reopening without a second debit',()=>{
- const fixture=ready(),p=currentProfile(fixture);p.materials=100;p.animals[0].husbandry!.pending.gold=2;
+ const fixture=ready(),p=currentProfile(fixture);p.materials=100;p.animals[0].husbandry!.pending.gold=2;delete p.production;
  const commands:EstateCommand[]=[
   {id:'claim-once',type:'claimWool',target:p.animals[0].id},
-  {id:'exchange-once',type:'exchangeWool',tier:'gold',amount:2},
+  {id:'exchange-once',type:'exchangeWool',tier:'gold',amount:2,woolVersion:'legacy'},
   {id:'guardian-once',type:'upgradeGuardian',guardian:'dog',expectedLevel:1},
   {id:'shelter-once',type:'upgradeShelter',buildingId:'initial-shelter',expectedLevel:1},
   {id:'adopt-once',type:'adopt',expectedCount:3},
@@ -86,9 +76,9 @@ test('receipts for claiming, exchanging, two upgrades and adoption survive reope
 });
 
 test('a rejected spend receipt cannot become a debit after stock changes',()=>{
- const fixture=ready(),p=currentProfile(fixture);p.animals[0].husbandry!.pending.blue=2;
+ const fixture=ready(),p=currentProfile(fixture);p.animals[0].husbandry!.pending.blue=2;delete p.production;
  withStore(fixture,io=>{
-  const request={id:'empty-exchange',type:'exchangeWool',tier:'blue',amount:2};
+  const request={id:'empty-exchange',type:'exchangeWool',tier:'blue',amount:2,woolVersion:'legacy'};
   const empty=io.command(request);assert.equal(empty.accepted,false);
   assert.equal(io.command({id:'fill-warehouse',type:'claimWool'}).accepted,true);
   io.reopen();const retry=io.command(request);assert.equal(retry.duplicate,true);assert.equal(retry.accepted,false);assert.equal(retry.snapshot.profile.materials,60);assert.equal(retry.snapshot.profile.economy?.warehouse.blue,2);
@@ -99,16 +89,16 @@ test('a rejected spend receipt cannot become a debit after stock changes',()=>{
 test('completed feeding upgrades husbandry once without recoloring wool earned at the old level',()=>{
  const fixture=ready(),p=currentProfile(fixture),a=p.animals[0];p.position={...a.position};
  withStore(fixture,io=>{
-  const at=T+HERD_RULES.naturalIntervalMs;
+  const at=T+43_200_000;
   const entered=io.command({id:'enter-after-interval',type:'enter'},at);assert.equal(entered.accepted,true);
   const session=entered.snapshot.profile.session;
-  assert.equal(entered.snapshot.profile.animals[0].husbandry?.pending.white,1);
+  assert.equal(entered.snapshot.profile.production?.pending.filter(l=>l.animalId===a.id&&l.tier==='white').reduce((n,l)=>n+l.amount,0),2);
   const feed=io.command({id:'first-feed',type:'feed',target:a.id,food:'milk',session},at);assert.equal(feed.accepted,true,feed.message);
   for(let i=1;i<=4;i++){const tick=io.command({id:`feeding-pulse-${i}`,type:'pulse',session,presentationReady:true},at+i*1000);assert.equal(tick.accepted,true,tick.message);}
   const fed=io.get(at+4000),husbandry=fed.profile.animals[0].husbandry!;
-  assert.equal(fed.profile.inventory.hand,2);assert.equal(fed.profile.animals[0].life.care.baby.feeds,1);assert.equal(husbandry.level,2);assert.equal(husbandry.effectiveFeeds,1);assert.equal(husbandry.pending.white,1);assert.equal(husbandry.pending.green,0);
+  assert.equal(fed.profile.inventory.hand,2);assert.equal(fed.profile.animals[0].life.care.baby.feeds,1);assert.equal(husbandry.level,2);assert.equal(husbandry.effectiveFeeds,1);assert.equal(husbandry.pending.white,0);assert.equal(husbandry.pending.green,0);
   io.reopen();const repeat=io.command({id:'first-feed',type:'feed',target:a.id,food:'milk',session},at+4000);assert.equal(repeat.duplicate,true);assert.equal(repeat.snapshot.profile.inventory.hand,2);assert.equal(repeat.snapshot.profile.animals[0].husbandry?.effectiveFeeds,1);
-  const later=io.get(at+HERD_RULES.naturalIntervalMs);assert.deepEqual(later.profile.animals[0].husbandry?.pending,{...emptyStacks(),white:1,green:1});
+  const later=io.get(at+43_200_000);assert.equal(later.profile.production?.pending.filter(l=>l.animalId===a.id&&l.tier==='white').reduce((n,l)=>n+l.amount,0),4);
  });
 });
 
@@ -140,8 +130,8 @@ test('active guarding locks cultivation, guardian and shelter upgrades, and adop
 test('offline production has a finite cap and cannot regenerate its discarded backlog on immediate repeated claims',()=>{
  withStore(ready(),io=>{
   const at=T+30*86_400_000;
-  const first=io.command({id:'month-return',type:'claimWool'},at);assert.equal(first.accepted,true,first.message);assert.equal(first.snapshot.profile.economy?.warehouse.white,18);
-  io.reopen();for(let i=0;i<3;i++){const repeat=io.command({id:`empty-return-${i}`,type:'claimWool'},at);assert.equal(repeat.accepted,false);assert.equal(repeat.snapshot.profile.economy?.warehouse.white,18);}
-  const next=io.command({id:'one-real-interval',type:'claimWool'},at+HERD_RULES.naturalIntervalMs);assert.equal(next.accepted,true,next.message);assert.equal(next.snapshot.profile.economy?.warehouse.white,21);
+  const first=io.command({id:'month-return',type:'claimWool'},at);assert.equal(first.accepted,true,first.message);assert.equal(first.snapshot.profile.economy?.warehouse.white,36);
+  io.reopen();for(let i=0;i<3;i++){const repeat=io.command({id:`empty-return-${i}`,type:'claimWool'},at);assert.equal(repeat.accepted,false);assert.equal(repeat.snapshot.profile.economy?.warehouse.white,36);}
+  const next=io.command({id:'one-real-interval',type:'claimWool'},at+43_200_000);assert.equal(next.accepted,true,next.message);assert.equal(next.snapshot.profile.economy?.warehouse.white,42);
  });
 });

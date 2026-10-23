@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-23T04:00:41.902Z",
+  "sourceReadOnly": true,
+  "copy": "/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/v6-migration-2026-10-23T04-00-41-810Z.sqlite",
+  "devices": 7,
+  "existingEstates": 2,
+  "existingEstateProfilesCompared": 2,
+  "legacyFarmRows": 7,
+  "profiles": 7,
+  "labProfiles": 0,
+  "migratedProfiles": 7,
+  "checks": {
+    "stablePlayerAnimalRunIds": true,
+    "relationshipsPreserved": true,
+    "warehousePreserved": true,
+    "legacyEntitlementsBalanced": true,
+    "perAnimalPendingBalanced": true,
+    "repeatedSettleNoNewLegacy": true,
+    "allPersistedProfilesChecked": true,
+    "labProfilePresent": false,
+    "legacyFarmsTableUnchanged": true,
+    "integrity": "ok"
+  },
+  "limitations": [
+    "Source snapshot contains no lab profile; inactive lab migration could not be observed in this real snapshot."
+  ],
+  "passed": true
+}

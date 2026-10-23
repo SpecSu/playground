@@ -103,3 +103,12 @@ V5.2.2 deployed locally from `ffc524a7ff9a7961bae6129269a8c45c0517c41a` at15:43:
 - 未做Chrome/WebGL/触控/听感与长期数值平衡验收。无独立Chrome/node_repl入口，未绕用其他浏览器。自然托管/幼鸭/真实AI社交不包含在本次。
 
 - V5.2.5 已更新到原Mac5190：实现提交 `32839a1`，独立后台PID39628/PPID1。跨调用2026-10-23T01:34:12.778850+00:00确认24资源逐字节一致、SQLite integrityok、7旧记录和2个V5记录完全未变。旧构建 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v525-20261023T013359Z`；最新存档备份 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-23T01-33-59-316Z-before-v525.sqlite`。临时5193测试服务已停止，生产存档未重置。真实Chrome/WebGL/触控/听感仍未验收。
+
+## V6.0 工作坊（2026-10-23）
+
+- 499/499自动测试，0失败/跳过；完整ESLint、typecheck与生产构建通过，1863模块。范围包含跨日/存储上限/旧版批次权益、制作和拆解幂等、来源与视觉版本、装卸/路径/盾持续期、项目累计预算，以及原镜头/输入/卡片/喂食回归。
+- 独立5193服务＋新Cookie验证真实HTTP/SQLite：首件赠品、重复制作、装配/换分身/刷新、旧版本拒绝、恢复图案、未连接生成不扣料、拆解赠品不生料；24个静态资源与最终构建逐字节一致。
+- 实际production React入口在Node DOM与独立API联动通过：保存图案→双击制作只1POST→免费披风→穿给伙伴→收卡→读取持久装备。原喂食响应丢失、目标切换、心跳队列、主题、建设、升级、独立档和重置链仍通过。Three实际对象方法覆盖纹样几何、旗草稿预览/取消、装卸与盾到期；均不代表真实画面。
+- 真实原SQLite只读备份，副本迁移7个profile；已有2个estate逐项确认身份、关系、库存、旧待领量权益，重复settle不重复迁入，7行legacy表不变。原快照没有lab，不能声称已实测旧lab迁移。证据verification/v6-migration.json。
+- 独立审查修复：固定生产位容量不能靠换动物扩仓；盾到期狼继续原追逐；携带狼断路不会误判到边界；旗草稿预览传入合法位置。
+- 真实AI、生成预算、审核/持久生成服务、真人好友、视频未接通，不假报成功。真实Chrome/WebGL、触控及声音听感仍未验收，独立Chrome工具入口缺失，未用CUA/其他浏览器。完整证据verification/v6.json。

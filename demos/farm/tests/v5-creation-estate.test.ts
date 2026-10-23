@@ -13,8 +13,9 @@ function fresh():CreationProfile {const p=createEstate('owner',T).profiles.home;
 function run(p:CreationProfile,type:string,extra:Record<string,unknown>={},actor?:string,now=T){return applyEstateCreation(p,'owner',{command:{id:`estate-create-${++seq}`,type,...extra} as CreationCommand,...(actor?{actor}:{})},now);}
 const decor=(id:string,x=7,z=7,cost=2):BlueprintComponent=>({id,region:'shore',estimatedCost:cost,edit:{type:'place',id,kind:'decor',x,z}});
 function visit(p:CreationProfile,extra:Record<string,unknown>={}){
-  const grant=run(p,'grant',{visitorId:visitor,regions:['shore'],budget:8,editTypes:['place'],expiresAt:T+CREATION_RULES.helpExpiryMs,allowHelp:true,...extra});assert.equal(grant.ok,true,grant.message);
-  const enter=run(grant.profile,'enterVisit',{mode:'local-visitor',grantId:grant.profile.creation.grants.at(-1)!.id},visitor);assert.equal(enter.ok,true,enter.message);
+  const actor=typeof extra.visitorId==='string'?extra.visitorId:visitor;
+  const grant=run(p,'grant',{visitorId:actor,regions:['shore'],budget:8,editTypes:['place'],expiresAt:T+CREATION_RULES.helpExpiryMs,allowHelp:true,...extra});assert.equal(grant.ok,true,grant.message);
+  const enter=run(grant.profile,'enterVisit',{mode:'local-visitor',grantId:grant.profile.creation.grants.at(-1)!.id},actor);assert.equal(enter.ok,true,enter.message);
   return {profile:enter.profile,visitId:enter.profile.creation.visits.at(-1)!.id};
 }
 function propose(p=fresh(),components=[decor('leaf-a'),decor('leaf-b',8,7)]){
@@ -22,6 +23,36 @@ function propose(p=fresh(),components=[decor('leaf-a'),decor('leaf-b',8,7)]){
   return {profile:r.profile,proposalId:r.profile.creation.proposals.at(-1)!.id};
 }
 function finish(p:CreationProfile):CreationProfile {const n=structuredClone(p);const r=tickConstruction(n.layout,n.layout.construction!.durationMs);assert.equal(r.ok,true,r.reasons.join(';'));n.layout=r.layout;n.materials+=r.materialDelta;return n;}
+
+test('shared project authorizes eight materials once across local visitor grants and actual accepted costs',()=>{
+  let p=fresh();
+  const first=visit(p,{projectId:'shared-eight'});p=first.profile;
+  const second=run(p,'grant',{projectId:'shared-eight',visitorId:LOCAL_VISITORS[1].id,regions:['shore'],budget:8,editTypes:['place'],expiresAt:T+CREATION_RULES.helpExpiryMs});assert.equal(second.ok,true,second.message);p=second.profile;
+  const proposal=run(p,'submitProposal',{visitId:first.visitId,baseVersion:p.layout.version,budget:8,scope:['shore'],components:[decor('project-a',7,7,8)]},visitor);assert.equal(proposal.ok,true,proposal.message);
+  const accepted=run(proposal.profile,'acceptProposal',{proposalId:proposal.profile.creation.proposals.at(-1)!.id});assert.equal(accepted.ok,true,accepted.message);p=finish(accepted.profile);
+  assert.equal(p.creation.projects['shared-eight'].spent,2);assert.equal(p.creation.projects['shared-eight'].budget,8);
+  const inflated=run(p,'grant',{projectId:'shared-eight',visitorId:LOCAL_VISITORS[2].id,regions:['shore'],budget:16,editTypes:['place'],expiresAt:T+10000});assert.equal(inflated.ok,false);assert.deepEqual(inflated.profile,p);
+  // A second grant cannot reset the already committed cost, even after the first is revoked.
+  const revoked=run(p,'revokeGrant',{grantId:first.profile.creation.grants[0].id});assert.equal(revoked.ok,true);p=revoked.profile;
+  for(let i=0;i<4;i++){
+    const actor=LOCAL_VISITORS[i%3].id;const g=visit(p,{projectId:'shared-eight',visitorId:actor});p=g.profile;
+    const proposed=run(p,'submitProposal',{visitId:g.visitId,baseVersion:p.layout.version,budget:8,scope:['shore'],components:[decor(`project-${i}`,7+i%2,8+Math.floor(i/2))]},actor);assert.equal(proposed.ok,true,proposed.message);
+    const applied=run(proposed.profile,'acceptProposal',{proposalId:proposed.profile.creation.proposals.at(-1)!.id});
+    if(i===3){assert.equal(applied.ok,false);assert.match(applied.message,/项目.*预算/);assert.deepEqual(applied.profile,proposed.profile);}
+    else {assert.equal(applied.ok,true,applied.message);p=finish(applied.profile);}
+  }
+  assert.equal(p.creation.projects['shared-eight'].spent,8);assert.equal(p.creation.projects['shared-eight'].receipts.length,4);
+});
+
+test('old grants migrate to independent projects with actual prior spending and undo cannot replenish authorization',()=>{
+  const proposed=propose();const accepted=run(proposed.profile,'acceptProposal',{proposalId:proposed.proposalId});assert.equal(accepted.ok,true);const built=finish(accepted.profile);
+  const legacy=structuredClone(built);delete (legacy.creation as Partial<typeof legacy.creation>).projects;for(const grant of legacy.creation.grants)delete grant.projectId;
+  const swept=run(legacy,'sweep');assert.equal(swept.ok,true,swept.message);const grant=swept.profile.creation.grants[0];assert.equal(grant.projectId,grant.id);
+  assert.equal(swept.profile.creation.projects[grant.id].spent,4);assert.equal(swept.profile.creation.projects[grant.id].reserved,0);
+  const undone=run(swept.profile,'undoProposal',{proposalId:proposed.proposalId});assert.equal(undone.ok,true,undone.message);assert.equal(undone.profile.materials,60);assert.equal(undone.profile.creation.projects[grant.id].spent,4);
+  const cancelled=structuredClone(accepted.profile);const cancel=cancelConstruction(cancelled.layout,'cancel-project');assert.equal(cancel.ok,true);cancelled.layout=cancel.layout;cancelled.materials+=cancel.materialDelta;
+  const afterCancel=run(cancelled,'sweep');assert.equal(afterCancel.ok,true);assert.equal(afterCancel.profile.creation.projects[grant.id].spent,4);assert.equal(afterCancel.profile.materials,60);
+});
 
 test('estate helper applies theme, saves factual private context and rejects unsupported or visitor physics writes',()=>{
   let p=fresh();p.events.push({id:'fact',text:'给皮皮喂奶',at:T-1000});
@@ -77,6 +108,7 @@ test('actual footprints must stay inside the granted scope and cannot cover an a
 test('partial owner acceptance recomputes actual cost and final navigation rather than charging the full proposal',()=>{
   const p=propose();const r=run(p.profile,'acceptProposal',{proposalId:p.proposalId,componentIds:['leaf-b']});assert.equal(r.ok,true,r.message);assert.equal(r.profile.materials,58);assert.equal(r.profile.layout.construction!.reservedCost,2);
   const built=finish(r.profile);assert.ok(built.layout.buildings.some(b=>b.id==='leaf-b'));assert.equal(built.layout.buildings.some(b=>b.id==='leaf-a'),false);
+  assert.equal(built.creation.projects[built.creation.grants[0].projectId!].spent,2);
 });
 
 test('proposal undo restores geometry and remaining paid cost once without rolling back animal growth',()=>{

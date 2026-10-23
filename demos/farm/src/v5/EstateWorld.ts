@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import {WorkshopScene} from './world-workshop.ts';
+import type {WorkshopDraft} from './workshop.ts';
 import {createClubAvatar,type ClubAvatar,type ClubAvatarKind} from '../avatars/club-avatar-rig.ts';
 import type {ClubMotionState} from '../avatars/club-scene-motion.ts';
 import {projectCameraLabel,createCameraObstacle,type CameraObstacle,type ClubCameraMode} from '../avatars/club-camera.ts';
@@ -57,6 +59,7 @@ function wolfModel(){
 export class EstateWorld{
  private host:HTMLDivElement;private handlers:EstateWorldHandlers;private data:EstateSnapshot;
  private scene=new THREE.Scene();private introBush=new THREE.Group();private layoutGroup=new THREE.Group();private routeGroup=new THREE.Group();private effectGroup=new THREE.Group();private ghostGroup=new THREE.Group();
+ private workshopScene=new WorkshopScene(this.scene);
  private cameraController=new EstateCameraController();private camera:THREE.Camera=this.cameraController.camera;private cameraMode:ClubCameraMode='third-person';private obstacles:CameraObstacle[]=[];
  private placementDrag=new PlacementDrag();private placementPointer:PointerEvent|undefined;private placementAnchor:GridPoint|undefined;
  private renderer:THREE.WebGLRenderer;private resize:ResizeObserver;private frame=0;private disposed=false;private prev=0;private offset=0;private enteredAt=0;
@@ -105,6 +108,7 @@ export class EstateWorld{
   const avatar=createClubAvatar(guardianKinds[kind],`estate-guardian-${kind}`);this.guardianAvatar=avatar;this.guardian.root.add(avatar.root);this.guardianStatus='loading';this.reportAssets();
   void avatar.ready.then(()=>{if(!this.disposed&&avatar===this.guardianAvatar){avatar.root.scale.setScalar(CLUB_AVATAR_SCALE);this.guardianStatus='ready';this.reportAssets();}}).catch(()=>{if(!this.disposed&&avatar===this.guardianAvatar){this.guardianStatus='error';this.reportAssets();}});
  }
+ previewWorkshop(draft:WorkshopDraft|null,position?:GridPoint):void{this.workshopScene.preview(draft,position);}
  set(data:EstateSnapshot,target:string,reduced:boolean,cameraMode:ClubCameraMode='third-person',ghost?:EstateGhost,previewTheme?:keyof typeof scenePalette,opening?:OpeningState,replay=false,attention:GridPoint|null=null){
   if(data.avatar!==this.data.avatar)this.installPlayer(data.avatar);
   const profileChanged=data.activeProfile!==this.data.activeProfile||data.profile.runId!==this.data.profile.runId||replay!==this.replay;this.replay=replay;
@@ -147,6 +151,7 @@ export class EstateWorld{
   }
   const wolves=p.threat?.wolves??[];const wolfIds=new Set(wolves.map(w=>w.id));for(const [id,w] of this.wolves)if(!wolfIds.has(id)){this.scene.remove(w.root);disposeTree(w.root);this.wolves.delete(id);}
   for(const w of wolves){let visual=this.wolves.get(w.id);if(!visual){const body=wolfModel();body.root.userData.entityId=`wolf:${w.id}`;this.scene.add(body.root);visual={...body,mover:{root:body.root,path:[],target:{...w.position},distance:0}};this.wolves.set(w.id,visual);this.syncMover(visual.mover,w.position,true);}visual.root.visible=!['retreated','boundary'].includes(w.status);this.syncMover(visual.mover,w.position,reset,w.path.slice(w.pathIndex));}
+  this.workshopScene.sync(p.workshop,p.layout,this.guardian.root,kind);this.workshopScene.syncShield(p.threat?.tacticalShield,p.layout,p.threat?.elapsed??0,p.workshop?.equipment.shield?p.workshop.tacticalAnchor:undefined);
   this.drawRoutes();this.drawVisits();
  }
  private buildMap(){
@@ -318,5 +323,5 @@ export class EstateWorld{
    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(source.width*scale));canvas.height=Math.max(1,Math.round(source.height*scale));const context=canvas.getContext('2d');if(!context)return undefined;context.drawImage(source,0,0,canvas.width,canvas.height);const thumbnail=canvas.toDataURL('image/webp',.65);if(!/^data:image\/(?:webp|jpeg|png);base64,/.test(thumbnail)||thumbnail.length>40000)return {camera};return {camera,thumbnail};
   }catch{return undefined;}
  }
- dispose(){this.disposed=true;cancelAnimationFrame(this.frame);this.resize.disconnect();this.listenerCleanup.forEach(fn=>fn());this.sheep.forEach(s=>s.cleanup());this.playerAvatar?.dispose();this.guardianAvatar?.dispose();this.visitors.forEach(v=>v.avatar.dispose());disposeTree(this.introBush);disposeTree(this.careProp);disposeTree(this.layoutGroup);disposeTree(this.routeGroup);disposeTree(this.effectGroup);disposeTree(this.ghostGroup);disposeTree(this.visitorGroup);this.wolves.forEach(w=>disposeTree(w.root));this.sheep.forEach(s=>disposeTree(s.root));this.renderer.dispose();this.host.replaceChildren();}
+ dispose(){this.workshopScene.dispose();this.disposed=true;cancelAnimationFrame(this.frame);this.resize.disconnect();this.listenerCleanup.forEach(fn=>fn());this.sheep.forEach(s=>s.cleanup());this.playerAvatar?.dispose();this.guardianAvatar?.dispose();this.visitors.forEach(v=>v.avatar.dispose());disposeTree(this.introBush);disposeTree(this.careProp);disposeTree(this.layoutGroup);disposeTree(this.routeGroup);disposeTree(this.effectGroup);disposeTree(this.ghostGroup);disposeTree(this.visitorGroup);this.wolves.forEach(w=>disposeTree(w.root));this.sheep.forEach(s=>disposeTree(s.root));this.renderer.dispose();this.host.replaceChildren();}
 }

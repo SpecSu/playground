@@ -13,9 +13,8 @@ const finite=(n:number,fallback=0)=>Number.isFinite(n)?n:fallback;
 export const raidDay=(now:number)=>Math.floor((finite(now)+8*3_600_000)/86_400_000);
 export function raidRisk(herd:RaidHerdAnimal[]):RaidRisk{
  const unique=[...new Map(herd.filter(a=>a.id).map(a=>[a.id,a])).values()];
- const count=unique.length,rarityLoad=unique.reduce((sum,a)=>sum+Math.max(0,Math.min(5,Math.floor(finite(a.rarity,1)))-1),0),pressure=count+rarityLoad*.75;
- const severity=Math.min(1,Math.max(0,(pressure-3)/12));
- return {count,rarityLoad,pressure,band:pressure>=12?'high':pressure>=6?'medium':'low',wolves:pressure>=12?3:pressure>=6?2:1,minIntervalMs:Math.round((8-5*severity)*60_000),maxIntervalMs:Math.round((14-8*severity)*60_000)};
+ const count=unique.length;
+ return {count,rarityLoad:0,pressure:count,band:'low',wolves:1,minIntervalMs:8*60_000,maxIntervalMs:14*60_000};
 }
 function word(seed:number,index:number){let n=(seed+Math.imul(index+1,0x9e3779b9))>>>0;n=Math.imul(n^(n>>>16),0x85ebca6b);n=Math.imul(n^(n>>>13),0xc2b2ae35);return (n^(n>>>16))>>>0;}
 function interval(c:Pick<RaidCycle,'seed'|'rollIndex'>,risk:RaidRisk,lab:boolean){const min=lab?RAID_RULES.labMinMs:risk.minIntervalMs,max=lab?RAID_RULES.labMaxMs:risk.maxIntervalMs;return Math.round(min+word(c.seed,c.rollIndex)/0xffffffff*(max-min));}

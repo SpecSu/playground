@@ -1,7 +1,7 @@
 /** Authoritative local adapter: creation candidates + geometry + treasury commit together. */
 import type {Profile} from './estate.ts';
 import {
-  reduceCreation,LOCAL_VISITORS,type CreationCommand,type CreationEffect,type WorkCapture,
+  reduceCreation,chargeProjectBudget,migrateProjectBudgets,LOCAL_VISITORS,type CreationCommand,type CreationEffect,type WorkCapture,
   type BlueprintComponent,type LocalVisit,
 } from './creation.ts';
 import {
@@ -74,6 +74,7 @@ function blueprint(p:CreationProfile,e:BlueprintEffect):void {
   // In the aggregate job all original geometry remains until the final install.
   // Its combined reservations must be safe, even if each sequential preview was safe.
   validateSafe(staged,p);
+  if(e.sourceKind==='proposal')chargeProjectBudget(p.creation,e.sourceId,e.transactionId,cost);
   p.layout=staged;p.materials-=cost;
   const receipt:CreationLayoutReceipt={transactionId:e.transactionId,...(e.sourceKind==='proposal'?{proposalId:e.sourceId}:{}),baseVersion:before.version,afterVersion:before.version+1,before,paid:cost,refunded:0,completionRefund:refund};
   p.creationLayouts=[...(p.creationLayouts??[]),receipt];
@@ -121,7 +122,19 @@ export function applyEstateCreation(original:CreationProfile,ownerId:string,oute
       sourceEvents:original.events.map(e=>({id:e.id,title:e.text,at:e.at,layoutVersion:'layoutVersion' in e&&typeof e.layoutVersion==='number'?e.layoutVersion:original.layout.version})),
       ...(outer.capture?{capture:outer.capture}:{}),
     };
-    const reduced=reduceCreation(original.creation,outer.command,context);
+    const creation=structuredClone(original.creation);const legacyProjects=creation.projects===undefined;
+    migrateProjectBudgets(creation);
+    // Reconstruct already committed legacy charges from actual layout receipts, never estimates.
+    if(legacyProjects)for(const receipt of original.creationLayouts??[]){
+      const proposal=creation.proposals.find(p=>p.id===receipt.proposalId);
+      const grant=creation.grants.find(g=>g.id===proposal?.grantId);
+      const project=grant?.projectId?creation.projects[grant.projectId]:undefined;
+      if(receipt.proposalId&&project&&!project.receipts.some(r=>r.transactionId===receipt.transactionId)){
+        ensure(Number.isSafeInteger(receipt.paid)&&receipt.paid>=0,'旧项目实际费用记录无效');
+        project.spent+=receipt.paid;project.receipts.push({transactionId:receipt.transactionId,proposalId:receipt.proposalId,cost:receipt.paid});
+      }
+    }
+    const reduced=reduceCreation(creation,outer.command,context);
     const p=structuredClone(original);p.creation=reduced.state;
     // Waiting/expiry transitions are useful ledger changes even when acceptance fails.
     if(!reduced.ok)return {ok:false,profile:p,message:reduced.message};

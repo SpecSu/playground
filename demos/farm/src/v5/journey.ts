@@ -56,5 +56,5 @@ export function currentJourneyGoal(p:Profile):JourneyGoal{
  if(!rehearsed)return goal('rehearse','试试现在的保护布局',`${pauseCare}主动开始无损演练，观察路线、入口排队和伙伴能力。日常成长不要求完成它。`,'布局已完成 · 安心演练','打开守护',5,{kind:'guardian'});
  if(!p.surveyed){const near=p.position.x>=10;return goal('survey','勘察东侧新土地',p.job?.type==='survey'?'正在观察边界，停留满5秒即可完成。':`${pauseCare}先走到东侧再观察5秒；勘察免费，拓荒另需30材料。`,'探索与拥有土地分开',near?'勘察边界':'去东侧',6,near?{kind:'survey'}:{kind:'move',to:{x:11,z:4}});}
  if(p.layout.owned.length<=144)return goal('expand','把发现变成自己的新土地',`${pauseCare}${p.materials>=30?'预览相邻36格，确认花费30材料。完工后才能在那里建造。':'还差'+(30-p.materials)+'材料；先回收闲置的付费设施，或收取羊毛兑换材料。'}`,`${p.materials}/30 材料 · 36格新土地`,'查看拓荒',7,{kind:'expand'});
- return goal('free-explore','收羊毛，让小家更有保护',`${pauseCare}每天在线会不定时多次来袭；动物越多、越稀有，需要更强守护。收羊毛、换材料，再升级伙伴和保护区。`,`${discovered.length}处发现 · ${p.layout.owned.length}格土地`,'羊毛·守护',7,{kind:'cycle'});
+ return goal('free-explore','收获羊毛，做自己的作品',`${pauseCare}在线会不定时来袭，离线不追算；稀有收藏不增加狼群。白绿毛做日常作品，蓝毛做狗盾，金毛留动物签名。`,`${discovered.length}处发现 · ${p.layout.owned.length}格土地`,'羊毛·守护',7,{kind:'cycle'});
 }

@@ -5,22 +5,23 @@ const T=1_800_000_000_000;let seq=0;
 function ready(){const s=createEstate('cycle-owner',T),p=currentProfile(s);p.tutorial='done';p.opening!.stage='done';p.threat=null;p.guardian='dog';p.milestones.push('first-meal');p.session='session';return s;}
 function cmd(s:Estate,type:string,extra:Record<string,unknown>={},at=T){return commandEstate(s,{id:`cycle-${++seq}`,type,session:currentProfile(s).session,...extra},at);}
 test('fresh and migrated estates have one persistent graded economy without reimporting old products',()=>{
- const s=ready(),p=currentProfile(s);assert.ok(p.economy,'fresh estate initializes warehouse');assert.ok(p.animals.every(a=>a.husbandry),'every animal owns production clock');
- delete p.economy;delete p.raidCycle;for(const a of p.animals)delete a.husbandry;p.animals[0].life.products.stored=2;
- const next=settleEstate(s,T+86400000),q=currentProfile(next);assert.equal(q.animals[0].husbandry?.pending.white,2);assert.equal(q.animals[0].life.products.stored,0);assert.equal(q.animals[0].husbandry?.settledAt,T+86400000);
- const again=currentProfile(settleEstate(next,T+86400000));assert.equal(again.animals[0].husbandry?.pending.white,2);assert.equal(again.animals[0].id,p.animals[0].id);assert.equal(again.animals[0].life.bond,p.animals[0].life.bond);
+ const s=ready(),p=currentProfile(s);assert.ok(p.economy,'fresh estate initializes warehouse');assert.ok(p.animals.every(a=>a.husbandry),'every animal keeps its care level');assert.equal(p.production?.slots.length,3,'fresh estate enables three V6 production slots');
+ delete p.economy;delete p.raidCycle;delete p.production;for(const a of p.animals)delete a.husbandry;p.animals[0].life.products.stored=2;
+ const next=settleEstate(s,T+86400000),q=currentProfile(next);assert.equal(q.animals[0].husbandry?.pending.white,0);assert.deepEqual(q.production?.pending.map(l=>({amount:l.amount,tier:l.tier,animalId:l.animalId,version:l.version,source:l.source})),[{amount:2,tier:'white',animalId:p.animals[0].id,version:'legacy',source:'legacy-pending'}]);assert.equal(q.animals[0].life.products.stored,0);assert.equal(q.animals[0].husbandry?.settledAt,T+86400000);
+ const again=currentProfile(settleEstate(next,T+86400000));assert.deepEqual(again.production,q.production);assert.equal(again.economy?.warehouse.white,0);assert.equal(again.animals[0].id,p.animals[0].id);assert.equal(again.animals[0].life.bond,p.animals[0].life.bond);
 });
 test('actual store claims graded wool and exchanges it exactly once across retries',()=>{
  const dir=mkdtempSync(join(tmpdir(),'farm-cycle-')),store=new EstateStore(join(dir,'test.sqlite'));try{
   const fixture=ready();fixture.playerId='grade-owner';const db=new DatabaseSync(join(dir,'test.sqlite'));db.prepare('INSERT INTO estates(device,state) VALUES(?,?)').run('grade-owner',JSON.stringify(fixture));db.close();
   let s=store.get('grade-owner',T);s=store.command('grade-owner',{id:'enter',type:'enter'},T).snapshot;
-  // Skip setup safely through state-independent economy after a settled full interval.
+  // A short revisit earns no V6 wool; a complete 12h period yields two per slot.
   const session=s.profile.session;
-  const claim=store.command('grade-owner',{id:'claim',type:'claimWool',session},T+600001);
-  assert.equal(claim.accepted,true,claim.message);assert.equal(claim.snapshot.profile.economy?.warehouse.white,3);
-  const again=store.command('grade-owner',{id:'claim',type:'claimWool',session},T+600001);assert.equal(again.duplicate,true);assert.equal(again.snapshot.profile.economy?.warehouse.white,3);
-  const exchange=store.command('grade-owner',{id:'exchange',type:'exchangeWool',session,tier:'white',amount:3},T+600001);assert.equal(exchange.accepted,true,exchange.message);assert.equal(exchange.snapshot.profile.materials,63);
-  const retry=store.command('grade-owner',{id:'exchange',type:'exchangeWool',session,tier:'white',amount:3},T+600002);assert.equal(retry.snapshot.profile.materials,63);assert.equal(retry.snapshot.profile.economy?.warehouse.white,0);
+  const early=store.command('grade-owner',{id:'too-early',type:'claimWool',session},T+600001);assert.equal(early.accepted,false);assert.equal(early.snapshot.profile.economy?.warehouse.white,0);
+  const claim=store.command('grade-owner',{id:'claim',type:'claimWool',session},T+43_200_000);
+  assert.equal(claim.accepted,true,claim.message);assert.equal(claim.snapshot.profile.economy?.warehouse.white,6);assert.ok(claim.snapshot.profile.economy?.lots?.every(l=>l.version==='v6'&&l.claimedBy==='claim'&&l.animalId));
+  const again=store.command('grade-owner',{id:'claim',type:'claimWool',session},T+43_200_000);assert.equal(again.duplicate,true);assert.equal(again.snapshot.profile.economy?.warehouse.white,6);
+  const exchange=store.command('grade-owner',{id:'exchange',type:'exchangeWool',session,tier:'white',amount:6},T+43_200_000);assert.equal(exchange.accepted,true,exchange.message);assert.equal(exchange.snapshot.profile.materials,66);
+  const retry=store.command('grade-owner',{id:'exchange',type:'exchangeWool',session,tier:'white',amount:6},T+43_200_001);assert.equal(retry.snapshot.profile.materials,66);assert.equal(retry.snapshot.profile.economy?.warehouse.white,0);
  }finally{store.close();rmSync(dir,{recursive:true,force:true});}
 });
 test('guardian and enclosure upgrades spend once per expected level and keep animal identity',()=>{

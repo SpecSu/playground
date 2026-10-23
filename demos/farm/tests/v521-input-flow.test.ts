@@ -18,7 +18,7 @@ registerHooks({load(url,context,next){
  if(url.endsWith('.css'))return {format:'module',shortCircuit:true,source:'export default {};'};
  if(url.endsWith('/src/v5/EstateWorld.ts'))return {format:'module',shortCircuit:true,source:`export class EstateWorld {
  constructor(host,data,callbacks){globalThis.__inputRepairWorld.callbacks=callbacks;globalThis.__inputRepairWorld.latest=data;callbacks.assetsReady(true);}
- set(data){globalThis.__inputRepairWorld.latest=data;} stopInput(){} move(){} dispose(){} capture(){return undefined;}
+ set(data){globalThis.__inputRepairWorld.latest=data;} stopInput(){} move(){} dispose(){} previewWorkshop(){} capture(){return undefined;}
  }`};
  return next(url,context);
 }});

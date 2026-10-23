@@ -1,0 +1,102 @@
+{
+  "version": "v6.0-workshop",
+  "at": "2026-10-23T04:01:45.139728+00:00",
+  "fullTests": {
+    "passed": 499,
+    "failed": 0,
+    "skipped": 0
+  },
+  "lint": "passed",
+  "typecheck": "passed",
+  "productionBuild": {
+    "status": "passed",
+    "directory": ".local/v6-dist",
+    "modules": 1863
+  },
+  "isolatedHttp": {
+    "oldApiRegression": "passed",
+    "resourcesByteMatched": 24,
+    "freshTestIdentity": true,
+    "realSqlite": true,
+    "firstGiftCraftAndRetry": "passed",
+    "equipAvatarReloadIdentity": "passed",
+    "staleVersionRejection": "passed",
+    "visualVersionRevert": "passed",
+    "unavailableGenerationAndRetryNoCharge": "passed",
+    "giftDismantleNoProfit": "passed",
+    "trialNotReissued": true
+  },
+  "actualBuiltReactNodeDom": {
+    "actualBuiltReactEntry": true,
+    "tutorialRoutes": true,
+    "preChoiceGated": true,
+    "independentReplayNoEconomyMutation": true,
+    "selectionSetup": "isolated API and explicit test readiness clock; WebGL unavailable",
+    "defaultLX": true,
+    "rapidIndividualCards": true,
+    "nonmodalCompactCard": true,
+    "careClosesCard": true,
+    "simpleBuildChoices": true,
+    "placementDraftControls": true,
+    "placementCancelNoCharge": true,
+    "cycleTabsAndFiveTierBorderStyles": true,
+    "guardianUpgradeActualDebit": true,
+    "freeCapeActualReactDraftCraftEquipPersisted": true,
+    "workshopSameFrameConfirmOnce": true,
+    "reassuranceRaidCopy": true,
+    "responseLossRetrySameId": true,
+    "targetSwitchCancelsWithoutCharge": true,
+    "actualWalkAndThreeSecondFeed": true,
+    "templateApplyUndo": true,
+    "privateWork": true,
+    "avatarIdentity": true,
+    "labSeparation": true,
+    "worldHostRetained": true,
+    "escape": true,
+    "actualValleyDiscovery": true,
+    "developmentPreviewAndConstruction": true,
+    "nextCareGoal": true,
+    "confirmedResetAndCancel": true,
+    "freshOpeningAfterReset": true,
+    "webgl": "not verified (Node DOM)"
+  },
+  "migration": {
+    "checkedAt": "2026-10-23T04:00:41.902Z",
+    "sourceReadOnly": true,
+    "copy": "/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/v6-migration-2026-10-23T04-00-41-810Z.sqlite",
+    "devices": 7,
+    "existingEstates": 2,
+    "existingEstateProfilesCompared": 2,
+    "legacyFarmRows": 7,
+    "profiles": 7,
+    "labProfiles": 0,
+    "migratedProfiles": 7,
+    "checks": {
+      "stablePlayerAnimalRunIds": true,
+      "relationshipsPreserved": true,
+      "warehousePreserved": true,
+      "legacyEntitlementsBalanced": true,
+      "perAnimalPendingBalanced": true,
+      "repeatedSettleNoNewLegacy": true,
+      "allPersistedProfilesChecked": true,
+      "labProfilePresent": false,
+      "legacyFarmsTableUnchanged": true,
+      "integrity": "ok"
+    },
+    "limitations": [
+      "Source snapshot contains no lab profile; inactive lab migration could not be observed in this real snapshot."
+    ],
+    "passed": true
+  },
+  "reviewFixes": [
+    "fixed production slot capacity under animal rotation",
+    "shield expiry preserves wolf pursuit destination",
+    "unreachable carrying wolf cannot teleport out",
+    "ground pattern draft supplies actual Three preview position"
+  ],
+  "realGeneration": "unavailable: no authorized runtime provider/quota/moderation/persistent asset interface",
+  "realFriends": "unavailable: local demonstration only",
+  "video": "not implemented or requested; documentation-only concept",
+  "browser": "NOT VERIFIED: no independent Chrome/node_repl tool; no alternative browser used",
+  "productionResetExecuted": false
+}

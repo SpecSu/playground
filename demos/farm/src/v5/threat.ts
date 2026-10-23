@@ -12,6 +12,7 @@
  */
 import { buildingApproaches, buildingFootprint, isWalkable, lineOfSight, shelterEntries, type GridPoint, type Layout } from './layout.ts';
 import { findActorPath } from './actor-navigation.ts';
+import {shieldLayout,shieldSafety,type ShieldTactic,type FoldingShieldState} from './tactical-shield.ts';
 
 export type GuardianKind = 'dog' | 'cat' | 'frog';
 export type ThreatMode = 'tutorial' | 'rehearsal' | 'reassure' | 'challenge';
@@ -80,19 +81,19 @@ export interface ThreatState {
   elapsed: number; discoveredAt: number | null; actors: ThreatActor[]; wolves: ThreatWolf[];
   guardian: GuardianState | null; guardianStart: GridPoint; doors: ThreatDoor[];
   confirmedParticipants: string[]; lockedLayoutVersion: number; howled: boolean; upgrades?:ThreatUpgrades;
-  events: ThreatTelemetry[]; rewards: 0; notice: string;
+  events: ThreatTelemetry[]; rewards: 0; notice: string; tacticalShield?: FoldingShieldState;
 }
 export interface CreateThreatOptions {
   id: string; seed: number; mode: ThreatMode; actors: ThreatActorInput[];
   guardian?: GuardianKind; guardianPosition?: GridPoint; wolfSpawns?: GridPoint[];
-  challengeAuthorized?: boolean; confirmedParticipants?: string[]; howled?: boolean; upgrades?:ThreatUpgrades;
+  challengeAuthorized?: boolean; confirmedParticipants?: string[]; howled?: boolean; upgrades?:ThreatUpgrades; tactic?:ShieldTactic;
 }
 export interface ThreatStepInput {
   dt: number; playerPosition?: GridPoint; driveOff?: string; rescueActorId?: string;
   findBackActorId?: string; abandonActorId?: string; abandonConfirmed?: boolean;
 }
 export interface GuardianCommand {
-  kind: 'select' | 'follow' | 'station' | 'patrol' | 'block' | 'gather' | 'calm' | 'bubble' | 'rescue';
+  kind: 'shield' | 'select' | 'follow' | 'station' | 'patrol' | 'block' | 'gather' | 'calm' | 'bubble' | 'rescue';
   guardian?: GuardianKind; target?: GridPoint; wolfId?: string; actorId?: string;
 }
 export interface EvacuationFixture {
@@ -197,6 +198,10 @@ export function createThreat(options: CreateThreatOptions, layout: Layout): Thre
     confirmedParticipants: options.mode === 'challenge' ? participants : [], lockedLayoutVersion: layout.version,
     howled: options.howled ?? true, events: [], rewards: 0, notice: options.mode === 'tutorial' ? '选择期间危险暂停；三位伙伴都有教学兜底' : options.mode === 'rehearsal' ? '无损演练：只记录路线与排队，不扣动物、不发材料' : '',
   };
+  if(options.tactic){
+    if(options.tactic.kind!=='folding-shield'||options.guardian!=='dog') throw new Error('折翼盾只能装备在刀盾狗的一个战术槽');
+    s.tacticalShield={...clone(options.tactic),status:'ready',startedAt:null,until:null,remaining:0,reason:'',waitingActorIds:[]};
+  }
   const boundary = boundaryPoints(layout).filter(p => !s.actors.some(a => equal(a.position, p)) && s.doors.some(d => pathTo(layout, p, d.position).length));
   const seededIndex = Math.abs(Math.trunc(options.seed * 1664525 + 1013904223)) % Math.max(1, boundary.length);
   const spawns = options.wolfSpawns ?? (boundary.length ? [boundary[seededIndex]] : []);
@@ -319,7 +324,7 @@ function release(s: ThreatState, layout: Layout, wolf: ThreatWolf, reason: strin
 
 function cast(s: ThreatState, layout: Layout, ability: GuardianAbility, wolfId?: string) {
   const g = s.guardian;
-  if (!g || g.cooldowns[ability] > s.elapsed) return false;
+  if (!g || g.cooldowns[ability] > s.elapsed || (ability==='block' && s.tacticalShield)) return false;
   if (ability === 'calm' && g.ability === 'bubble' && g.abilityUntil > s.elapsed) return false;
   if ((ability === 'block' && g.kind !== 'dog') || (ability === 'gather' && g.kind !== 'cat') || (['calm', 'bubble'].includes(ability) && g.kind !== 'frog')) return false;
   if (ability === 'block' || ability === 'bubble') {
@@ -354,7 +359,7 @@ function cast(s: ThreatState, layout: Layout, ability: GuardianAbility, wolfId?:
 
 export function guardianCommand(state: ThreatState, layout: Layout, command: GuardianCommand): { state: ThreatState; ok: boolean; reason?: string } {
   const fail = (reason: string) => ({ state, ok: false, reason });
-  if (!command || !['select', 'follow', 'station', 'patrol', 'block', 'gather', 'calm', 'bubble', 'rescue'].includes(command.kind)) return fail('请选择合法的伙伴指令');
+  if (!command || !['shield', 'select', 'follow', 'station', 'patrol', 'block', 'gather', 'calm', 'bubble', 'rescue'].includes(command.kind)) return fail('请选择合法的伙伴指令');
   if (command.kind === 'select') {
     if (state.phase !== 'choosing' || state.guardian) return fail('事件期间只有一个守护槽，不能换人重置技能');
     if (!command.guardian || !['dog', 'cat', 'frog'].includes(command.guardian)) return fail('请选择一位守护者');
@@ -364,6 +369,25 @@ export function guardianCommand(state: ThreatState, layout: Layout, command: Gua
   if (!state.guardian || state.phase === 'choosing') return fail('请先选择守护者');
   if (state.phase === 'complete') return fail('本次事件已经结束');
   const g = state.guardian;
+  if(command.kind==='block'&&state.tacticalShield)return fail('折翼盾已替代贴身拦截，请使用展开盾牌');
+  if(command.kind==='shield'){
+    const shield=state.tacticalShield;
+    if(!shield||g.kind!=='dog')return fail('请在事件前为刀盾狗装备折翼盾');
+    if(command.target&&!equal(command.target,shield.anchor))return fail('事件期间锚点已锁定');
+    if(['active','moving','waiting'].includes(shield.status))return {state,ok:true};
+    if(shield.status==='expired')return fail('本次事件的6秒折翼盾已经使用完毕');
+    const safety=shieldSafety(layout,shield.anchor,state.actors.filter(liveActor).flatMap(a=>{
+      const destinations=a.reservation?state.doors.filter(d=>d.doorId===a.reservation!.doorId):state.doors;
+      const destination=destinations.find(d=>pathTo(shieldLayout(layout,shield.anchor),a.position,d.position).length)?.position??destinations[0]?.position;
+      return destination?[{position:a.position,destination}]:[{position:a.position,destination:a.position}];
+    }));
+    if(!safety.ok)return fail(safety.reason);
+    if(!pathTo(layout,g.position,shield.anchor).length)return fail('狗到不了此锚点，请在事件前另选可达通路格');
+    const s=clone(state);s.tacticalShield!.status='moving';s.tacticalShield!.reason='正在沿实际路线前往锚点';
+    const next=s.guardian!;next.behavior='station';next.target=point(shield.anchor);next.pendingAbility=null;next.ability=null;setPath(next,pathTo(layout,next.position,shield.anchor));
+    return {state:s,ok:true};
+  }
+  if(state.tacticalShield&&['moving','waiting','active'].includes(state.tacticalShield.status))return fail('狗正在驻点展开折翼盾，6秒结束后才能移动');
   if (command.target && (!Number.isFinite(command.target.x) || !Number.isFinite(command.target.z) || !isWalkable(layout, cell(command.target)) || !pathTo(layout, g.position, cell(command.target)).length)) return fail('目标不可达，请选择同一连通区的合法地点');
   if (['block', 'gather', 'calm', 'bubble'].includes(command.kind)) {
     const ability = command.kind as GuardianAbility;
@@ -406,6 +430,7 @@ export function guardianCommand(state: ThreatState, layout: Layout, command: Gua
 function guardianStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: number) {
   const g = s.guardian;
   if (!g) return;
+  if(s.tacticalShield&&['moving','waiting','active'].includes(s.tacticalShield.status))return;
   if (g.ability && g.abilityUntil <= s.elapsed) g.ability = null;
   let target: GridPoint | null = null;
   if (g.behavior === 'emergency') {
@@ -458,7 +483,7 @@ function actorStep(s: ThreatState, layout: Layout, dt: number, previous: number)
     if (!door) continue;
     if (actor.status === 'waiting') { actor.status = 'evacuating'; emit(s, 'depart', { actorId: actor.id, position: point(actor.position) }, actor.departAt); }
     if (actor.status !== 'evacuating') continue;
-    if (actor.pathIndex < actor.path.length && !isWalkable(layout, cell(actor.path[actor.pathIndex]))) {
+    if (actor.path.slice(actor.pathIndex).some(p=>!isWalkable(layout,cell(p)))) {
       actor.reservation = null; actor.path = []; reserve(s, layout); continue;
     }
     const start = Math.max(previous, actor.departAt), available = Math.min(dt, s.elapsed - start);
@@ -504,6 +529,10 @@ function wolfStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: nu
     if (input.driveOff === wolf.id && input.playerPosition && distance(input.playerPosition, wolf.position) <= THREAT_RULES.driveOffRange && lineOfSight(layout, input.playerPosition, wolf.position, THREAT_RULES.driveOffRange)) {
       release(s, layout, wolf, 'LX在实际位置驱赶并救回'); wolf.blockedUntil = Math.max(wolf.blockedUntil, s.elapsed + 2); emit(s, 'drive-off', { wolfId: wolf.id, position: point(wolf.position) });
     }
+    if(s.tacticalShield?.status==='active'||s.tacticalShield?.status==='expired'){
+      const destination=wolf.status==='carrying'?wolf.spawn:s.actors.find(a=>a.id===wolf.targetActorId&&liveActor(a))?.position??(wolf.arrivedAt===null?s.doors.find(d=>d.doorId===wolf.targetDoorId)?.position:wolf.path.at(-1));
+      if(destination)setPath(wolf,pathTo(layout,wolf.position,destination));
+    }
     if (wolf.blockedUntil > previous || wolf.interruptedUntil > previous) continue;
     if (s.mode === 'tutorial' && s.elapsed >= THREAT_RULES.tutorialRetreat) {
       wolf.status = 'retreated'; emit(s, 'tutorial-fallback', { wolfId: wolf.id, reason: '伙伴赶走教学威胁，继续按真实路线排队回棚' }); continue;
@@ -513,7 +542,7 @@ function wolfStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: nu
       const actor = s.actors.find(a => a.id === wolf.targetActorId);
       move(wolf, THREAT_RULES.carrySpeed, dt);
       if (actor) actor.position = point(wolf.position);
-      if (wolf.pathIndex >= wolf.path.length && actor) {
+      if (wolf.pathIndex >= wolf.path.length && actor && equal(wolf.position, wolf.spawn)) {
         wolf.status = 'boundary'; actor.status = 'boundary'; actor.rescueStartedAt = s.elapsed; actor.rescueRemaining = THREAT_RULES.rescueWindow;
         actor.rescuePoint = point(wolf.spawn); actor.rescueProgress = 0;
         emit(s, 'boundary-rescue', { actorId: actor.id, wolfId: wolf.id, position: point(actor.position), reason: '180秒在线追踪救援；靠近1格连续3秒' });
@@ -602,12 +631,41 @@ function rescueStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt: 
   }
 }
 
+function shieldStep(s:ThreatState,layout:Layout,dt:number){
+ const shield=s.tacticalShield,g=s.guardian;if(!shield||!g)return;
+ if(shield.status==='active'){
+   shield.remaining=Math.max(0,rounded((shield.until??s.elapsed)-s.elapsed));
+   if(shield.remaining===0){shield.status='expired';shield.reason='6秒路障已结束';emit(s,'shield-expired',{position:point(shield.anchor)});}
+   return;
+ }
+ if(!['moving','waiting'].includes(shield.status))return;
+ if(!equal(g.position,shield.anchor)){move(g,THREAT_RULES.dog.speed,dt);if(!equal(g.position,shield.anchor))return;}
+ const exposed=s.actors.filter(liveActor);
+ const safety=shieldSafety(layout,shield.anchor,exposed.flatMap(a=>{
+   const doors=a.reservation?s.doors.filter(d=>d.doorId===a.reservation!.doorId):s.doors;
+   const d=doors.find(d=>pathTo(shieldLayout(layout,shield.anchor),a.position,d.position).length)??doors[0];
+   return [{position:a.position,destination:d?.position??a.position}];
+ }));
+ // Reservations that still cross the anchor must pass before the barrier unfolds.
+ shield.waitingActorIds=exposed.filter(a=>a.reservation&&a.path.slice(Math.max(0,a.pathIndex-1)).some(p=>equal(p,shield.anchor))).map(a=>a.id);
+ if(shield.waitingActorIds.length||s.wolves.some(w=>distance(w.position,shield.anchor)<.51)||exposed.some(a=>distance(a.position,shield.anchor)<.51)){
+   shield.status='waiting';shield.reason='等待本侧已预约撤离动物通过锚点';return;
+ }
+ if(!safety.ok){shield.status='rejected';shield.reason=safety.reason;s.notice=safety.reason;return;}
+ shield.status='active';shield.startedAt=s.elapsed;shield.until=rounded(s.elapsed+6);shield.remaining=6;shield.reason='实体路障展开，狗驻点6秒';
+ emit(s,'shield-active',{position:point(shield.anchor),reason:shield.reason});
+}
+
 export function stepThreat(state: ThreatState, layout: Layout, input: ThreatStepInput): ThreatState {
   if (!Number.isFinite(input.dt) || input.dt < 0) throw new Error('在线步长必须是非负有限秒数');
   if (input.dt === 0 || state.phase === 'choosing') return clone(state);
   const recovery = state.phase === 'complete' && state.actors.some(a => a.id === input.findBackActorId && a.status === 'lost');
   if (layout.version !== state.lockedLayoutVersion && !recovery && state.phase !== 'complete') throw new Error('事件期间布局已锁定，不能改变路线与入口');
-  if (state.phase === 'complete' && !input.findBackActorId) return clone(state);
+  if (state.phase === 'complete' && !input.findBackActorId) {
+    const ended=clone(state);
+    if(ended.tacticalShield?.status==='active'){ended.elapsed=rounded(ended.elapsed+input.dt);shieldStep(ended,layout,input.dt);}
+    return ended;
+  }
   const s = clone(state);
   if (s.phase === 'complete' && !recovery) return s;
   if (recovery) {
@@ -628,9 +686,11 @@ export function stepThreat(state: ThreatState, layout: Layout, input: ThreatStep
     const dt = Math.min(THREAT_RULES.step, remaining), previous = s.elapsed;
     discover(s, layout, input);
     s.elapsed = rounded(s.elapsed + dt); remaining -= dt;
-    guardianStep(s, layout, input, dt);
-    actorStep(s, layout, dt, previous);
-    wolfStep(s, layout, input, dt, previous);
+    shieldStep(s,layout,dt);
+    const navigation=s.tacticalShield?.status==='active'?shieldLayout(layout,s.tacticalShield.anchor):layout;
+    guardianStep(s, navigation, input, dt);
+    actorStep(s, navigation, dt, previous);
+    wolfStep(s, navigation, input, dt, previous);
     queueStep(s, layout);
     for (const actor of s.actors) {
       const door = s.doors.find(d => d.doorId === actor.reservation?.doorId);
@@ -643,6 +703,7 @@ export function stepThreat(state: ThreatState, layout: Layout, input: ThreatStep
       s.phase = 'complete'; emit(s, 'complete', { reason: s.mode === 'rehearsal' ? '无损演练完成，无经济奖励' : '本次事件结果已保存' });
     }
   }
+  if(remaining>1e-9 && s.tacticalShield?.status==='active'){s.elapsed=rounded(s.elapsed+remaining);shieldStep(s,layout,remaining);}
   return s;
 }
 
