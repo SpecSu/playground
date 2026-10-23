@@ -1,1 +1,24 @@
-{"version":"v9.0-food-adjacency-alerts","camera":"fixed-isometric-45-52","opening":"two-wolf-staggered-safe-entrance","motion":"buffered-authority-220ms","viewport":"390x844","world":"open-valley-owned-build-land","audio":"original-crossfaded-calm-warning-guard","journey":"persisted-discovery-development","care":"manual-bond-vs-physical-autonomous-dining","construction":"translucent-drag-preview-confirm","economy":"rarity-coins-feed-boxes-capacity","raids":"rarity-pressure-tier-capped-loss","workshop":"private-pattern-cape-banner-shield","generation":"unavailable","friends":"local-two-client-convoy-and-opt-in-harvest","encounter":"real-events-unconnected-video-contract","guardian":"reachable-tower-lookout-and-distinct-defense","inventory":"illustrated-quality-grid-real-commands","food":"four-edge-resource-stars-quality-fifo"}
+{
+  "version": "v11.0-minimal-terrain",
+  "defaultMode": "minimal",
+  "legacyMode": "?legacy",
+  "camera": "orthographic-manor-10.4-offset-9-13.8-18",
+  "viewport": "390x844",
+  "world": "continuous-land-4x4-owned-10x10-visible",
+  "terrain": [
+    "meadow",
+    "creek",
+    "hill",
+    "grove"
+  ],
+  "storage": "browser-local-separate-v1",
+  "care": "walk-near-feed-pet-natural-drink-rest",
+  "gifts": "collect-display-sell-permanent-collection",
+  "expansion": "four-edge-40-coins",
+  "terraform": "20-coins-after-first-expansion",
+  "wolves": "two-safe-edge-visitors",
+  "audio": "legacy-only",
+  "generation": "not-connected-in-minimal-mode",
+  "friends": "not-connected-in-minimal-mode",
+  "visualAcceptance": "not-browser-verified"
+}
