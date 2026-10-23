@@ -8,3 +8,7 @@
 .estate-feed .quick-build-status{font-size:10px;line-height:16px;min-height:16px;margin:8px 0;color:#bdc9b1}
 .estate-feed .quick-build-confirm{width:100%;min-height:36px;padding:7px 10px;border-radius:10px;background:#e4edd7;color:#21301b;font-size:12px;font-weight:600;border:1px solid #e9efdc4d}
 .estate-feed .quick-build-links{display:flex;justify-content:center;gap:22px;margin-top:5px}.estate-feed .quick-build-links button{padding:6px 0;font-size:10px;color:#aeb9a4;text-decoration:underline;text-decoration-color:#aeb9a444;text-underline-offset:3px}
+
+.estate-feed .quick-build-drag-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px}.estate-feed .quick-build-drag-title span{font-size:10px;color:#bccbb2;flex:1}.estate-feed .quick-build-drag-title button{font-size:10px;text-decoration:underline;color:#dce9cc;padding:5px 2px}.estate-feed .quick-build-panel.is-placing .quick-build-status{margin:6px 0;font-size:10px}
+.estate-feed .farm-world.estate-placing .animal-label,.estate-feed .farm-world.estate-placing .guardian-label{pointer-events:none}
+.estate-feed .farm-world.estate-placing canvas{cursor:grab;touch-action:none}.estate-feed .farm-world.estate-placing canvas:active{cursor:grabbing}

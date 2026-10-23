@@ -93,3 +93,11 @@ V5.2.2 deployed locally from `ffc524a7ff9a7961bae6129269a8c45c0517c41a` at15:43:
 **Chrome/WebGL实际画面、触控和音乐听感仍未验收**；没有可调用独立Chrome插件入口，未使用CUA/Playwright等替代。Node DOM不创建WebGL，其预期告警不代表视觉测试。证据 `verification/v524.json`，本机安装与存档保留另记 `verification/v524-live.json`。
 
 本机安装与跨调用检查成功：源码 `2c0c1abe6dc64c8a592c6d89099b7e2a4d81f1b0`，PID73712/PPID1，原 `http://127.0.0.1:5190`；24资源与最终构建一致，7旧记录和2V5记录完全不变，未重置。最新备份 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-22T16-45-37-020Z-before-v524.sqlite`；旧构建 `/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v524-20261022T164536Z`。证据 `verification/v524-live.json`。
+
+## V5.2.5 拖拽与反复守护（最终构建）
+
+- 463/463自动测试，0失败/跳过；完整ESLint、typecheck与生产构建通过（1857 modules）。最终证据 `verification/v525.json`。
+- 独立5193/SQLite验证24份静态资源字节一致，API身份隔离、收据、重置确认与重试通过。实际生产React入口的NodeDOM流程覆盖放置预览/取消不扣、三页经营/五色边框样式、狗升级真实扣24及同帧双击去重，并回归开场、喂养、回放、发现/建设、重置。无WebGL，不能据此声称真实画面验证。
+- 真实EstateStore临时库验证旧产物仅迁移一次、领取/兑换/培育/升级/领养跨重启幂等、升级不染旧羊毛、离线无隐藏产出积压。Reducer链验证完整12秒预警、1–3狼合法边界、真实撤离、180秒救援/免费找回、面板/后台/离线暂停、结束重排。
+- 独立审查发现的塔顶抓取跳格、少于3住民时领养空名、救援面板覆盖导致不推进均有实际RED→GREEN回归。末轮源码审查无剩余Important/Critical。第一轮全套在UI并行落盘时出现1项禁用提示失败；冻结改动后最终全套463通过。
+- 未做Chrome/WebGL/触控/听感与长期数值平衡验收。无独立Chrome/node_repl入口，未绕用其他浏览器。自然托管/幼鸭/真实AI社交不包含在本次。

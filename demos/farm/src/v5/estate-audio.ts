@@ -7,8 +7,8 @@ export const BEATS_PER_BAR=4;
 export const MUSIC_BPM=76;
 export type MusicNote={voice:'melody'|'pad'|'bass';midi:number;duration:number;offset:number;gain:number};
 export type FarmAudioStatus='awaiting-gesture'|'playing'|'muted'|'paused'|'unavailable';
-export type FarmAudioCue='arrival'|'safe';
-export type AudioScene={scope:string;eventId:string|null;active:boolean;complete:boolean};
+export type FarmAudioCue='warning'|'arrival'|'safe';
+export type AudioScene={scope:string;eventId:string|null;warning:boolean;active:boolean;complete:boolean};
 
 const chords=[[48,52,55],[48,52,55],[45,48,52],[45,48,52],[41,45,48],[41,45,48],[43,47,50],[43,47,50]];
 const phrases:(number|null)[][]=[
@@ -37,7 +37,8 @@ export function audioScene(data:EstateSnapshot,opening=data.profile.opening,repl
  const p=data.profile,cinematic=replay||p.tutorial!=='done';
  const complete=cinematic?opening?.stage==='done'||!replay&&p.threat?.phase==='complete':p.threat?.phase==='complete';
  const active=!complete&&(cinematic?!!opening&&['approach','startle','choose','arrival','defend'].includes(opening.stage):!!p.threat&&['active','rescue'].includes(p.threat.phase));
- return {scope:`${data.playerId}:${p.id}:${p.runId??p.createdAt}:${replay?'replay':'live'}`,eventId:replay?'opening':p.threat?.id??(cinematic?'opening':null),active,complete:!!complete};
+ const warning=!cinematic&&!p.threat&&!!p.raidCycle?.pending&&['warning','ready'].includes(p.raidCycle.phase);
+ return {scope:`${data.playerId}:${p.id}:${p.runId??p.createdAt}:${replay?'replay':'live'}`,eventId:warning?p.raidCycle!.pending!.id:replay?'opening':p.threat?.id??(cinematic?'opening':null),warning,active,complete:!!complete};
 }
 
 /** Tracks facts, not frame counts. Silent/hidden transitions never queue old victory sounds. */
@@ -47,6 +48,7 @@ export class AudioCueTracker{
   if(scene.scope!==this.scope){this.scope=scene.scope;this.eventId=null;this.active=false;this.emitted.clear();}
   const cues:FarmAudioCue[]=[],key=scene.eventId;
   const add=(cue:FarmAudioCue)=>{const id=`${key}:${cue}`;if(audible&&!this.emitted.has(id)){this.emitted.add(id);cues.push(cue);}};
+  if(key&&scene.warning)add('warning');
   if(key&&scene.active)add('arrival');
   if(key&&scene.complete&&this.eventId===key&&this.active)add('safe');
   this.eventId=key;this.active=scene.active;
@@ -126,7 +128,10 @@ export class FarmAudio{
  }
  private cue(cue:FarmAudioCue){
   if(!this.context||!this.effects)return;const at=this.context.currentTime+.025;
-  if(cue==='arrival'){
+  if(cue==='warning'){
+   // A brief rising wooden pair marks distant tracks before a wolf actually arrives.
+   for(const [index,midi] of [62,67].entries())this.oscillator('triangle',hz(midi),at+index*.24,.55,.035,this.effects,.035,.4,1500);
+  }else if(cue==='arrival'){
    // Two restrained gliding partials evoke a distant howl, rather than a sharp alarm.
    const lower=this.oscillator('sine',155,at,1.45,.07,this.effects,.28,.55);
    lower.frequency.linearRampToValueAtTime(220,at+.48);lower.frequency.linearRampToValueAtTime(174,at+1.35);

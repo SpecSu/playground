@@ -1,0 +1,46 @@
+import {DatabaseSync} from 'node:sqlite';
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';
+import {createEstate,currentProfile,commandEstate,settleEstate,type Estate} from '../src/v5/estate.ts';import {EstateStore} from '../server/estate-store.ts';import {createThreat} from '../src/v5/threat.ts';
+const T=1_800_000_000_000;let seq=0;
+function ready(){const s=createEstate('cycle-owner',T),p=currentProfile(s);p.tutorial='done';p.opening!.stage='done';p.threat=null;p.guardian='dog';p.milestones.push('first-meal');p.session='session';return s;}
+function cmd(s:Estate,type:string,extra:Record<string,unknown>={},at=T){return commandEstate(s,{id:`cycle-${++seq}`,type,session:currentProfile(s).session,...extra},at);}
+test('fresh and migrated estates have one persistent graded economy without reimporting old products',()=>{
+ const s=ready(),p=currentProfile(s);assert.ok(p.economy,'fresh estate initializes warehouse');assert.ok(p.animals.every(a=>a.husbandry),'every animal owns production clock');
+ delete p.economy;delete p.raidCycle;for(const a of p.animals)delete a.husbandry;p.animals[0].life.products.stored=2;
+ const next=settleEstate(s,T+86400000),q=currentProfile(next);assert.equal(q.animals[0].husbandry?.pending.white,2);assert.equal(q.animals[0].life.products.stored,0);assert.equal(q.animals[0].husbandry?.settledAt,T+86400000);
+ const again=currentProfile(settleEstate(next,T+86400000));assert.equal(again.animals[0].husbandry?.pending.white,2);assert.equal(again.animals[0].id,p.animals[0].id);assert.equal(again.animals[0].life.bond,p.animals[0].life.bond);
+});
+test('actual store claims graded wool and exchanges it exactly once across retries',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'farm-cycle-')),store=new EstateStore(join(dir,'test.sqlite'));try{
+  const fixture=ready();fixture.playerId='grade-owner';const db=new DatabaseSync(join(dir,'test.sqlite'));db.prepare('INSERT INTO estates(device,state) VALUES(?,?)').run('grade-owner',JSON.stringify(fixture));db.close();
+  let s=store.get('grade-owner',T);s=store.command('grade-owner',{id:'enter',type:'enter'},T).snapshot;
+  // Skip setup safely through state-independent economy after a settled full interval.
+  const session=s.profile.session;
+  const claim=store.command('grade-owner',{id:'claim',type:'claimWool',session},T+600001);
+  assert.equal(claim.accepted,true,claim.message);assert.equal(claim.snapshot.profile.economy?.warehouse.white,3);
+  const again=store.command('grade-owner',{id:'claim',type:'claimWool',session},T+600001);assert.equal(again.duplicate,true);assert.equal(again.snapshot.profile.economy?.warehouse.white,3);
+  const exchange=store.command('grade-owner',{id:'exchange',type:'exchangeWool',session,tier:'white',amount:3},T+600001);assert.equal(exchange.accepted,true,exchange.message);assert.equal(exchange.snapshot.profile.materials,63);
+  const retry=store.command('grade-owner',{id:'exchange',type:'exchangeWool',session,tier:'white',amount:3},T+600002);assert.equal(retry.snapshot.profile.materials,63);assert.equal(retry.snapshot.profile.economy?.warehouse.white,0);
+ }finally{store.close();rmSync(dir,{recursive:true,force:true});}
+});
+test('guardian and enclosure upgrades spend once per expected level and keep animal identity',()=>{
+ let s=ready();const ids=currentProfile(s).animals.map(a=>a.id),first=cmd(s,'upgradeGuardian',{guardian:'dog',expectedLevel:1});assert.equal(first.accepted,true,first.message);s=first.state;
+ assert.equal(currentProfile(s).upgrades?.guardians.dog,2);assert.equal(currentProfile(s).materials,36);assert.equal(cmd(s,'upgradeGuardian',{guardian:'dog',expectedLevel:1}).accepted,false);
+ const shelter=cmd(s,'upgradeShelter',{buildingId:'initial-shelter',expectedLevel:1});assert.equal(shelter.accepted,true,shelter.message);s=shelter.state;assert.equal(currentProfile(s).materials,20);assert.equal(currentProfile(s).upgrades?.shelters['initial-shelter'],2);assert.equal(currentProfile(s).layout.buildings[0].capacity,6);assert.deepEqual(currentProfile(s).animals.map(a=>a.id),ids);
+});
+test('a new resident needs actual spare protection capacity and a current herd count',()=>{
+ const s=ready(),first=cmd(s,'adopt',{expectedCount:3});assert.equal(first.accepted,true,first.message);const p=currentProfile(first.state);assert.equal(p.animals.length,4);assert.equal(p.materials,40);assert.ok(p.animals[3].husbandry);assert.equal(cmd(first.state,'adopt',{expectedCount:3}).accepted,false);
+ const noBeds=ready();currentProfile(noBeds).layout.buildings=[];assert.equal(cmd(noBeds,'adopt',{expectedCount:3}).accepted,false);
+});
+test('natural threat time pauses with hidden scene readiness or modal coverage, then resumes only online dt',()=>{
+ const s=ready(),p=currentProfile(s);p.threat=createThreat({id:'natural-test',seed:5,mode:'reassure',guardian:'dog',actors:p.animals.map(a=>({id:a.id,position:a.position}))},p.layout);
+ const paused=cmd(s,'pulse',{presentationReady:false},T+1000);assert.equal(currentProfile(paused.state).threat?.elapsed,0);
+ const covered=cmd(paused.state,'pulse',{presentationReady:true,presentationCovered:true},T+2000);assert.equal(currentProfile(covered.state).threat?.elapsed,0);
+ const resume=cmd(covered.state,'pulse',{presentationReady:true,presentationCovered:false},T+2500);assert.ok(Math.abs(currentProfile(resume.state).threat!.elapsed-.5)<1e-6);
+});
+test('adopting after a memorial always gives the new stable ID a saved name',()=>{
+ const s=ready(),p=currentProfile(s);p.animals[0].memorial={at:T,eventId:'independent-test-challenge'};
+ const r=cmd(s,'adopt',{expectedCount:2});assert.equal(r.accepted,true,r.message);
+ const added=currentProfile(r.state).animals.at(-1)!;assert.equal(typeof added.name,'string');assert.ok(added.name.length>0);
+ assert.notEqual(added.id,'pipi');assert.equal(JSON.parse(JSON.stringify(added)).name,added.name);
+});

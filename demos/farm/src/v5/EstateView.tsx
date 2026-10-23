@@ -17,30 +17,36 @@ import SceneCard from './SceneCard.tsx';
 import CompactAnimalCard from './CompactAnimalCard.tsx';
 import QuickBuildPanel from './QuickBuildPanel.tsx';
 import {playPrompt} from './play-prompt.ts';
+import FarmCyclePanel,{AnimalProduction} from './FarmCyclePanel.tsx';
+import {stackTotal} from './herd-economy.ts';
 import type {FarmAudioStatus} from './estate-audio.ts';
-import {threatSummary,type GuardianKind} from './threat.ts';
+import {threatSummary,guardianUpgradeRules,type GuardianKind} from './threat.ts';
 import {LOCAL_VISITORS,THEME_TEMPLATES,type CreationCommand,type Theme} from './creation.ts';
 
-export type EstateSheet = null|'animal'|'actions'|'guardian'|'build'|'creation'|'visits'|'works'|'settings'|'reset'|'view'|'avatar'|'journal'|'journey'|'animalDetails'|'planner';
+export type EstateSheet = null|'animal'|'actions'|'guardian'|'build'|'creation'|'visits'|'works'|'settings'|'reset'|'view'|'avatar'|'journal'|'journey'|'animalDetails'|'planner'|'cycle';
 export const isSceneCardSheet=(sheet:EstateSheet)=>sheet==='animal'||sheet==='build';
-type Ghost={x:number;z:number;kind:BuildingKind;valid:boolean};
+type Ghost={x:number;z:number;kind:BuildingKind;valid:boolean;interactive?:boolean};
 type Send=(type:string,extra?:Record<string,unknown>)=>void;
 export type EstateViewProps={
   openingOverlay?:ReactNode;interactionLocked?:boolean;data:EstateSnapshot;target:string;sheet:EstateSheet;camera:ClubCameraMode;reduced:boolean;busy:boolean;
   message:string;commandFeedback?:string;error:string;assetStatus:string;worldRef:RefObject<HTMLDivElement|null>;
   onCommand:Send;onSheet:(sheet:EstateSheet)=>void;onInspect:(id:string)=>void;onTarget?:(id:string)=>void;
   onCamera:(mode:ClubCameraMode)=>void;onMove:(vector:StickVector,active:boolean)=>void;onStop:()=>void;
-  onReduced:()=>void;onGhost:(ghost?:Ghost)=>void;onThemePreview?:(theme?:Theme)=>void;
+  placementPoint?:GridPoint;onReduced:()=>void;onGhost:(ghost?:Ghost)=>void;onThemePreview?:(theme?:Theme)=>void;
   soundEnabled?:boolean;soundStatus?:FarmAudioStatus;onSound?:()=>void;
 };
 const BUILDING_LABEL:Record<BuildingKind,string>={shelter:'保护区',trough:'食槽',workbench:'工作台',tower:'观察台',factory:'饲料厂',ramp:'池岸坡道',decor:'装饰'};
 const REGION_LABEL={pen:'圈养区',meadow:'草场',shore:'池岸',home:'家园'};
 const STAGE_LABEL={baby:'幼崽',juvenile:'少年',adult:'成年'};
-const GUARDIANS:{kind:GuardianKind;asset:string;description:string;limit:string}[]=[
-  {kind:'dog',asset:'sword-shield-dog',description:'走近一只狼，守住6秒',limit:'视距6格 · 一次只能守一线'},
-  {kind:'cat',asset:'miaocuijiao',description:'巡视早发现，近身归拢',limit:'视距8格 · 有效观察台再加4格'},
-  {kind:'frog',asset:'milk-frog',description:'安抚门前惊慌，泡泡减速',limit:'视距5格 · 两种技能共用施法锁'},
+const GUARDIANS:{kind:GuardianKind;asset:string}[]=[
+  {kind:'dog',asset:'sword-shield-dog'},
+  {kind:'cat',asset:'miaocuijiao'},
+  {kind:'frog',asset:'milk-frog'},
 ];
+function guardianCopy(kind:GuardianKind,level:number){
+ const rules=guardianUpgradeRules(kind,level);
+ return kind==='dog'?{description:`走近一只狼，守住${rules.duration}秒`,limit:`视距${rules.sight}格 · 一次只能守一线`}:kind==='cat'?{description:`归拢${rules.range}格内小羊，持续${rules.duration}秒`,limit:`视距${rules.sight}格 · 有效观察台再加4格`}:{description:`安抚${rules.range}格内惊慌，持续${rules.duration}秒`,limit:`视距${rules.sight}格 · 泡泡与安抚不叠加`};
+}
 const round=(p:GridPoint):GridPoint=>({x:Math.round(p.x),z:Math.round(p.z)});
 const timestamp=(at:number)=>new Date(at).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'UTC'});
 const bondLabel=bondStage;
@@ -68,6 +74,7 @@ function AnimalCard({animal:a,profile:p,now,busy,send}:{animal:EstateAnimal;prof
     <button className="estate-primary" data-command={p.inventory.hand?'feed':'refill'} disabled={busy||!!p.job} onClick={()=>send(p.inventory.hand?'feed':'refill',p.inventory.hand?{target:a.id,food:a.life.stage==='baby'?'milk':'feed'}:{})}><Leaf size={18}/>{feeding?'正在走近并喂养…':!p.inventory.hand?'去工作台免费补充':a.life.stage==='baby'?'喂奶':'喂食'}<small>{feeding?`${Math.min(3,Math.floor((p.job?.progress??0)/1000))}/3秒`:'LX走近后照料 · 食物1份'}</small></button>
     <div className="estate-secondary"><button disabled={busy||!!p.job} onClick={()=>send('play',{target:a.id,action:a.preference})}>一起{ACTION_LABEL[a.preference]}</button><button disabled={busy} aria-pressed={a.following} onClick={()=>send('follow',{target:a.id})}>{a.following?'让它自在活动':'陪我散步'}</button></div>
     {p.job&&<button className="farm-text-link" disabled={busy} onClick={()=>send('cancel')}>取消手上行动 · 未完成不扣食物</button>}
+    <AnimalProduction animal={a} now={now} busy={busy} send={send} economy={p.economy} blockedReason={p.threat?'等这次守护结束后再培育':undefined}/>
     <div className="estate-growth"><h3>下一成长 <span>{growth.nextStage?STAGE_LABEL[growth.nextStage]:'继续留下新经历'}</span></h3><progress max={1} value={growth.ageProgress}/><ul>{growth.missing.map(item=><li key={item.kind}>{item.text}</li>)}</ul>{!growth.missing.length&&<p>{growth.message}</p>}</div>
     <div className="farm-memory-heading"><h3>最近的真实记忆</h3><span><Heart size={12}/>{Math.round(a.life.bond)}/100 · {bondLabel(a.life.bond)}</span></div>
     <div className="farm-bond"><i style={{width:`${a.life.bond}%`,background:a.color}}/></div>
@@ -81,8 +88,8 @@ function Inventory({profile:p,busy,send}:{profile:Profile;busy:boolean;send:Send
   const selectedDelivery=p.layout.buildings.some(b=>b.kind==='trough'&&b.id===deliveryTarget)?deliveryTarget:p.layout.buildings.find(b=>b.kind==='trough')?.id;
   const trough=p.layout.buildings.find(b=>b.kind==='trough'&&(p.troughFood?.[b.id]??0)>0);
   const troughStock=Object.values(p.troughFood??{}).reduce((a,b)=>a+b,0);
-  const stored=living(p).reduce((n,a)=>n+a.life.products.stored,0);
-  return <details className="estate-details"><summary><Backpack size={14}/> 背包与免费食物 · 手持{p.inventory.hand}/3</summary><div className="estate-stat-row"><span>建设材料 <b>{p.materials}</b></span><span>工作台食物 <b>{p.inventory.pantry}</b></span><span>工厂库存 <b>{p.factory.stock}/12</b></span><span>食槽库存 <b>{troughStock}</b></span></div><div className="estate-secondary"><button disabled={busy||p.inventory.hand>=3||!!p.job} onClick={()=>send('refill')}>去工作台补充</button><button disabled={busy||p.factory.stock===0||!!p.job} onClick={()=>send('delivery',{target:selectedDelivery})}>从工厂搬运</button><button disabled={busy||!trough||p.inventory.hand>=3||!!p.job} onClick={()=>send('refill',{source:'trough',target:trough?.id})}>去食槽装食物</button></div><label className="estate-field">配送到哪个食槽<select value={selectedDelivery??''} onChange={e=>setDeliveryTarget(e.target.value)}>{p.layout.buildings.filter(b=>b.kind==='trough').map(b=><option key={b.id} value={b.id}>食槽 ({b.x},{b.z}) · {p.troughFood?.[b.id]??0}/{b.capacity}</option>)}</select></label><p className="sheet-note">基础食物免费。工作台每30在线秒准备3份；每档一座工厂每60秒加工3份，储存上限12。配送每趟最多3份，按实际路线装卸。</p><button className="actions-join" disabled={busy||!stored} onClick={()=>send('claimProducts')}>领取成年产物 · {stored}材料</button><p className="sheet-note">每只成年动物每12真实小时积累2材料，最多存6。</p></details>;
+  const stored=living(p).reduce((n,a)=>n+(a.husbandry?stackTotal(a.husbandry.pending):0),0);
+  return <details className="estate-details"><summary><Backpack size={14}/> 背包与免费食物 · 手持{p.inventory.hand}/3</summary><div className="estate-stat-row"><span>建设材料 <b>{p.materials}</b></span><span>工作台食物 <b>{p.inventory.pantry}</b></span><span>工厂库存 <b>{p.factory.stock}/12</b></span><span>食槽库存 <b>{troughStock}</b></span></div><div className="estate-secondary"><button disabled={busy||p.inventory.hand>=3||!!p.job} onClick={()=>send('refill')}>去工作台补充</button><button disabled={busy||p.factory.stock===0||!!p.job} onClick={()=>send('delivery',{target:selectedDelivery})}>从工厂搬运</button><button disabled={busy||!trough||p.inventory.hand>=3||!!p.job} onClick={()=>send('refill',{source:'trough',target:trough?.id})}>去食槽装食物</button></div><label className="estate-field">配送到哪个食槽<select value={selectedDelivery??''} onChange={e=>setDeliveryTarget(e.target.value)}>{p.layout.buildings.filter(b=>b.kind==='trough').map(b=><option key={b.id} value={b.id}>食槽 ({b.x},{b.z}) · {p.troughFood?.[b.id]??0}/{b.capacity}</option>)}</select></label><p className="sheet-note">基础食物免费。工作台每30在线秒准备3份；每档一座工厂每60秒加工3份，储存上限12。配送每趟最多3份，按实际路线装卸。</p><button className="actions-join" disabled={busy||!stored} onClick={()=>send('claimWool')}>收好羊毛 · {stored}份</button><p className="sheet-note">羊毛分白、绿、蓝、红、金五档。收进仓库后，在“羊毛·守护”兑换材料或培育。</p></details>;
 }
 
 function BuildPanel({profile:p,busy,send,onGhost,initialMode='place'}:{profile:Profile;busy:boolean;send:Send;onGhost:(g?:Ghost)=>void;initialMode?:LayoutEdit['type']}){
@@ -156,12 +163,13 @@ function BuildPanel({profile:p,busy,send,onGhost,initialMode='place'}:{profile:P
   </>;
 }
 
-function GuardianPanel({profile:p,busy,send}:{profile:Profile;busy:boolean;send:Send}){
+function GuardianPanel({profile:p,busy,send,onUpgrades}:{profile:Profile;busy:boolean;send:Send;onUpgrades:()=>void}){
   const [participants,setParticipants]=useState<string[]>([]),[riskAcknowledged,setRiskAcknowledged]=useState(false),[ready,setReady]=useState(false);
   const event=p.threat,result=event?threatSummary(event):null,wolf=event?.wolves.find(w=>!['retreated','boundary'].includes(w.status));
   return <>
     <p className="sheet-note">{p.tutorial==='choose'?'选择时危险暂停。三位伙伴都能守住第一次小家。':'当前只启用一位伙伴。换岗准备20秒，间隔5分钟；关系会保留。'}</p>
-    <div className="estate-guardian-choices">{GUARDIANS.map(g=><button key={g.kind} className={p.guardian===g.kind?'selected':''} disabled={busy||!!event&&p.tutorial!=='choose'} onClick={()=>send('guardian',{guardian:g.kind})}><img src={`/avatars/portraits/${g.asset}.webp`} alt=""/><div><b>{GUARDIAN_LABEL[g.kind]}{p.guardian===g.kind?' · 当前伙伴':''}</b><span>{g.description}</span><small>{g.limit}</small></div><ChevronRight size={15}/></button>)}</div>
+    <div className="estate-guardian-choices">{GUARDIANS.map(g=>{const level=p.threat&&p.guardian===g.kind?p.threat.upgrades?.guardianLevel??p.upgrades?.guardians[g.kind]??1:p.upgrades?.guardians[g.kind]??1,copy=guardianCopy(g.kind,level);return <button key={g.kind} className={p.guardian===g.kind?'selected':''} disabled={busy||!!event&&p.tutorial!=='choose'} onClick={()=>send('guardian',{guardian:g.kind})}><img src={`/avatars/portraits/${g.asset}.webp`} alt=""/><div><b>{GUARDIAN_LABEL[g.kind]} · Lv.{level}{p.guardian===g.kind?' · 当前伙伴':''}</b><span>{copy.description}</span><small>{copy.limit}</small></div><ChevronRight size={15}/></button>;})}</div>
+    <div className="estate-cycle-invite"><p>每天在线会不定时多次来袭。动物数量越多、稀有度越高，越需要加强保护。</p><button className="actions-join" data-open-cycle onClick={onUpgrades}><Shield size={15}/>收羊毛 → 换材料 → 升级守护</button></div>
     {p.guardian&&!event&&<div className="estate-secondary"><button disabled={busy} onClick={()=>send('guardianCommand',{command:{kind:'follow'}})}>伙伴陪我散步</button><button disabled={busy} onClick={()=>send('guardianCommand',{command:{kind:'station',target:round(p.position)}})}>驻守我这里</button><button disabled={busy} onClick={()=>send('guardianCommand',{command:{kind:'patrol'}})}>自在巡游</button></div>}
     {p.guardianReadyMs>0&&<p className="sheet-note">换岗准备还要{Math.ceil(p.guardianReadyMs/1000)}在线秒。</p>}
     {p.tutorial==='defend'&&<button className="estate-primary" disabled={busy||event?.phase!=='complete'||p.opening?.stage!=='done'} onClick={()=>send('finishTutorial')}>{event?.phase==='complete'&&p.opening?.stage!=='done'?'狼正在退走，先关闭面板看看':event?.phase==='complete'?'伙伴守住了，去喂第一口奶':'伙伴正在保护，沿实际路线回棚…'}</button>}
@@ -252,24 +260,25 @@ export default function EstateView(props:EstateViewProps){
   const create=(command:CreationInput,actor?:string)=>send('creation',{command:{id:crypto.randomUUID(),...command},...(actor?{actor}:{})});
   const animal=p.animals.find(a=>a.id===target)??p.animals[0];
   const status=error?'保存待重试':busy?'保存中':'已保存';
-  const activeEvent=!!p.threat&&p.threat.phase!=='complete';
+  const activeEvent=!!p.threat&&p.threat.phase!=='complete',raidWarning=!p.threat&&(p.raidCycle?.phase==='warning'||p.raidCycle?.phase==='ready');
   const goal=currentJourneyGoal(p),prompt=playPrompt(p,data.now),compact=isSceneCardSheet(sheet),modal=!!sheet&&!compact;
-  const followGoal=()=>{const a=prompt.action;if(!a)return;if(a.kind==='inspect')props.onInspect(a.target);else if(a.kind==='move'){close();send('move',{to:a.to});}else if(a.kind==='refill'){close();send('refill');}else if(a.kind==='survey'){close();send('survey');}else if(a.kind==='guardian')props.onSheet('guardian');else if(a.kind==='expand')props.onSheet('planner');else if(a.kind==='development')props.onSheet('build');else props.onSheet('journey');};
+  const followGoal=()=>{const a=prompt.action;if(!a)return;if(a.kind==='inspect')props.onInspect(a.target);else if(a.kind==='move'){close();send('move',{to:a.to});}else if(a.kind==='refill'){close();send('refill');}else if(a.kind==='survey'){close();send('survey');}else if(a.kind==='guardian')props.onSheet('guardian');else if(a.kind==='expand')props.onSheet('planner');else if(a.kind==='development')props.onSheet('build');else if(a.kind==='cycle')props.onSheet('cycle');else props.onSheet('journey');};
   const failure=error?<div className="farm-sheet-error" role="alert">{error}<button disabled={saving} onClick={()=>send('retry')}>重试保存</button></div>:undefined;
-  const titles:Record<Exclude<EstateSheet,null>,string>={animal:'小羊',animalDetails:'成长与回忆',planner:'自己摆放',actions:'一起相处',guardian:'守护小家',build:'建点什么？',creation:'给小家换个主题',visits:'拜访与共同创造',works:'我的私有作品',settings:'慢慢相处就好',reset:'从头演示',view:'看见你的庄园',avatar:'我的分身',journal:'相处手账',journey:'探索与发展'};
+  const titles:Record<Exclude<EstateSheet,null>,string>={animal:'小羊',animalDetails:'成长与回忆',planner:'自己摆放',actions:'一起相处',guardian:'守护小家',build:'建点什么？',creation:'给小家换个主题',visits:'拜访与共同创造',works:'我的私有作品',settings:'慢慢相处就好',reset:'从头演示',view:'看见你的庄园',avatar:'我的分身',journal:'相处手账',journey:'探索与发展',cycle:'羊毛与守护'};
   const tabs=['planner','creation','visits','works'] as const;
   const themePreview=sheet==='creation'&&p.creation.drafts.some(d=>d.kind==='theme'&&d.status==='draft'&&d.baseThemeVersion===p.creation.themeVersions.at(-1)?.version);
   return <main className="app-shell app-shell-v020"><PhoneViewport><section className={`feed-window feed-v020 farm-feed estate-feed joined ${compact?'has-scene-card':''} ${themePreview?'estate-theme-preview-active':''}`} aria-label="绒绒庄园互动空间">
     <section className="app-page feed-page" aria-label="首页" inert={modal||!!props.interactionLocked}>
       <div className="club-stage"><div className="farm-world" ref={props.worldRef}/></div><div className="stage-top-shade"/><div className="stage-bottom-shade"/>
       <header className="feed-header"><div className="feed-tabs" role="tablist" aria-label="庄园分类"><button role="tab" aria-selected={true} onClick={close}>农场</button><button role="tab" aria-selected={false} onClick={()=>animal&&props.onInspect(animal.id)}>住民</button></div><button className="header-icon bell" onClick={()=>props.onSheet('journal')} aria-label="查看相处手账"><img src="/feed-ui/icons/bell.svg" alt=""/></button><button className="header-icon settings" onClick={()=>props.onSheet('settings')} aria-label="庄园设置"><img src="/feed-ui/icons/settings.svg" alt=""/></button></header>
-      <div className="farm-top-strip"><button className="estate-sound" data-sound-toggle onClick={props.onSound} aria-label={props.soundEnabled===false?'开启音乐与音效':'关闭音乐与音效'} aria-pressed={props.soundEnabled!==false}>{props.soundEnabled===false?<VolumeX size={16}/>:<Volume2 size={16}/>}<span>{props.soundStatus==='awaiting-gesture'?'点一下听音乐':props.soundStatus==='unavailable'?'声音不可用':props.soundEnabled===false?'静音':'音乐'}</span></button><button className="farm-book-pill" onClick={()=>props.onSheet('journey')}><Compass size={13}/>探索与发展</button><button className="farm-target-pill" onClick={()=>props.onSheet('build')}><Hammer size={13}/>建东西 · {p.materials}<ChevronRight size={12}/></button></div>
+      <div className="farm-top-strip"><button className="estate-sound" data-sound-toggle onClick={props.onSound} aria-label={props.soundEnabled===false?'开启音乐与音效':'关闭音乐与音效'} aria-pressed={props.soundEnabled!==false}>{props.soundEnabled===false?<VolumeX size={16}/>:<Volume2 size={16}/>}<span>{props.soundStatus==='awaiting-gesture'?'听音乐':props.soundStatus==='unavailable'?'声音不可用':props.soundEnabled===false?'静音':'音乐'}</span></button><button className="farm-book-pill" aria-label="探索与发展" onClick={()=>props.onSheet('journey')}><Compass size={13}/>探索</button><button className="farm-cycle-pill" data-open-cycle onClick={()=>props.onSheet('cycle')}><Cloud size={13}/>羊毛·守护</button><button className="farm-target-pill" onClick={()=>props.onSheet('build')}><Hammer size={13}/>建东西 · {p.materials}<ChevronRight size={12}/></button></div>
       {/失败|无法|中断/.test(assetStatus)&&<div className="farm-scene-warning" role="alert">{assetStatus}</div>}
       {p.id==='lab'&&<button className="farm-demo-mode" onClick={()=>send('profile',{profile:'home'})}>独立演示档 · 年龄240倍 · 回自然档</button>}
       {(p.tutorial==='choose'||p.tutorial==='defend'||activeEvent)&&<button disabled={p.tutorial==='defend'&&p.threat?.phase==='complete'&&p.opening?.stage!=='done'} className={`estate-guide-chip ${p.id==='lab'?'under-demo':''}`} onClick={()=>props.onSheet('guardian')}><Shield size={14}/>{p.tutorial==='choose'?'选一位伙伴，幼崽正在等你':p.threat?.phase==='complete'?(p.opening?.stage==='done'?'小家守住了，去照顾幼崽':'狼正在退走…'):activeEvent?'守护进行中 · 查看路线与指令':'第一次守护'}<ChevronRight size={13}/></button>}
-      {p.tutorial==='done'&&!activeEvent&&<div className={`estate-next-goal ${p.id==='lab'?'under-demo':''}`} data-journey-goal={goal.id}><button className="estate-next-main" disabled={busy||!prompt.action} onClick={followGoal}><span><small>接下来 · {prompt.progress}</small><b>{prompt.title}</b></span><strong>{prompt.label}<ChevronRight size={12}/></strong></button></div>}
+      {p.tutorial==='done'&&raidWarning&&<button className={`estate-raid-warning ${p.id==='lab'?'under-demo':''}`} data-raid-warning onClick={()=>props.onSheet('guardian')}><Shield size={17}/><span><b>{p.raidCycle?.phase==='ready'?'猛兽在远处徘徊':`猛兽靠近 · ${Math.ceil((p.raidCycle?.warningMs??0)/1000)}秒`}</b><small>让伙伴守护，带小羊回保护区</small></span><ChevronRight size={14}/></button>}
+      {p.tutorial==='done'&&!activeEvent&&!raidWarning&&<div className={`estate-next-goal ${p.id==='lab'?'under-demo':''}`} data-journey-goal={goal.id}><button className="estate-next-main" disabled={busy||!prompt.action} onClick={followGoal}><span><small>接下来 · {prompt.progress}</small><b>{prompt.title}</b></span><strong>{prompt.label}<ChevronRight size={12}/></strong></button></div>}
       {p.job&&<button className="estate-job-chip" onClick={()=>send('cancel')}><span>{p.job.type==='feed'?'照顾'+(p.animals.find(a=>a.id===p.job?.target)?.name??'小羊'):p.job.type==='survey'?'边界勘察':p.job.type==='delivery'?'沿路搬运食物':'去工作台补充'} · {p.job.phase==='walk'?'正在走近':`${Math.floor(p.job.progress/1000)}秒`}</span><small>点此取消</small></button>}
-      <div className="creator-caption"><div className="creator-copy"><div className="creator-line"><button className="creator-name" onClick={()=>props.onSheet('avatar')}>@我的庄园</button><span className={`live-tag ${error?'is-connecting':''}`} role="status"><i/><span>{status}</span><span className="status-separator">·</span><span>{living(p).length} 位住民</span></span></div><p role="status">{props.commandFeedback||prompt.feedback||(p.job?prompt.title:'照顾小羊，走出家门，慢慢建起自己的庄园')}</p><span className="farm-learning-hint">{animal?`${animal.name} · ${STAGE_LABEL[animal.life.stage]} · 点小羊照料，点地面散步`:'去布置自己的小家'}</span></div><button className="feed-like" disabled={busy||!animal||!!animal.memorial} onClick={()=>send('play',{target:animal?.id,action:'love'})} aria-label="向朋友表达喜欢"><FeedHeart/><span className="feed-like-count">喜欢</span></button></div>
+      <div className="creator-caption"><div className="creator-copy"><div className="creator-line"><button className="creator-name" onClick={()=>props.onSheet('avatar')}>@我的庄园</button><span className={`live-tag ${error?'is-connecting':''}`} role="status"><i/><span>{status}</span><span className="status-separator">·</span><span>{living(p).length} 位住民</span></span></div><p role="status">{props.commandFeedback||prompt.feedback||(p.job?prompt.title:p.lastThreat?.phase==='complete'?'收羊毛换材料，升级伙伴迎接下一次来袭':'照顾小羊，走出家门，慢慢建起自己的庄园')}</p><span className="farm-learning-hint">{animal?`${animal.name} · ${STAGE_LABEL[animal.life.stage]} · 点小羊照料，点地面散步`:'去布置自己的小家'}</span></div><button className="feed-like" disabled={busy||!animal||!!animal.memorial} onClick={()=>send('play',{target:animal?.id,action:'love'})} aria-label="向朋友表达喜欢"><FeedHeart/><span className="feed-like-count">喜欢</span></button></div>
       {prompt.feedback&&!sheet&&<div className="estate-scene-feedback" role="status">{prompt.feedback}</div>}
       {props.commandFeedback&&!error&&<div className="farm-toast" role="alert">{props.commandFeedback}</div>}
       {error&&<div className="farm-toast" role="alert">{error}<button disabled={saving} onClick={()=>send('retry')}>重试保存</button></div>}
@@ -280,13 +289,14 @@ export default function EstateView(props:EstateViewProps){
     {sheet!=='reset'&&props.openingOverlay}
     {compact&&<SceneCard kind={sheet!} title={sheet==='animal'?`${animal?.name??'小羊'} · ${animal?STAGE_LABEL[animal.life.stage]:''}`:'建点什么？'} onClose={close}>
       {sheet==='animal'&&animal&&<CompactAnimalCard key={animal.id} animal={animal} profile={p} busy={busy} send={send} onInspect={props.onInspect} onDetails={()=>props.onSheet('animalDetails')}/>}
-      {sheet==='build'&&<QuickBuildPanel profile={p} busy={busy} send={send} onGhost={props.onGhost} onClose={close} onPlanner={()=>props.onSheet('planner')} onTheme={()=>props.onSheet('creation')}/>}
+      {sheet==='build'&&<QuickBuildPanel profile={p} busy={busy} placementPoint={props.placementPoint} send={send} onGhost={props.onGhost} onClose={close} onPlanner={()=>props.onSheet('planner')} onTheme={()=>props.onSheet('creation')} onExplore={()=>props.onSheet('journey')}/>}
     </SceneCard>}
     {sheet&&!compact&&<FeedSheet title={titles[sheet]} subtitle={sheet==='animalDetails'?'照顾眼前的需要，记住一起度过的时光':undefined} onClose={close} notice={failure}>
       {tabs.includes(sheet as typeof tabs[number])&&<div className="estate-sheet-tabs" role="tablist" aria-label="庄园创作与共创">{tabs.map((tab,i)=><button key={tab} role="tab" aria-selected={sheet===tab} className={sheet===tab?'selected':''} onClick={()=>props.onSheet(tab)}>{['布置','主题','拜访','作品'][i]}</button>)}</div>}
       {sheet==='animalDetails'&&animal&&<><div className="farm-resident-picker">{p.animals.map(a=><button key={a.id} aria-label={`查看${a.name}的卡片`} className={animal.id===a.id?'selected':''} onClick={()=>props.onInspect(a.id)} style={{'--resident-color':a.color} as CSSProperties}><span className="farm-sheep-mark"><Cloud/></span><b>{a.name}</b><small>{STAGE_LABEL[a.life.stage]} · {PERSONALITY_LABEL[a.personality]}</small></button>)}</div><AnimalCard key={animal.id} animal={animal} profile={p} now={data.now} busy={busy||!!error} send={send}/><Inventory profile={p} busy={busy||!!error} send={send}/></>}
       {sheet==='actions'&&<><div className="farm-targets" aria-label="选择互动对象">{p.animals.map(a=><button key={a.id} className={a.id===animal?.id?'selected':''} onClick={()=>(props.onTarget??props.onInspect)(a.id)}>{a.name}</button>)}</div><div className="option-grid farm-action-grid">{ACTIONS.map(action=><button className="option-card" key={action} disabled={busy||!animal||!!animal.memorial} onClick={()=>send('play',{target:animal?.id,action})}>{action==='love'?<Heart/>:<FeedActionIcon kind={action}/>}<span>{ACTION_LABEL[action]}</span></button>)}</div><button className="actions-join" onClick={()=>props.onSheet('guardian')}><Shield size={16}/> 看看守护伙伴</button><button className="actions-join" onClick={()=>animal&&props.onInspect(animal.id)}>照顾{animal?.name}</button><Inventory profile={p} busy={busy} send={send}/></>}
-      {sheet==='guardian'&&<GuardianPanel profile={p} busy={busy||!!error} send={send}/>}
+      {sheet==='guardian'&&<GuardianPanel profile={p} busy={busy||!!error} send={send} onUpgrades={()=>props.onSheet('cycle')}/>}
+      {sheet==='cycle'&&<FarmCyclePanel profile={p} now={data.now} busy={busy||!!error} send={send} onInspect={props.onInspect}/>}
       {sheet==='journey'&&<JourneyPanel profile={p} busy={busy} send={send} onGhost={props.onGhost} onClose={close} onBuild={()=>props.onSheet('planner')}/> }
       {sheet==='planner'&&<BuildPanel initialMode={goal.action.kind==='expand'?'expand':'place'} profile={p} busy={busy||!!error} send={send} onGhost={props.onGhost}/>}
       {sheet==='creation'&&<CreationPanel profile={p} busy={busy||!!error} create={create} onThemePreview={props.onThemePreview}/>}

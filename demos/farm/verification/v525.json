@@ -1,0 +1,73 @@
+{
+  "version": "v5.2.5-farm-cycle",
+  "at": "2026-10-23T01:33:31.862652+00:00",
+  "fullTests": {
+    "passed": 463,
+    "failed": 0,
+    "skipped": 0
+  },
+  "lint": "passed",
+  "typecheck": "passed",
+  "productionBuild": {
+    "status": "passed",
+    "directory": ".local/v525-dist",
+    "modules": 1857
+  },
+  "isolatedHttp": {
+    "http": true,
+    "currentApi": true,
+    "guardianPersisted": true,
+    "templateApplied": true,
+    "receiptDuplicate": true,
+    "ownerBoundary": true,
+    "labIsolation": true,
+    "legacyBypassClosed": true,
+    "sameOrigin": true,
+    "resourcesByteMatched": 24,
+    "confirmedReset": true,
+    "resetRetryPreservesNewProgress": true,
+    "webgl": "not verified"
+  },
+  "actualBuiltReactNodeDom": {
+    "actualBuiltReactEntry": true,
+    "tutorialRoutes": true,
+    "preChoiceGated": true,
+    "independentReplayNoEconomyMutation": true,
+    "selectionSetup": "isolated API and explicit test readiness clock; WebGL unavailable",
+    "defaultLX": true,
+    "rapidIndividualCards": true,
+    "nonmodalCompactCard": true,
+    "careClosesCard": true,
+    "simpleBuildChoices": true,
+    "placementDraftControls": true,
+    "placementCancelNoCharge": true,
+    "cycleTabsAndFiveTierBorderStyles": true,
+    "guardianUpgradeActualDebit": true,
+    "responseLossRetrySameId": true,
+    "targetSwitchCancelsWithoutCharge": true,
+    "actualWalkAndThreeSecondFeed": true,
+    "templateApplyUndo": true,
+    "privateWork": true,
+    "avatarIdentity": true,
+    "labSeparation": true,
+    "worldHostRetained": true,
+    "escape": true,
+    "actualValleyDiscovery": true,
+    "developmentPreviewAndConstruction": true,
+    "nextCareGoal": true,
+    "confirmedResetAndCancel": true,
+    "freshOpeningAfterReset": true,
+    "webgl": "not verified (Node DOM)"
+  },
+  "reviewRegressions": {
+    "towerGrabOffset": "observed RED then GREEN",
+    "adoptionAfterMemorialName": "observed RED then GREEN",
+    "rescueClosesPausedPanel": "observed RED then GREEN",
+    "dragPlacementAppBridge": "observed RED then GREEN",
+    "productionMigrationAndReceipts": "passed",
+    "onlineRaidFullWarningEvacuationRescueRecovery": "passed",
+    "remainingImportantFindings": 0
+  },
+  "browser": "NOT VERIFIED: no independent Chrome/node_repl entry",
+  "productionResetExecuted": false
+}

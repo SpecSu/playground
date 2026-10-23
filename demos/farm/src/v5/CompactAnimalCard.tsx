@@ -1,4 +1,5 @@
 import {useEffect,useRef} from 'react';import {Cloud,Milk,Heart,Footprints,ChevronRight} from 'lucide-react';
+import {TIER_LABEL,stackTotal} from './herd-economy.ts';
 import type {EstateAnimal,Profile} from './estate.ts';import {PERSONALITY_LABEL} from '../model.ts';import {bondStage} from './life.ts';
 type Send=(type:string,extra?:Record<string,unknown>)=>void;
 export default function CompactAnimalCard({animal:a,profile:p,busy,send,onInspect,onDetails}:{animal:EstateAnimal;profile:Profile;busy:boolean;send:Send;onInspect:(id:string)=>void;onDetails:()=>void}){
@@ -11,6 +12,6 @@ export default function CompactAnimalCard({animal:a,profile:p,busy,send,onInspec
   <div className="compact-animal-state"><strong>{need}</strong><small>{PERSONALITY_LABEL[a.personality]} · {bondStage(a.life.bond)}</small></div>
   {!a.memorial&&<><div className="compact-needs"><span>饱食<progress max={100} value={a.life.hunger} aria-label="饱食"/></span><span>精力<progress max={100} value={a.life.energy} aria-label="精力"/></span></div>
   <div className="compact-animal-actions"><button className="compact-primary" data-command={p.inventory.hand?'feed':'refill'} disabled={busy||!!p.job||full} onClick={()=>act(p.inventory.hand?'feed':'refill',p.inventory.hand?{target:a.id,food:a.life.stage==='baby'?'milk':'feed'}:{})}><Milk size={19}/>{feeding?'照顾中':full?'吃饱了':!p.inventory.hand?'去拿食物':a.life.stage==='baby'?'喂奶':'喂食'}</button><button disabled={busy||!!p.job} onClick={()=>act('play',{target:a.id,action:a.preference})}><Heart size={18}/>一起玩</button><button disabled={busy} onClick={()=>act('follow',{target:a.id})}><Footprints size={18}/>{a.following?'自由活动':'一起走'}</button></div></>}
-  <button className="compact-more" onClick={onDetails}>查看成长与回忆<ChevronRight size={13}/></button>
+  <button className="compact-more" onClick={onDetails}>{!a.memorial&&<span className="compact-production-summary" data-compact-production>Lv.{a.husbandry?.level??1} · {TIER_LABEL[a.husbandry?.rarity??'white']} · {a.husbandry?stackTotal(a.husbandry.pending):0}份羊毛</span>}<span>查看成长与回忆<ChevronRight size={13}/></span></button>
  </article>;
 }

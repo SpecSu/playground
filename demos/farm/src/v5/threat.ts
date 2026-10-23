@@ -29,6 +29,16 @@ export const THREAT_RULES = {
   frog: { speed: 1.2, sight: 5, range: 4, duration: 12, cooldown: 24, bubbleRange: 6, bubbleDuration: 4, bubbleCooldown: 20, bubbleMaxDelay: 2 },
 };
 
+export type ThreatUpgrades = {guardianLevel?:number;shelterLevels?:Record<string,number>};
+const upgradeLevel=(level:number|undefined)=>Math.max(1,Math.min(3,Number.isFinite(level)?Math.floor(level!):1));
+/** Level changes remain distinct abilities, never a global combat score. */
+export function guardianUpgradeRules<K extends GuardianKind>(kind:K,level=1):typeof THREAT_RULES[K]{
+  const n=upgradeLevel(level)-1,base=THREAT_RULES[kind];
+  return {...base,sight:base.sight+(kind==='cat'?2*n:0),range:base.range+(kind==='dog'?0:n),duration:base.duration+(kind==='frog'?3*n:2*n)};
+}
+export function shelterDoorService(level=1){return 1-(upgradeLevel(level)-1)*.2;}
+function abilityRules<K extends GuardianKind>(state:ThreatState,kind:K):typeof THREAT_RULES[K]{return guardianUpgradeRules(kind,state.upgrades?.guardianLevel);}
+
 export interface ThreatActorInput { id: string; position: GridPoint; participant?: boolean; role?: 'animal' | 'guardian' | 'visitor'; }
 export interface ShelterReservation { buildingId: string; doorId: string; slot: number; }
 export interface ThreatActor {
@@ -69,13 +79,13 @@ export interface ThreatState {
   version: 1; id: string; seed: number; mode: ThreatMode; phase: 'choosing' | 'active' | 'rescue' | 'complete';
   elapsed: number; discoveredAt: number | null; actors: ThreatActor[]; wolves: ThreatWolf[];
   guardian: GuardianState | null; guardianStart: GridPoint; doors: ThreatDoor[];
-  confirmedParticipants: string[]; lockedLayoutVersion: number; howled: boolean;
+  confirmedParticipants: string[]; lockedLayoutVersion: number; howled: boolean; upgrades?:ThreatUpgrades;
   events: ThreatTelemetry[]; rewards: 0; notice: string;
 }
 export interface CreateThreatOptions {
   id: string; seed: number; mode: ThreatMode; actors: ThreatActorInput[];
   guardian?: GuardianKind; guardianPosition?: GridPoint; wolfSpawns?: GridPoint[];
-  challengeAuthorized?: boolean; confirmedParticipants?: string[]; howled?: boolean;
+  challengeAuthorized?: boolean; confirmedParticipants?: string[]; howled?: boolean; upgrades?:ThreatUpgrades;
 }
 export interface ThreatStepInput {
   dt: number; playerPosition?: GridPoint; driveOff?: string; rescueActorId?: string;
@@ -115,7 +125,7 @@ function guardianSight(s: ThreatState, layout: Layout) {
   const g = s.guardian;
   if (!g) return 0;
   const tower = g.kind === 'cat' && layout.buildings.some(b => b.kind === 'tower' && buildingApproaches(layout, b).some(p => distance(p, g.position) <= 1));
-  return THREAT_RULES[g.kind].sight + (tower ? THREAT_RULES.cat.towerBonus : 0);
+  return abilityRules(s,g.kind).sight + (tower ? THREAT_RULES.cat.towerBonus : 0);
 }
 function visibleThreatPositions(s: ThreatState, layout: Layout) {
   const g = s.guardian;
@@ -183,13 +193,14 @@ export function createThreat(options: CreateThreatOptions, layout: Layout): Thre
     wolves: [], guardian: options.guardian ? guardian(options.guardian, start) : null, guardianStart: point(start),
     doors: shelterEntries(layout).map(d => ({ buildingId: d.buildingId, doorId: d.doorId, position: { x: d.x, z: d.z }, capacity: d.capacity,
       panic: THREAT_RULES.normalPanic, queue: [], wolfArrivedAt: null, serviceActorId: null, lastFinishedAt: 0 })),
+    upgrades: {guardianLevel:upgradeLevel(options.upgrades?.guardianLevel),shelterLevels:Object.fromEntries(layout.buildings.filter(b=>b.kind==='shelter').map(b=>[b.id,upgradeLevel(options.upgrades?.shelterLevels?.[b.id])]))},
     confirmedParticipants: options.mode === 'challenge' ? participants : [], lockedLayoutVersion: layout.version,
     howled: options.howled ?? true, events: [], rewards: 0, notice: options.mode === 'tutorial' ? '选择期间危险暂停；三位伙伴都有教学兜底' : options.mode === 'rehearsal' ? '无损演练：只记录路线与排队，不扣动物、不发材料' : '',
   };
   const boundary = boundaryPoints(layout).filter(p => !s.actors.some(a => equal(a.position, p)) && s.doors.some(d => pathTo(layout, p, d.position).length));
   const seededIndex = Math.abs(Math.trunc(options.seed * 1664525 + 1013904223)) % Math.max(1, boundary.length);
   const spawns = options.wolfSpawns ?? (boundary.length ? [boundary[seededIndex]] : []);
-  if (spawns.length > 2) throw new Error('首版最多验证双狼固定挑战');
+  if (spawns.length > (options.mode==='reassure'?3:2)) throw new Error('自然来袭最多3只狼，教学与固定演练最多2只');
   for (const spawn of spawns) {
     if (!boundary.some(p => equal(p, spawn))) throw new Error('狼必须从可达边界出现，不能生成在动物脚下');
     const candidates = s.doors.map(d => ({ door: d, path: pathTo(layout, spawn, d.position) })).filter(c => c.path.length)
@@ -206,8 +217,8 @@ export function createThreat(options: CreateThreatOptions, layout: Layout): Thre
 }
 
 /** The same service equation is used by live queues and the documented fixtures. */
-function serviceCompletion(start: number, panic: number, calm: { from: number; until: number }[]) {
-  const baseDone = start + THREAT_RULES.doorBase;
+function serviceCompletion(start: number, panic: number, calm: { from: number; until: number }[],base=THREAT_RULES.doorBase) {
+  const baseDone = start + base;
   let finish = baseDone + Math.max(0, panic);
   for (const window of calm) {
     const candidate = Math.max(baseDone, window.from);
@@ -280,7 +291,7 @@ function discover(s: ThreatState, layout: Layout, input: ThreatStepInput) {
   for (const actor of s.actors) { actor.discoveredAt = s.elapsed; emit(s, 'discovered', { actorId: actor.id, position: point(actor.position) }); }
   reserve(s, layout, visible.map(w => w.position));
   for (const actor of s.actors) {
-    const gathered = g?.ability === 'gather' && g.abilityUntil > s.elapsed && reachableWithin(layout, g.abilityPosition, actor.position, THREAT_RULES.cat.range);
+    const gathered = g?.ability === 'gather' && g.abilityUntil > s.elapsed && reachableWithin(layout, g.abilityPosition, actor.position, abilityRules(s,'cat').range);
     actor.departAt = s.elapsed + (gathered ? 0 : THREAT_RULES.reaction);
   }
   if (g && ['patrol', 'rest'].includes(g.behavior)) { g.behavior = 'respond'; g.path = []; g.pathIndex = 0; }
@@ -316,11 +327,11 @@ function cast(s: ThreatState, layout: Layout, ability: GuardianAbility, wolfId?:
     const wolf = s.wolves.find(w => w.id === wolfId) ?? [...s.wolves].filter(w => !['boundary', 'retreated'].includes(w.status)).sort((a, b) => distance(g.position, a.position) - distance(g.position, b.position) || byId(a, b))[0];
     if (!wolf || ['boundary', 'retreated'].includes(wolf.status) || distance(g.position, wolf.position) > range || !lineOfSight(layout, g.position, wolf.position, range)) return false;
     if (ability === 'block' && !reachableWithin(layout, g.position, wolf.position, range)) return false;
-    if (ability === 'block' && wolf.blockUsed >= THREAT_RULES.dog.duration) return false;
+    if (ability === 'block' && wolf.blockUsed >= abilityRules(s,'dog').duration) return false;
     if (ability === 'bubble' && wolf.bubbleDelay >= THREAT_RULES.frog.bubbleMaxDelay) return false;
     release(s, layout, wolf, ability === 'block' ? '刀盾狗打断并守住这一路' : '泡泡命中，打断抓取');
     if (ability === 'block') {
-      const duration = THREAT_RULES.dog.duration - wolf.blockUsed;
+      const duration = abilityRules(s,'dog').duration - wolf.blockUsed;
       wolf.blockedUntil = s.elapsed + duration; wolf.blockUsed += duration;
       g.abilityUntil = wolf.blockedUntil; g.cooldowns.block = s.elapsed + THREAT_RULES.dog.cooldown;
     } else {
@@ -328,10 +339,10 @@ function cast(s: ThreatState, layout: Layout, ability: GuardianAbility, wolfId?:
       g.abilityUntil = wolf.slowedUntil; g.cooldowns.bubble = s.elapsed + THREAT_RULES.frog.bubbleCooldown;
     }
   } else if (ability === 'gather') {
-    g.abilityUntil = s.elapsed + THREAT_RULES.cat.duration; g.cooldowns.gather = s.elapsed + THREAT_RULES.cat.cooldown;
-    for (const actor of s.actors) if (actor.departAt !== null && actor.status === 'waiting' && reachableWithin(layout, g.position, actor.position, THREAT_RULES.cat.range)) actor.departAt = Math.min(actor.departAt, s.elapsed);
+    g.abilityUntil = s.elapsed + abilityRules(s,'cat').duration; g.cooldowns.gather = s.elapsed + THREAT_RULES.cat.cooldown;
+    for (const actor of s.actors) if (actor.departAt !== null && actor.status === 'waiting' && reachableWithin(layout, g.position, actor.position, abilityRules(s,'cat').range)) actor.departAt = Math.min(actor.departAt, s.elapsed);
   } else {
-    g.abilityUntil = s.elapsed + THREAT_RULES.frog.duration; g.cooldowns.calm = s.elapsed + THREAT_RULES.frog.cooldown;
+    g.abilityUntil = s.elapsed + abilityRules(s,'frog').duration; g.cooldowns.calm = s.elapsed + THREAT_RULES.frog.cooldown;
     g.calmWindows.push({ from: s.elapsed, until: g.abilityUntil, position: point(g.position) });
   }
   // One active ability: a bubble replaces calm and its local service benefit.
@@ -362,7 +373,7 @@ export function guardianCommand(state: ThreatState, layout: Layout, command: Gua
     const wolf = command.wolfId ? state.wolves.find(w => w.id === command.wolfId) : undefined;
     if (command.wolfId && !wolf) return fail('目标狼不存在');
     if ((ability === 'block' || ability === 'bubble') && !wolf && !state.wolves.some(w => !['retreated', 'boundary'].includes(w.status))) return fail('没有可拦截的威胁');
-    if (ability === 'block' && wolf && wolf.blockUsed >= THREAT_RULES.dog.duration) return fail('同一威胁最多守住6秒');
+    if (ability === 'block' && wolf && wolf.blockUsed >= abilityRules(state,'dog').duration) return fail(`同一威胁最多守住${abilityRules(state,'dog').duration}秒`);
     if (ability === 'bubble' && wolf && wolf.bubbleDelay >= THREAT_RULES.frog.bubbleMaxDelay) return fail('这条狼路线的泡泡延迟已到2秒上限');
     const target = command.target ? cell(command.target) : wolf?.position;
     if (target && !pathTo(layout, g.position, target).length) return fail('守护者到不了这条威胁路线');
@@ -421,11 +432,11 @@ function guardianStep(s: ThreatState, layout: Layout, input: ThreatStepInput, dt
     } else if (g.kind === 'cat') {
       const waiting = s.actors.filter(a => a.status === 'waiting').sort(byId);
       target = waiting[0]?.position ?? s.doors.find(d => d.queue.length)?.position ?? null;
-      if (waiting.some(a => reachableWithin(layout, g.position, a.position, THREAT_RULES.cat.range))) cast(s, layout, 'gather');
+      if (waiting.some(a => reachableWithin(layout, g.position, a.position, abilityRules(s,'cat').range))) cast(s, layout, 'gather');
     } else {
       const busy = [...s.doors].sort((a, b) => s.actors.filter(x => x.reservation?.doorId === b.doorId && liveActor(x)).length - s.actors.filter(x => x.reservation?.doorId === a.doorId && liveActor(x)).length || a.doorId.localeCompare(b.doorId));
       target = busy[0]?.position ?? null;
-      if (target && distance(g.position, target) <= THREAT_RULES.frog.range && (!g.ability || g.ability === 'calm')) cast(s, layout, 'calm');
+      if (target && distance(g.position, target) <= abilityRules(s,'frog').range && (!g.ability || g.ability === 'calm')) cast(s, layout, 'calm');
     }
   } else {
     // Stable patrol points remain on the same graph; no invisible scouting bonus.
@@ -469,8 +480,8 @@ function queueStep(s: ThreatState, layout: Layout) {
       const g = s.guardian;
       // Keep completed windows so a service at11.99 is still admitted when a
       // simulation step crosses the12.00 expiry. Cancellation clips the window.
-      const calm = g?.calmWindows.filter(w => distance(w.position, door.position) <= THREAT_RULES.frog.range) ?? [];
-      const entered = serviceCompletion(actor.serviceStartedAt, door.panic, calm);
+      const calm = g?.calmWindows.filter(w => distance(w.position, door.position) <= abilityRules(s,'frog').range) ?? [];
+      const entered = serviceCompletion(actor.serviceStartedAt, door.panic, calm,shelterDoorService(s.upgrades?.shelterLevels?.[door.buildingId]));
       if (entered > s.elapsed + 1e-8) { door.serviceActorId = actor.id; break; }
       actor.enteredAt = entered; actor.status = 'safe'; actor.timely = actor.rescuedAt === null && (door.wolfArrivedAt === null || entered < door.wolfArrivedAt);
       actor.reason = actor.timely ? '首轮及时入棚' : '暴露后已进入预约位';

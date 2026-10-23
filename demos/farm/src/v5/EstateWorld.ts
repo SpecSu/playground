@@ -4,6 +4,7 @@ import type {ClubMotionState} from '../avatars/club-scene-motion.ts';
 import {projectCameraLabel,createCameraObstacle,type CameraObstacle,type ClubCameraMode} from '../avatars/club-camera.ts';
 import {CLUB_AVATAR_SCALE} from '../avatars/club-avatar-scale.ts';
 import {EstateCameraController,screenMovement} from './isometric-camera.ts';
+import {PlacementDrag,placementEdgeDirection} from './placement.ts';
 import {BufferedMotionTrack} from './motion-track.ts';
 import {renderRoute,routeLength} from './render-route.ts';
 import {openingPresentation,type OpeningState} from './opening.ts';
@@ -17,8 +18,8 @@ import {playPrompt} from './play-prompt.ts';
 import {gridToWorld,worldToGrid,sceneResponse,sceneBuilding,legacyAnimal,scenePalette,cameraCapture} from './estate-scene.ts';
 import type {EstateSnapshot,EstateAnimal} from './estate.ts';
 import type {GuardianKind,ThreatWolf} from './threat.ts';
-export type EstateWorldHandlers={select:(id:string)=>void;destination:(p:GridPoint)=>void;status:(message:string)=>void;steer?:(direction:GridPoint)=>void;assetsReady?:(ready:boolean)=>void};
-export type EstateGhost={x:number;z:number;kind:BuildingKind;valid:boolean};
+export type EstateWorldHandlers={select:(id:string)=>void;destination:(p:GridPoint)=>void;status:(message:string)=>void;steer?:(direction:GridPoint)=>void;assetsReady?:(ready:boolean)=>void;place?:(to:GridPoint)=>void};
+export type EstateGhost={x:number;z:number;kind:BuildingKind;valid:boolean;interactive?:boolean};
 type SheepVisual=ReturnType<typeof makeSheep>&{label:HTMLButtonElement;name:HTMLElement;memory:HTMLElement;bubble:HTMLElement;cleanup:()=>void};
 type Mover={root:THREE.Group;path:GridPoint[];target:GridPoint;distance:number;track?:BufferedMotionTrack;sampleAt?:number;authorityAt?:number;future?:GridPoint[];speed?:number};
 const guardianKinds:Record<GuardianKind,ClubAvatarKind>={dog:'sword-shield-dog',cat:'miaocuijiao',frog:'milk-frog'};
@@ -57,6 +58,7 @@ export class EstateWorld{
  private host:HTMLDivElement;private handlers:EstateWorldHandlers;private data:EstateSnapshot;
  private scene=new THREE.Scene();private introBush=new THREE.Group();private layoutGroup=new THREE.Group();private routeGroup=new THREE.Group();private effectGroup=new THREE.Group();private ghostGroup=new THREE.Group();
  private cameraController=new EstateCameraController();private camera:THREE.Camera=this.cameraController.camera;private cameraMode:ClubCameraMode='third-person';private obstacles:CameraObstacle[]=[];
+ private placementDrag=new PlacementDrag();private placementPointer:PointerEvent|undefined;private placementAnchor:GridPoint|undefined;
  private renderer:THREE.WebGLRenderer;private resize:ResizeObserver;private frame=0;private disposed=false;private prev=0;private offset=0;private enteredAt=0;
  private replay=false;private careTarget:string|undefined;private careMarker:THREE.Mesh|undefined;
  private playerAvatar:ClubAvatar|undefined;private guardianAvatar:ClubAvatar|undefined;private guardianKind:GuardianKind|null=null;
@@ -75,12 +77,12 @@ export class EstateWorld{
   this.playerLabel=document.createElement('div');this.playerLabel.className='player-label';host.append(this.playerLabel);
   this.installPlayer(data.avatar);this.sync(data,true);this.set(data,'',false,'third-person');
   const on=(target:EventTarget,type:string,fn:EventListener)=>{target.addEventListener(type,fn);this.listenerCleanup.push(()=>target.removeEventListener(type,fn));};
-  on(canvas,'pointerdown',((e:PointerEvent)=>{if(!this.tap.begin(e))return;canvas.focus({preventScroll:true});canvas.setPointerCapture(e.pointerId);}) as EventListener);
-  on(canvas,'pointermove',((e:PointerEvent)=>this.tap.move(e)) as EventListener);
-  on(canvas,'pointerup',((e:PointerEvent)=>{if(this.tap.end(e))this.point(e);if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);}) as EventListener);
-  on(canvas,'pointercancel',((e:PointerEvent)=>this.tap.cancel(e.pointerId)) as EventListener);on(canvas,'lostpointercapture',((e:PointerEvent)=>this.tap.cancel(e.pointerId)) as EventListener);
-  on(canvas,'keydown',((e:KeyboardEvent)=>{if(['w','a','s','d','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){this.keys.add(e.key);e.preventDefault();}}) as EventListener);on(canvas,'keyup',((e:KeyboardEvent)=>{this.keys.delete(e.key);}) as EventListener);
-  const stop=()=>{this.keys.clear();this.direction={x:0,z:0};this.stopSteering();};on(canvas,'blur',stop);on(window,'blur',stop);on(document,'visibilitychange',()=>{if(document.hidden)stop();});
+  on(canvas,'pointerdown',((e:PointerEvent)=>{if(this.ghost?.interactive){if(this.placementDown(e)){e.preventDefault();canvas.focus({preventScroll:true});canvas.setPointerCapture(e.pointerId);}return;}if(!this.tap.begin(e))return;canvas.focus({preventScroll:true});canvas.setPointerCapture(e.pointerId);}) as EventListener);
+  on(canvas,'pointermove',((e:PointerEvent)=>{if(this.placementMove(e)){e.preventDefault();return;}this.tap.move(e);}) as EventListener);
+  on(canvas,'pointerup',((e:PointerEvent)=>{if(this.placementUp(e))e.preventDefault();else if(!this.ghost?.interactive&&this.tap.end(e))this.point(e);if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);}) as EventListener);
+  const cancelPointer=(e:PointerEvent)=>{this.tap.cancel(e.pointerId);if(this.placementDrag.owns(e.pointerId))this.cancelPlacement();};on(canvas,'pointercancel',cancelPointer as EventListener);on(canvas,'lostpointercapture',cancelPointer as EventListener);
+  on(canvas,'keydown',((e:KeyboardEvent)=>{if(!this.ghost?.interactive&&['w','a','s','d','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){this.keys.add(e.key);e.preventDefault();}}) as EventListener);on(canvas,'keyup',((e:KeyboardEvent)=>{this.keys.delete(e.key);}) as EventListener);
+  const stop=()=>{this.cancelPlacement();this.keys.clear();this.direction={x:0,z:0};this.stopSteering();};on(canvas,'blur',stop);on(window,'blur',stop);on(document,'visibilitychange',()=>{if(document.hidden)stop();});
   on(canvas,'webglcontextlost',((e:Event)=>{e.preventDefault();handlers.status('3D画面连接中断，刷新可恢复存档');}) as EventListener);
   this.resize=new ResizeObserver(()=>this.fit());this.resize.observe(host);this.fit();this.frame=requestAnimationFrame(t=>this.animate(t));
  }
@@ -111,11 +113,13 @@ export class EstateWorld{
   if(profileChanged){this.enteredAt=data.now;this.mapKey='';this.offset=data.now-Date.now();}
   if(cameraMode!==this.cameraMode){this.stopSteering();this.keys.clear();this.direction={x:0,z:0};}
   this.attention=attention;this.openingState=opening??data.profile.opening;this.inputLocked=replay||!!this.openingState&&(openingPresentation(this.openingState).controlsLocked||data.profile.tutorial!=='done'&&(this.openingState.stage==='done'||data.profile.threat?.phase==='complete'));if(this.inputLocked){this.keys.clear();this.direction={x:0,z:0};this.stopSteering();}
+  if(profileChanged||!ghost?.interactive||ghost.kind!==this.ghost?.kind){this.cancelPlacement(false);this.placementAnchor=undefined;}
+  this.host?.classList?.toggle('estate-placing',!!ghost?.interactive);
   this.data=data;this.selected=target;this.reduced=reduced;this.cameraMode=cameraMode;this.ghost=ghost;this.previewTheme=previewTheme;this.sync(data,profileChanged);this.drawGhost();
  }
  private stopSteering(){if(this.steering){this.steering=false;this.handlers.steer?.({x:0,z:0});}}
  stopInput(){this.keys.clear();this.direction={x:0,z:0};this.stopSteering();}
- move(v:GridPoint){if(this.inputLocked){this.direction={x:0,z:0};return;}this.direction={x:Number.isFinite(v.x)?v.x:0,z:Number.isFinite(v.z)?v.z:0};if(!this.direction.x&&!this.direction.z){this.stopSteering();}}
+ move(v:GridPoint){if(this.inputLocked||this.ghost?.interactive){this.direction={x:0,z:0};return;}this.direction={x:Number.isFinite(v.x)?v.x:0,z:Number.isFinite(v.z)?v.z:0};if(!this.direction.x&&!this.direction.z){this.stopSteering();}}
  private syncMover(m:Mover,to:GridPoint,reset=false,future:GridPoint[]=[]){
   let at=this.replay?Date.now()+this.offset:this.data.profile.lastPulseAt;
   if(reset||!m.track){const w=gridToWorld(to);m.root.position.set(w.x,0,w.z);m.target={...to};m.path=[];m.distance=0;m.speed=0;m.sampleAt=at;m.authorityAt=at;m.future=future.map(p=>({...p}));m.track=new BufferedMotionTrack(to,at);return;}
@@ -178,8 +182,8 @@ export class EstateWorld{
   for(const offset of [-.46,.46])box(fence,'#ddd1ac',x+(alongX?offset:0),.31,z+(alongX?0:offset),.09,.65,.09);
   for(const height of [.23,.47])box(fence,'#e6d9b9',x,height,z,alongX?1:.075,.065,alongX?.075:1);
  }
- private building(b:Building,accent:string){
-  const g=sceneBuilding(b),root=new THREE.Group();root.position.set(g.center.x,0,g.center.z);root.userData.entityId=`building:${b.id}`;this.layoutGroup.add(root);const w=g.width,d=g.depth;
+ private building(b:Building,accent:string,parent:THREE.Group=this.layoutGroup){
+  const g=sceneBuilding(b),root=new THREE.Group();root.position.set(g.center.x,0,g.center.z);root.userData.entityId=`building:${b.id}`;parent.add(root);const w=g.width,d=g.depth;
   if(b.kind==='shelter'){
    const floor=box(root,'#c6a576',0,.04,0,w-.08,.1,d-.08);floor.castShadow=false;
    const footprint=buildingFootprint(b),cells=new Set(footprint.map(key));
@@ -190,15 +194,16 @@ export class EstateWorld{
   }else if(b.kind==='workbench'){
    box(root,'#b78c63',0,.48,0,.92,.12,.78);for(const x of [-.34,.34])for(const z of [-.26,.26])box(root,'#9c7d58',x,.23,z,.09,.5,.09);box(root,'#e6e3bf',-.2,.68,0,.22,.3,.22);ball(root,'#c9a96e',.2,.6,.08,.2,.1,.16);
   }else if(b.kind==='factory'){
-   const body=box(root,'#d0c09a',0,.65,0,w-.1,1.3,d-.1);box(root,accent,0,1.36,0,w,.18,d);box(root,'#ad9d7c',.5,1.78,-.5,.27,.9,.27);box(root,'#8d9e8d',0,.5,d/2,.65,.65,.05);this.obstacles.push(createCameraObstacle(body));
+   const body=box(root,'#d0c09a',0,.65,0,w-.1,1.3,d-.1);box(root,accent,0,1.36,0,w,.18,d);box(root,'#ad9d7c',.5,1.78,-.5,.27,.9,.27);box(root,'#8d9e8d',0,.5,d/2,.65,.65,.05);if(parent===this.layoutGroup)this.obstacles.push(createCameraObstacle(body));
   }else if(b.kind==='tower'){
-   for(const x of [-.7,.7])for(const z of [-.7,.7])box(root,'#aa895e',x,1.15,z,.15,2.3,.15);const platform=box(root,'#d4bc89',0,2.16,0,1.9,.14,1.9);for(let i=0;i<6;i++)box(root,'#aa895e',-.6,1.9-i*.3,1,.8,.08,.1);const roof=mesh(root,new THREE.ConeGeometry(1.5,.65,4),accent,0,2.8,0);roof.rotation.y=Math.PI/4;this.obstacles.push(createCameraObstacle(platform));
+   for(const x of [-.7,.7])for(const z of [-.7,.7])box(root,'#aa895e',x,1.15,z,.15,2.3,.15);const platform=box(root,'#d4bc89',0,2.16,0,1.9,.14,1.9);for(let i=0;i<6;i++)box(root,'#aa895e',-.6,1.9-i*.3,1,.8,.08,.1);const roof=mesh(root,new THREE.ConeGeometry(1.5,.65,4),accent,0,2.8,0);roof.rotation.y=Math.PI/4;if(parent===this.layoutGroup)this.obstacles.push(createCameraObstacle(platform));
   }else if(b.kind==='ramp'){
    const ramp=box(root,'#c5ae81',0,.08,0,w*.9,.16,d*.95);ramp.rotation.x=.1;
   }else{
    box(root,'#b7a789',0,.11,0,.8,.22,.8);for(let i=0;i<5;i++)ball(root,i%2?accent:'#b7c88c',Math.cos(i*2.4)*.2,.35+Math.sin(i)*.1,Math.sin(i*2.4)*.2,.18,.22,.18);
   }
   for(const door of g.doors){const dx=door.x-g.center.x,dz=door.z-g.center.z;const entry=ring(root,door.open?'#b7dfad':'#e2a185',dx,dz,.34,.9);entry.position.y=.08;if(!door.open){const bar=box(root,'#b97960',dx,.36,dz,.8,.5,.12);if(Math.abs(dx)>Math.abs(dz))bar.rotation.y=Math.PI/2;}}
+  return root;
  }
  private drawRoutes(){
   disposeTree(this.routeGroup);disposeTree(this.effectGroup);const p=this.data.profile;
@@ -229,10 +234,36 @@ export class EstateWorld{
   }
  }
  private drawGhost(){
-  disposeTree(this.ghostGroup);if(!this.ghost)return;const rule=BUILDING_RULES[this.ghost.kind],w=gridToWorld(this.ghost);box(this.ghostGroup,this.ghost.valid?'#a1d8b5':'#e7a090',w.x+(rule.width-1)/2,.25,w.z+(rule.depth-1)/2,rule.width-.04,.5,rule.depth-.04,.36);this.ghostGroup.traverse(o=>o.userData.pickThrough=true);
+  disposeTree(this.ghostGroup);if(!this.ghost)return;const ghost=this.ghost,rule=BUILDING_RULES[ghost.kind],w=gridToWorld(ghost),color=ghost.valid?'#9ae5b1':'#f2938b';
+  const footprint=box(this.ghostGroup,color,w.x+(rule.width-1)/2,.055,w.z+(rule.depth-1)/2,rule.width-.04,.06,rule.depth-.04,.42);footprint.name='placement-footprint';footprint.castShadow=false;
+  const b:Building={id:'placement-preview',kind:ghost.kind,x:ghost.x,z:ghost.z,rotation:0,paidCost:0,capacity:rule.capacity,doors:ghost.kind==='shelter'?[{id:'preview-door',x:ghost.x+1,z:ghost.z+3,open:true,paidCost:0}]:[]};
+  const model=this.building(b,color,this.ghostGroup);model.name='placement-model';model.position.y=.28;
+  model.traverse(o=>{if(o instanceof THREE.Mesh){o.castShadow=false;o.receiveShadow=false;for(const material of Array.isArray(o.material)?o.material:[o.material]){material.transparent=true;material.opacity=.48;material.depthWrite=false;if(material instanceof THREE.MeshStandardMaterial){material.color.lerp(new THREE.Color(color),.4);material.emissive.set(color).multiplyScalar(.08);}}}});
+  this.ghostGroup.traverse(o=>o.userData.pickThrough=true);
  }
+ private placementGround(e:Pick<PointerEvent,'clientX'|'clientY'>):GridPoint|null{
+  const r=this.renderer.domElement.getBoundingClientRect();if(r.width<=0||r.height<=0||!Number.isFinite(e.clientX)||!Number.isFinite(e.clientY))return null;
+  this.cursor.set((e.clientX-r.left)/r.width*2-1,1-(e.clientY-r.top)/r.height*2);this.ray.setFromCamera(this.cursor,this.camera);const p=new THREE.Vector3();return this.ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),p)?{x:p.x+5.5,z:p.z+5.5}:null;
+ }
+ private placementDown(e:PointerEvent):boolean{
+  if(this.inputLocked||!this.ghost?.interactive||!this.handlers.place)return false;
+  const ground=this.placementGround(e);if(!ground)return false;
+  // The visible roof/platform can project beyond its ground footprint. Preserve its
+  // initial ground-ray offset when grabbed so the first held frame never teleports.
+  const model=this.ghostGroup.getObjectByName('placement-model');model?.updateWorldMatrix(true,true);
+  const grabbedModel=!!model&&this.ray.intersectObject(model,true).length>0;
+  this.placementDrag??=new PlacementDrag();if(!this.placementDrag.begin(e,ground,this.ghost,grabbedModel))return false;
+  this.stopInput();this.tap?.cancel();this.placementPointer=e;
+  const center=new THREE.Ray(this.camera.position,this.camera.getWorldDirection(new THREE.Vector3())).intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),-.6),new THREE.Vector3());this.placementAnchor=center?{x:center.x,z:center.z}:undefined;
+  const proposal=this.placementDrag.move(e.pointerId,ground);if(proposal)this.handlers.place(proposal);return true;
+ }
+ private placementMove(e:PointerEvent):boolean{
+  if(!this.placementDrag?.owns(e.pointerId))return false;this.placementPointer=e;const ground=this.placementGround(e),proposal=ground?this.placementDrag.move(e.pointerId,ground):null;if(proposal)this.handlers.place?.(proposal);return true;
+ }
+ private placementUp(e:PointerEvent):boolean{if(!this.placementDrag?.owns(e.pointerId))return false;this.placementMove(e);this.placementDrag.finish(e.pointerId);this.placementPointer=undefined;return true;}
+ private cancelPlacement(restore=true){const original=this.placementDrag?.cancel();this.placementPointer=undefined;if(original&&restore&&this.ghost?.interactive){this.placementAnchor=undefined;this.handlers.place?.(original);}}
  private point(e:PointerEvent){
-  if(this.inputLocked)return;this.keys.clear();this.direction={x:0,z:0};this.stopSteering();
+  if(this.inputLocked||this.ghost?.interactive)return;this.keys.clear();this.direction={x:0,z:0};this.stopSteering();
   const r=this.renderer.domElement.getBoundingClientRect(),entity=pickSceneEntity(this.scene.children,this.camera,e,r);if(entity){this.handlers.select(entity);return;}
   this.cursor.set((e.clientX-r.left)/r.width*2-1,1-(e.clientY-r.top)/r.height*2);this.ray.setFromCamera(this.cursor,this.camera);const p=new THREE.Vector3();if(this.ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),0),p))this.handlers.destination(worldToGrid(p));
  }
@@ -247,9 +278,17 @@ export class EstateWorld{
  private locomotion(m:Mover,speed:number):ClubMotionState{const origin=m.root.position,heading=m.root.rotation.y,distance=m.distance;return {slot:0,x:origin.x,z:origin.z,heading,speed,distance,walkBlend:clamp(speed/2.4,0,1),action:'dance',sampleAtDistance:d=>{const p=m.track?.sampleAtDistance(d);return p?{...gridToWorld(p),heading:p.heading}:{x:origin.x,z:origin.z,heading};}};}
  private place(el:HTMLElement,point:THREE.Vector3,lift:number){this.projection.copy(point);this.projection.y+=lift;const p=projectCameraLabel(this.projection,this.camera,this.host.clientWidth,this.host.clientHeight);el.hidden=!p;if(p)el.style.transform=`translate(-50%,-100%) translate(${p.x}px,${p.y}px)`;}
  private cameraUpdate(dt:number){
-  const bounds=layoutWorldBounds(),focus=this.attention,attention=focus?gridToWorld(focus):undefined;
-  const ghost=this.ghost,rule=ghost?BUILDING_RULES[ghost.kind]:undefined,previewFocus=ghost&&rule?gridToWorld({x:ghost.x+(rule.width-1)/2,z:ghost.z+(rule.depth-1)/2}):undefined;
+  const dragging=this.placementDrag?.active,bounds=layoutWorldBounds();
+  if(dragging){
+   const pointer=this.placementPointer,anchor=this.placementAnchor;if(!pointer||!anchor)return;
+   const edge=placementEdgeDirection(pointer,this.renderer.domElement.getBoundingClientRect());if(!edge.x&&!edge.z)return;
+   const direction=screenMovement(this.camera,edge.x,edge.z),step=5*Math.max(0,Math.min(.06,dt));
+   anchor.x=clamp(anchor.x+direction.x*step,bounds.minX-4,bounds.maxX-7);anchor.z=clamp(anchor.z+direction.z*step,bounds.minZ-4,bounds.maxZ-7);
+  }
+  const focus=this.attention,attention=focus?gridToWorld(focus):undefined;
+  const ghost=this.ghost,rule=ghost?BUILDING_RULES[ghost.kind]:undefined,previewFocus=this.placementAnchor??(ghost&&rule?gridToWorld({x:ghost.x+(rule.width-1)/2,z:ghost.z+(rule.depth-1)/2}):undefined);
   this.camera=this.cameraController.update({dt,aspect:this.host.clientWidth/Math.max(1,this.host.clientHeight),mode:this.openingState&&!['defend','done'].includes(this.openingState.stage)?'overview':this.cameraMode,position:this.player.root.position,bounds:{minX:bounds.minX-5.5,maxX:bounds.maxX-5.5,minZ:bounds.minZ-5.5,maxZ:bounds.maxZ-5.5},...(attention?{attention:{...attention,zoom:this.reduced?1:1.06}}:{}),...(previewFocus?{previewFocus}:{})});
+  if(dragging&&this.placementPointer)this.placementMove(this.placementPointer);
  }
  private fit(){const w=this.host.clientWidth,h=this.host.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.cameraUpdate(0);}
  private updateSheep(a:EstateAnimal,t:number,now:number,dt:number){
@@ -265,7 +304,7 @@ export class EstateWorld{
   if(this.disposed)return;this.frame=requestAnimationFrame(t=>this.animate(t));const dt=Math.min(.06,(time-this.prev)/1000||.016);this.prev=time;const t=time/1000,now=Date.now()+this.offset,p=this.data.profile;
   this.introBush.visible=this.openingState?.stage==='rustle';if(this.introBush.visible&&this.attention){const w=gridToWorld(this.attention);this.introBush.position.set(w.x,.02,w.z);this.introBush.rotation.z=this.reduced?0:Math.sin(t*21)*.09;}
   const dx=(this.keys.has('d')||this.keys.has('ArrowRight')?1:0)-(this.keys.has('a')||this.keys.has('ArrowLeft')?1:0)+this.direction.x,dz=(this.keys.has('s')||this.keys.has('ArrowDown')?1:0)-(this.keys.has('w')||this.keys.has('ArrowUp')?1:0)+this.direction.z;
-  if(!this.inputLocked&&(dx||dz)){const direction=screenMovement(this.camera,dx,dz);if(time-this.sentAt>=150){this.handlers.steer?.(direction);this.steering=true;this.sentAt=time;}}else this.stopSteering();
+  if(!this.inputLocked&&!this.ghost?.interactive&&(dx||dz)){const direction=screenMovement(this.camera,dx,dz);if(time-this.sentAt>=150){this.handlers.steer?.(direction);this.steering=true;this.sentAt=time;}}else this.stopSteering();
   const playerSpeed=this.moveVisual(this.player,dt,now),visual=p.lastVisual,age=visual?now-visual.at:Infinity,active=!!visual&&age>=0&&age<6000&&visual.action!=='eat'&&visual.action!=='rest';const reacting=this.openingState?.stage==='startle';this.playerAvatar?.update(active?age/500:t*2,reacting?'bounce':active?visual!.action as 'dance'|'bounce'|'love':'dance',this.reduced||(!reacting&&!active&&playerSpeed<.02),reacting?.25:active?.8:.2,this.locomotion(this.player,playerSpeed));
   const guardSpeed=this.moveVisual(this.guardian,dt),guard=p.threat?.guardian,group=active&&visual?.target==='all';this.guardianAvatar?.update(group?age/500:t*2,'dance',this.reduced||(!group&&!guard?.ability&&guardSpeed<.02),group?.8:guard?.ability?.6:.25,this.locomotion(this.guardian,guardSpeed));
   p.animals.forEach(a=>this.updateSheep(a,t,now,dt));this.updateCareProp();for(const wolf of p.threat?.wolves??[])this.updateWolf(wolf,t,dt);for(const visit of this.visitors.values()){const speed=this.moveVisual(visit.mover,dt,now);visit.avatar.update(t*2,'dance',this.reduced||speed<.02,.2,this.locomotion(visit.mover,speed));this.place(visit.label,visit.mover.root.position,visit.avatar.height*CLUB_AVATAR_SCALE+.3);}this.cameraUpdate(dt);

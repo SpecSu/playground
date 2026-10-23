@@ -5,12 +5,13 @@ import {setTimeout as delay} from 'node:timers/promises';
 import {Window} from 'happy-dom';
 import {createElement,act} from 'react';
 import {createEstate,currentProfile,commandEstate,estateSnapshot,type EstateCommand,type EstateSnapshot} from '../src/v5/estate.ts';
+import {createThreat} from '../src/v5/threat.ts';
 import type {GridPoint} from '../src/v5/layout.ts';
 import type {EstateResponse} from '../server/estate-store.ts';
 
 // Only WebGL is replaced: the actual React app, queue and estate reducer run.
 // This verifies the command/UI chain, not Chrome hit testing or WebGL visuals.
-type WorldBridge={callbacks?:{destination:(to:GridPoint)=>void;select:(id:string)=>void;assetsReady:(ready:boolean)=>void};latest?:EstateSnapshot};
+type WorldBridge={callbacks?:{destination:(to:GridPoint)=>void;select:(id:string)=>void;assetsReady:(ready:boolean)=>void;place?:(to:GridPoint)=>void};latest?:EstateSnapshot};
 const bridge:WorldBridge={};
 Object.defineProperty(globalThis,'__inputRepairWorld',{value:bridge,configurable:true});
 registerHooks({load(url,context,next){
@@ -28,7 +29,7 @@ async function until(check:()=>boolean,label:string,ms=1800){
  assert.ok(check(),label);
 }
 
-async function mount(options:{stage?:'complete'|'retreat'|'done'|'choose';holdEnter?:boolean;loseFinish?:boolean;loseReset?:boolean;loseFeed?:boolean;failInitialGet?:boolean;feeding?:string}={}){
+async function mount(options:{stage?:'complete'|'retreat'|'done'|'choose';holdEnter?:boolean;loseFinish?:boolean;loseReset?:boolean;loseFeed?:boolean;failInitialGet?:boolean;feeding?:string;lostNatural?:boolean}={}){
  const browser=new Window({url:'http://farm-test.invalid/'});
  browser.document.body.innerHTML='<div id="root"></div>';
  const old=new Map<string,PropertyDescriptor|undefined>();
@@ -44,6 +45,7 @@ async function mount(options:{stage?:'complete'|'retreat'|'done'|'choose';holdEn
  const stage=options.stage??'complete';
  if(stage==='done'){profile.tutorial='done';profile.threat=null;profile.opening={version:1,stage:'done',elapsed:0,guardian:'dog'};}
  else if(stage!=='choose'){profile.tutorial='defend';profile.guardian='dog';profile.openingActed=true;profile.opening={version:1,stage:stage==='retreat'?'defend':'done',elapsed:0,guardian:'dog'};profile.threat!.phase='complete';}
+ if(options.lostNatural){profile.guardian='dog';profile.threat=createThreat({id:'natural-lost',seed:5,mode:'reassure',guardian:'dog',actors:profile.animals.map(a=>({id:a.id,position:a.position}))},profile.layout);profile.threat.actors[0].status='lost';profile.threat.actors[0].reason='等待免费找回';}
  if(options.feeding){const result=commandEstate(estate,{id:'existing-feed',type:'feed',target:options.feeding,food:'milk',session:profile.session},now);assert.equal(result.accepted,true,result.message);estate=result.state;}
  const receipts=new Map<string,Pick<EstateResponse,'accepted'|'message'>>(),posts:EstateCommand[]=[],responses:EstateResponse[]=[];
  const originalFetch=globalThis.fetch;
@@ -226,7 +228,7 @@ test('the first sound-button gesture starts music instead of immediately muting 
  class AudioNode{gain=new Param();frequency=new Param();Q=new Param();onended:unknown=null;connect(){}disconnect(){}start(){}stop(){}}
  class Context{state='suspended';currentTime=0;destination=new AudioNode();createGain(){return new AudioNode();}createOscillator(){return new AudioNode();}createBiquadFilter(){return new AudioNode();}async resume(){this.state='running';}async close(){this.state='closed';}}
  Object.defineProperty(globalThis,'AudioContext',{value:Context,configurable:true});const h=await mount({stage:'done'});
- try{const button=h.browser.document.querySelector('.estate-sound')!;assert.match(button.textContent,/点一下听音乐/);
+ try{const button=h.browser.document.querySelector('.estate-sound')!;assert.match(button.textContent,/听音乐/);
   await act(async()=>{button.dispatchEvent(new h.browser.PointerEvent('pointerdown',{bubbles:true}));});
   await act(async()=>{(button as unknown as HTMLButtonElement).click();});
   assert.equal(button.getAttribute('aria-pressed'),'true','first sound interaction enables music');assert.equal(button.getAttribute('aria-label'),'关闭音乐与音效');
@@ -268,5 +270,28 @@ test('a lost feed result stays retryable after the compact card closes and reope
   assert.equal(h.profile.inventory.hand,3);assert.equal(h.profile.job?.target,'momo');assert.equal(!!doc.querySelector('.farm-toast button'),false);
   const more=doc.querySelector('.compact-more') as unknown as HTMLButtonElement;more.focus();
   await act(async()=>{await delay(260);});assert.equal(Object.is(doc.activeElement,more),true,'quiet updates must not steal focus inside the card');
+ }finally{await h.close();}
+});
+
+test('drag placement proposals reach the chosen building without submitting movement until confirm',async()=>{
+ const h=await mount({stage:'done'});try{const doc=h.browser.document;
+  await act(async()=>{(doc.querySelector('.farm-target-pill') as unknown as HTMLButtonElement).click();});
+  await act(async()=>{(doc.querySelector('[data-quick-kind="tower"]') as unknown as HTMLButtonElement).click();});
+  assert.ok(bridge.callbacks?.place,'world must receive placement callback');
+  const before=h.posts.length;await act(async()=>bridge.callbacks!.place!({x:9,z:5}));
+  assert.equal(h.posts.slice(before).some(c=>c.type==='move'||c.type==='layout'),false,'dragging is only a preview');
+  await until(()=>!(doc.querySelector('[data-command="quick-build-confirm"]') as unknown as HTMLButtonElement)?.disabled,'legal drag confirmation');
+  await act(async()=>{(doc.querySelector('[data-command="quick-build-confirm"]') as unknown as HTMLButtonElement).click();});
+  await until(()=>h.posts.some(c=>c.type==='layout'),'placed layout request');const request=h.posts.find(c=>c.type==='layout')!;assert.equal((request.edit as {x:number}).x,9);assert.equal((request.edit as {z:number}).z,5);
+ }finally{await h.close();}
+});
+
+test('a natural-event rescue command uncovers the scene so the rescue actually advances',async()=>{
+ const h=await mount({stage:'done',lostNatural:true});try{const doc=h.browser.document;
+  await act(async()=>bridge.callbacks!.select('guardian'));await until(()=>!!doc.querySelector('[role="dialog"]'),'guardian open');
+  const find=()=>[...doc.querySelectorAll('button')].find(b=>b.textContent==='免费找回');await until(()=>!!find()&&!find()!.disabled,'find-back ready');
+  await act(async()=>find()!.click());assert.equal(!!doc.querySelector('[role="dialog"]'),false,'rescue must uncover paused world');
+  await until(()=>h.posts.some(c=>c.type==='pulse'&&c.presentationCovered===false),'uncovered pulse');
+  await until(()=>h.profile.threat?.actors[0].status!=='lost','real rescue begins');assert.ok(h.posts.some(c=>c.type==='rescue'&&c.findBack===true));
  }finally{await h.close();}
 });
