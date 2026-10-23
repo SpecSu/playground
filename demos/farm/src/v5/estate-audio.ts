@@ -117,7 +117,9 @@ export class FarmAudio{
  }
  setEnabled(enabled:boolean){if(this.disposed)return;this.enabled=enabled;this.synchronize();}
  setVisible(visible:boolean){if(this.disposed)return;this.visible=visible;this.synchronize();}
- update(data:EstateSnapshot,opening?:OpeningState,replay=false){if(this.disposed)return;this.scene=audioScene(data,opening,replay);this.synchronize();}
+ update(data:EstateSnapshot,opening?:OpeningState,replay=false){if(this.disposed)return;this.updateScene(audioScene(data,opening,replay));}
+ /** Game-independent entry point; updating a scene never creates/resumes an AudioContext. */
+ updateScene(scene:AudioScene){if(this.disposed)return;this.scene={...scene};this.synchronize();}
  private publish(){const status=this.status;if(status!==this.lastStatus){this.lastStatus=status;this.onStatus?.(status);}}
  private synchronize(){
   const audible=this.status==='playing';

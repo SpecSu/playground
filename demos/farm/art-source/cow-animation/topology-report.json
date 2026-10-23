@@ -1,0 +1,10 @@
+{
+  "connected_hide_components": 1,
+  "component_vertex_counts": [
+    8862
+  ],
+  "nonmanifold_edges": 0,
+  "loose_vertices": 0,
+  "white_hide_min_y": 0.10842657089233398,
+  "all_meshes_have_armature_modifier": true
+}

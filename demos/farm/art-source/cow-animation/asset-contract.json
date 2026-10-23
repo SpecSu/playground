@@ -1,0 +1,44 @@
+{
+  "source": "Blender 4.3.2, deterministic Python construction",
+  "bones": 26,
+  "mesh_objects": 29,
+  "connected_hide_vertices": 8862,
+  "connected_hide_faces": 8860,
+  "clips": {
+    "idle": 3.0,
+    "walk": 1.2083333333333333,
+    "drink_enter": 1.0833333333333333,
+    "drink_loop": 2.5833333333333335,
+    "drink_exit": 1.2916666666666667
+  },
+  "walk_stride_m": 0.58,
+  "game_coordinates": {
+    "up": "+Y",
+    "forward": "+Z",
+    "ground_y": 0
+  },
+  "bones_for_runtime": {
+    "head": "cow_head",
+    "neck": [
+      "cow_neck_01",
+      "cow_neck_02"
+    ],
+    "mouth": "feeding-mouth",
+    "support": "animal-support"
+  },
+  "mouth_idle": [
+    0.0,
+    0.8399999737739563,
+    0.7649999856948853
+  ],
+  "mouth_drink": [
+    0,
+    0.045,
+    0.72
+  ],
+  "support_idle": [
+    0,
+    0.345,
+    -0.06
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "version": "v13.0-living-farm-weather",
+  "version": "v14.0-skeletal-cow-gentle-walk",
   "defaultMode": "minimal",
   "legacyMode": "?legacy",
   "camera": "orthographic-manor-10.4-offset-9-13.8-18",
@@ -20,14 +20,18 @@
     "giant"
   ],
   "breeding": "manual-adult-same-species-opposite-sex-one-farm-egg-per-UTC8-day",
-  "visualQA": "actual-skin-volume-tests-and-offline-geometry-review-not-browser-acceptance",
+  "visualQA": "actual-skinned-mesh-tests-and-offline-Blender-preview-not-browser-acceptance",
   "generation": "not-connected-in-minimal-mode",
   "friends": "not-connected-in-minimal-mode",
   "controls": "OrbitControls-left-drag-single-touch-rotate-pinch-wheel-zoom",
-  "walking": "fractional-ground-tap-los-route-0.62s-per-cell",
+  "walking": "shared-eased-stroll-0.9cells-per-second",
   "defaultZoom": 1.6,
   "grounding": "farm-stride-actual-skin-sole-probes",
   "carry": "anatomical-belly-support-head-contact",
   "growth": "birth-potential-visible-age-growth-no-extra-penalty",
-  "weather": "simulated-UTC8-day-night-sunny-cloudy-rain-snow-storm"
+  "weather": "simulated-UTC8-day-night-sunny-cloudy-rain-snow-storm",
+  "audio": "gesture-unlocked-calm-and-wolf-crossfade",
+  "water": "pond-blocked-creek-walkable-bank-drink",
+  "cowAnimation": "blender-26bones-5clips-AnimationMixer",
+  "otherAnimalAnimation": "shared-procedural-articulated"
 }

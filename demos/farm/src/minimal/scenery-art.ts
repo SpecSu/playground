@@ -48,6 +48,20 @@ function stream(parent:THREE.Object3D,tile:Tile,tiles:readonly Tile[]){const pat
  }
  for(let i=0;i<7;i++){const x=random(tile.x,tile.z,70+i*2)*1.8-.9,z=random(tile.x,tile.z,71+i*2)*1.8-.9,d=creekDistance(x,z,paths);if(d<.3||d>.52)continue;const stone=orb(parent,i%2?'#B9BBA2':'#D6CFB5',x,.028,z,.06,.035,.09);stone.rotation.y=i*.9;if(i%2)grass(parent,x+.07,z,'#6D9563');}
 }
+/** One continuous deep-water sheet. Shore appears only on the OUTER perimeter, never between pond cells. */
+function pond(parent:THREE.Object3D,tile:Tile,tiles:readonly Tile[]){
+ const joined=(dx:number,dz:number)=>tiles.some(t=>t.x===tile.x+dx&&t.z===tile.z+dz&&t.terrain==='pond');
+ const geometry=new THREE.PlaneGeometry(2,2,32,32);geometry.rotateX(-Math.PI/2);
+ const positions=geometry.getAttribute('position'),colors:number[]=[],deep=new THREE.Color('#4E9EA9'),shallow=new THREE.Color('#82BFB6'),sand=new THREE.Color('#CEC7A0');
+ for(let i=0;i<positions.count;i++){const x=positions.getX(i),z=positions.getZ(i);let edge=2;
+  for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]])if(!joined(dx,dz))edge=Math.min(edge,dx?1-x*dx:1-z*dz);
+  const worldX=tile.x*2+x,worldZ=tile.z*2+z,rim=.08+.025*Math.sin(worldX*5+worldZ*3);
+  const c=edge<rim?sand:shallow.clone().lerp(deep,Math.min(1,(edge-rim)/.65));colors.push(c.r,c.g,c.b);
+ }
+ geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));const surface=role(mesh(parent,geometry,'#FFFFFF',0,.009,0),'water');(surface.material as THREE.MeshStandardMaterial).vertexColors=true;(surface.material as THREE.MeshStandardMaterial).roughness=.28;surface.castShadow=false;
+ for(let i=0;i<2;i++){const ripple=role(mesh(parent,new THREE.TorusGeometry(.18+i*.09,.004,3,24,Math.PI*1.3),'#A1D1CA',-.25+i*.5,.018,.16-i*.36),'water');ripple.rotation.x=-Math.PI/2;ripple.rotation.z=i*2+.5;ripple.scale.y=.48;ripple.castShadow=false;}
+ return surface;
+}
 function pasture(parent:THREE.Object3D,tile:Tile){
  const geometry=new THREE.PlaneGeometry(2,2,8,8);geometry.rotateX(-Math.PI/2);const pos=geometry.getAttribute('position'),colors:number[]=[],base=new THREE.Color('#A9C784'),light=new THREE.Color('#B3CE8E');
  for(let i=0;i<pos.count;i++){const x=pos.getX(i)+tile.x*2,z=pos.getZ(i)+tile.z*2;const v=.5+.25*Math.sin(x*1.3+Math.sin(z*.7))+.25*Math.cos(z*1.8+x*.3);const c=base.clone().lerp(light,v);colors.push(c.r,c.g,c.b);}
@@ -58,17 +72,18 @@ function pasture(parent:THREE.Object3D,tile:Tile){
 }
 /** Visible terrain floor only; stones and plants are decoration, not walking platforms. */
 export function terrainSurfaceHeight(tile:Tile,localX:number,localZ:number,tiles:readonly Tile[]=[]){
+ if(tile.terrain==='pond')return .009;
  if(tile.terrain==='hill'){const q=((localX-.65)/.32)**2+((localZ+.69)/.28)**2;return q<1?Math.max(0,-.075+.15*Math.sqrt(1-q)):0;}
  if(tile.terrain==='creek'){const distance=creekDistance(localX,localZ,creekPaths(tile,tiles));return distance<.17?.011:distance<.275?.009:distance<.34?.006:distance<.43?.003:0;}
  return 0;
 }
 export function makeTerrain(tile:Tile,tiles:readonly Tile[]=[]){const root=new THREE.Group();root.position.copy(worldPoint(tile));root.position.y=0;root.userData.target={kind:'tile',x:tile.x,z:tile.z};
- const foundation=mesh(root,new THREE.BoxGeometry(2,.24,2),'#91AA70',0,-.122,0);foundation.castShadow=false;const top=pasture(root,tile);
+ const foundation=mesh(root,new THREE.BoxGeometry(2,.24,2),'#91AA70',0,-.122,0);foundation.castShadow=false;const top=tile.terrain==='pond'?pond(root,tile,tiles):pasture(root,tile);
  if(tile.terrain==='creek')stream(root,tile,tiles);
  else if(tile.terrain==='hill'){orb(root,'#A5BD80',.65,-.075,-.69,.32,.15,.28);orb(root,'#C6C8A9',.76,.045,-.74,.09,.075,.12);}
  else if(tile.terrain==='grove'){leafTree(root,-.66,-.68,.75);leafTree(root,.65,-.71,.56);orb(root,'#8AA967',.75,.1,.73,.17,.14,.18);}
  const paths=tile.terrain==='creek'?creekPaths(tile,tiles):null;
- const density=tile.owned?6:3;for(let i=0;i<density;i++){const x=random(tile.x,tile.z,i*2+4)*1.72-.86,z=random(tile.x,tile.z,i*2+5)*1.72-.86;if(paths&&creekDistance(x,z,paths)<.45||tile.terrain==='hill'&&x>.35&&z<-.35)continue;if(i===0&&tile.owned&&random(tile.x,tile.z,90)>.35)flower(root,x,z,'#F3E8C6');else grass(root,x,z,i%2?'#7EA267':'#91B372');}
+ const density=tile.terrain==='pond'?0:tile.owned?6:3;for(let i=0;i<density;i++){const x=random(tile.x,tile.z,i*2+4)*1.72-.86,z=random(tile.x,tile.z,i*2+5)*1.72-.86;if(paths&&creekDistance(x,z,paths)<.45||tile.terrain==='hill'&&x>.35&&z<-.35)continue;if(i===0&&tile.owned&&random(tile.x,tile.z,90)>.35)flower(root,x,z,'#F3E8C6');else grass(root,x,z,i%2?'#7EA267':'#91B372');}
  if(!tile.owned){root.traverse(o=>{if(o instanceof THREE.Mesh)for(const m of Array.isArray(o.material)?o.material:[o.material])if(m instanceof THREE.MeshStandardMaterial){m.color.lerp(new THREE.Color('#75877C'),.2);m.color.multiplyScalar(.77);}});}
  return {root,hit:top};}
 export function makeShop(){const root=new THREE.Group();root.position.copy(worldPoint({x:.5,z:0}));root.position.y=0;root.userData.target={kind:'shop'};

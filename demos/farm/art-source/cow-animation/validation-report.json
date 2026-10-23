@@ -1,0 +1,27 @@
+{
+  "sha256": "83708687945af7e2127d0b115e333a3b41fb65cfeac498eaef2ded21c04eee01",
+  "size_bytes": 1416712,
+  "skins": 1,
+  "joints": 26,
+  "visible_mesh_nodes": 29,
+  "all_meshes_skinned": true,
+  "skinned_vertices": 19014,
+  "max_weight_sum_error": 1.2351665645837784e-07,
+  "clip_durations_seconds": {
+    "drink_enter": 1.0833333730697632,
+    "drink_exit": 1.2916666269302368,
+    "drink_loop": 2.5833332538604736,
+    "idle": 3.0,
+    "walk": 1.2083333730697632
+  },
+  "max_animation_seam_errors": {
+    "idle_loop": 0,
+    "walk_loop": 3.653985785007172e-15,
+    "drink_loop_loop": 0,
+    "idle->drink_enter": 0,
+    "drink_enter->drink_loop": 0,
+    "drink_loop->drink_exit": 0,
+    "drink_exit->idle": 0
+  },
+  "scope": "Binary GLB structure, skin normalization and authored pose seams only. Runtime geometry and rendering need separate checks."
+}

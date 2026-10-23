@@ -1,8 +1,10 @@
 import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {createSkeletalCowController} from './cow-animation.ts';
 
 export type FarmSpecies='sheep'|'pig'|'cow'|'bunny';
 export type FarmSex='male'|'female';
-export type FarmAnimalPose={time:number;speed:number;distance:number;activity:string;carried?:boolean;hatch?:number;selected?:boolean};
+export type FarmAnimalPose={time:number;speed:number;distance:number;activity:string;carried?:boolean;hatch?:number;selected?:boolean;drinkPhase?:number;/** Contact in animal root-local coordinates, supplied by the terrain surface. */waterContact?:{x:number;y:number;z:number}};
 const clamp=(n:number,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const ease=(n:number)=>{const t=clamp(n);return t*t*(3-2*t);};
 function dispose(root:THREE.Object3D){const geometries=new Set<THREE.BufferGeometry>(),materials=new Set<THREE.Material>();root.traverse(o=>{if(o instanceof THREE.Mesh){geometries.add(o.geometry);(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>materials.add(m));}});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());}
@@ -10,6 +12,40 @@ function material(color:string,roughness=.72){return new THREE.MeshStandardMater
 function ellipsoid(parent:THREE.Object3D,mat:THREE.Material,x:number,y:number,z:number,sx:number,sy=sx,sz=sx,segments=18){const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,segments,12),mat);mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
 function capsule(parent:THREE.Object3D,mat:THREE.Material,x:number,y:number,z:number,radius:number,length:number){const mesh=new THREE.Mesh(new THREE.CapsuleGeometry(radius,length,6,12),mat);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
 function curveTube(parent:THREE.Object3D,mat:THREE.Material,points:THREE.Vector3[],radius:number){const mesh=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),24,radius,7,false),mat);mesh.castShadow=true;parent.add(mesh);return mesh;}
+/** Stable six-second action envelope, independent of render rate / model snapshots.
+ * The same contract can drive a future AnimationMixer clip plus mouth IK. */
+export function drinkingPoseAt(phase:number){
+ const p=clamp(phase),lower=ease((p-.12)/.18)*(1-ease((p-.78)/.22));
+ const sipWindow=p>=.32&&p<=.76,sipPhase=clamp((p-.32)/.44)*3;
+ return {lower,sipping:sipWindow,sip:sipWindow?Math.sin(sipPhase*Math.PI*2):0,sipPhase};
+}
+/** Shared articulated action layer. Only the head/neck bend; planted legs never sink. */
+function createDrinkAction(root:THREE.Group,body:THREE.Group,head:THREE.Group,mouth:THREE.Object3D,neck:THREE.Mesh,baseHead:THREE.Vector3,baseNeck:THREE.Vector3,neckScale:THREE.Vector3){
+ const ripples=new THREE.Group();ripples.name='drink-ripples';ripples.position.y=.01;root.add(ripples);
+ const rings=Array.from({length:3},()=>{const ring=new THREE.Mesh(new THREE.RingGeometry(.065,.079,24),new THREE.MeshBasicMaterial({color:'#E6FFFF',transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));ring.rotation.x=-Math.PI/2;ripples.add(ring);return ring;});
+ const temp=new THREE.Vector3(),target=new THREE.Vector3(),offset=new THREE.Vector3(),inverse=new THREE.Matrix4(),up=new THREE.Vector3(0,1,0);
+ return (p:FarmAnimalPose)=>{
+  const grazing=p.activity==='graze',enabled=(p.activity==='drink'||grazing)&&!p.carried&&p.speed<.1,action=grazing?{lower:1,sipping:false,sip:Math.sin(p.time*5)*.5,sipPhase:0}:drinkingPoseAt(p.drinkPhase??.5),weight=enabled?action.lower:0;
+  neck.position.copy(baseNeck);neck.scale.copy(neckScale);neck.quaternion.identity();
+  ripples.visible=enabled&&action.sipping;
+  if(!weight)return;
+  const contact=(!grazing&&p.waterContact)||{x:0,y:grazing?.07:.045,z:.72};
+  target.set(contact.x,contact.y+.008*action.sip,contact.z);
+  head.rotation.set(1.05*weight,head.rotation.y*(1-weight),0);
+  // Convert root-local water into the head parent's coordinates, including hatch scale.
+  body.updateMatrix();inverse.copy(body.matrix).invert();temp.copy(target).applyMatrix4(inverse);
+  offset.copy(mouth.position).applyEuler(head.rotation);temp.sub(offset);
+  head.position.copy(baseHead).lerp(temp,weight);
+  // Keep the throat visibly attached instead of translating a floating face.
+  temp.copy(head.position).add(new THREE.Vector3(0,-.04,-.075));
+  const shoulder=baseNeck.clone().add(new THREE.Vector3(0,.015,-.06));
+  offset.copy(temp).sub(shoulder);neck.position.copy(shoulder).lerp(temp,.5);
+  neck.scale.set(neckScale.x*.88,Math.max(neckScale.y,offset.length()*.62),neckScale.z*.85);
+  neck.quaternion.setFromUnitVectors(up,offset.normalize());
+  ripples.position.set(contact.x,contact.y+.006,contact.z);
+  rings.forEach((ring,i)=>{const phase=(action.sipPhase+i/3)%1;ring.scale.setScalar(1+phase*2.4);ring.material.opacity=(1-phase)*.55;});
+ };
+}
 /** Pigment lives on the skin vertices, not separate floating patch meshes. */
 function cowSkin(mesh:THREE.Mesh,patches:{direction:THREE.Vector3;radius:number}[]){
  const base=new THREE.Color('#FFF2DA'),spot=new THREE.Color('#725044');
@@ -69,18 +105,19 @@ function createPlushCow(sex:FarmSex){
  anchors.support.name='animal-support';anchors.support.position.set(0,.335,-.06);body.add(anchors.support);
  anchors.head.name='animal-head';head.add(anchors.head);
  const halo=new THREE.Mesh(new THREE.RingGeometry(.48,.515,40),new THREE.MeshBasicMaterial({color:'#FFF1AB',transparent:true,opacity:.8,side:THREE.DoubleSide,depthWrite:false}));halo.name='selection-halo';halo.rotation.x=-Math.PI/2;halo.position.y=.012;halo.visible=false;root.add(halo);
+ const drinkAction=createDrinkAction(root,body,head,mouth,neck,head.position.clone(),neck.position.clone(),neck.scale.clone());
  const height=1.31;
  return {root,mouth,height,anchors,
   update(p:FarmAnimalPose){
    const t=p.time,walk=clamp(p.speed/.8),phase=p.distance/.7*Math.PI*2,carried=!!p.carried;
-   const rest=p.activity==='rest'&&!carried,feeding=['drink','eat','graze'].includes(p.activity)&&!carried;
+   const rest=p.activity==='rest'&&!carried,feeding=['eat','graze'].includes(p.activity)&&!carried;
    const h=clamp(p.hatch??1),bounce=h<1?Math.sin(clamp((h-.1)/.9)*Math.PI)*.65:0;
    // Feet remain at the ground datum. Breathing expands the torso, not all joints.
    body.position.y=bounce+(rest?-.08:0);
    torso.scale.y=.315*(1+Math.sin(t*2)*.008);
    anchors.support.position.set(0,.65-torso.scale.y*Math.sqrt(1-(.03/.47)**2),-.06);
    head.rotation.set(feeding?.32+Math.sin(t*4)*.025:Math.sin(t*1.5)*.018,Math.sin(t*.8)*.025,carried?Math.sin(t*1.7)*.025:0);
-   head.position.y=.94+(feeding?-.035:0);
+   head.position.set(0,.94+(feeding?-.035:0),.36);
    legs.forEach((leg,i)=>{
     const stride=Math.sin(phase+(i===0||i===3?0:Math.PI));
     leg.rotation.x=carried?(i<2?-.22:.25):rest?(i<2?-.65:.6):stride*.32*walk;
@@ -89,17 +126,36 @@ function createPlushCow(sex:FarmSex){
    ears.forEach((ear,i)=>ear.rotation.z=(i===0?1:-1)*.22+Math.sin(t*2+i)*.025);
    tail.rotation.y=Math.sin(t*2.4)*.16;
    eyes.forEach(eye=>eye.scale.y=.043*((t%4.7)>4.54?.16:1));
+   drinkAction(p);
    halo.visible=!!p.selected&&!carried;
   },dispose:()=>dispose(root)};
 }
 
 /** Toy-like anatomical groups. Locomotion never writes the root's world transform. */
-export function createFarmAnimal(species:FarmSpecies,sex:FarmSex){
- return species==='cow'?createPlushCow(sex):createClassicAnimal(species,sex);
+export function createFarmAnimal(species:FarmSpecies,sex:FarmSex,options:{skeletalCow?:boolean}={}){
+ const art=species==='cow'?createPlushCow(sex):createClassicAnimal(species,sex);
+ if(species==='cow'&&options.skeletalCow){
+  let disposed=false,controller:ReturnType<typeof createSkeletalCowController>|undefined;
+  const update=art.update,release=art.dispose;
+  art.update=p=>{update(p);controller?.update(p);};
+  art.dispose=()=>{disposed=true;controller?.dispose();release();};
+  art.root.userData.animationSource='procedural-fallback';
+  art.root.userData.animationReady=new GLTFLoader().loadAsync('/models/farm/cow-animated.glb').then(gltf=>{
+   if(disposed){dispose(gltf.scene);return false;}
+   let next:ReturnType<typeof createSkeletalCowController>;try{next=createSkeletalCowController(gltf.scene,gltf.animations,art.root);}catch(error){dispose(gltf.scene);throw error;}
+   gltf.scene.name='blender-skinned-cow';gltf.scene.traverse(o=>{if(o instanceof THREE.Mesh){o.castShadow=true;o.receiveShadow=true;if(o instanceof THREE.SkinnedMesh)o.frustumCulled=false;}});
+   const fallback=art.root.getObjectByName('cow-body-rig');if(fallback)fallback.visible=false;
+   for(const name of ['animal-support','animal-head','animal-ground','feeding-mouth']){const old=art.root.getObjectByName(name);if(old)old.name=`procedural-${name}`;}
+   art.root.add(gltf.scene);art.mouth=next.mouth;controller=next;gltf.scene.updateMatrixWorld(true);const assetHeight=new THREE.Box3().setFromObject(gltf.scene,true).getSize(new THREE.Vector3()).y/art.root.scale.y;art.height=Math.max(art.height,assetHeight);
+   art.root.userData.muzzleReach=.72;art.root.userData.animationSource='blender-skinned';
+   return true;
+  }).catch(error=>{art.root.userData.animationError=error instanceof Error?error.message:String(error);return false;}); // Keep a working fallback, but expose the failure for diagnostics.
+ }
+ return art;
 }
 function createClassicAnimal(species:FarmSpecies,sex:FarmSex){
  const root=new THREE.Group();root.name=`farm-${species}`;
- const body=new THREE.Group(),head=new THREE.Group(),legs:THREE.Group[]=[],ears:THREE.Group[]=[],eyes:THREE.Mesh[]=[];root.add(body);body.add(head);
+ const body=new THREE.Group(),head=new THREE.Group(),legs:THREE.Group[]=[],ears:THREE.Group[]=[],eyes:THREE.Mesh[]=[];root.add(body);body.add(head);body.name=`${species}-body-rig`;head.name=`${species}-head`;
  const cream=material('#FFF4DD'),ivory=material('#F5EAD8'),dark=material('#493C35'),black=material('#27342C',.38),white=material('#FFFFFF',.28),pink=material('#ECA6A7'),blush=material('#E9A899');
  const main=species==='pig'?material('#F1B9AA'):species==='bunny'?material('#E6C9AA'):cream;
  const bodyY=species==='bunny'?.43:.48;
@@ -109,6 +165,7 @@ function createClassicAnimal(species:FarmSpecies,sex:FarmSex){
  ellipsoid(head,main,0,0,0,.29,.27,.275);
  const muzzleColor=species==='pig'?pink:species==='cow'?material('#E5BAAA'):ivory;
  ellipsoid(head,muzzleColor,0,-.11,.205,species==='pig'?.19:.205,species==='pig'?.125:.135,.115);
+ const neck=ellipsoid(body,main,0,.53,.22,.19,.21,.19);neck.name=`${species}-neck`;
  const mouth=new THREE.Object3D();mouth.name='feeding-mouth';mouth.position.set(0,-.15,.33);head.add(mouth);
  for(const side of [-1,1]){
   const eye=ellipsoid(head,black,side*.135,.015,.241,.036,.046,.025);eyes.push(eye);
@@ -174,26 +231,28 @@ function createClassicAnimal(species:FarmSpecies,sex:FarmSex){
  const fleeceBottom=fleeceRay.intersectObjects(fleeceMeshes,false)[0]?.point.y??bodyY-belly.scale.y;
  const support=new THREE.Object3D();support.name='animal-support';support.position.set(0,species==='sheep'?fleeceBottom:bodyY-belly.scale.y,supportZ);body.add(support);
  const originalEarRot=ears.map(e=>e.rotation.z);const tailBase=tail.rotation.y;
+ const drinkAction=createDrinkAction(root,body,head,mouth,neck,head.position.clone(),neck.position.clone(),neck.scale.clone());
  const height=species==='bunny'?1.36:species==='cow'?1.18:1.08;
  return {root,mouth,height,
   update(p:FarmAnimalPose){
    const walk=clamp(p.speed/.8),phase=p.distance/.62*Math.PI*2,t=p.time;
-   const resting=p.activity==='rest'&&!p.carried,feeding=(p.activity==='drink'||p.activity==='graze'||p.activity==='eat')&&!p.carried;
+   const resting=p.activity==='rest'&&!p.carried,feeding=(p.activity==='graze'||p.activity==='eat')&&!p.carried;
    const reveal=p.hatch===undefined?1:clamp(p.hatch);
    let bounce=0,squash=1;
    if(reveal<1){bounce=Math.sin(clamp((reveal-.12)/.75)*Math.PI)*(1-reveal*.25)*1.05;squash=reveal<.15?.72+reveal/.15*.28:reveal>.78?1-Math.sin((reveal-.78)/.22*Math.PI)*.14:1;}
-   body.position.y=(resting?-.13:0)+(p.carried?-.08:0)+bounce+(p.carried?Math.sin(t*2)*.015:Math.abs(Math.sin(phase))*walk*.035);
+   body.position.y=(resting?-.13:0)+(p.carried?-.08:0)+bounce+(p.carried?Math.sin(t*2)*.015:(species==='bunny'?Math.max(0,Math.sin(phase))*.09:Math.abs(Math.sin(phase))*.018)*walk);
    body.scale.set(1+(1-squash)*.45,squash*(1+Math.sin(t*2.1)*.008),1+(1-squash)*.22);
    belly.scale.y=(species==='bunny'?.34:.31)*(1+Math.sin(t*2)*.014);
    // Fleece is the sheep's physical underside; other bellies use their breathing radius.
    support.position.set(0,species==='sheep'?fleeceBottom:bodyY-belly.scale.y,supportZ);
    head.rotation.x=feeding?.38+Math.sin(t*4)*.045:resting?.13:Math.sin(t*1.5)*.035;
    head.rotation.y=walk>.15?0:Math.sin(t*.8)*.055;
-   head.position.y=(species==='bunny'?.76:.7)+(feeding?-.08:0);
-   legs.forEach((leg,i)=>{leg.rotation.x=p.carried?(i<2?-.62:.62):resting?(i<2?-.85:.8):Math.sin(phase+(i===0||i===3?0:Math.PI))*.45*walk;leg.rotation.z=p.carried?(i%2?.14:-.14):0;});
+   head.position.set(0,(species==='bunny'?.76:.7)+(feeding?-.08:0),species==='bunny'?.19:.33);
+   legs.forEach((leg,i)=>{leg.rotation.x=p.carried?(i<2?-.62:.62):resting?(i<2?-.85:.8):Math.sin(phase+(species==='bunny'?(i<2?Math.PI*.4:0):(i===0||i===3?0:Math.PI)))*.45*walk;leg.rotation.z=p.carried?(i%2?.14:-.14):0;});
    ears.forEach((ear,i)=>{ear.rotation.z=originalEarRot[i]+Math.sin(t*2.7+i)*.045+(species==='bunny'?Math.sin(phase+i)*walk*.055:0);});
    tail.rotation.y=tailBase+Math.sin(t*3)*.12;
    const blink=(t%4.3)>4.13?.14:1;eyes.forEach(eye=>eye.scale.y=.046*blink);
+   drinkAction(p);
    halo.visible=!!p.selected&&!p.carried;
   },dispose:()=>dispose(root)};
 }

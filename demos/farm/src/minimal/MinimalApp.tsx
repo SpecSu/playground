@@ -1,30 +1,45 @@
 'use client';
 import {useEffect,useRef,useState,type CSSProperties} from 'react';
-import {ArrowUp,Bell,Cloud,CloudLightning,CloudRain,CloudSnow,Coins,Droplets,Egg,Hand,Heart,Home,Leaf,Mountain,Moon,Plus,Settings2,Sun,ShoppingBag,Sparkles,TreePine,Wheat,X,ZoomIn,ZoomOut} from 'lucide-react';
+import {ArrowUp,Bell,Cloud,CloudLightning,CloudRain,CloudSnow,Coins,Droplets,Egg,Hand,Heart,Home,Leaf,Mountain,Moon,Plus,Settings2,Sun,ShoppingBag,Sparkles,TreePine,Volume2,VolumeX,Wheat,X,ZoomIn,ZoomOut} from 'lucide-react';
 import PhoneViewport from '../feed/PhoneViewport.tsx';
 import {MinimalWorld} from './World.ts';
 import {advanceMinimalState,createMinimalState,loadMinimalState,minimalCommand,saveMinimalState,tileAt,playerWalkRoute,nearShop,isShopTile,sellValue,isAdult,canPlaceEgg,eligiblePairs,SHOP_APPROACH,type MinimalState,type MinimalCommand,type Terrain,type Point} from './model.ts';
 import {deriveWeather,WEATHER_KINDS,WEATHER_LABELS,type WeatherOverride} from './weather.ts';
+import {FarmAudio,type FarmAudioStatus} from '../v5/estate-audio.ts';
+import {MinimalAudioScenes} from './audio.ts';
+import {withRenderedPlayer} from './player-motion.ts';
 import './minimal.css';
 
 type Target={kind:'tile';x:number;z:number;worldPoint?:Point}|{kind:'animal';id:string}|{kind:'egg';id:string}|{kind:'shop'};
 type Pending={target:Target;destination:Point;placeEggId?:string;at?:Point};
 const speciesName={sheep:'绵羊',pig:'小猪',cow:'奶牛',bunny:'兔子'};
 const weatherIcons={sunny:Sun,cloudy:Cloud,rain:CloudRain,snow:CloudSnow,storm:CloudLightning};
+const AUDIO_STORAGE='dreamina-farm-audio-v1';
+function loadAudioPreference():boolean{try{return window.localStorage.getItem(AUDIO_STORAGE)!=='muted';}catch{return true;}}
 const WEATHER_STORAGE='dreamina-farm-weather-v1';
 function loadWeatherPreference():WeatherOverride{try{const value=JSON.parse(window.localStorage.getItem(WEATHER_STORAGE)??'{}');return {weather:WEATHER_KINDS.includes(value.weather)?value.weather:'auto',time:['day','night'].includes(value.time)?value.time:'auto'};}catch{return {weather:'auto',time:'auto'};}}
-const terrainInfo={meadow:{name:'草地',text:'慢慢吃草，晒晒太阳。',Icon:Wheat},creek:{name:'小溪',text:'动物会自己来喝水。',Icon:Droplets},hill:{name:'丘陵',text:'爬上小山，看看远方。',Icon:Mountain},grove:{name:'林地',text:'在树荫下歇一会儿。',Icon:TreePine}};
-export function terrainCanOpen(state:MinimalState,p:Point){return !tileAt(state,p)?.owned&&[{x:p.x+1,z:p.z},{x:p.x-1,z:p.z},{x:p.x,z:p.z+1},{x:p.x,z:p.z-1}].some(q=>tileAt(state,q)?.owned);}
+const terrainInfo={meadow:{name:'草地',text:'慢慢吃草，晒晒太阳。',Icon:Wheat},creek:{name:'小溪',text:'浅浅的小溪可以走过，小动物会来喝水。',Icon:Droplets},pond:{name:'池塘',text:'池塘不能穿过，小动物会站在岸边低头喝水。',Icon:Droplets},hill:{name:'丘陵',text:'爬上小山，看看远方。',Icon:Mountain},grove:{name:'林地',text:'在树荫下歇一会儿。',Icon:TreePine}};
+export function terrainCanOpen(state:MinimalState,p:Point){
+ const tile=tileAt(state,p);
+ return !!tile&&!tile.owned&&[{x:p.x+1,z:p.z},{x:p.x-1,z:p.z},{x:p.x,z:p.z+1},{x:p.x,z:p.z-1}].some(q=>{const neighbor=tileAt(state,q);return neighbor?.owned&&neighbor.terrain!=='pond'&&!isShopTile(q);});
+}
 export function animalApproach(state:MinimalState,position:Point):Point{const p={x:Math.round(position.x),z:Math.round(position.z)};return [{x:p.x+1,z:p.z},{x:p.x-1,z:p.z},{x:p.x,z:p.z+1},{x:p.x,z:p.z-1}].filter(q=>tileAt(state,q)?.owned&&!isShopTile(q)&&playerWalkRoute(state,state.player,q)!==null).sort((a,b)=>Math.hypot(a.x-state.player.x,a.z-state.player.z)-Math.hypot(b.x-state.player.x,b.z-state.player.z))[0]??p;}
 
 export default function MinimalApp(){
  const [data,setData]=useState<MinimalState|null>(null),[target,setTarget]=useState<Target|null>(null),[sheet,setSheet]=useState<'bag'|'settings'|null>(null),[placing,setPlacing]=useState<string|null>(null),[converting,setConverting]=useState(false),[notice,setNotice]=useState(''),[saveOk,setSaveOk]=useState(true),[worldError,setWorldError]=useState(''),[walking,setWalking]=useState(false),[anchor,setAnchor]=useState<Point|null>(null),[coinBurst,setCoinBurst]=useState(false),[dismissedHatch,setDismissedHatch]=useState<string|null>(null);
+ const [audioEnabled,setAudioEnabled]=useState(true),[audioStatus,setAudioStatus]=useState<FarmAudioStatus>('awaiting-gesture');
+ const audio=useRef<FarmAudio|null>(null),audioScenes=useRef<MinimalAudioScenes|null>(null);
+ const updateAudio=(state:MinimalState)=>{if(audio.current&&audioScenes.current)audio.current.updateScene(audioScenes.current.update(state));};
+ const unlockAudio=()=>{void audio.current?.unlock();};
+ const unlockFromGesture=(event:{target:EventTarget|null})=>{if((event.target as Element|null)?.closest?.('[data-audio-toggle]'))return;unlockAudio();};
+ const toggleAudio=()=>{const enabled=!audioEnabled;setAudioEnabled(enabled);audio.current?.setEnabled(enabled);if(enabled)unlockAudio();try{window.localStorage.setItem(AUDIO_STORAGE,enabled?'enabled':'muted');}catch{/* Sound still works without storage. */}};
  const [weatherPreference,setWeatherPreference]=useState<WeatherOverride|null>(null);
  const host=useRef<HTMLDivElement>(null),world=useRef<MinimalWorld|null>(null),live=useRef<MinimalState|null>(null),pending=useRef<Pending|null>(null),buyLocked=useRef(false),placingRef=useRef<string|null>(null),sendRef=useRef<(c:MinimalCommand)=>boolean>(()=>false),selectRef=useRef<(t:Target)=>void>(()=>{});
  placingRef.current=placing;
- const accept=(state:MinimalState)=>{live.current=state;setData(state);world.current?.update(state);try{setSaveOk(saveMinimalState(window.localStorage,state));}catch{setSaveOk(false);}};
- const send=(command:MinimalCommand)=>{if(!live.current)return false;const reply=minimalCommand(live.current,command,Date.now());accept(reply.state);if(!reply.accepted)setNotice(reply.message);else if(!['move','welcome'].includes(command.type))setNotice(reply.message);return reply.accepted;};sendRef.current=send;
- const stop=()=>{pending.current=null;setWalking(false);world.current?.cancelWalk();if(live.current?.playerPath.length)accept({...live.current,playerPath:[]});};
+ const accept=(state:MinimalState)=>{live.current=state;setData(state);world.current?.update(state);updateAudio(state);try{setSaveOk(saveMinimalState(window.localStorage,state));}catch{setSaveOk(false);}};
+ const currentSnapshot=(now:number)=>withRenderedPlayer(advanceMinimalState(live.current!,now),world.current?.playerMotionSnapshot?.());
+ const send=(command:MinimalCommand)=>{if(!live.current)return false;const now=Date.now();const reply=minimalCommand(currentSnapshot(now),command,now);accept(reply.state);if(!reply.accepted)setNotice(reply.message);else if(!['move','welcome'].includes(command.type))setNotice(reply.message);return reply.accepted;};sendRef.current=send;
+ const stop=()=>{pending.current=null;setWalking(false);const snapshot=live.current?currentSnapshot(Date.now()):null;world.current?.cancelWalk();if(snapshot)accept({...snapshot,playerPath:[],playerSpeed:0});};
  const close=()=>{stop();setSheet(null);setTarget(null);setConverting(false);};
  const approach=(selection:Target,to:Point,placeEggId?:string,at?:Point)=>{pending.current={target:selection,destination:to,placeEggId,at};setWalking(true);setTarget(null);if(!sendRef.current({type:'move',to})||!world.current?.walkTo(to)){pending.current=null;setWalking(false);setNotice('这里暂时走不过去，试试旁边。');}};
  selectRef.current=(selection:Target)=>{
@@ -37,15 +52,21 @@ export default function MinimalApp(){
   const p={x:selection.x,z:selection.z};
   if(isShopTile(p)){if(placingRef.current){setNotice('商店不能放蛋，选一块空地吧。');return;}setPlacing(null);approach({kind:'shop'},SHOP_APPROACH);return;}
   if(placingRef.current){if(!canPlaceEgg(current,p)){setNotice('选一块空着的已开辟土地。');return;}approach(selection,animalApproach(current,p),placingRef.current,p);return;}
-  if(!tileAt(current,p)?.owned){stop();setTarget(selection);return;}
+  if(!tileAt(current,p)?.owned||tileAt(current,p)?.terrain==='pond'){stop();setTarget(selection);return;}
   approach(selection,selection.worldPoint??p);
  };
  useEffect(()=>{
   setWeatherPreference(loadWeatherPreference());
-  let state:MinimalState;try{state=loadMinimalState(window.localStorage,Date.now());}catch{state=createMinimalState(Date.now());setSaveOk(false);}live.current=state;setData(state);
+  const engine=new FarmAudio(setAudioStatus),scenes=new MinimalAudioScenes();
+  audio.current=engine;audioScenes.current=scenes;
+  const enabled=loadAudioPreference();setAudioEnabled(enabled);engine.setEnabled(enabled);
+  const visibility=()=>{const visible=document.visibilityState!=='hidden';engine.setVisible(visible);world.current?.setPlayerMotionVisible?.(visible);};
+  visibility();document.addEventListener('visibilitychange',visibility);
+  let state:MinimalState;try{state=loadMinimalState(window.localStorage,Date.now());}catch{state=createMinimalState(Date.now());setSaveOk(false);}live.current=state;setData(state);engine.updateScene(scenes.update(state));
   if(host.current){try{world.current=new MinimalWorld(host.current,state,{select:(t:Target)=>selectRef.current(t),arrive:(point:Point)=>{const job=pending.current;if(!job||Math.hypot(point.x-job.destination.x,point.z-job.destination.z)>.05)return;setWalking(false);pending.current=null;if(job.placeEggId&&job.at){if(sendRef.current({type:'placeEgg',eggId:job.placeEggId,at:job.at})){buyLocked.current=false;setPlacing(null);setTarget({kind:'egg',id:job.placeEggId});}}else setTarget(job.target);},status:(message:string)=>setNotice(message)});world.current.setPlacementMode(!!placingRef.current);}catch(error){setWorldError(error instanceof Error?error.message:'3D 场景暂时没有打开');}}
-  const timer=window.setInterval(()=>{if(!live.current)return;const next=advanceMinimalState(live.current,Date.now());live.current=next;setData(next);world.current?.update(next);try{setSaveOk(saveMinimalState(window.localStorage,next));}catch{setSaveOk(false);}},250);
-  return()=>{window.clearInterval(timer);world.current?.dispose();world.current=null;};
+  visibility();
+  const timer=window.setInterval(()=>{if(!live.current)return;const next=currentSnapshot(Date.now());live.current=next;setData(next);world.current?.update(next);engine.updateScene(scenes.update(next));try{setSaveOk(saveMinimalState(window.localStorage,next));}catch{setSaveOk(false);}},250);
+  return()=>{window.clearInterval(timer);document.removeEventListener('visibilitychange',visibility);engine.dispose();audio.current=null;audioScenes.current=null;world.current?.dispose();world.current=null;};
  },[]);
  useEffect(()=>{world.current?.setPlacementMode(!!placing);},[placing]);
  useEffect(()=>{if(!target||sheet){setAnchor(null);return;}const update=()=>{const s=live.current;if(!s||!world.current)return;const p=target.kind==='shop'?SHOP_APPROACH:target.kind==='tile'?target:target.kind==='animal'?s.animals.find(a=>a.id===target.id)?.position:s.eggs.find(e=>e.id===target.id)?.position;if(!p)return;const screen=world.current.screenPoint(p);setAnchor(screen.x>20&&screen.x<370&&screen.y>100&&screen.y<600?{x:screen.x,z:screen.y}:null);};update();const timer=window.setInterval(update,100);return()=>window.clearInterval(timer);},[target,sheet]);
@@ -67,7 +88,7 @@ export default function MinimalApp(){
  const pickup=()=>{if(!animal||!live.current)return;const current=live.current.animals.find(a=>a.id===animal.id);if(!current)return;if(Math.hypot(current.position.x-live.current.player.x,current.position.z-live.current.player.z)>1.6){approach({kind:'animal',id:current.id},animalApproach(live.current,current.position));setNotice('走近一点，再轻轻举起来。');return;}if(send({type:'pickup',animalId:current.id})){setTarget(null);world.current?.perform('hold');}};
  const ready=!!egg&&egg.readyAt!==undefined&&Date.now()>=egg.readyAt;
  const onboarding=data?.welcomeClaimed&&!data.animals.length&&!data.eggs.length;
- return <main className="app-shell minimal-shell"><PhoneViewport><section className="minimal-farm egg-farm" aria-label="萌蛋牧场"><div className="minimal-world" ref={host}/>
+ return <main className="app-shell minimal-shell"><PhoneViewport><section className="minimal-farm egg-farm" aria-label="萌蛋牧场" onPointerDownCapture={unlockFromGesture} onKeyDownCapture={unlockFromGesture} onClickCapture={unlockFromGesture}><div className="minimal-world" ref={host}/>
   <header className="egg-top"><div className="egg-avatar"><img src="/avatars/portraits/human-lx.webp" alt="LX"/><span>LX 的牧场</span></div><div className={`egg-coins ${coinBurst?'egg-coins-pop':''}`}><Coins size={18}/><b>{data?.coins??0}</b></div><button className="egg-round" aria-label="设置与说明" onClick={()=>{close();setSheet('settings');}}><Settings2 size={18}/></button></header>
   <button className="egg-weather-badge" aria-label="牧场天气设置" onClick={()=>{close();setSheet('settings');}}><ClimateIcon size={15}/>{climate.label} · {climate.daylight<.5?'夜晚':'白天'}</button>
   {coinBurst&&<div className="egg-coin-burst" aria-hidden="true">{Array.from({length:7},(_,i)=><i key={i} style={{'--coin-index':i} as CSSProperties}><Coins size={27}/></i>)}</div>}
@@ -89,7 +110,7 @@ export default function MinimalApp(){
    </>}
    {showReveal&&hatchAnimal&&<div className={`egg-reveal ${hatchAnimal.size==='giant'?'giant':''}`} onClick={()=>setDismissedHatch(hatchAnimal.id)}><div><small>{hatchAnimal.size==='giant'?'居然是巨型！':'啪嗒！新伙伴来啦'}</small><h2>{speciesName[hatchAnimal.species]}</h2><span>{hatchAnimal.sex==='female'?'♀ 女生':'♂ 男生'}</span></div></div>}
   </>}
-  {sheet&&<div className="egg-sheet-shade" onClick={()=>setSheet(null)}><section className="egg-sheet" role="dialog" aria-label={sheet==='bag'?'我的蛋袋':'设置与说明'} onClick={e=>e.stopPropagation()}><header><h2>{sheet==='bag'?'我的蛋袋':'慢慢玩就好'}</h2><button className="egg-round" aria-label="关闭面板" onClick={()=>setSheet(null)}><X size={20}/></button></header>{sheet==='bag'?<>{bag.map(e=><button className="egg-bag-item" key={e.id} onClick={()=>beginPlace(e.id)}><span className="egg-painted"><Egg size={32}/>{e.source==='shop'&&<i>?</i>}</span><span><b>{e.source==='shop'?'神秘动物蛋':`${speciesName[e.species]}蛋`}</b><small>拿出来，放在地上孵</small></span><ArrowUp size={19}/></button>)}{!bag.length&&<p>蛋袋空空的，去商店挑一颗吧。</p>}</>:<><p>点商店买蛋 → 放地上孵 → 留下来养，或举去商店卖。</p><div className="egg-settings-row"><button onClick={()=>world.current?.zoom(.12)}><ZoomIn size={18}/>放大</button><button onClick={()=>world.current?.zoom(-.12)}><ZoomOut size={18}/>缩小</button></div><fieldset className="egg-weather-settings"><legend>牧场天气 · 模拟</legend><div className="egg-weather-options"><button aria-pressed={!weatherPreference?.weather||weatherPreference.weather==='auto'} onClick={()=>setWeatherPreference(p=>({...p,weather:'auto'}))}>自动变化</button>{WEATHER_KINDS.map(kind=>{const Icon=weatherIcons[kind];return <button key={kind} aria-label={`预览天气：${WEATHER_LABELS[kind]}`} aria-pressed={weatherPreference?.weather===kind} onClick={()=>setWeatherPreference(p=>({...p,weather:kind}))}><Icon size={17}/>{WEATHER_LABELS[kind]}</button>;})}</div><div className="egg-weather-times">{([{value:'auto',label:'随时间'},{value:'day',label:'白天'},{value:'night',label:'夜晚'}] as const).map(option=><button key={option.value} aria-label={`昼夜：${option.label}`} aria-pressed={(weatherPreference?.time??'auto')===option.value} onClick={()=>setWeatherPreference(p=>({...p,time:option.value}))}>{option.value==='night'?<Moon size={15}/>:<Sun size={15}/>} {option.label}</button>)}</div><small>模拟天气，不是真实天气预报。昼夜默认按 UTC+8；不改变动物收益，也没有灾害惩罚。</small></fieldset><p>同种成年异性伙伴有机会产下对应物种蛋。每天整座牧场最多 1 枚，每只动物每天尝试一次。</p><small>演示孵化 10–15 秒，成年约 1 分钟。繁育日按 UTC+8 自然日计算，不加速。</small><small>{saveOk?'当前浏览器本机保存，旧版存档保留。':'暂时无法保存，请先不要关闭页面。'}</small><small>拖拽旋转视角，单击地面走动；双指捏合或滚轮缩放。</small></>}</section></div>}
+  {sheet&&<div className="egg-sheet-shade" onClick={()=>setSheet(null)}><section className="egg-sheet" role="dialog" aria-label={sheet==='bag'?'我的蛋袋':'设置与说明'} onClick={e=>e.stopPropagation()}><header><h2>{sheet==='bag'?'我的蛋袋':'慢慢玩就好'}</h2><button className="egg-round" aria-label="关闭面板" onClick={()=>setSheet(null)}><X size={20}/></button></header>{sheet==='bag'?<>{bag.map(e=><button className="egg-bag-item" key={e.id} onClick={()=>beginPlace(e.id)}><span className="egg-painted"><Egg size={32}/>{e.source==='shop'&&<i>?</i>}</span><span><b>{e.source==='shop'?'神秘动物蛋':`${speciesName[e.species]}蛋`}</b><small>拿出来，放在地上孵</small></span><ArrowUp size={19}/></button>)}{!bag.length&&<p>蛋袋空空的，去商店挑一颗吧。</p>}</>:<><p>点商店买蛋 → 放地上孵 → 留下来养，或举去商店卖。</p><div className="egg-settings-row"><button onClick={()=>world.current?.zoom(.12)}><ZoomIn size={18}/>放大</button><button onClick={()=>world.current?.zoom(-.12)}><ZoomOut size={18}/>缩小</button></div><div className="egg-settings-row"><button data-audio-toggle aria-label="牧场背景音乐" aria-pressed={audioEnabled} onClick={toggleAudio}>{audioEnabled?<Volume2 size={18}/>:<VolumeX size={18}/>}背景音乐 · {audioEnabled?'开':'关'}</button></div><small>{audioStatus==='unavailable'?'当前浏览器暂不支持声音，不影响游玩。':'轻轻一点开启声音，小狼来时音乐会稍微紧张，离开后慢慢恢复。'}</small><fieldset className="egg-weather-settings"><legend>牧场天气 · 模拟</legend><div className="egg-weather-options"><button aria-pressed={!weatherPreference?.weather||weatherPreference.weather==='auto'} onClick={()=>setWeatherPreference(p=>({...p,weather:'auto'}))}>自动变化</button>{WEATHER_KINDS.map(kind=>{const Icon=weatherIcons[kind];return <button key={kind} aria-label={`预览天气：${WEATHER_LABELS[kind]}`} aria-pressed={weatherPreference?.weather===kind} onClick={()=>setWeatherPreference(p=>({...p,weather:kind}))}><Icon size={17}/>{WEATHER_LABELS[kind]}</button>;})}</div><div className="egg-weather-times">{([{value:'auto',label:'随时间'},{value:'day',label:'白天'},{value:'night',label:'夜晚'}] as const).map(option=><button key={option.value} aria-label={`昼夜：${option.label}`} aria-pressed={(weatherPreference?.time??'auto')===option.value} onClick={()=>setWeatherPreference(p=>({...p,time:option.value}))}>{option.value==='night'?<Moon size={15}/>:<Sun size={15}/>} {option.label}</button>)}</div><small>模拟天气，不是真实天气预报。昼夜默认按 UTC+8；不改变动物收益，也没有灾害惩罚。</small></fieldset><p>同种成年异性伙伴有机会产下对应物种蛋。每天整座牧场最多 1 枚，每只动物每天尝试一次。</p><small>演示孵化 10–15 秒，成年约 1 分钟。繁育日按 UTC+8 自然日计算，不加速。</small><small>{saveOk?'当前浏览器本机保存，旧版存档保留。':'暂时无法保存，请先不要关闭页面。'}</small><small>拖拽旋转视角，单击地面走动；双指捏合或滚轮缩放。</small></>}</section></div>}
   {!saveOk&&!sheet&&<div className="egg-save-warning">暂时无法保存，请不要关闭页面。</div>}
  </section></PhoneViewport></main>;
 }
