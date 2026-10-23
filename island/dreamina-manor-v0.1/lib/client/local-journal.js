@@ -1,3 +1,4 @@
+import{constructionView,constructionSignature}from'../game/construction.js';
 import {createActionQueue as createLegacyQueue} from './action-queue.js';
 import {applyLocalOperation,planLocalOperation,operationResourceKeys,LOCAL_COMMANDS} from '../game/local-operations.js';
 import {projectedPosition} from '../game/state.js';
@@ -7,7 +8,7 @@ const wire=e=>{const {motion,...op}=e.op;return op;};
  * @param {any} options
  */
 export function createLocalJournal({uid,sessionId,storage=globalThis.localStorage,now=()=>Date.now(),newId=()=>crypto.randomUUID(),onChange=()=>{},onLocalComplete=(..._args)=>{},onConfirmed=(..._args)=>{},onError=(..._args)=>{}}={}){
- const key=`manor-next:journal-v7:${uid}:${sessionId}`,saved=JSON.parse(storage?.getItem(key)??'null');let entries=Array.isArray(saved)?saved:(saved?.entries??[]),authority=saved?.authority??null,running=false,retryAfter=0,lastPosition=null;
+ const key=`manor-next:journal-v7:${uid}:${sessionId}`,saved=JSON.parse(storage?.getItem(key)??'null');let entries=Array.isArray(saved)?saved:(saved?.entries??[]),authority=saved?.authority??null,running=false,retryAfter=0,lastPosition=null,buildSignature='';
  const legacy=createLegacyQueue({uid,sessionId,storage,now,onChange:()=>emit(),onLocalComplete,onConfirmed,onError});
  const save=()=>storage?.setItem(key,JSON.stringify({entries,authority}));
  function base(){const old=legacy.view();return legacy.pending&&old?old:authority;}
@@ -18,7 +19,7 @@ export function createLocalJournal({uid,sessionId,storage=globalThis.localStorag
   }
   for(const item of g.items)if(dirty.has(item.id)||entries.some(e=>e.command.itemId===item.id))item.syncPending=true;
   g.localTargets=entries.filter(e=>!e.localDone&&!e.cancelled&&e.command.target).map(e=>e.command.target);g.canClaimEmergency=g.coins<8&&g.seeds.every(n=>n===0)&&g.jobs.length===0;
-  data.game=g;if(data.island?.ownerUid===uid)data.island=g;return data;
+  g=constructionView(g,now());data.game=g;if(data.island?.ownerUid===uid)data.island=g;else if(data.island)data.island=constructionView(data.island,now());return data;
  }
  function emit(){save();onChange();}
  function dependencies(command){const keys=new Set(operationResourceKeys(command));const ids=[];for(const e of entries){if(e.cancelled)continue;if(operationResourceKeys(e.command).some(k=>keys.has(k))||command.itemId===`${e.id}-product`||e.product?.id===command.itemId)ids.push(e.id);}return ids.slice(-24);}
@@ -27,14 +28,15 @@ export function createLocalJournal({uid,sessionId,storage=globalThis.localStorag
   try{e.op=planLocalOperation(g,e.command,{id:e.id,now:now(),dependsOn:e.dependencies});e.local=e.op.motion??null;if(!e.op.motion){e.localDone=true;onLocalComplete(e);}emit();}catch(error){reject(e.id,error.message);}
  }
  function enqueue(command,meta={}){if(command.type==='move'&&authority?.island?.ownerUid!==uid)return legacy.enqueue(command,meta);if(!authority)throw new Error('还没连上庄园');if(!LOCAL_COMMANDS.has(command.type))throw new Error('这次需要连上庄园');
+  if((command.type==='construct'&&command.kind==='tank'||command.type==='build-tank')&&entries.some(e=>e.op?.motion&&!e.localDone))throw new Error('等走到位置再建鱼缸吧');
   const duplicate=entries.find(e=>!e.localDone&&e.command.type==='begin-work'&&e.command.action===command.action&&same(e.command.target,command.target));if(duplicate)return duplicate;
   const g=view().game;const planned=planLocalOperation({...g,pending:null},command,{id:'validate-operation',now:now()});if(!planned.motion)applyLocalOperation(g,planned);
   const job=command.action==='harvest'?g.jobs.find(j=>same(j.target,command.target)):null;
   const e={id:newId(),command:clone(command),meta:clone(meta),dependencies:dependencies(command),op:null,local:null,localDone:false,...(job?{jobId:job.id,product:clone(job.product)}:{})};
   if(!planned.motion){e.op=planLocalOperation(g,command,{id:e.id,now:now(),dependsOn:e.dependencies});e.localDone=true;e.localReceipt=applyLocalOperation(g,e.op).receipt;}
-  entries.push(e);try{emit();}catch{entries=entries.filter(x=>x!==e);throw new Error('本机空间不足，这次没有执行，请清理后再试');}if(e.localDone)onLocalComplete(e);startNext();return e;
+  entries.push(e);if(e.localDone&&(command.type==='construct'&&command.kind==='tank'||command.type==='build-tank'))lastPosition=clone(applyLocalOperation(g,e.op).state.position);try{emit();}catch{entries=entries.filter(x=>x!==e);throw new Error('本机空间不足，这次没有执行，请清理后再试');}if(e.localDone)onLocalComplete(e);startNext();return e;
  }
- function tick(){legacy.tick();const e=entries.find(e=>e.op?.motion&&!e.localDone);if(e&&now()>=e.op.at){e.localDone=true;lastPosition=clone(e.op.motion.pending.path.at(-1));emit();onLocalComplete(e);startNext();}else startNext();}
+ function tick(){legacy.tick();const stamp=constructionSignature(authority?.game??{},now())+'|'+constructionSignature(authority?.island??{},now())+'|'+entries.filter(e=>['construct','expand-land','build-dock','build-tank'].includes(e.command.type)&&e.op?.at+12000<=now()).map(e=>e.id).join(',');if(stamp!==buildSignature){buildSignature=stamp;emit();}const e=entries.find(e=>e.op?.motion&&!e.localDone);if(e&&now()>=e.op.at){e.localDone=true;lastPosition=clone(e.op.motion.pending.path.at(-1));emit();onLocalComplete(e);startNext();}else startNext();}
  function reject(id,message){const blocked=new Set([id]);for(const e of entries)if(e.dependencies.some(x=>blocked.has(x)))blocked.add(e.id);const failed=entries.filter(e=>blocked.has(e.id));entries=entries.filter(e=>!blocked.has(e.id));lastPosition=null;emit();onError(message,failed[0]);startNext();}
  function observe(data){if(!data?.game)return;
   const results=data.receipt?.type==='sync-local'?data.receipt.results:(data.game.localSync?.applied??[]).filter(r=>entries.some(e=>e.id===r.id));const hasResults=results.length>0;

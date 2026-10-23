@@ -15,7 +15,7 @@ export default function CollectionBook({game}:{game:any}){
    {entries.map(s=>{
     const found=!!game?.discovered[s.id],variants=game?.discoveredVariants?.[s.id]??[];
     return <div className={`item-card ${found?'':'undiscovered'}`} key={s.id}>
-     <ItemThumb defer silhouette={!found} item={{id:s.id,kind:s.kind,speciesId:s.id,finalSize:s.standardSize,standardSize:s.standardSize,mutation:'normal'}}/>
+     <ItemThumb defer fit silhouette={!found} item={{id:s.id,kind:s.kind,speciesId:s.id,finalSize:s.standardSize,standardSize:s.standardSize,mutation:'normal'}}/>
      <b>{found?s.name:'未发现'}</b><small>{TIER_LABELS[s.tier-1]}</small>
      <div className="collection-badges">{found&&variants.includes('giant')&&<small>巨型</small>}{found&&variants.includes('gold')&&<small className="gold">金色</small>}</div>
     </div>;

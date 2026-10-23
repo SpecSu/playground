@@ -1,6 +1,7 @@
 import {walkGraph,cellKey,pathDistance,clearWalkSegment,simplifyWalkPath} from './grid.js';
 /** Project a ground tap onto the same fixed safe walking network used by work. */
 export function planFreeWalk(island,from,point){
+ island={...island,tank:[...island.tank,...(island.constructions??[]).filter(c=>c.kind==='tank').flatMap(c=>c.cells)]};
  if(!point||![point.x,point.z,from?.x,from?.z].every(Number.isFinite))return null;
  const cell={x:Math.round(point.x),z:Math.round(point.z)};
  if(![...island.land,...island.docks].some(c=>c.x===cell.x&&c.z===cell.z)||island.tank.some(c=>c.x===cell.x&&c.z===cell.z))return null;

@@ -217,10 +217,16 @@ export function createOceanAudioController(options = {}) {
     current = {...current, playing: false, needsGesture: false};
     listeners.clear(); releaseGraph();
   }
+  // Publish persisted preference before a first click can consult stale UI defaults.
+  if (options.onStatus) notify(options.onStatus);
+  function togglePlayback() {
+    if (current.muted || current.playing) toggleMute();
+    else startFromGesture();
+  }
   return {
     get status() { return snapshot(); },
     get state() { return snapshot(); },
-    startFromGesture, toggleMute, setHidden, dispose,
+    startFromGesture, toggleMute, togglePlayback, setHidden, dispose,
     subscribe(listener) {
       if (disposed) return () => {};
       listeners.add(listener); notify(listener);

@@ -1,3 +1,4 @@
+import{constructionView}from'../game/construction.js';
 import {GameError,publicGame,projectedPosition} from '../game/state.js';
 import {prepareSocial,finishSocial} from './social-service.js';
 import {visitPosition} from './social-store.js';
@@ -13,7 +14,7 @@ export async function performSocial(store,{uid,sessionId,opId,command},hash,now)
   if(!visit||visit.uid!==uid||visit.updatedAt<=now-15000)fail('VISIT_EXPIRED','重新进入这个庄园再试试');
   if(game.pending&&['move','begin-social'].includes(command.type))fail('WORK_PENDING','手边的事还没好，马上继续');
   if(command.type==='move'){
-   const island=await store.read(visit.islandUid),from=visitPosition(visit,game,now),path=planFreeWalk(island,from,command.point);if(!path)fail('NO_PATH','那里暂时走不到');
+   const island=constructionView(await store.read(visit.islandUid),now),from=visitPosition(visit,game,now),path=planFreeWalk(island,from,command.point);if(!path)fail('NO_PATH','那里暂时走不到');
    const arriveAt=now+Math.ceil(pathDistance(path)*ECONOMY.walkSecondsPerCell*1000),pending={id:crypto.randomUUID(),action:'move',path,startedAt:now,arriveAt,finishAt:arriveAt};
    const next={position:from,pending},receipt={type:'move',intentId:pending.id},nextGame={...game,revision:game.revision+1,updatedAt:now};if(visit.islandUid===uid){nextGame.position=from;nextGame.pending=null;}
    if(await store.commitVisit(game,visit,next,opId,hash,receipt,now,nextGame))return socialResponse(store,uid,sessionId,receipt,now);

@@ -10,14 +10,14 @@ import {createAquariumArt} from '../lib/art/aquarium.js';
 import {createSwimmer,safeSwimPoint} from '../lib/world/swimming.js';
 
 test('one exhibition ruler enlarges small fish while preserving within-species ratios',()=>{
- assert.equal(fishWorldLength(16,16),.45);
- assert.ok(Math.abs(fishWorldLength(100,100)-1.125)<1e-10);
+ assert.ok(Math.abs(fishWorldLength(16,16)-1.35)<1e-10);
+ assert.ok(Math.abs(fishWorldLength(100,100)-1.43)<1e-10);
  for(const standard of [14,16,45,100,115]){
   const ordinary=fishWorldLength(standard*.9,standard);
   assert.ok(Math.abs(fishWorldLength(standard*.9*1.3,standard)/ordinary-1.3)<1e-10);
   assert.ok(Math.abs(fishWorldLength(standard*1.2,standard)/fishWorldLength(standard*.8,standard)-1.5)<1e-10);
  }
- assert.throws(()=>fishWorldLength(20,0));
+ assert.throws(()=>fishWorldLength(20,0));let previous=0;for(let standard=14;standard<=115;standard++){const size=fishWorldLength(standard,standard);assert.ok(size>=previous);previous=size;}
 });
 
 test('all twenty largest exhibition fish stay inside the starter tank during real swimming and fin motion',()=>{

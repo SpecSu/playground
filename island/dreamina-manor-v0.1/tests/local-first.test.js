@@ -16,8 +16,8 @@ test('local construction and fishing chain batch preserves geometry, exact fish 
   await store.ensure(uid,1000);const funded=await store.read(uid);funded.coins=1000;db.raw.prepare('UPDATE manor_games SET state_json=? WHERE uid=?').run(JSON.stringify(funded),uid);
   let state=(await readGame(store,{uid,sessionId},1000)).game,t=1100;const operations=[];
   const add=command=>{const id=`qa-build-fish-op-${operations.length}`,op=planLocalOperation(state,command,{id,now:t,dependsOn:operations.length?[operations.at(-1).id]:[]});state=applyLocalOperation(state,op).state;t=op.at+1;operations.push(op);return op;};
-  add({type:'expand-land',cell:{x:2,z:1}});add({type:'expand-land',cell:{x:2,z:0}});
-  add({type:'build-dock',cell:{x:0,z:2}});add({type:'build-tank',cells:[{x:0,z:0},{x:1,z:0}]});add({type:'build-tank',cells:[{x:2,z:0}]});
+  add({type:'expand-land',cell:{x:2,z:1}});t+=12000;add({type:'expand-land',cell:{x:2,z:0}});t+=12000;
+  add({type:'build-dock',cell:{x:0,z:2}});add({type:'build-tank',cells:[{x:0,z:0},{x:1,z:0}]});t+=12000;add({type:'build-tank',cells:[{x:2,z:0}]});t+=12000;
   add({type:'buy-input',kind:'bait',tier:1});const fish=add({type:'begin-work',action:'fish',tier:1,target:{kind:'dock',cell:{x:0,z:2}}});
   const job=structuredClone(state.jobs[0]);assert.equal(job.startedAt,fish.at);t=job.readyAt;
   add({type:'begin-work',action:'harvest',target:job.target});add({type:'hold',itemId:job.product.id});add({type:'begin-work',action:'display',target:{kind:'tank',cell:{x:0,z:0}},itemId:job.product.id});

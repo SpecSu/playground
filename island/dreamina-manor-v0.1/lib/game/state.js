@@ -1,7 +1,9 @@
+import{constructionView,reservedCells,startConstruction}from'./construction.js';
 import {recordDiscovery,collectionVariants} from './collection.js';
 import {INITIAL_LAND,docksHaveWater,validCell,cellKey,landCandidates,dockCandidates,canExtendTank,planWalk,pathDistance,allLandReachable,nearestDryPosition} from './grid.js';
 import {ECONOMY,validTier} from './economy.js';
 import {SPECIES_BY_ID} from './catalogue.js';
+import {fishingWaitSeconds} from './fishing-time.js';
 import {rollProduct} from './random.js';
 export class GameError extends Error{constructor(code,message,status=409){super(message);this.name='GameError';this.code=code;this.status=status;}}
 const fail=(code,msg,status)=>{throw new GameError(code,msg,status);};
@@ -11,8 +13,8 @@ const sameCell=(a,b)=>!!a&&!!b&&a.x===b.x&&a.z===b.z;
 const targetKey=t=>`${t.kind}:${cellKey(t.cell)}`;
 const jobAt=(s,t)=>s.jobs.find(j=>targetKey(j.target)===targetKey(t));
 const itemById=(s,id)=>s.items.find(i=>i.id===id)??fail('ITEM_GONE','找不到这件东西了');
-const isEmptyLand=(s,cell)=>has(s.land,cell)&&!has(s.tank,cell)&&!s.jobs.some(j=>j.target.kind==='land'&&sameCell(j.target.cell,cell))&&!s.items.some(i=>i.location.kind==='land'&&sameCell(i.location.cell,cell));
-export function createGame(uid,now,config=ECONOMY){return {gameId:'manor-next',schemaVersion:1,ownerUid:normalizeUid(uid),revision:0,createdAt:now,updatedAt:now,profile:{name:'',avatar:'milk-frog'},coins:config.startingCoins,seeds:[config.startingSeeds,0,0,0,0],baits:[0,0,0,0,0],land:structuredClone(INITIAL_LAND),docks:[],tank:[],jobs:[],items:[],discovered:{},discoveredVariants:{},position:{x:.5,z:.65},pending:null,firstPlantStarted:false,theftAvailableAt:0,activity:[]};}
+const isEmptyLand=(s,cell)=>has(s.land,cell)&&!has(s.tank,cell)&&!reservedCells(s,'tank').some(c=>sameCell(c,cell))&&!s.jobs.some(j=>j.target.kind==='land'&&sameCell(j.target.cell,cell))&&!s.items.some(i=>i.location.kind==='land'&&sameCell(i.location.cell,cell));
+export function createGame(uid,now,config=ECONOMY){return {gameId:'manor-next',schemaVersion:1,ownerUid:normalizeUid(uid),revision:0,createdAt:now,updatedAt:now,profile:{name:'',avatar:'milk-frog'},coins:config.startingCoins,seeds:[config.startingSeeds,0,0,0,0],baits:[0,0,0,0,0],land:structuredClone(INITIAL_LAND),docks:[],tank:[],jobs:[],items:[],discovered:{},discoveredVariants:{},position:{x:.5,z:.65},pending:null,firstPlantStarted:false,theftAvailableAt:0,activity:[],constructions:[]};}
 export function canClaimEmergency(s,config=ECONOMY){return s.coins<config.inputCosts[0]&&s.seeds.every(n=>n===0)&&s.jobs.length===0;}
 export function projectedPosition(s,now){
  const p=s.pending;if(!p?.path?.length)return {...s.position};
@@ -53,7 +55,7 @@ function hold(s,item){const hand=s.items.find(i=>i.location.kind==='hand');if(ha
 export function applyCommand(original,command,context={}){
  if(original?.gameId!=='manor-next'||original.schemaVersion!==1)fail('CLIENT_UPGRADE_REQUIRED','更新一下页面，再继续玩吧',426);
  assertGame(original);const cfg=context.config??ECONOMY,now=context.now;if(!Number.isSafeInteger(now)||now<0)throw new Error('Server clock required');
- const s=structuredClone(original),c=command;s.discoveredVariants=collectionVariants(s);let receipt={type:c.type};const newId=()=>context.newId?.()??crypto.randomUUID();
+ const s=structuredClone(constructionView(original,now)),c=!context._validateConstruction&&['expand-land','build-dock','build-tank'].includes(command.type)?{type:'construct',kind:command.type==='expand-land'?'land':command.type==='build-dock'?'dock':'tank',cells:command.cells??[command.cell]}:command;s.discoveredVariants=collectionVariants(s);let receipt={type:c.type};const newId=()=>context.newId?.()??crypto.randomUUID();
  const spend=amount=>{if(s.coins<amount)fail('NOT_ENOUGH_COINS',`还差${amount-s.coins}币`);s.coins-=amount;};
  switch(c.type){
  case 'buy-input':{
@@ -80,13 +82,13 @@ export function applyCommand(original,command,context={}){
   validateWork(s,p.action,p.target,p.tier,p.itemId,now,context,p.jobId);
   if(p.action==='plant'||p.action==='fish'){
    const kind=p.action==='plant'?'plant':'fish';s[kind==='plant'?'seeds':'baits'][p.tier-1]--;
-   const duration=kind==='plant'&&!s.firstPlantStarted?cfg.firstPlantSeconds:cfg.growSeconds[p.tier-1];
+   const duration=kind==='fish'?fishingWaitSeconds(p.tier,context.seed,cfg):!s.firstPlantStarted?cfg.firstPlantSeconds:cfg.growSeconds[p.tier-1];
    if(kind==='plant')s.firstPlantStarted=true;
    const id=newId(),seed=context.seed;if(!Number.isSafeInteger(seed))throw new Error('Server random seed required');
    const product={...rollProduct(kind,p.tier,seed,`${id}-product`,now,cfg),sourceIntentId:p.id};
    s.jobs.push({id:`${id}-job`,target:p.target,inputTier:p.tier,seed,startedAt:now,readyAt:now+duration*1000,product});receipt={...receipt,action:p.action,jobId:`${id}-job`};
   }else if(p.action==='harvest'){
-   const job=jobAt(s,p.target),item={...job.product,harvestedAt:now,location:{kind:'bag'}};s.jobs=s.jobs.filter(j=>j.id!==job.id);s.items.push(item);recordDiscovery(s,item);receipt={...receipt,action:'harvest',itemId:item.id};
+   const job=jobAt(s,p.target),item={...job.product,harvestedAt:now,location:{kind:'bag'}};s.jobs=s.jobs.filter(j=>j.id!==job.id);s.items.push(item);if(item.kind==='fish')hold(s,item);recordDiscovery(s,item);receipt={...receipt,action:'harvest',itemId:item.id};
   }else if(p.action==='display'){
    const item=itemById(s,p.itemId);item.location=item.kind==='fish'?{kind:'tank',placedAt:now}:{kind:'land',cell:structuredClone(p.target.cell)};receipt={...receipt,action:'display',itemId:item.id};
   }else if(p.action==='retrieve'){
@@ -115,6 +117,7 @@ export function applyCommand(original,command,context={}){
   const safePosition=nearestDryPosition(s.land,s.docks,next,projectedPosition(s,now));if(next.length>=s.land.length||!safePosition||!allLandReachable(s.land,s.docks,next,safePosition))fail('BLOCKED_PATH','留一块能走动的空地吧');
   spend(cfg.tankModulePrice*c.cells.length);s.tank=next;s.position=safePosition;s.pending=null;receipt={...receipt,capacity:next.length*cfg.tankCapacityPerCell};break;
  }
+ case 'construct':{const build=startConstruction(s,c,{...context,now,_validateConstruction:true},applyCommand,fail);receipt={...receipt,constructionId:build.id,readyAt:build.readyAt};break;}
  case 'profile':{
   if(typeof c.name!=='string'||c.name.trim().length>20||typeof c.avatar!=='string'||c.avatar.length>32)fail('BAD_PROFILE','换个简短昵称试试',400);
   const ids=['milk-frog','niulai','feidudu','miaocuijiao','banana-cat','sword-shield-dog','human-lx','human-kelly','human-bear','human-subeike','human-jiji','human-jiaxin'];
@@ -134,9 +137,10 @@ export function assertGame(s){
  const verify=p=>{if(!p?.id||ids.has(p.id))throw new Error('Duplicated product');ids.add(p.id);const species=SPECIES_BY_ID[p.speciesId];if(!species||species.kind!==p.kind||!Number.isSafeInteger(p.value)||p.value<1||!Number.isFinite(p.finalSize)||p.finalSize<=0)throw new Error('Invalid product');};
  for(const job of s.jobs){verify(job.product);const key=targetKey(job.target);if(occupancy.has(key)||job.readyAt<job.startedAt||!Number.isSafeInteger(job.readyAt))throw new Error('Invalid job');occupancy.add(key);if(job.target.kind==='land'&&(!has(s.land,job.target.cell)||has(s.tank,job.target.cell)))throw new Error('Job off productive land');if(job.target.kind==='dock'&&!has(s.docks,job.target.cell))throw new Error('Job off dock');}
  let hands=0;for(const item of s.items){verify(item);const loc=item.location;if(!loc||!['bag','hand','land','tank'].includes(loc.kind))throw new Error('Orphaned item');if(loc.kind==='hand')hands++;if(loc.kind==='tank'&&(item.kind!=='fish'||!s.tank.length))throw new Error('Invalid aquarium item');if(loc.kind==='land'){if(item.kind!=='plant'||!has(s.land,loc.cell)||has(s.tank,loc.cell))throw new Error('Invalid display');const key=`land:${cellKey(loc.cell)}`;if(occupancy.has(key))throw new Error('Double cell occupancy');occupancy.add(key);}}
+ for(const b of s.constructions??[]){if(!['land','dock','tank'].includes(b.kind)||!b.id||b.readyAt-b.startedAt!==12000||!Number.isSafeInteger(b.startedAt)||!b.cells?.length||b.cells.some(c=>!validCell(c)))throw new Error('Invalid construction');}
  if(hands>1)throw new Error('Multiple held objects');return true;
 }
 export function publicGame(s,now,{viewerUid=s.ownerUid}={}){
- const self=viewerUid===s.ownerUid;
- return {demo:!!s.demo,gameId:s.gameId,schemaVersion:s.schemaVersion,ownerUid:s.ownerUid,revision:s.revision,serverNow:now,profile:structuredClone(s.profile),land:structuredClone(s.land),docks:structuredClone(s.docks),tank:structuredClone(s.tank),jobs:s.jobs.map(({seed,...j})=>structuredClone(j)),items:structuredClone(self?s.items:s.items.filter(i=>i.location.kind!=='bag')),position:projectedPosition(s,now),...(self?{localSync:structuredClone(s.localSync??null),firstPlantStarted:s.firstPlantStarted,coins:s.coins,seeds:[...s.seeds],baits:[...s.baits],pending:structuredClone(s.pending),activity:structuredClone(s.activity),discovered:{...s.discovered},discoveredVariants:collectionVariants(s),theftAvailableAt:s.theftAvailableAt,canClaimEmergency:canClaimEmergency(s)}:{})};
+ s=constructionView(s,now);const self=viewerUid===s.ownerUid;
+ return {demo:!!s.demo,gameId:s.gameId,schemaVersion:s.schemaVersion,ownerUid:s.ownerUid,revision:s.revision,serverNow:now,profile:structuredClone(s.profile),constructions:structuredClone(s.constructions??[]),land:structuredClone(s.land),docks:structuredClone(s.docks),tank:structuredClone(s.tank),jobs:s.jobs.map(({seed,...j})=>structuredClone(j)),items:structuredClone(self?s.items:s.items.filter(i=>i.location.kind!=='bag')),position:projectedPosition(s,now),...(self?{localSync:structuredClone(s.localSync??null),firstPlantStarted:s.firstPlantStarted,coins:s.coins,seeds:[...s.seeds],baits:[...s.baits],pending:structuredClone(s.pending),activity:structuredClone(s.activity),discovered:{...s.discovered},discoveredVariants:collectionVariants(s),theftAvailableAt:s.theftAvailableAt,canClaimEmergency:canClaimEmergency(s)}:{})};
 }

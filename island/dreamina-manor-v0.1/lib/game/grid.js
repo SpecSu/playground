@@ -69,15 +69,16 @@ export function nearestDryPosition(land,docks,tank,position){let best=null,dista
 /** A segment stays on the union of dry cells and outside real occupied footprints. */
 export function clearWalkSegment(island,a,b,{targetCell=null}={}){
  const cells=[...island.land,...island.docks],distance=Math.hypot(b.x-a.x,b.z-a.z),steps=Math.max(1,Math.ceil(distance/.035));
+ const pendingTank=(island.constructions??[]).filter(c=>c.kind==='tank').flatMap(c=>c.cells);
  const occupied=[...(island.jobs??[]).filter(j=>j.target.kind==='land').map(j=>j.target.cell),...(island.items??[]).filter(i=>i.location.kind==='land').map(i=>i.location.cell),...(targetCell?[targetCell]:[])];
  for(let i=0;i<=steps;i++){const t=i/steps,p={x:a.x+(b.x-a.x)*t,z:a.z+(b.z-a.z)*t};
   if(!cells.some(c=>Math.abs(c.x-p.x)<=.5&&Math.abs(c.z-p.z)<=.5))return false;
-  if(island.tank.some(c=>Math.abs(c.x-p.x)<.55&&Math.abs(c.z-p.z)<.55))return false;
+  if([...island.tank,...pendingTank].some(c=>Math.abs(c.x-p.x)<.55&&Math.abs(c.z-p.z)<.55))return false;
   if(occupied.some(c=>Math.hypot(c.x-a.x,c.z-a.z)>.31&&Math.hypot(c.x-p.x,c.z-p.z)<.30))return false;
  }return true;
 }
 export function simplifyWalkPath(island,path,options={}){if(!path)return null;const out=[path[0]];for(let i=0;i<path.length-1;){let j=path.length-1;while(j>i+1&&!clearWalkSegment(island,path[i],path[j],options))j--;if(!clearWalkSegment(island,path[i],path[j],options))return null;out.push(path[j]);i=j;}return out;}
-export function planWalk(land,docks,tank,from,target,source=null){const island=source??{land,docks,tank},options={targetCell:target.workSide?target.cell:null};
+export function planWalk(land,docks,tank,from,target,source=null){tank=[...tank,...(source?.constructions??[]).filter(c=>c.kind==='tank').flatMap(c=>c.cells)];const island=source?{...source,tank}: {land,docks,tank},options={targetCell:target.workSide?target.cell:null};
  const graph=walkGraph(land,docks,tank),ends=targetKeys(graph,land,docks,target).map(k=>graph.get(k).position);
  const direct=ends.filter(end=>clearWalkSegment(island,from,end,options)).sort((a,b)=>Math.hypot(a.x-from.x,a.z-from.z)-Math.hypot(b.x-from.x,b.z-from.z));
  if(direct.length)return [{...from},{...direct[0]}];

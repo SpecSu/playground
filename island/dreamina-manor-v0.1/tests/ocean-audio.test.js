@@ -335,3 +335,6 @@ test('dispose is idempotent, closes/stops the whole graph, clears timers and ign
     h.audio.startFromGesture(); assert.equal(h.created(), 1);
   }
 });
+
+test('saved mute is published to UI at construction, before any state change',()=>{const h=setup({muted:true});assert.equal(h.statuses[0]?.muted,true);assert.equal(h.created(),0);h.audio.dispose();});
+test('playback button opens saved mute, mutes running gain and reopens exactly once',async()=>{const h=setup({muted:true});assert.equal(typeof h.audio.togglePlayback,'function');h.audio.togglePlayback();await flush();assert.equal(h.audio.status.playing,true);assert.equal(h.ctx.gains[0].gain.value,.18);h.audio.togglePlayback();await h.fireTimers();assert.equal(h.ctx.gains[0].gain.value,0);assert.equal(h.ctx.state,'suspended');assert.equal(h.storage.get(ocean.OCEAN_MUTE_KEY),'true');h.audio.togglePlayback();await flush();assert.equal(h.audio.status.playing,true);assert.equal(h.ctx.sources.length,2);h.audio.dispose();});

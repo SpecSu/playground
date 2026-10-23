@@ -1,10 +1,10 @@
 /** World grid uses metres. Fish use one approved exhibition ruler in every context. */
 export const WORLD_UNIT_METRES=1;
-export const FISH_DISPLAY_RULER=Object.freeze({referenceCm:16,referenceWorldLength:.45,standardExponent:.5});
+export const FISH_DISPLAY_RULER=Object.freeze({referenceCm:16,referenceWorldLength:.45,standardExponent:.5,enlargement:3,standardCap:1.43});
 export function fishWorldLength(finalSizeCm,standardSizeCm){
  if(!Number.isFinite(finalSizeCm)||finalSizeCm<=0)throw new Error('Invalid final fish size');
  if(!Number.isFinite(standardSizeCm)||standardSizeCm<=0)throw new Error('Fish exhibition scale requires its species standard size');
- return FISH_DISPLAY_RULER.referenceWorldLength*Math.sqrt(standardSizeCm/FISH_DISPLAY_RULER.referenceCm)*(finalSizeCm/standardSizeCm);
+ return Math.min(FISH_DISPLAY_RULER.standardCap,FISH_DISPLAY_RULER.referenceWorldLength*Math.sqrt(standardSizeCm/FISH_DISPLAY_RULER.referenceCm)*FISH_DISPLAY_RULER.enlargement)*(finalSizeCm/standardSizeCm);
 }
 // finalSize already includes random size and giant. Never multiply giant twice.
 export const SHARED_CELL_SIZE=3.2;

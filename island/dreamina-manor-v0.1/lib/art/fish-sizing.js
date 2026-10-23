@@ -9,4 +9,4 @@ export const FISH_STANDARD_SIZES_CM=Object.freeze({
 });
 export const MAX_RANDOM_SIZE_FACTOR=1.2;
 export const GIANT_VISUAL_SIZE_FACTOR=1.3;
-export const TANK_INNER_WATER_HEIGHT=2.1;
+export const TANK_INNER_WATER_HEIGHT=2.6;

@@ -6,7 +6,7 @@ for(const cells of [[{x:0,z:0},{x:1,z:0}],[{x:0,z:0},{x:1,z:0},{x:0,z:1}]]){
  const tank=createAquariumArt({cells});
  const base=new THREE.Box3().setFromObject(tank.root.getObjectByName('ThinAboveGroundPlinth'));
  assert.ok(base.min.y>=.45-1e-6);assert.ok(base.max.y<tank.floorY);assert.equal(tank.root.userData.landCutout,false);assert.equal(tank.root.userData.sharedGlassCount,0);
- assert.equal(tank.waterHeight,2.1);assert.equal(tank.floorY,.59);assert.equal(tank.outline.length,1);
+ assert.equal(tank.waterHeight,2.6);assert.equal(tank.floorY,.59);assert.equal(tank.outline.length,1);
  assert.equal(tank.edges.length,cells.length===2?4:6); // no interior divider
  tank.dispose();
 }

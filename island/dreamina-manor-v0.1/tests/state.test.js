@@ -1,5 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {createGame,applyCommand,assertGame,canClaimEmergency,publicGame} from '../lib/game/state.js';
+import {constructionView} from '../lib/game/construction.js';
 import {ECONOMY} from '../lib/game/economy.js';
 const ctx=(now=1000)=>({now,seed:42,newId:()=>`id-${now}`,config:ECONOMY,canDisplayFish:()=>true});
 const begin=(s,action,extra={},now=1000)=>applyCommand(s,{type:'begin-work',action,target:{kind:'land',cell:{x:0,z:0}},...extra},ctx(now)).state;
@@ -51,15 +52,15 @@ test('an existing collectible/display never must be sold to claim emergency seed
  const s=collect(mature());s.coins=0;s.items[0].location={kind:'land',cell:{x:0,z:0}};assert.ok(canClaimEmergency(s));const r=applyCommand(s,{type:'emergency-seed'},ctx()).state;assert.equal(r.items[0].id,s.items[0].id);assert.equal(r.coins,0);
 });
 test('land is the same unit price, nonrectangular growth never moves old coordinates',()=>{
- const s=createGame('qa-state',0);s.coins=200;const old=structuredClone(s.land);const r=applyCommand(s,{type:'expand-land',cell:{x:-1,z:0}},ctx()).state;assert.equal(r.coins,140);assert.equal(r.land.length,5);assert.deepEqual(r.land.slice(0,4),old);assert.throws(()=>applyCommand(r,{type:'expand-land',cell:{x:-2,z:-1}},ctx()),/相邻/);
+ const s=createGame('qa-state',0);s.coins=200;const old=structuredClone(s.land);const r=applyCommand(s,{type:'expand-land',cell:{x:-1,z:0}},ctx()).state;assert.equal(r.coins,140);assert.equal(r.land.length,4);assert.equal(constructionView(r,13000).land.length,5);assert.deepEqual(r.land,old);assert.throws(()=>applyCommand(r,{type:'expand-land',cell:{x:-2,z:-1}},ctx()),/相邻|连着/);
 });
 test('each dock is one fishing job location; only one bait is consumed after arrival',()=>{
- let s=createGame('qa-state',0);s.coins=200;s=applyCommand(s,{type:'build-dock',cell:{x:2,z:0}},ctx()).state;s=applyCommand(s,{type:'buy-input',kind:'bait',tier:1},ctx()).state;const before=s.coins;s=begin(s,'fish',{tier:1,target:{kind:'dock',cell:{x:2,z:0}}});assert.equal(s.baits[0],1);s=finish(s);assert.equal(s.baits[0],0);assert.equal(s.jobs.length,1);assert.equal(s.jobs[0].product.kind,'fish');assert.equal(s.coins,before);assertGame(s);
+ let s=createGame('qa-state',0);s.coins=200;s=applyCommand(s,{type:'build-dock',cell:{x:2,z:0}},ctx()).state;s=constructionView(s,13000);s=applyCommand(s,{type:'buy-input',kind:'bait',tier:1},ctx(13000)).state;const before=s.coins;s=begin(s,'fish',{tier:1,target:{kind:'dock',cell:{x:2,z:0}}});assert.equal(s.baits[0],1);s=finish(s);assert.equal(s.baits[0],0);assert.equal(s.jobs.length,1);assert.equal(s.jobs[0].product.kind,'fish');assert.equal(s.coins,before);assertGame(s);
 });
 test('first tank needs two adjacent owned empty cells; every later cell adds ten',()=>{
  let s=createGame('qa-state',0);s.coins=1000;assert.throws(()=>applyCommand(s,{type:'build-tank',cells:[{x:0,z:0}]},ctx()),/两块/);
- s=applyCommand(s,{type:'build-tank',cells:[{x:0,z:0},{x:1,z:0}]},ctx()).state;assert.equal(s.tank.length,2);assert.equal(s.coins,840);
- s=applyCommand(s,{type:'build-tank',cells:[{x:0,z:1}]},ctx()).state;assert.equal(s.tank.length*ECONOMY.tankCapacityPerCell,30);assert.equal(s.coins,760);assertGame(s);
+ s=applyCommand(s,{type:'build-tank',cells:[{x:0,z:0},{x:1,z:0}]},ctx()).state;assert.equal(s.tank.length,0);s=constructionView(s,13000);assert.equal(s.tank.length,2);assert.equal(s.coins,840);
+ s=applyCommand(s,{type:'build-tank',cells:[{x:0,z:1}]},ctx(13001)).state;s=constructionView(s,25001);assert.equal(s.tank.length*ECONOMY.tankCapacityPerCell,30);assert.equal(s.coins,760);assertGame(s);
 });
 test('public game exposes safe gameplay data, not private operation receipts',()=>{
  const s=createGame('qa-state',0);s.receipts={secret:'not-a-game-field'};const p=publicGame(s,1000);assert.equal(p.receipts,undefined);assert.equal(p.ownerUid,s.ownerUid);

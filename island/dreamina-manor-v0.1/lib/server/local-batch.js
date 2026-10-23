@@ -19,7 +19,7 @@ export function validateLocalOperations(operations){
 }
 export async function performLocalBatch(store,{uid,sessionId,command},now){
  const operations=validateLocalOperations(command.operations),results=[];
- const visit=await store.readVisit(sessionId);if(visit&&visit.islandUid!==uid&&operations.some(o=>['begin-work','move','build-tank','build-dock','expand-land'].includes(o.command.type)))throw new GameError('OWN_ISLAND_REQUIRED','回自己的庄园再做吧');
+ const visit=await store.readVisit(sessionId);if(visit&&visit.islandUid!==uid&&operations.some(o=>['construct','begin-work','move','build-tank','build-dock','expand-land'].includes(o.command.type)))throw new GameError('OWN_ISLAND_REQUIRED','回自己的庄园再做吧');
  for(const op of operations){const requestHash=await hash(op);let finished=false;
   for(let attempt=0;attempt<6&&!finished;attempt++){
    const recorded=await store.receipt(uid,op.id);if(recorded){if(recorded.hash!==requestHash)throw new GameError('OPERATION_CONFLICT','同一操作的内容变了，请重新连接');results.push({id:op.id,...recorded.receipt,replayed:true});finished=true;break;}

@@ -14,8 +14,8 @@ test('uncollected seeded output cannot unlock collection and public visitors do 
  const s=createGame('qa-collection-hidden',1);s.jobs=[{product:item}];assert.deepEqual(collectionVariants(s),{});assert.equal(publicGame(s,2,{viewerUid:'qa-visitor'}).discoveredVariants,undefined);assert.deepEqual(publicGame(s,2).discoveredVariants,{});
 });
 test('collection renders real lazy silhouette assets with two groups and a three-column complete vertical grid',()=>{
- const ui=fs.readFileSync('components/manor/CollectionBook.tsx','utf8');assert.match(ui,/\['plant','fish'\]/);assert.match(ui,/entries.map/);assert.match(ui,/scrollTop=0/);const css=fs.readFileSync('app/globals.css','utf8');assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);assert.match(ui,/<ItemThumb defer silhouette=\{!found\}/);assert.match(ui,/巨型/);assert.match(ui,/金色/);assert.doesNotMatch(ui,/>\?<\//);
- const thumb=fs.readFileSync('components/manor/ItemThumb.tsx','utf8');assert.match(thumb,/IntersectionObserver/);assert.match(thumb,/itemThumbnail\(item\)/);
+ const ui=fs.readFileSync('components/manor/CollectionBook.tsx','utf8');assert.match(ui,/\['plant','fish'\]/);assert.match(ui,/entries.map/);assert.match(ui,/scrollTop=0/);const css=fs.readFileSync('app/globals.css','utf8');assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);assert.match(ui,/<ItemThumb defer fit silhouette=\{!found\}/);assert.match(ui,/巨型/);assert.match(ui,/金色/);assert.doesNotMatch(ui,/>\?<\//);
+ const thumb=fs.readFileSync('components/manor/ItemThumb.tsx','utf8');assert.match(thumb,/IntersectionObserver/);assert.match(thumb,/itemThumbnail\(item,\{fit\}\)/);
 });
 
 test('collection mutation badges cannot squeeze species names out of their cards',()=>{const ui=fs.readFileSync('components/manor/CollectionBook.tsx','utf8'),css=fs.readFileSync('app/globals.css','utf8');assert.match(css,/grid-auto-rows:minmax\(144px,max-content\)/);assert.match(css,/item-card>\*\{flex-shrink:0\}/);assert.match(css,/min-height:28px;line-height:14px/);assert.doesNotMatch(ui,/found&&variants.length>0&&<div/);});

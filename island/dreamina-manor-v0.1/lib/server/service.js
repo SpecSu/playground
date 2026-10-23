@@ -5,7 +5,7 @@ import {secureSeed} from '../game/random.js';
 import {SOCIAL_FIELDS,performSocial,socialResponse} from './social-commands.js';
 import {visitPosition} from './social-store.js';
 const fields={...SOCIAL_FIELDS,'sync-local':['operations'],
- 'buy-input':['kind','tier'],'emergency-seed':[],
+ 'construct':['kind','cells'],'buy-input':['kind','tier'],'emergency-seed':[],
  'begin-work':['action','target','tier','itemId','destination'],'cancel-work':['intentId'],
  'finish-work':['intentId'],'hold':['itemId'],'store-hand':[],'sell':['itemId'],
  'expand-land':['cell'],'build-dock':['cell'],'build-tank':['cells'],'profile':['name','avatar'],
@@ -29,7 +29,7 @@ export async function performCommand(store,body,now=Date.now()){
  for(let attempt=0;attempt<6;attempt++){
   const recorded=await store.receipt(uid,opId);if(recorded){if(recorded.hash!==hash)throw new GameError('OPERATION_CONFLICT','这次操作已结束，重新点一下吧');return socialResponse(store,uid,sessionId,recorded.receipt,now,true);}
   const game=await store.read(uid);let visit=await store.readVisit(sessionId);
-  const worldCommand=['begin-work','finish-work','cancel-work','expand-land','build-dock','build-tank'].includes(command.type);
+  const worldCommand=['construct','begin-work','finish-work','cancel-work','expand-land','build-dock','build-tank'].includes(command.type);
   if(worldCommand&&!visit){await store.visit(sessionId,uid,uid,now);visit=await store.readVisit(sessionId);}
   if(worldCommand&&visit?.islandUid!==uid)throw new GameError('OWN_ISLAND_REQUIRED','回自己的庄园再做吧');
   if(command.type==='begin-work'&&game.pending){const p=game.pending;if(p.operationId!==opId)throw new GameError('WORK_IN_PROGRESS','手边的事还没好，马上继续');}

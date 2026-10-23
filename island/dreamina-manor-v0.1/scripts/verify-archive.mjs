@@ -1,4 +1,4 @@
-/** Verify the immutable 0.1 archive. Generated dependencies/build/state are not inputs. */
+/** Verify the current 0.1 source snapshot. Generated dependencies/build/state are not inputs. */
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFileSync, statSync} from 'node:fs';

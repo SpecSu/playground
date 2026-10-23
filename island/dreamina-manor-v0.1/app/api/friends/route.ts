@@ -1,0 +1,2 @@
+import{env}from'cloudflare:workers';import{readFriends}from'../../../lib/server/friends.js';
+export async function GET(request:Request){try{return Response.json({friends:await readFriends(env.DB,new URL(request.url).searchParams.get('uid'))},{headers:{'Cache-Control':'no-store'}});}catch(e:any){return Response.json({error:{code:e.code??'UNAVAILABLE',message:e.code?e.message:'朋友列表暂时没连上'}},{status:e.status??503,headers:{'Cache-Control':'no-store'}});}}

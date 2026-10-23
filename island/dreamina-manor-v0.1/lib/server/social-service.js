@@ -1,3 +1,4 @@
+import{constructionView}from'../game/construction.js';
 import {recordDiscovery,collectionVariants} from '../game/collection.js';
 import {GameError,assertGame,projectedPosition} from '../game/state.js';
 import {planWalk,pathDistance} from '../game/grid.js';
@@ -12,7 +13,7 @@ function record(s,entry){s.activity=[{...entry,id:crypto.randomUUID()},...s.acti
 function assertVisit(v,uid,now){if(!active(v,uid,now))fail('VISIT_EXPIRED','重新进入这个庄园再试试');}
 export async function prepareSocial(store,game,visit,command,now){
  assertVisit(visit,game.ownerUid,now);if(game.pending)fail('WORK_PENDING','先完成手边的事，或点取消');
- const island=await store.read(visit.islandUid);if(!island)fail('NO_ISLAND','这个庄园暂时找不到');
+ const rawIsland=await store.read(visit.islandUid),island=rawIsland?constructionView(rawIsland,now):null;if(!island)fail('NO_ISLAND','这个庄园暂时找不到');
  const from=visitPosition(visit,game,now);let target,otherUid,jobId,itemId,targetSession;
  if(command.action==='steal'){
   if(visit.islandUid===game.ownerUid)fail('OWN_ISLAND','这是自己的收获');
