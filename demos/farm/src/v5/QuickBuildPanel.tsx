@@ -61,6 +61,6 @@ export default function QuickBuildPanel({profile:p,busy,placementPoint,send,onGh
   {selection&&!blocked&&<button type="button" className="quick-build-confirm" data-command="quick-build-confirm" disabled={busy||!preview?.ok} onClick={confirm}>建这里 · 花{preview?.cost??0}材料</button>}
   {selection&&preview&&p.materials<preview.cost&&onExplore&&<button className="quick-build-explore" data-quick-explore onClick={onExplore}>去探索找材料</button>}
   {p.layout.construction&&<button type="button" className="quick-build-confirm" onClick={onClose}>回去看建造</button>}
-  {!selection&&<div className="quick-build-links"><button type="button" data-quick-planner onClick={onPlanner}>自己摆放</button>{onTheme&&<button type="button" data-quick-theme onClick={onTheme}>换个主题</button>}{onExplore&&<button type="button" data-quick-explore onClick={onExplore}>去探索</button>}</div>}
+  {!selection&&<div className="quick-build-links"><button type="button" data-quick-planner onClick={onPlanner}>自己摆放</button>{onTheme&&<button type="button" data-quick-theme onClick={onTheme}>做件作品</button>}{onExplore&&<button type="button" data-quick-explore onClick={onExplore}>去探索</button>}</div>}
  </div>;
 }
