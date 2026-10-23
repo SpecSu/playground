@@ -1,24 +1,26 @@
 {
-  "version": "v11.0-minimal-terrain",
+  "version": "v12.0-egg-farm",
   "defaultMode": "minimal",
   "legacyMode": "?legacy",
   "camera": "orthographic-manor-10.4-offset-9-13.8-18",
   "viewport": "390x844",
   "world": "continuous-land-4x4-owned-10x10-visible",
-  "terrain": [
-    "meadow",
-    "creek",
-    "hill",
-    "grove"
+  "storage": "browser-local-egg-v2",
+  "entry": "welcome-coins-random-egg-place-hatch",
+  "shop": "two-tiles-physical-walk-carry-confirm-sale",
+  "species": [
+    "sheep",
+    "pig",
+    "cow",
+    "bunny"
   ],
-  "storage": "browser-local-separate-v1",
-  "care": "walk-near-feed-pet-natural-drink-rest",
-  "gifts": "collect-display-sell-permanent-collection",
-  "expansion": "four-edge-40-coins",
-  "terraform": "20-coins-after-first-expansion",
-  "wolves": "two-safe-edge-visitors",
-  "audio": "legacy-only",
+  "sizes": [
+    "normal",
+    "large",
+    "giant"
+  ],
+  "breeding": "manual-adult-same-species-opposite-sex-one-farm-egg-per-UTC8-day",
+  "visualQA": "geometry-and-raycast-tested-not-WebGL-browser-accepted",
   "generation": "not-connected-in-minimal-mode",
-  "friends": "not-connected-in-minimal-mode",
-  "visualAcceptance": "not-browser-verified"
+  "friends": "not-connected-in-minimal-mode"
 }

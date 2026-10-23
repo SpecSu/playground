@@ -4,32 +4,40 @@ import {registerHooks} from 'node:module';
 import {Window,type HTMLButtonElement as HappyButton} from 'happy-dom';
 import {createElement} from 'react';
 import {createRoot} from 'react-dom/client';
-import {createMinimalState,MINIMAL_STORAGE_KEY,type MinimalState} from '../src/minimal/model.ts';
-type StubWorld={handlers:{select:(target:{kind:'tile';x:number;z:number}|{kind:'animal';id:string})=>void;arrive:(p:{x:number;z:number})=>void};state:MinimalState;path:{x:number;z:number}|null;actions:string[];disposed:boolean};
-const pause=()=>new Promise(r=>setTimeout(r,25));
+import {MINIMAL_STORAGE_KEY,type MinimalState,type Point} from '../src/minimal/model.ts';
+type Target={kind:'tile';x:number;z:number}|{kind:'animal';id:string}|{kind:'egg';id:string}|{kind:'shop'};
+type StubWorld={handlers:{select:(target:Target)=>void;arrive:(p:Point)=>void};state:MinimalState;path:Point|null;actions:string[];disposed:boolean;placementMode:boolean};
+const pause=(ms=30)=>new Promise(r=>setTimeout(r,ms));
 
-test('minimal UI: visible terrain expands, care waits for arrival, gift display/sale persists collection',async()=>{
+test('egg UI: welcome once, physical shop purchase, ground incubation, overhead carry and explicit sale',async()=>{
  const hooks=registerHooks({load(url,context,next){
-  if(url.endsWith('/minimal/World.ts'))return {format:'module',shortCircuit:true,source:`export class MinimalWorld{constructor(host,state,handlers){this.state=state;this.handlers=handlers;this.actions=[];globalThis.__minimalTestWorld=this;}update(s){this.state=s;}walkTo(p){this.path=p;return true;}focus(){}zoom(){}cancelWalk(){this.path=null;}perform(a){this.actions.push(a);}dispose(){this.disposed=true;}screenPoint(){return {x:100,y:100};}}`};
+  if(url.endsWith('/minimal/World.ts'))return {format:'module',shortCircuit:true,source:`export class MinimalWorld{constructor(host,state,handlers){this.state=state;this.handlers=handlers;this.actions=[];globalThis.__eggTestWorld=this;}update(s){this.state=s;}walkTo(p){this.path=p;return true;}setPlacementMode(active){this.placementMode=active;}focus(){}zoom(){}cancelWalk(){this.path=null;}perform(a){this.actions.push(a);}dispose(){this.disposed=true;}screenPoint(){return {x:195,y:300};}}`};
   if(url.endsWith('/feed/PhoneViewport.tsx'))return {format:'module',shortCircuit:true,source:'export default function PhoneViewport({children}){return children;}'};
   return next(url,context);
  }});
  const w=new Window({url:'http://localhost/'});Object.assign(globalThis,{window:w,document:w.document,HTMLElement:w.HTMLElement});
- const now=Date.now(),initial=createMinimalState(now);initial.gifts.push({id:'gift-test',kind:'wool',location:'ground',createdAt:now,animalId:'sheep-1',rare:false});initial.player={x:1,z:1};initial.animals[0].activityUntil=now+60_000;initial.nextWolfAt=now+60_000;
- w.localStorage.setItem(MINIMAL_STORAGE_KEY,JSON.stringify(initial));
+ const originalNow=Date.now;let now=originalNow();Date.now=()=>now;
  const {default:MinimalApp}=await import('../src/minimal/MinimalApp.tsx');
  const host=w.document.createElement('div');w.document.body.append(host);const root=createRoot(host as unknown as HTMLElement);
  const buttons=()=>Array.from(host.querySelectorAll<HappyButton>('button'));
  const click=async(text:string)=>{const b=buttons().find(b=>b.textContent?.includes(text));assert.ok(b,`button ${text} exists`);assert.equal(b.disabled,false,`${text} enabled`);b.click();await pause();};
  const saved=()=>JSON.parse(w.localStorage.getItem(MINIMAL_STORAGE_KEY)!) as MinimalState;
+ const advance=async(ms:number)=>{now+=ms;await pause(280);};
+ const arrive=async(scene:StubWorld)=>{assert.ok(scene.path);await advance(2500);scene.handlers.arrive(scene.path!);await pause();};
  try{
   root.render(createElement(MinimalApp));await pause();await pause();
-  const scene=(globalThis as unknown as {__minimalTestWorld:StubWorld}).__minimalTestWorld;assert.ok(scene);assert.match(host.textContent!,/本机保存/);assert.match(host.textContent!,/演示加速/);
-  scene.handlers.select({kind:'tile',x:6,z:6});await pause();assert.equal(buttons().find(b=>b.textContent?.includes('先开辟一块相邻土地'))?.disabled,true);
-  scene.handlers.select({kind:'tile',x:4,z:1});await pause();assert.match(host.textContent!,/还没开辟的小溪/);await click('开辟这里');assert.equal(saved().coins,40);assert.equal(saved().tiles.filter(t=>t.owned).length,17);
-  await click('换一种风景');await click('丘陵');assert.equal(saved().coins,20);assert.equal(saved().tiles.find(t=>t.x===4&&t.z===1)?.terrain,'hill');
-  scene.handlers.select({kind:'animal',id:'sheep-1'});await pause();assert.equal(buttons().some(b=>b.textContent?.includes('亲自喂一点')),false,'care not visible before arrival');assert.ok(scene.path);scene.handlers.arrive(scene.path);await pause();await click('亲自喂一点');assert.equal(saved().animals[0].bond,1);assert.deepEqual(scene.actions,['feed']);
-  scene.handlers.select({kind:'animal',id:'sheep-2'});await pause();const staleArrival=scene.path!;await click('背包');scene.handlers.arrive(staleArrival);await pause();assert.equal(host.querySelector('[aria-label="场景动作"]'),null,'stale arrival cannot reopen card behind panel');await click('收下地上的');assert.equal(saved().gifts[0].location,'bag');await click('摆出来');assert.equal(saved().gifts[0].location,'display');await click('出售 20');assert.equal(saved().coins,40);assert.equal(saved().gifts.length,0);assert.deepEqual(saved().collection,['wool']);
-  root.unmount();assert.equal(scene.disposed,true);
- }finally{hooks.deregister();await w.happyDOM.close();}
+  const scene=(globalThis as unknown as {__eggTestWorld:StubWorld}).__eggTestWorld;assert.ok(scene);assert.match(host.textContent!,/领取 120 金币/);assert.doesNotMatch(host.textContent!,/精力/);
+  await click('领取 120');assert.equal(saved().coins,120);assert.equal(saved().welcomeClaimed,true);assert.equal(saved().animals.length,0);assert.doesNotMatch(host.textContent!,/领取 120 金币/);
+  await click('去商店');assert.equal(buttons().some(b=>b.textContent?.includes('买一颗')),false,'purchase not offered before reaching shop');await arrive(scene);const buyButton=buttons().find(b=>b.textContent?.includes('买一颗'))!;buyButton.click();buyButton.click();await pause();assert.equal(saved().coins,90);assert.equal(saved().eggs.length,1);assert.match(host.textContent!,/点一块亮起的空地/);assert.equal(scene.placementMode,true);
+  const eggId=saved().eggs[0].id;scene.handlers.select({kind:'shop'});await pause();assert.equal(scene.placementMode,true,'shop cannot steal placement mode');scene.handlers.select({kind:'tile',x:2,z:2});await pause();assert.equal(saved().eggs[0].location,'bag','placement waits for walk');const canceled=scene.path!;buttons().find(b=>b.getAttribute('aria-label')==='取消放蛋')!.click();await pause();scene.handlers.arrive(canceled);await pause();assert.equal(saved().eggs[0].location,'bag','canceled placement never consumes an egg');assert.equal(scene.placementMode,false);buttons().find(b=>b.getAttribute('aria-label')?.startsWith('蛋袋'))!.click();await pause();await click('神秘动物蛋');scene.handlers.select({kind:'tile',x:2,z:2});await pause();await arrive(scene);assert.equal(saved().eggs[0].location,'ground');assert.equal(scene.placementMode,false);assert.equal(buttons().some(b=>b.textContent?.includes('孵开看看')),false);
+  await advance(11000);await click('孵开看看');assert.equal(saved().eggs.length,0);assert.equal(saved().animals.length,1);assert.equal(saved().lastHatch?.animalId,saved().animals[0].id);
+  await advance(6000);const animalId=saved().animals[0].id;scene.handlers.select({kind:'animal',id:animalId});await pause();await arrive(scene);const wandered=scene.state.animals.find(a=>a.id===animalId)!;wandered.position=[{x:0,z:3},{x:3,z:3},{x:3,z:0}].sort((a,b)=>Math.hypot(b.x-scene.state.player.x,b.z-scene.state.player.z)-Math.hypot(a.x-scene.state.player.x,a.z-scene.state.player.z))[0];await click('举起来');assert.equal(saved().carriedAnimalId,null,'a wandering animal is approached before pickup');assert.ok(scene.path);await arrive(scene);await click('举起来');assert.equal(saved().carriedAnimalId,animalId);assert.equal(saved().animals.length,1,'carry never duplicates or removes the animal');scene.handlers.select({kind:'animal',id:animalId});await pause();assert.equal(buttons().some(b=>b.textContent?.includes('举起来')),false,'carrying never offers another pickup');assert.match(host.textContent!,/带去商店出售/);
+  await click('带去商店出售');await arrive(scene);assert.equal(saved().animals.length,1,'arrival at shop does not auto-sell');assert.match(host.textContent!,/出售后会离开牧场/);const balance=saved().coins;await click('出售 ·');assert.equal(saved().animals.length,0);assert.equal(saved().carriedAnimalId,null);assert.ok(saved().coins>balance);assert.ok(saved().collection.length>0,'collection survives sale');assert.match(host.textContent!,/再挑一颗蛋/);assert.doesNotMatch(host.textContent!,/买第一颗蛋/);
+  // New destination wins; an old arrival cannot open the newer target early.
+  scene.handlers.select({kind:'tile',x:3,z:3});await pause();const oldDestination=scene.path!;scene.handlers.select({kind:'shop'});await pause();scene.handlers.arrive(oldDestination);await pause();assert.equal(host.querySelector('[aria-label="场景动作"]'),null);await arrive(scene);assert.ok(host.querySelector('[aria-label="场景动作"]'));
+  // A canceled approach must not reopen a stale world card behind settings.
+  scene.handlers.select({kind:'shop'});await pause();const stale=scene.path!;buttons().find(b=>b.getAttribute('aria-label')==='设置与说明')!.click();await pause();scene.handlers.arrive(stale);await pause();assert.equal(host.querySelector('[aria-label="场景动作"]'),null);
+  assert.equal(saved().eggs.some(e=>e.id===eggId),false);buttons().find(b=>b.getAttribute('aria-label')==='关闭面板')!.click();await pause();scene.handlers.select({kind:'shop'});await pause();await arrive(scene);await click('买一颗');buttons().find(b=>b.getAttribute('aria-label')==='取消放蛋')!.click();await pause();scene.handlers.select({kind:'shop'});await pause();await arrive(scene);const beforeRebuy=saved().coins;await click('买一颗');assert.equal(saved().coins,beforeRebuy-30,'cancel placement unlocks a subsequent intentional purchase');assert.equal(saved().eggs.length,2);root.unmount();assert.equal(scene.disposed,true);
+  const second=createRoot(host as unknown as HTMLElement);second.render(createElement(MinimalApp));await pause();await pause();assert.doesNotMatch(host.textContent!,/领取 120 金币/,'welcome cannot repeat after reload');second.unmount();
+ }finally{Date.now=originalNow;hooks.deregister();await w.happyDOM.close();}
 });
