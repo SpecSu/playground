@@ -31,6 +31,6 @@ test('foreign heartbeat from a second browser cannot cancel an ongoing home job'
  await assert.rejects(performSocial(store,envelope('visitor','visitor-session',{type:'begin-social',action:'steal',jobId:'mature-job'}),'foreign-cannot-cancel',2250),{code:'WORK_PENDING'});
  assert.equal((await store.read('visitor')).pending?.id,started.game.pending.id);
  await store.visit('visitor-home-session','visitor','owner',2300);
- assert.equal((await store.read('visitor')).pending,null);
+ assert.equal((await store.read('visitor')).pending.id,started.game.pending.id);
  assert.equal((await store.read('visitor')).seeds[0],1);
 });

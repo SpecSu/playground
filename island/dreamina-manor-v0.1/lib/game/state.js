@@ -1,3 +1,4 @@
+import{fishTankFit}from'./fish-space.js';
 import{constructionView,reservedCells,startConstruction}from'./construction.js';
 import {recordDiscovery,collectionVariants} from './collection.js';
 import {INITIAL_LAND,docksHaveWater,validCell,cellKey,landCandidates,dockCandidates,canExtendTank,planWalk,pathDistance,allLandReachable,nearestDryPosition} from './grid.js';
@@ -14,7 +15,7 @@ const targetKey=t=>`${t.kind}:${cellKey(t.cell)}`;
 const jobAt=(s,t)=>s.jobs.find(j=>targetKey(j.target)===targetKey(t));
 const itemById=(s,id)=>s.items.find(i=>i.id===id)??fail('ITEM_GONE','找不到这件东西了');
 const isEmptyLand=(s,cell)=>has(s.land,cell)&&!has(s.tank,cell)&&!reservedCells(s,'tank').some(c=>sameCell(c,cell))&&!s.jobs.some(j=>j.target.kind==='land'&&sameCell(j.target.cell,cell))&&!s.items.some(i=>i.location.kind==='land'&&sameCell(i.location.cell,cell));
-export function createGame(uid,now,config=ECONOMY){return {gameId:'manor-next',schemaVersion:1,ownerUid:normalizeUid(uid),revision:0,createdAt:now,updatedAt:now,profile:{name:'',avatar:'milk-frog'},coins:config.startingCoins,seeds:[config.startingSeeds,0,0,0,0],baits:[0,0,0,0,0],land:structuredClone(INITIAL_LAND),docks:[],tank:[],jobs:[],items:[],discovered:{},discoveredVariants:{},position:{x:.5,z:.65},pending:null,firstPlantStarted:false,theftAvailableAt:0,activity:[],constructions:[]};}
+export function createGame(uid,now,config=ECONOMY){return {gameId:'manor-next',schemaVersion:1,fishHousingVersion:2,ownerUid:normalizeUid(uid),revision:0,createdAt:now,updatedAt:now,profile:{name:'',avatar:'milk-frog'},coins:config.startingCoins,seeds:[config.startingSeeds,0,0,0,0],baits:[0,0,0,0,0],land:structuredClone(INITIAL_LAND),docks:[],tank:[],jobs:[],items:[],discovered:{},discoveredVariants:{},position:{x:.5,z:.65},pending:null,firstPlantStarted:false,theftAvailableAt:0,activity:[],constructions:[]};}
 export function canClaimEmergency(s,config=ECONOMY){return s.coins<config.inputCosts[0]&&s.seeds.every(n=>n===0)&&s.jobs.length===0;}
 export function projectedPosition(s,now){
  const p=s.pending;if(!p?.path?.length)return {...s.position};
@@ -44,6 +45,8 @@ function validateWork(s,action,target,tier,itemId,now,context,expectedJobId){
   }else{
    if(target.kind!=='tank'||!has(s.tank,target.cell))fail('NO_TANK','先放一个鱼缸吧');
    if(s.items.filter(i=>i.location.kind==='tank').length>=s.tank.length*cfg.tankCapacityPerCell)fail('TANK_FULL','鱼缸满了，接一格就能继续放');
+   const fit=fishTankFit(s,item);
+   if(!context.approvedLegacyHousing&&(!fit.fitsFootprint||!fit.fitsHeight))throw Object.assign(new GameError('TANK_TOO_SMALL',`鱼缸至少需要 ${fit.requiredN}×${fit.requiredM} 格才能放下这条鱼`),{requiredNxN:fit.requiredNxN,requiredNxM:fit.requiredNxM});
   }
  }else if(action==='retrieve'){
   const item=itemById(s,itemId);if(!['land','tank'].includes(item.location.kind))fail('ITEM_MOVED','东西已经挪走了');
@@ -112,7 +115,8 @@ export function applyCommand(original,command,context={}){
   if(!validCell(c.cell)||!has(dockCandidates(s.land,s.docks),c.cell))fail('BAD_DOCK','选一处岸边或码头旁的空位吧');spend(cfg.dockPrice);s.docks.push({...c.cell});break;
  }
  case 'build-tank':{
-  if(!Array.isArray(c.cells)||c.cells.length!==(s.tank.length?1:2))fail('BAD_TANK_SIZE',s.tank.length?'每次接一块就好':'第一只鱼缸需要相邻两块地');
+  // Preserve old unacknowledged two-cell starter commands; new UI builds one cell.
+  if(!Array.isArray(c.cells)||!(s.tank.length?[1]:[1,2]).includes(c.cells.length))fail('BAD_TANK_SIZE','选一块空地建鱼缸吧');
   const next=[...s.tank];for(const cell of c.cells){if(!validCell(cell)||!isEmptyLand(s,cell)||!canExtendTank(s.land,next,cell))fail('BAD_TANK_SITE','选两块相邻、空着的地吧');next.push({...cell});}
   const safePosition=nearestDryPosition(s.land,s.docks,next,projectedPosition(s,now));if(next.length>=s.land.length||!safePosition||!allLandReachable(s.land,s.docks,next,safePosition))fail('BLOCKED_PATH','留一块能走动的空地吧');
   spend(cfg.tankModulePrice*c.cells.length);s.tank=next;s.position=safePosition;s.pending=null;receipt={...receipt,capacity:next.length*cfg.tankCapacityPerCell};break;

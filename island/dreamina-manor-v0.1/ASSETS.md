@@ -9,3 +9,7 @@
 - 保留 package-lock、vendored Sites 插件 MIT 许可和 shadcn CSS 许可。依赖遵循各自包内 LICENSE；本目录没有擅自给整个工程或用户素材附加统一开源许可。
 
 用户授权归档到此仓库不代表所有人物/资产都已获通用再分发或商业授权。来源工程没有完整提供人物建模原件或独立素材许可，应在进一步公开分发/商业使用前确认权利或替换未知项。
+
+## 海面新增素材
+
+`public/assets/lagoon/fish-compact-e94279c.glb` 与 `rock-compact-e94279c.glb` 取自授权的 `SpecSu/playground/island/artdesign` 来源提交 e94279c，供海底装饰使用；不是玩家库存或个人记录。动态海岸/日光/海面与运动代码在 lib/art 中适配。保留 `art-source/lagoon-reference/SOURCE.md`、来源 notices 与 Three.js MIT 文本；其对源工程 art/、vendor/ 等路径的引用不是本 demo 缺失运行资源的声明。归档不扩展素材的通用商业/公开再分发授权。

@@ -1,5 +1,5 @@
 /** Bounded in-session image cache. Keys identify presentation, not inventory identity. */
-export const THUMBNAIL_REVISION='display-v10';
+export const THUMBNAIL_REVISION='display-v12';
 export function thumbnailKey(item,{fit=false}={}){return JSON.stringify([THUMBNAIL_REVISION,item.kind,item.speciesId,item.standardSize??null,item.finalSize,item.mutation??'normal',fit?'fill':'relative']);}
 export function createThumbnailCache(limit=192){const ready=new Map(),pending=new Map();let generated=0,hits=0,failed=0;return{
  peek(key){const value=ready.get(key);if(value){ready.delete(key);ready.set(key,value);}return value;},

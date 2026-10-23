@@ -19,7 +19,7 @@ export function createActionQueue({uid,sessionId,storage=globalThis.localStorage
   if(data.island?.ownerUid===uid)data.island=g;return data;
  }
  function startNext(){if(entries.some(e=>e.local&&!e.localDone&&!e.cancelled))return;
-  const e=entries.find(e=>!e.localDone&&!e.cancelled);if(!e||!authority)return;const g=view().game,island=authority.island??g,from=lastPosition??projectedPosition(g,now());
+  const e=entries.find(e=>!e.localDone&&!e.cancelled);if(!e||!authority)return;const g=view().game,island=authority.island??g,from=lastPosition??(island.ownerUid!==uid?authority.visit?.position:projectedPosition(g,now()))??g.position;
   try{let p;if(e.command.type==='move'){const path=planFreeWalk(island,from,e.command.point);if(!path)throw new Error('那里暂时走不到');const arriveAt=now()+Math.ceil(pathDistance(path)*ECONOMY.walkSecondsPerCell*1000);p={id:e.id,action:'move',path,startedAt:now(),arriveAt,finishAt:arriveAt};}
    else {const working={...g,seeds:[...g.seeds],baits:[...g.baits],pending:null,position:from};if(e.command.action==='plant')working.seeds[e.command.tier-1]++;if(e.command.action==='fish')working.baits[e.command.tier-1]++;p=applyCommand(working,e.command,{now:Math.round(now()),newId:()=>e.id}).state.pending;}
    e.local={position:from,pending:p};save();
@@ -35,12 +35,12 @@ export function createActionQueue({uid,sessionId,storage=globalThis.localStorage
   // A new free walk replaces only another unfinished free walk, never work.
   if(command.type==='move')for(const e of [...entries])if(e.command.type==='move'&&!e.localDone)cancel(e.id);
   const g=view().game,job=command.action==='harvest'?g.jobs.find(j=>same(j.target,command.target)):null;
-  const e={id:newId(),command:structuredClone(command),meta,local:null,localDone:false,server:null,cancelled:false,...(job?{jobId:job.id,product:structuredClone(job.product)}:{})};entries.push(e);save();startNext();return e;
+  const e={id:newId(),command:structuredClone(command),meta:{...meta,islandUid:authority.island?.ownerUid??uid},local:null,localDone:false,server:null,cancelled:false,...(job?{jobId:job.id,product:structuredClone(job.product)}:{})};entries.push(e);save();startNext();return e;
  }
  function tick(){const e=entries.find(e=>e.local&&!e.localDone&&!e.cancelled);if(e&&now()>=e.local.pending.finishAt){e.localDone=true;lastPosition={...e.local.pending.path.at(-1)};save();onLocalComplete(e);startNext();}else startNext();}
  function cancel(id){const e=entries.find(e=>e.id===id);if(!e||e.localDone)return false;if(e.local)lastPosition=projectedPosition(e.local,now());if(e.server||e.sent)e.cancelled=true;else entries=entries.filter(x=>x!==e);save();startNext();return true;}
  function fail(id,message){const e=entries.find(e=>e.id===id);if(!e)return;entries=entries.filter(x=>x!==e);save();onError(message,e);startNext();}
- function observe(data){if(!data?.game)return;if(!authority||data.game.revision>=authority.game.revision)authority=data;
+ function observe(data){if(!data?.game)return;if(authority?.island?.ownerUid!==data.island?.ownerUid)lastPosition=null;if(!authority||data.game.revision>=authority.game.revision)authority=data;
   const op=data.operationId;if(op){for(const e of [...entries]){if(op===`begin-${e.id}`){const intentId=data.receipt?.intentId,p=data.operationPending?.id===intentId?data.operationPending:data.visit?.pending?.id===intentId?data.visit.pending:data.game.pending?.id===intentId?data.game.pending:null;e.server=p??{id:intentId,finishAt:0};}
    else if(op===`complete-${e.server?.id}`||op===`cancel-${e.id}`){entries=entries.filter(x=>x!==e);if(data.receipt?.action==='interrupted')onError(data.receipt.message,e);else if(!e.cancelled)onConfirmed(e,data);}
   }}

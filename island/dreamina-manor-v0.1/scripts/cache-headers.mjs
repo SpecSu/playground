@@ -6,4 +6,5 @@ for(const kind of ['seed','bait'])for(let tier=1;tier<=5;tier++){
  const route=`/assets/world/icons/${kind}-${tier}-botanical-v10b.svg`;
  if(!text.includes(route))text+=`\n${route}\n  Cache-Control: public, max-age=31536000, immutable\n`;
 }
+for(const kind of ['fish','rock']){const route=`/assets/lagoon/${kind}-compact-e94279c.glb`;if(!text.includes(route))text+=`\n${route}\n  Cache-Control: public, max-age=31536000, immutable\n`;}
 fs.writeFileSync(path,text);

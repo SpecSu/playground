@@ -2,8 +2,9 @@
 
 ## 1. 先确认基线与边界
 
-- 对外归档版本：0.1；package：0.1.0；内部发布版本：Sites v11；更新日期：2026-10-23。原目录覆盖更新，不另建 0.2。
-- 发布源码 SHA：`085d34080ba13c0719e0e2396846a4a85f2682dc`；包含 Sites v8–v10 合版及 v11 默认收起背包热修。
+- 对外归档版本：0.1；package：0.1.0；内部发布版本：Sites 15；更新日期：2026-10-23。原目录覆盖更新，不另建 0.2。
+- 发布源码 SHA：`c8fedba1de4565289cf89ed38986f80af939bb97`；包含鱼缸/大鱼空间、精确日志恢复、海面日光/泳动/提示降噪及串门回跳修复；只同步该冻结提交，不混入之后的工作树改动。
+- 发布：Sites v15 于 2026-10-23 13:07:49 UTC 成功，保存版本 `appgver_fed58d32352c8191b71e1797958d60dd`，deployment `appgdep_6adb5c1afdfc8191b5c9f20e2bc66aad`。
 - 当前线上：[即梦庄园](https://dreamina-manor.mythicgleam32.chatgpt.site/)。此处同步已发布版本，不触发再次部署、不清档。
 - 原 Sites 项目：`appgprj_6ada46e99b6c81919a0b4e8db57f4163`。这些是来源标识，不是访问凭据。
 - 归档来源为该提交的完整 Git 跟踪文件；只改 README 和 `.openai/hosting.json`，并加入本文、部署模板、来源说明与校验文件。运行代码、正式测试、package-lock 和素材均未改变。`ARCHIVE-MANIFEST.json` 逐项记录原 SHA-256、归档 SHA-256 和差异。
@@ -41,10 +42,10 @@ npm run start -- --port 5174
 - `lib/game/`：10 种植物、20 种鱼、五档经济、纯状态与本地操作 reducer；`lib/server/`：服务端校验、存储、社交和 batch 处理。
 - `lib/client/local-journal.js`、`action-queue.js`、`snapshot-order.js`、`monotonic-clock.js`：持久命令日志、旧请求恢复、快照排序、单调时间。
 - `lib/world/`：场景、移动、手势、游泳、建造预览；`lib/art/`：程序化鱼/码头/鱼缸、植物展示和比例；`lib/avatars/`：人物加载、骨骼与动作。
-- `public/assets/avatars/`：12 个原 GLB + 12 个 WebP 及原校验清单；`public/assets/world/`：10 株植物 GLB/元数据、地块、10 个当前 botanical-v10b 种子/鱼饵 SVG 图标（并保留旧 10 个来源图标）。人物的原始建模工程不在来源工程中，不能声称可从脚本重建全部人物。
+- `public/assets/avatars/`：12 个原 GLB + 12 个 WebP 及原校验清单；`public/assets/lagoon/`：新海底装饰 fish/rock compact GLB；`public/assets/world/`：10 株植物 GLB/元数据、地块、10 个当前 botanical-v10b 种子/鱼饵 SVG 图标（并保留旧 10 个来源图标）。人物的原始建模工程不在来源工程中，不能声称可从脚本重建全部人物。
 - `lib/client/ocean-audio.js`：Web Audio 合成海浪，无缺失的外部 mp3；需要用户有效手势启动。鱼也由代码生成，不是遗漏的 20 个 GLB。
 - `art-source/`：11 个 Blender 源文件、生成与验证脚本。它们用于交接，不进入公开网页静态资源。
-- 美术旧文档勘误：`art-source/README.md` 中鱼的 `.01 unit/cm` 是旧描述，未为归档改写历史文件；实际展示比例以 `lib/art/physical-contract.js` 的展示公式（小鱼 3×、种类标准上限 1.43m、再乘个体尺寸比例）和本目录 README 为准，不要按旧句把展示强行还原为现实厘米等比。
+- 美术旧文档勘误：`art-source/README.md` 中鱼的 `.01 unit/cm` 是旧描述，未为归档改写历史文件；实际展示比例以 `lib/art/physical-contract.js` 的现版展示公式与 `fish-space-profiles.js` 实际包络和本目录 README 为准，不要按旧句把展示强行还原为现实厘米等比。
 - `db/`、`drizzle/`：D1 schema 与迁移；`tests/`：正式 Node 测试；`scripts/`、`vite.config.ts`、`.openai/`：完整构建/环境/部署材料。
 
 ## 4. 玩法与不可破坏的同步约束
@@ -66,7 +67,17 @@ npm run start -- --port 5174
 - `fishing-time.js` 用固定 seed 和独立 salt 决定 70%–130% 档位等待，不消耗产物 RNG 序号；鱼获自动换手时，原手持物以原 ID 回包。
 - `app/api/friends/`、`lib/server/friends.js` 与 0001 迁移仅处理真实登记关系。不要把固定演示岛当作真实好友，不为好友操作修改双方资产。
 - `thumbnail-cache.js`、`thumbnail-frame.js`、`scripts/cache-headers.mjs` 保留变体/尺寸缓存隔离和静态版本图标缓存；`npm run build` 已包含缓存头生成，不跳过后一步。海浪按真实播放状态切换；头顶/场景提示坐标逐渲染帧同步。
-- 鱼按统一展示尺扩大并限制大鱼，保留个体随机/巨型比例；鱼缸水高 2.6m，足迹、容量和价格不变。不能再次叠乘巨型倍率。
+- v11 的固定大鱼展示上限已被新版鱼空间模型替代，接手以当前源码为准；保留个体随机/巨型比例，不能再次叠乘巨型倍率。
+
+## 4b. 恢复、访客与海面接手重点
+
+- `pending-recovery.js` / `action-queue.js` / `api.js`：恢复旧跨会话 pending 时沿用原请求 body 和 ID；先查已提交回执，再处理确实未提交的部分，避免重复扣费或让旧 batch 卡死新动作。未确认的本地日志备份不能因升级被删除。
+- `game/journal-recovery.js` + `server/journal-recovery.js` 是有边界的一次性恢复：联合 SHA-256 绑定 UID、原基线/epoch、精确有序操作；原子 CAS 事务一次提交状态和所有 receipts，任何资产差异/部分回执/依赖冲突/并发变化整批中止。新位置与独立修改的 profile 元数据不能被旧日志覆盖。源码只保留绑定和算法，没有原存档/原操作数组。后续移除临时恢复入口需单独维护，不得顺手删除通用防复发逻辑或已写回执，详见专门文档。
+- `fish-space.js` / `fish-housing.js` / `tank-space.js` / `fish-space-profiles.js` 按实际模型包络验证可旋转实心矩形；仅已完工格计入。首格 80 币/10 条，旧两格构造兼容；旧缸空间不足的鱼以原 ID 回包，不改变价值或所有权。大鱼不要再靠压缩显示尺寸塞进不足的缸。
+- `bait-placement.js` 与空间规则衔接；施工/生长/钓鱼不阻断串门。访客状态排序须同时尊重目标岛和本地动作终点，过期 GET/ACK 不能把角色拉回或污染另一岛。
+- `lib/art/lagoon*.js`、`manor-lagoon.js`、`shore-field.js`、`daylight.js` 及两份 lagoon GLB 为动态海岸、海底装饰和光照实现；多通道渲染后必须恢复 renderer 状态，不能覆盖原游戏相机/人物生命周期。`swimming.js` 保留新版泳动，鱼群可使用整个已连接鱼缸的安全活动区域。
+- `sync-notice.js` 合并普通短时网络提示，保留需行动的异常；不要以“降噪”为由吞掉数据冲突或永久失败。海底装饰鱼不属于玩家背包/鱼获资产，不能混用经济状态。
+- 来源是已授权的小岛美术参考，说明/Three.js MIT 文本保存在 `art-source/lagoon-reference/`。里面引用的参考图/工具目录属于来源工程；本 demo 只携带实际使用的 compact fish/rock、适配代码和许可，不复制完整美术工程。
 
 ## 5. 部署与迁移
 
@@ -85,8 +96,7 @@ node scripts/check-release-archive.mjs /tmp/manor-site.tar.gz
 
 ## 6. 证据与限制
 
-- 本次覆盖按用户要求不新增软件测试、浏览器验收或安装/构建，仅核对来源与提交文件。`VERIFICATION.md` 区分已有发布证据和本轮未执行项，不能把旧报告当作新版再次通过。
-- v10 的精确来源 f318c7b 已有 193 正式测试、tsc/build 与独立 28 项通过记录。v11 是默认收起背包热修及对应正式回归测试，沿用其余逻辑；不声称本轮重新跑过完整套件。
-- 已有本地云浏览器证据包括土地施工与刷新续时、挂起 ACK 连种、自动换手、码头热区和缓存；不是实机验收。程序化最大鱼/虚拟时间测试与真实实屏证据不可混称。
-- 全仓 lint 存在历史债务；云 API/D1 长尾未被证明根治，uid 仍不是安全账号。不宣称强反作弊、全动作全设备验收或平台零故障。
-- 不新增 CI workflow 或自动部署。生产操作另需授权，禁止用真实玩家存档做 QA。资产来源/许可边界见 ASSETS.md。
+- 本次原目录覆盖不重新跑完整软件套件或实屏；只核对冻结来源、归档边界和远端提交。已有发布/重点检查证据在 VERIFICATION.md 按版本区分，不把历史通过当作新一轮全量通过。
+- 单次恢复成功与通用同步修复是不同事实；归档不提供恢复所需的玩家原始数据，也不是可任意重放的用户数据备份。禁止在真实玩家上做 QA，测试只能使用合成或独立 qa-* 身份。
+- 云浏览器证据不等于手机实机；海面 GPU 效果、性能和兼容性以实际设备为准。全仓 lint 历史债务、uid 非安全账号、D1 长尾和非强反作弊边界保留。
+- 不新增 CI workflow、自动部署、PR、tag 或 release；保留原 0.1 目录，其他工程不变。资产来源/许可边界见 ASSETS.md。

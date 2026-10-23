@@ -19,14 +19,15 @@ export function validateLocalOperations(operations){
 }
 export async function performLocalBatch(store,{uid,sessionId,command},now){
  const operations=validateLocalOperations(command.operations),results=[];
- const visit=await store.readVisit(sessionId);if(visit&&visit.islandUid!==uid&&operations.some(o=>['construct','begin-work','move','build-tank','build-dock','expand-land'].includes(o.command.type)))throw new GameError('OWN_ISLAND_REQUIRED','回自己的庄园再做吧');
+ // Every operation below applies only to the envelope UID's ledger. Visiting cannot retarget it.
+
  for(const op of operations){const requestHash=await hash(op);let finished=false;
   for(let attempt=0;attempt<6&&!finished;attempt++){
    const recorded=await store.receipt(uid,op.id);if(recorded){if(recorded.hash!==requestHash)throw new GameError('OPERATION_CONFLICT','同一操作的内容变了，请重新连接');results.push({id:op.id,...recorded.receipt,replayed:true});finished=true;break;}
    let rejection=null;for(const dependency of op.dependsOn){const r=await store.receipt(uid,dependency);if(!r||r.receipt.status==='rejected'){rejection={code:'DEPENDENCY_REJECTED',message:'前面的操作没有完成，这次没有扣除东西'};break;}}
    const game=await store.read(uid);let next,receipt;
    try{if(rejection)throw Object.assign(new GameError(rejection.code,rejection.message),rejection);if(game.pending)throw new GameError('WORK_IN_PROGRESS','先接好原来的操作');const applied=applyLocalOperation(game,op,{serverNow:now});next=applied.state;receipt={...applied.receipt,status:'confirmed'};}
-   catch(e){if(!(e instanceof GameError))throw e;if(['WORK_IN_PROGRESS'].includes(e.code))throw e;next={...game,revision:game.revision+1};receipt={type:'local-operation',status:'rejected',code:e.code,message:e.message};}
+   catch(e){if(!(e instanceof GameError))throw e;if(['WORK_IN_PROGRESS'].includes(e.code))throw e;next={...game,revision:game.revision+1};receipt={type:'local-operation',status:'rejected',code:e.code,message:e.message,...(e.requiredNxN?{requiredNxN:e.requiredNxN}:{}),...(e.requiredNxM?{requiredNxM:e.requiredNxM}:{}),...(e.requiredWaterHeight?{requiredWaterHeight:e.requiredWaterHeight}:{})};}
    // Each prefix is independently atomic and recoverable with exactly the same ID.
    next.updatedAt=now;next.localSync={...next.localSync,applied:[...(next.localSync?.applied??[]).filter(r=>r.id!==op.id),{id:op.id,...receipt}].slice(-256)};if(await store.commit(uid,game.revision,next,op.id,requestHash,receipt,now)){results.push({id:op.id,...receipt});finished=true;}
   }if(!finished)throw new GameError('BUSY','正在同步，稍后会接上');

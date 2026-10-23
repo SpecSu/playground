@@ -6,12 +6,13 @@ import {createAvatarActionPose} from '../lib/art/avatar-actions.js';
 import * as actionArt from '../lib/art/avatar-actions.js';
 import {FISH_STANDARD_SIZES_CM} from '../lib/art/fish-sizing.js';
 import {createFishPresentation,measureFishTurnEnvelope} from '../lib/art/fish-presentation.js';
+import{fishSpaceRequirement,fishTankFit}from'../lib/game/fish-space.js';
 import {createAquariumArt} from '../lib/art/aquarium.js';
 import {createSwimmer,safeSwimPoint} from '../lib/world/swimming.js';
 
 test('one exhibition ruler enlarges small fish while preserving within-species ratios',()=>{
  assert.ok(Math.abs(fishWorldLength(16,16)-1.35)<1e-10);
- assert.ok(Math.abs(fishWorldLength(100,100)-1.43)<1e-10);
+ assert.ok(Math.abs(fishWorldLength(100,100)-3.375)<1e-10);
  for(const standard of [14,16,45,100,115]){
   const ordinary=fishWorldLength(standard*.9,standard);
   assert.ok(Math.abs(fishWorldLength(standard*.9*1.3,standard)/ordinary-1.3)<1e-10);
@@ -20,20 +21,20 @@ test('one exhibition ruler enlarges small fish while preserving within-species r
  assert.throws(()=>fishWorldLength(20,0));let previous=0;for(let standard=14;standard<=115;standard++){const size=fishWorldLength(standard,standard);assert.ok(size>=previous);previous=size;}
 });
 
-test('all twenty largest exhibition fish stay inside the starter tank during real swimming and fin motion',()=>{
- const cells=[{x:0,z:0},{x:1,z:0}],tank=createAquariumArt({cells});
- for(const [id,standard] of Object.entries(FISH_STANDARD_SIZES_CM)){
-  const finalSize=standard*1.2*1.3,p=createFishPresentation({speciesId:id,lengthCm:finalSize,worldLength:fishWorldLength(finalSize,standard),instanceId:'audit-'+id});
-  const e=measureFishTurnEnvelope(p,{samples:96,seconds:24}),radius=Math.max(e.half.x,e.half.z)+.035;
-  const swimmer=createSwimmer({id:'audit-'+id,cells,outline:tank.outline,edges:tank.edges,floorY:tank.floorY,surfaceY:tank.surfaceY,radius,halfHeight:e.half.y});
+test('all twenty maxima stay within the true required rectangle in both orientations for120s',()=>{
+ for(const [id,standard] of Object.entries(FISH_STANDARD_SIZES_CM))for(const rotated of [false,true]){
+  const finalSize=standard*1.56,req=fishSpaceRequirement({speciesId:id,standardSize:standard,finalSize}),n=rotated?req.requiredM:req.requiredN,m=rotated?req.requiredN:req.requiredM;
+  const cells=Array.from({length:n*m},(_,i)=>({x:i%n,z:Math.floor(i/n)})),tank=createAquariumArt({cells}),space=fishTankFit({tank:cells},{speciesId:id,standardSize:standard,finalSize});
+  const p=createFishPresentation({speciesId:id,lengthCm:finalSize,worldLength:fishWorldLength(finalSize,standard),instanceId:'audit-'+id});
+  const swimmer=createSwimmer({id:'audit-'+id,cells,outline:tank.outline,edges:tank.edges,floorY:tank.floorY,surfaceY:tank.surfaceY,radius:space.swimRadius,halfHeight:space.halfHeight,space});
   for(let i=0;i<1200;i++){
-   const pose=swimmer.step(.1);assert.ok(safeSwimPoint(pose.position,radius,tank.outline,tank.edges),id+' horizontal envelope');
-   if(i%10===0){p.root.position.copy(pose.position);p.root.rotation.y=pose.yaw;p.animate(i*.1);p.root.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(p.root);
-    assert.ok(box.min.y>=tank.floorY+.04,id+' bottom including bob and fins');
-    assert.ok(box.max.y<=tank.surfaceY-.04,id+' surface including bob and fins');
+   const pose=swimmer.step(.1);
+   if(i%10===0){p.root.position.copy(pose.position);p.root.rotation.y=pose.yaw;p.animate(i*.1);p.root.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(p.root,true);
+    assert.ok(box.min.y>=tank.floorY+.04,id+' bottom including bob and fins');assert.ok(box.max.y<=tank.surfaceY-.04,id+' water surface');
+    assert.ok(box.min.x>=-1.3825&&box.max.x<=(n-.5)*3.2-.2175&&box.min.z>=-1.3825&&box.max.z<=(m-.5)*3.2-.2175,id+' actual mesh inside rectangle '+n+'x'+m);
    }
-  }p.dispose();
- }tank.dispose();
+  }p.dispose();tank.dispose();
+ }
 });
 
 test('sowing accent is neutral, finite, transient, and removable on failure',()=>{

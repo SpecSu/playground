@@ -59,3 +59,11 @@
 .overflow-toggle{background:transparent}.item-overflow-popover{position:absolute;z-index:14;width:136px;padding:6px;background:#fffdf3;border:1px solid #dbe1d1;border-radius:14px;box-shadow:0 6px 22px #15382935;display:flex;flex-direction:column}.item-overflow-popover button{min-height:44px;border-radius:9px;font-size:12px}.item-overflow-popover button:hover{background:#e8eedf}.more-dismiss{position:absolute;inset:0;z-index:13;cursor:default}.unaffordable{opacity:.48!important}.held-label{display:inline-block;font-size:10px;color:#546b43;background:#e1e9d5;border-radius:7px;padding:1px 5px}.construction-marker{pointer-events:none}.build-summary{font-size:12px;padding:7px 3px;color:#65735d}.friend-status{font-size:10px;color:#7b8972}
 
 .world-marker.plant-progress span{background:transparent!important;color:#fff;font-weight:600;text-shadow:0 1px 3px #0009,0 0 2px #0005;box-shadow:none;border:0}.world-marker.plant-progress{background:transparent!important;border:0;box-shadow:none}
+
+/* Compact thought bubble, with the original 44px pointer target retained. */
+.thought-prompt{background:#fffdf6cc;border-radius:16px;min-height:36px}.thought-prompt>button{min-height:44px;margin:-4px 0;padding:0 12px;font-size:11px}.thought-prompt:before,.thought-prompt:after{background:#fffdf6cc}.thought-prompt:before{width:8px;height:8px;bottom:-11px;left:calc(50% - 4px)}.thought-prompt:after{width:4px;height:4px;bottom:-18px;left:calc(50% - 2px)}
+
+.money-value{display:inline-flex;gap:3px;align-items:center;vertical-align:middle;white-space:nowrap}.money-value svg{flex:0 0 17px;width:17px;height:17px}
+.identity .money-value{flex-direction:row;align-items:center}
+
+.sync-note{position:absolute;z-index:9;top:max(72px,calc(env(safe-area-inset-top) + 62px));left:14px;right:14px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 9px;background:#f8f5e6dd;border-radius:10px;font-size:11px;color:#66674f;pointer-events:none}.sync-note button{pointer-events:auto;flex-shrink:0;min-height:36px;text-decoration:underline;font-size:11px}

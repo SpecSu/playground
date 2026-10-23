@@ -47,5 +47,5 @@ export async function performSocial(store,{uid,sessionId,opId,command},hash,now)
 }
 export async function socialResponse(store,uid,sessionId,receipt,now,replayed=false){
  const game=await store.read(uid),visit=await store.readVisit(sessionId),island=visit?await store.read(visit.islandUid):game;
- return {game:publicGame(game,now),island:publicGame(island,now,{viewerUid:uid}),visit:visit?{...visit.state,position:visitPosition(visit,game,now)}:null,presence:await store.presence(island.ownerUid,now),messages:await store.messages(island.ownerUid,now),receipt,serverNow:now,replayed};
+ return {game:publicGame(game,now),island:publicGame(island,now,{viewerUid:uid}),visit:visit?{...visit.state,position:visitPosition(visit,game,now),revision:visit.revision,islandUid:visit.islandUid}:null,presence:await store.presence(island.ownerUid,now),messages:await store.messages(island.ownerUid,now),receipt,serverNow:now,replayed};
 }

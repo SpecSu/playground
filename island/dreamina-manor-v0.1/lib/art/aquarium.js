@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {SHARED_CELL_SIZE,GROUND_TOP_Y,TANK_BASE_HEIGHT,TANK_FLOOR_Y,TANK_OUTER_EDGE_INSET} from './physical-contract.js';
-import {TANK_INNER_WATER_HEIGHT} from './fish-sizing.js';
+import {tankWaterHeight} from '../game/tank-space.js';
 
 const key=(x,z)=>`${x},${z}`;
 const area=p=>p.reduce((a,v,i)=>{const n=p[(i+1)%p.length];return a+v[0]*n[1]-n[0]*v[1]},0)/2;
@@ -49,7 +49,7 @@ function shapesFromOutline(loops){
 }
 
 /** World-root group: do NOT position it again at tank centre. Full ground remains underneath. */
-export function createAquariumArt({cells,cellSize=SHARED_CELL_SIZE,groundY=GROUND_TOP_Y,waterHeight=TANK_INNER_WATER_HEIGHT}={}){
+export function createAquariumArt({cells,cellSize=SHARED_CELL_SIZE,groundY=GROUND_TOP_Y,waterHeight=tankWaterHeight(cells??[])}={}){
  if(!cells?.length)throw new Error('Missing aquarium cells');
  const root=new THREE.Group();root.name='Art_ContinuousAboveGroundAquarium';
  const outline=aquariumOutline(cells,cellSize),shape=shapesFromOutline(outline);

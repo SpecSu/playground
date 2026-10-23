@@ -17,7 +17,7 @@ export function planLocalOperation(game,command,{id,now,dependsOn=[]}={}){
  }
  return op;
 }
-export function applyLocalOperation(original,op,{serverNow=null}={}){
+export function applyLocalOperation(original,op,{serverNow=null,approvedLegacyHousing=false}={}){
  const c=op.command;if(!LOCAL_COMMANDS.has(c?.type))fail('BAD_COMMAND','换个操作试试');
  if(!Number.isSafeInteger(op.at)||!Number.isSafeInteger(op.startedAt)||op.at<op.startedAt)fail('BAD_TIME','这次操作时间不对，请再试一次');
  if(serverNow!==null&&(op.at>serverNow+1500||serverNow-op.at>86400000||op.startedAt<(original.localSync?.issuedAt??0)))fail('BAD_TIME','离开太久了，请重新操作');
@@ -25,9 +25,9 @@ export function applyLocalOperation(original,op,{serverNow=null}={}){
  if(c.type==='begin-work'){
   const producing=['plant','fish'].includes(c.action),sync=s.localSync;
   if(producing&&(!sync||op.epoch!==sync.epoch||op.sequence!==sync.sequence))fail('DRAW_CONFLICT','另一处刚有变化，这次操作没有扣除种子');
-  const planned=applyCommand(s,c,{now:op.startedAt,newId:()=>op.id,operationId:op.id}).state;
+  const planned=applyCommand(s,c,{now:op.startedAt,newId:()=>op.id,operationId:op.id,approvedLegacyHousing}).state;
   if(op.at<planned.pending.finishAt)fail('BAD_TIME','还没走到这里');
-  result=applyCommand(planned,{type:'finish-work',intentId:op.id},{now:op.at,seed:producing?productionSeed(sync,op.sequence):0,newId:()=>op.id});
+  result=applyCommand(planned,{type:'finish-work',intentId:op.id},{now:op.at,seed:producing?productionSeed(sync,op.sequence):0,newId:()=>op.id,approvedLegacyHousing});
   if(producing)result.state.localSync={...sync,sequence:sync.sequence+1};
  }else if(c.type==='move'){
   const p=planLocalOperation(s,c,{id:op.id,now:op.startedAt});if(op.at<p.at)fail('BAD_TIME','还没走到这里');result={state:{...s,position:{...p.motion.pending.path.at(-1)},revision:s.revision+1,updatedAt:op.at},receipt:{type:'move'},changed:true};

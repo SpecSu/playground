@@ -4,7 +4,9 @@ export const FISH_DISPLAY_RULER=Object.freeze({referenceCm:16,referenceWorldLeng
 export function fishWorldLength(finalSizeCm,standardSizeCm){
  if(!Number.isFinite(finalSizeCm)||finalSizeCm<=0)throw new Error('Invalid final fish size');
  if(!Number.isFinite(standardSizeCm)||standardSizeCm<=0)throw new Error('Fish exhibition scale requires its species standard size');
- return Math.min(FISH_DISPLAY_RULER.standardCap,FISH_DISPLAY_RULER.referenceWorldLength*Math.sqrt(standardSizeCm/FISH_DISPLAY_RULER.referenceCm)*FISH_DISPLAY_RULER.enlargement)*(finalSizeCm/standardSizeCm);
+ // The locked catalogue has T1–2 standards 14–32cm and T3–5 standards 40–115cm.
+ const standard=FISH_DISPLAY_RULER.referenceWorldLength*Math.sqrt(standardSizeCm/FISH_DISPLAY_RULER.referenceCm)*FISH_DISPLAY_RULER.enlargement;
+ return (standardSizeCm<40?Math.min(FISH_DISPLAY_RULER.standardCap,standard):standard)*(finalSizeCm/standardSizeCm);
 }
 // finalSize already includes random size and giant. Never multiply giant twice.
 export const SHARED_CELL_SIZE=3.2;

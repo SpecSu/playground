@@ -57,10 +57,10 @@ test('land is the same unit price, nonrectangular growth never moves old coordin
 test('each dock is one fishing job location; only one bait is consumed after arrival',()=>{
  let s=createGame('qa-state',0);s.coins=200;s=applyCommand(s,{type:'build-dock',cell:{x:2,z:0}},ctx()).state;s=constructionView(s,13000);s=applyCommand(s,{type:'buy-input',kind:'bait',tier:1},ctx(13000)).state;const before=s.coins;s=begin(s,'fish',{tier:1,target:{kind:'dock',cell:{x:2,z:0}}});assert.equal(s.baits[0],1);s=finish(s);assert.equal(s.baits[0],0);assert.equal(s.jobs.length,1);assert.equal(s.jobs[0].product.kind,'fish');assert.equal(s.coins,before);assertGame(s);
 });
-test('first tank needs two adjacent owned empty cells; every later cell adds ten',()=>{
- let s=createGame('qa-state',0);s.coins=1000;assert.throws(()=>applyCommand(s,{type:'build-tank',cells:[{x:0,z:0}]},ctx()),/两块/);
- s=applyCommand(s,{type:'build-tank',cells:[{x:0,z:0},{x:1,z:0}]},ctx()).state;assert.equal(s.tank.length,0);s=constructionView(s,13000);assert.equal(s.tank.length,2);assert.equal(s.coins,840);
- s=applyCommand(s,{type:'build-tank',cells:[{x:0,z:1}]},ctx(13001)).state;s=constructionView(s,25001);assert.equal(s.tank.length*ECONOMY.tankCapacityPerCell,30);assert.equal(s.coins,760);assertGame(s);
+test('first tank needs one owned empty cell; every later cell adds ten',()=>{
+ let s=createGame('qa-state',0);s.coins=1000;
+ s=applyCommand(s,{type:'build-tank',cells:[{x:0,z:0}]},ctx()).state;assert.equal(s.tank.length,0);s=constructionView(s,13000);assert.equal(s.tank.length,1);assert.equal(s.coins,920);
+ s=applyCommand(s,{type:'build-tank',cells:[{x:0,z:1}]},ctx(13001)).state;s=constructionView(s,25001);assert.equal(s.tank.length*ECONOMY.tankCapacityPerCell,20);assert.equal(s.coins,840);assertGame(s);
 });
 test('public game exposes safe gameplay data, not private operation receipts',()=>{
  const s=createGame('qa-state',0);s.receipts={secret:'not-a-game-field'};const p=publicGame(s,1000);assert.equal(p.receipts,undefined);assert.equal(p.ownerUid,s.ownerUid);
