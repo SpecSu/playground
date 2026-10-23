@@ -65,10 +65,10 @@ Asynchronous collection same-server explicitowneropen token, real seconddeviceon
 - [x] RED job/facts/nocharge/harvestpermission/cap/dup tests, implement andintegrate.
 - [x] Current camera/input/drag/firstfeed/workshop regression.
 - [x] Wholebranchreview, alltests/lint/typecheck/build, copiedsave migration andisolatedHTTP/actualReact.
-- [ ] BackuplatestSQLite/build, localupdate, crosscallPID/resourceverification, secrets/privatefiles diffcheck.
-- [ ] Normalpushwithupstream exactbranch; readremoteSHA equalscommit. Reportactualruntime andmissingexternalservices.
+- [x] BackuplatestSQLite/build, localupdate, crosscallPID/resourceverification, secrets/privatefiles diffcheck.
+- [x] Normalpushwithupstream exactbranch; readremoteSHA equalscommit. Reportactualruntime andmissingexternalservices.
 
 ## Progress
-2026-10-23: 完成全部五个模块与交叉审查。全量586测试、lint、typecheck、1875模块生产构建通过；双设备采收、经济HTTP、28静态资源以及独立分享入口已通过。最终护送与完整生产React流程也通过。5190暂仍为V6/PID10414，等待备份更新与正常分支推送。真实Chrome/WebGL未验收。
+2026-10-23: 完成全部五个模块与交叉审查。全量586测试、lint、typecheck、1875模块生产构建通过；双设备采收、经济HTTP、28静态资源以及独立分享入口已通过。最终护送与完整生产React流程也通过。5190已更新到V7/PID49027，数据库与旧构建已备份，正常分支推送及远端实现SHA已核对。真实Chrome/WebGL未验收。
 
 最终审查修正：活动事件期间停产且不补发；孵化预览取消/旧版本拒绝；各品质分别限制20%掠夺；移动时间不算连续治疗；采收GET结算、读取失败恢复、独立访客入口；运货键盘路线与关门碰撞；估值唯一实体ID去重。

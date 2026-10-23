@@ -20,7 +20,17 @@
 
 Node DOM的WebGL上下文不可用警告符合该测试环境；**这些通过不等于Chrome/WebGL视觉、手机触控或音频验收**。仍无可调用独立Chrome插件入口；未使用CUA、Playwright或其他浏览器绕行。
 
-本机部署与分支推送结果另记于后续本节及verification/v7-live.json，未取得结果前不视为完成。
+
+## V7 本机部署与推送结果
+
+- 2026-10-23T05:02UTC，运行实现提交 `544c1139a57b6f5c1f28e64d9ff12cc543ca70c5`，版本 `v7.0-economy-cooperation`。
+- 原Mac `http://127.0.0.1:5190`，独立PID49027、PPID1，loopback监听；跨调用核对28项资源逐字节一致、SQLite完整性ok。
+- 原7条legacy记录、2份estate记录完全保持，未执行用户重置或生产游戏命令；迁移在用户下次访问时执行，已先对真实只读副本验证。
+- 最新SQLite备份：`/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-23T05-02-07-323Z-before-v7.sqlite`。旧构建：`/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v7-20261023T050207Z`。
+- `origin/codex/animal-farm-companion-demo` 已正常新建推送并设置upstream；首次远端SHA核对等于上述实现提交。本节之后的提交仅补交付文档，不改运行代码。没有推main、force、创建PR或发布Sites。
+- 5193/5194测试服务已关闭。真实Chrome/WebGL、触控、动画观感与音频仍未验收；生成服务、公网好友、全服榜等边界见V7_GAMEPLAY。
+- 证据：[verification/v7-live.json](verification/v7-live.json)。
+
 
 ---
 

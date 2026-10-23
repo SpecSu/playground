@@ -149,3 +149,13 @@ V6最终本机更新已确认：源码 `ee6ef421430827559df8fc2ff660d1c740b8da8f
 - 审查修复事件内产物漏洞、分品质损失上限、取消后的旧孵化确认、治疗移动计时、护送方向和门碰撞、分享加载失败恢复。最终护送与全流程生产DOM待收尾；无Chrome控制入口，未验证WebGL/触控/听感。5190还未切换，不将测试服务器当用户运行版。
 
 V7最终隔离检查全部通过：586/586、lint/typecheck、1875模块构建、28资源、生产React全流程及独立分享入口、两cookie护送和采收。开始本地提交与备份更新；用户5190未用作测试。
+
+## V7 本机部署与推送结果
+
+- 2026-10-23T05:02UTC，运行实现提交 `544c1139a57b6f5c1f28e64d9ff12cc543ca70c5`，版本 `v7.0-economy-cooperation`。
+- 原Mac `http://127.0.0.1:5190`，独立PID49027、PPID1，loopback监听；跨调用核对28项资源逐字节一致、SQLite完整性ok。
+- 原7条legacy记录、2份estate记录完全保持，未执行用户重置或生产游戏命令；迁移在用户下次访问时执行，已先对真实只读副本验证。
+- 最新SQLite备份：`/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/2026-10-23T05-02-07-323Z-before-v7.sqlite`。旧构建：`/Users/bytedance/Documents/Codex/2026-10-21/task-2/animal-farm/demos/farm/.local/backups/dist-before-v7-20261023T050207Z`。
+- `origin/codex/animal-farm-companion-demo` 已正常新建推送并设置upstream；首次远端SHA核对等于上述实现提交。本节之后的提交仅补交付文档，不改运行代码。没有推main、force、创建PR或发布Sites。
+- 5193/5194测试服务已关闭。真实Chrome/WebGL、触控、动画观感与音频仍未验收；生成服务、公网好友、全服榜等边界见V7_GAMEPLAY。
+- 证据：[verification/v7-live.json](verification/v7-live.json)。
