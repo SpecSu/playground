@@ -1,5 +1,5 @@
 {
-  "version": "v12.0-egg-farm",
+  "version": "v12.1-manor-orbit-free-walk",
   "defaultMode": "minimal",
   "legacyMode": "?legacy",
   "camera": "orthographic-manor-10.4-offset-9-13.8-18",
@@ -22,5 +22,7 @@
   "breeding": "manual-adult-same-species-opposite-sex-one-farm-egg-per-UTC8-day",
   "visualQA": "geometry-and-raycast-tested-not-WebGL-browser-accepted",
   "generation": "not-connected-in-minimal-mode",
-  "friends": "not-connected-in-minimal-mode"
+  "friends": "not-connected-in-minimal-mode",
+  "controls": "OrbitControls-left-drag-single-touch-rotate-pinch-wheel-zoom",
+  "walking": "fractional-ground-tap-los-route-0.62s-per-cell"
 }

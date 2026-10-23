@@ -54,6 +54,44 @@ export function ownedPath(state:MinimalState,from:Point,to:Point):Point[]|null{
  return null;
 }
 export function continuousRoute(state:MinimalState,from:Point,to:Point):Point[]|null{const path=ownedPath(state,from,to);if(!path)return null;const route=path.slice(1);if(distance(from,path[0])>.00001&&(!route.length||Math.abs(route[0].x-from.x)>.00001&&Math.abs(route[0].z-from.z)>.00001))route.unshift(path[0]);return route;}
+/** Product manor timing, in logical grid cells per second. */
+export const PLAYER_WALK_SPEED=1/.62;
+const freePoint=(p:Point)=>!!p&&Number.isFinite(p.x)&&Number.isFinite(p.z)&&p.x>MINIMAL_RULES.min-.5&&p.x<MINIMAL_RULES.max+.5&&p.z>MINIMAL_RULES.min-.5&&p.z<MINIMAL_RULES.max+.5;
+function playerNavigation(state:MinimalState,from:Point):MinimalState{
+ // Placing an egg under the avatar must never trap its owner inside the nest.
+ const nests=state.eggs.filter(e=>e.location==='ground'&&e.position&&!same(point(from),e.position)).map(e=>e.position!);
+ return {...state,tiles:state.tiles.map(t=>nests.some(n=>same(n,t))?{...t,owned:false}:t)};
+}
+function clearPlayerSegment(state:MinimalState,from:Point,to:Point):boolean{
+ if(!freePoint(from)||!freePoint(to)||!walkable(state,from)||!walkable(state,to))return false;
+ // Closed expanded boxes reject even a diagonal grazing a blocked corner.
+ for(const tile of state.tiles){
+  if(walkable(state,tile))continue;
+  let enter=0,leave=1;
+  for(const axis of ['x','z'] as const){
+   const delta=to[axis]-from[axis],low=tile[axis]-.500001,high=tile[axis]+.500001;
+   if(Math.abs(delta)<1e-12){if(from[axis]<low||from[axis]>high){enter=2;break;}}
+   else {const a=(low-from[axis])/delta,b=(high-from[axis])/delta;enter=Math.max(enter,Math.min(a,b));leave=Math.min(leave,Math.max(a,b));}
+  }
+  if(enter<=leave)return false;
+ }
+ return true;
+}
+/** Remaining waypoints, without the starting position; the last is the exact click. */
+export function playerWalkRoute(state:MinimalState,from:Point,to:Point):Point[]|null{
+ if(!freePoint(from)||!freePoint(to))return null;
+ const navigation=playerNavigation(state,from);
+ if(clearPlayerSegment(navigation,from,to))return distance(from,to)<.00001?[]:[{...to}];
+ const grid=ownedPath(navigation,from,point(to));
+ if(!grid||!clearPlayerSegment(navigation,from,grid[0])||!clearPlayerSegment(navigation,grid[grid.length-1],to))return null;
+ const candidates=[{...from},...grid,{...to}],route:Point[]=[];
+ for(let i=0;i<candidates.length-1;){
+  let next=candidates.length-1;while(next>i+1&&!clearPlayerSegment(navigation,candidates[i],candidates[next]))next--;
+  if(!clearPlayerSegment(navigation,candidates[i],candidates[next]))return null;
+  if(distance(candidates[i],candidates[next])>.00001)route.push({...candidates[next]});i=next;
+ }
+ return route;
+}
 function moveAlong(position:Point,path:Point[],travel:number):void{while(path.length&&travel>0){const next=path[0],d=distance(position,next);if(d<.00001){path.shift();continue;}const step=Math.min(d,travel);position.x+=(next.x-position.x)*step/d;position.z+=(next.z-position.z)*step/d;travel-=step;if(step===d){position.x=next.x;position.z=next.z;path.shift();}}}
 export function canPlaceEgg(s:MinimalState,at:Point):boolean{return validPoint(at)&&walkable(s,at)&&!same(at,WATER_BOWL)&&!same(at,REST_MAT)&&!s.eggs.some(e=>e.location==='ground'&&e.position&&same(e.position,at))&&!s.animals.some(a=>a.id!==s.carriedAnimalId&&same(point(a.position),at));}
 function random(s:MinimalState,salt:number):number{let x=(Math.floor(s.createdAt/1000)^Math.imul(s.sequence+1,0x9e3779b9)^Math.imul(salt+7,0x85ebca6b))>>>0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;x=Math.imul(x,0x846ca68b);x^=x>>>16;return (x>>>0)/4294967296;}
@@ -77,7 +115,7 @@ function animalNavigation(s:MinimalState):MinimalState{return {...s,tiles:s.tile
 function naturalActivity(terrain:Terrain):'drink'|'rest'|'graze'{return terrain==='creek'?'drink':terrain==='meadow'?'graze':'rest';}
 function startWolf(s:MinimalState,now:number){s.wolfEvent={startedAt:now,endsAt:now+MINIMAL_RULES.wolfMs,helped:false};s.notice='两只小狼在边缘探头，伙伴会照看大家。';}
 export function advanceMinimalState(input:MinimalState,now:number):MinimalState{
- const s=copy(input);if(!Number.isFinite(now)||now<s.updatedAt)return s;const gap=now-s.updatedAt,dt=Math.min(2000,Math.max(0,gap))/1000;s.updatedAt=now;moveAlong(s.player,s.playerPath,dt*2.2);
+ const s=copy(input);if(!Number.isFinite(now)||now<s.updatedAt)return s;const gap=now-s.updatedAt,dt=Math.min(2000,Math.max(0,gap))/1000;s.updatedAt=now;moveAlong(s.player,s.playerPath,dt*PLAYER_WALK_SPEED);
  for(let i=0;i<s.animals.length;i++){
   const a=s.animals[i],navigation=animalNavigation(s);if(a.id===s.carriedAnimalId){a.position={...s.player};a.activity='carried';delete a.target;delete a.path;continue;}
   if(a.target){const route=a.path;if(!route||!route.every(q=>walkable(navigation,q))){stopAnimal(a,now);}else{moveAlong(a.position,route,dt*(i%2?.55:.65));if(distance(a.position,a.target)<.01){a.position={...a.target};delete a.target;delete a.path;a.activity=a.targetActivity??naturalActivity(tileAt(s,a.position)!.terrain);delete a.targetActivity;a.activityUntil=now+6000;}else a.activity='walk';}}
@@ -91,11 +129,11 @@ export function minimalCommand(input:MinimalState,command:MinimalCommand,now:num
  if(!Number.isFinite(now)||now<input.updatedAt)return {state:copy(input),accepted:false,message:'时间尚未同步，请稍后再试'};
  const s=advanceMinimalState(input,now),reply=(accepted:boolean,message:string):MinimalReply=>{s.notice=message;return {state:s,accepted,message};};
  if(command.type==='welcome'){if(s.welcomeClaimed)return reply(false,'开园金币已经领过啦');s.welcomeClaimed=true;s.coins+=MINIMAL_RULES.welcomeCoins;return reply(true,'收到 120 金币！去小店买第一颗惊喜蛋吧');}
- if(command.type==='move'){const path=continuousRoute(s,s.player,command.to);if(!path)return reply(false,'这里暂时走不到');s.playerPath=path;return reply(true,'走过去看看');}
+ if(command.type==='move'){const path=playerWalkRoute(s,s.player,command.to);if(!path)return reply(false,'这里暂时走不到');s.playerPath=path;return reply(true,'走过去看看');}
  if(!s.welcomeClaimed)return reply(false,'先收下开园金币吧');
  if(command.type==='emergencyEgg'){if(!nearShop(s)||s.coins>=30||s.animals.length||s.eggs.length)return reply(false,'只有金币不足且没有动物或蛋时，店主才会送一颗起步蛋');s.eggs.push(egg(s,now,'shop'));return reply(true,'店主送你一颗起步蛋，重新开始吧');}
  if(command.type==='buyEgg'){if(!nearShop(s))return reply(false,'先走到小店柜台前');if(s.coins<30)return reply(false,'惊喜蛋需要 30 金币');if(s.animals.length+s.eggs.length>=16)return reply(false,'小家暂时最多容纳 16 位伙伴和待孵的蛋');s.coins-=30;s.eggs.push(egg(s,now,'shop'));return reply(true,'拿到一颗惊喜蛋！找块空地放下吧');}
- if(command.type==='placeEgg'){const e=s.eggs.find(e=>e.id===command.eggId&&e.location==='bag');if(!e)return reply(false,'这颗蛋已经放好，或不在背包里');if(!canPlaceEgg(s,command.at))return reply(false,'找一块没有动物和蛋的已开辟空地');if(distance(s.player,command.at)>1.6)return reply(false,'走近那块空地再放下蛋');e.location='ground';e.position={...command.at};e.placedAt=now;e.readyAt=now+(s.placedEggCount===0?MINIMAL_RULES.firstHatchMs:MINIMAL_RULES.hatchMs);s.placedEggCount++;return reply(true,'蛋放好了，等它摇摇晃晃准备好');}
+ if(command.type==='placeEgg'){const e=s.eggs.find(e=>e.id===command.eggId&&e.location==='bag');if(!e)return reply(false,'这颗蛋已经放好，或不在背包里');if(!canPlaceEgg(s,command.at))return reply(false,'找一块没有动物和蛋的已开辟空地');if(distance(s.player,command.at)>1.6)return reply(false,'走近那块空地再放下蛋');e.location='ground';e.position={...command.at};e.placedAt=now;e.readyAt=now+(s.placedEggCount===0?MINIMAL_RULES.firstHatchMs:MINIMAL_RULES.hatchMs);s.placedEggCount++;s.playerPath=[];return reply(true,'蛋放好了，等它摇摇晃晃准备好');}
  if(command.type==='hatch'){const e=s.eggs.find(e=>e.id===command.eggId&&e.location==='ground');if(!e||!e.position||e.readyAt===undefined)return reply(false,'先把蛋放到地上');if(now<e.readyAt)return reply(false,'再等一小会，里面正在准备');if(distance(s.player,e.position)>1.6)return reply(false,'走近一点，看看谁要出来');const hatchSpace={...s,eggs:s.eggs.filter(x=>x!==e)},landing=s.tiles.filter(t=>canPlaceEgg(hatchSpace,t)).sort((u,v)=>distance(u,e.position!)-distance(v,e.position!))[0];if(!landing)return reply(false,'先给新伙伴腾出一块空地吧');s.sequence++;const id=`animal-${s.sequence}`,a:MinimalAnimal={id,name:SPECIES_LABELS[e.species],species:e.species,sex:e.sex,size:e.size,position:{x:landing.x,z:landing.z},activity:'idle',energy:85,bond:0,bornAt:now,activityUntil:now+8000};s.animals.push(a);s.hatchedCount++;s.eggs=s.eggs.filter(x=>x!==e);s.lastHatch={animalId:id,at:now,position:{...e.position}};if(!s.collection.includes(a.species))s.collection.push(a.species);return reply(true,`${a.size==='giant'?'哇，是巨大':a.size==='large'?'是一只大大的':'蹦出来一只'}${SPECIES_LABELS[a.species]}！`);}
  if(command.type==='pickup'){const a=s.animals.find(a=>a.id===command.animalId);if(!a)return reply(false,'这只小动物已经不在这里');if(s.carriedAnimalId)return reply(false,'先把头顶的小伙伴放下来');if(distance(s.player,a.position)>1.6)return reply(false,'走近一点才能举起来');stopAnimal(a,now);a.activity='carried';s.carriedAnimalId=a.id;a.position={...s.player};return reply(true,`把${a.name}举起来啦！可以带去小店，或找地方放下`);}
  if(command.type==='putdown'){const a=s.animals.find(a=>a.id===s.carriedAnimalId);if(!a)return reply(false,'现在没有举着小动物');const p=command.at??point(s.player);if(!canPlaceEgg(s,p)||distance(s.player,p)>1.6)return reply(false,'找身边一块空地放下它');a.position={...p};stopAnimal(a,now);s.carriedAnimalId=null;return reply(true,'小伙伴稳稳落地，继续自在散步');}
@@ -114,10 +152,11 @@ function validSave(value:unknown):value is MinimalState{
  if(!value||typeof value!=='object')return false;const s=value as MinimalState,finite=(v:unknown):v is number=>typeof v==='number'&&Number.isFinite(v),coordinate=(p:Point)=>!!p&&finite(p.x)&&finite(p.z)&&p.x>=-3&&p.x<=6&&p.z>=-3&&p.z<=6,integer=(p:Point)=>coordinate(p)&&validPoint(p);
  if(s.version!==2||![s.coins,s.updatedAt,s.createdAt,s.nextWolfAt,s.sequence,s.expansions,s.placedEggCount,s.hatchedCount].every(finite)||s.coins<0||s.sequence<0||s.expansions<0||s.placedEggCount<0||s.hatchedCount<0||typeof s.welcomeClaimed!=='boolean'||typeof s.notice!=='string')return false;
  if(!Array.isArray(s.tiles)||s.tiles.length!==100||!s.tiles.every(t=>integer(t)&&terrains.includes(t.terrain)&&typeof t.owned==='boolean')||new Set(s.tiles.map(key)).size!==100||!SHOP_TILES.every(t=>tileAt(s,t)?.owned))return false;
- const onOwned=(p:Point)=>coordinate(p)&&walkable(s,p),path=(v:unknown)=>Array.isArray(v)&&v.every(p=>integer(p)&&onOwned(p)),validDay=(v:unknown)=>v===null||typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v);
- if(!onOwned(s.player)||!path(s.playerPath)||!Array.isArray(s.animals)||!Array.isArray(s.eggs)||s.animals.length+s.eggs.length>16||new Set(s.animals.map(a=>a?.id)).size!==s.animals.length)return false;
+ const onOwned=(p:Point)=>freePoint(p)&&walkable(s,p),path=(v:unknown)=>Array.isArray(v)&&v.every(p=>integer(p)&&onOwned(p)),validDay=(v:unknown)=>v===null||typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v);
+ if(!freePoint(s.player)||!walkable(s,s.player)||!Array.isArray(s.playerPath)||!s.playerPath.every(p=>freePoint(p)&&walkable(s,p))||!Array.isArray(s.animals)||!Array.isArray(s.eggs)||s.animals.length+s.eggs.length>16||new Set(s.animals.map(a=>a?.id)).size!==s.animals.length)return false;
  if(!s.animals.every(a=>a&&typeof a.id==='string'&&typeof a.name==='string'&&speciesList.includes(a.species)&&['male','female'].includes(a.sex)&&['normal','large','giant'].includes(a.size)&&onOwned(a.position)&&[a.bornAt,a.energy,a.bond,a.activityUntil].every(finite)&&a.energy>=0&&a.energy<=100&&a.bond>=0&&a.bond<=100&&['idle','walk','drink','rest','graze','carried'].includes(a.activity)&&(!a.lastBreedAttemptDay||validDay(a.lastBreedAttemptDay))&&(!a.targetActivity||['drink','rest','graze'].includes(a.targetActivity))&&(!a.target||integer(a.target)&&onOwned(a.target)&&path(a.path))))return false;
  if(!s.eggs.every(e=>e&&typeof e.id==='string'&&['shop','bred'].includes(e.source)&&speciesList.includes(e.species)&&['male','female'].includes(e.sex)&&['normal','large','giant'].includes(e.size)&&finite(e.boughtAt)&&(e.location==='bag'||e.location==='ground'&&!!e.position&&integer(e.position)&&onOwned(e.position)&&finite(e.placedAt)&&finite(e.readyAt)&&e.readyAt>=e.placedAt)&&(!e.parents||e.parents.length===2&&e.parents.every(v=>typeof v==='string')))||new Set(s.eggs.map(e=>e.id)).size!==s.eggs.length)return false;
+ const navigation=playerNavigation(s,s.player);if(!s.playerPath.every((p,i)=>clearPlayerSegment(navigation,i?s.playerPath[i-1]:s.player,p)))return false;
  if(s.carriedAnimalId!==null&&!s.animals.some(a=>a.id===s.carriedAnimalId&&a.activity==='carried'))return false;
  if(s.animals.some(a=>a.activity==='carried'&&a.id!==s.carriedAnimalId)||!validDay(s.breedingDay))return false;
  if(s.lastHatch!==null&&(!s.lastHatch||typeof s.lastHatch.animalId!=='string'||!finite(s.lastHatch.at)||!integer(s.lastHatch.position)))return false;

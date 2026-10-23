@@ -3,16 +3,16 @@ import {useEffect,useRef,useState,type CSSProperties} from 'react';
 import {ArrowUp,Bell,Coins,Droplets,Egg,Hand,Heart,Home,Leaf,Mountain,Plus,Settings2,ShoppingBag,Sparkles,TreePine,Wheat,X,ZoomIn,ZoomOut} from 'lucide-react';
 import PhoneViewport from '../feed/PhoneViewport.tsx';
 import {MinimalWorld} from './World.ts';
-import {advanceMinimalState,createMinimalState,loadMinimalState,minimalCommand,saveMinimalState,tileAt,nearShop,isShopTile,sellValue,isAdult,canPlaceEgg,eligiblePairs,SHOP_APPROACH,type MinimalState,type MinimalCommand,type Terrain,type Point} from './model.ts';
+import {advanceMinimalState,createMinimalState,loadMinimalState,minimalCommand,saveMinimalState,tileAt,playerWalkRoute,nearShop,isShopTile,sellValue,isAdult,canPlaceEgg,eligiblePairs,SHOP_APPROACH,type MinimalState,type MinimalCommand,type Terrain,type Point} from './model.ts';
 import './minimal.css';
 
-type Target={kind:'tile';x:number;z:number}|{kind:'animal';id:string}|{kind:'egg';id:string}|{kind:'shop'};
+type Target={kind:'tile';x:number;z:number;worldPoint?:Point}|{kind:'animal';id:string}|{kind:'egg';id:string}|{kind:'shop'};
 type Pending={target:Target;destination:Point;placeEggId?:string;at?:Point};
 const speciesName={sheep:'绵羊',pig:'小猪',cow:'奶牛',bunny:'兔子'};
 const sizeName={normal:'标准体型',large:'大个子',giant:'巨大！'};
 const terrainInfo={meadow:{name:'草地',text:'慢慢吃草，晒晒太阳。',Icon:Wheat},creek:{name:'小溪',text:'动物会自己来喝水。',Icon:Droplets},hill:{name:'丘陵',text:'爬上小山，看看远方。',Icon:Mountain},grove:{name:'林地',text:'在树荫下歇一会儿。',Icon:TreePine}};
 export function terrainCanOpen(state:MinimalState,p:Point){return !tileAt(state,p)?.owned&&[{x:p.x+1,z:p.z},{x:p.x-1,z:p.z},{x:p.x,z:p.z+1},{x:p.x,z:p.z-1}].some(q=>tileAt(state,q)?.owned);}
-export function animalApproach(state:MinimalState,position:Point):Point{const p={x:Math.round(position.x),z:Math.round(position.z)};return [{x:p.x+1,z:p.z},{x:p.x-1,z:p.z},{x:p.x,z:p.z+1},{x:p.x,z:p.z-1}].filter(q=>tileAt(state,q)?.owned&&!isShopTile(q)).sort((a,b)=>Math.hypot(a.x-state.player.x,a.z-state.player.z)-Math.hypot(b.x-state.player.x,b.z-state.player.z))[0]??p;}
+export function animalApproach(state:MinimalState,position:Point):Point{const p={x:Math.round(position.x),z:Math.round(position.z)};return [{x:p.x+1,z:p.z},{x:p.x-1,z:p.z},{x:p.x,z:p.z+1},{x:p.x,z:p.z-1}].filter(q=>tileAt(state,q)?.owned&&!isShopTile(q)&&playerWalkRoute(state,state.player,q)!==null).sort((a,b)=>Math.hypot(a.x-state.player.x,a.z-state.player.z)-Math.hypot(b.x-state.player.x,b.z-state.player.z))[0]??p;}
 
 export default function MinimalApp(){
  const [data,setData]=useState<MinimalState|null>(null),[target,setTarget]=useState<Target|null>(null),[sheet,setSheet]=useState<'bag'|'settings'|null>(null),[placing,setPlacing]=useState<string|null>(null),[converting,setConverting]=useState(false),[notice,setNotice]=useState(''),[saveOk,setSaveOk]=useState(true),[worldError,setWorldError]=useState(''),[walking,setWalking]=useState(false),[anchor,setAnchor]=useState<Point|null>(null),[coinBurst,setCoinBurst]=useState(false),[dismissedHatch,setDismissedHatch]=useState<string|null>(null);
@@ -34,7 +34,7 @@ export default function MinimalApp(){
   if(isShopTile(p)){if(placingRef.current){setNotice('商店不能放蛋，选一块空地吧。');return;}setPlacing(null);approach({kind:'shop'},SHOP_APPROACH);return;}
   if(placingRef.current){if(!canPlaceEgg(current,p)){setNotice('选一块空着的已开辟土地。');return;}approach(selection,animalApproach(current,p),placingRef.current,p);return;}
   if(!tileAt(current,p)?.owned){stop();setTarget(selection);return;}
-  approach(selection,p);
+  approach(selection,selection.worldPoint??p);
  };
  useEffect(()=>{
   let state:MinimalState;try{state=loadMinimalState(window.localStorage,Date.now());}catch{state=createMinimalState(Date.now());setSaveOk(false);}live.current=state;setData(state);
@@ -81,7 +81,7 @@ export default function MinimalApp(){
    </>}
    {showReveal&&hatchAnimal&&<div className={`egg-reveal ${hatchAnimal.size==='giant'?'giant':''}`} onClick={()=>setDismissedHatch(hatchAnimal.id)}><div><small>{hatchAnimal.size==='giant'?'居然是巨型！':'啪嗒！新伙伴来啦'}</small><h2>{sizeName[hatchAnimal.size]}{speciesName[hatchAnimal.species]}</h2><span>{hatchAnimal.sex==='female'?'♀ 女生':'♂ 男生'}</span></div></div>}
   </>}
-  {sheet&&<div className="egg-sheet-shade" onClick={()=>setSheet(null)}><section className="egg-sheet" role="dialog" aria-label={sheet==='bag'?'我的蛋袋':'设置与说明'} onClick={e=>e.stopPropagation()}><header><h2>{sheet==='bag'?'我的蛋袋':'慢慢玩就好'}</h2><button className="egg-round" aria-label="关闭面板" onClick={()=>setSheet(null)}><X size={20}/></button></header>{sheet==='bag'?<>{bag.map(e=><button className="egg-bag-item" key={e.id} onClick={()=>beginPlace(e.id)}><span className="egg-painted"><Egg size={32}/>{e.source==='shop'&&<i>?</i>}</span><span><b>{e.source==='shop'?'神秘动物蛋':`${speciesName[e.species]}蛋`}</b><small>拿出来，放在地上孵</small></span><ArrowUp size={19}/></button>)}{!bag.length&&<p>蛋袋空空的，去商店挑一颗吧。</p>}</>:<><p>点商店买蛋 → 放地上孵 → 留下来养，或举去商店卖。</p><div className="egg-settings-row"><button onClick={()=>world.current?.zoom(.12)}><ZoomIn size={18}/>放大</button><button onClick={()=>world.current?.zoom(-.12)}><ZoomOut size={18}/>缩小</button></div><p>同种成年异性伙伴有机会产下对应物种蛋。每天整座牧场最多 1 枚，每只动物每天尝试一次。</p><small>演示孵化 10–15 秒，成年约 1 分钟。繁育日按 UTC+8 自然日计算，不加速。</small><small>{saveOk?'当前浏览器本机保存，旧版存档保留。':'暂时无法保存，请先不要关闭页面。'}</small><small>拖动查看周围；不需要喂食计时或照顾打卡。</small></>}</section></div>}
+  {sheet&&<div className="egg-sheet-shade" onClick={()=>setSheet(null)}><section className="egg-sheet" role="dialog" aria-label={sheet==='bag'?'我的蛋袋':'设置与说明'} onClick={e=>e.stopPropagation()}><header><h2>{sheet==='bag'?'我的蛋袋':'慢慢玩就好'}</h2><button className="egg-round" aria-label="关闭面板" onClick={()=>setSheet(null)}><X size={20}/></button></header>{sheet==='bag'?<>{bag.map(e=><button className="egg-bag-item" key={e.id} onClick={()=>beginPlace(e.id)}><span className="egg-painted"><Egg size={32}/>{e.source==='shop'&&<i>?</i>}</span><span><b>{e.source==='shop'?'神秘动物蛋':`${speciesName[e.species]}蛋`}</b><small>拿出来，放在地上孵</small></span><ArrowUp size={19}/></button>)}{!bag.length&&<p>蛋袋空空的，去商店挑一颗吧。</p>}</>:<><p>点商店买蛋 → 放地上孵 → 留下来养，或举去商店卖。</p><div className="egg-settings-row"><button onClick={()=>world.current?.zoom(.12)}><ZoomIn size={18}/>放大</button><button onClick={()=>world.current?.zoom(-.12)}><ZoomOut size={18}/>缩小</button></div><p>同种成年异性伙伴有机会产下对应物种蛋。每天整座牧场最多 1 枚，每只动物每天尝试一次。</p><small>演示孵化 10–15 秒，成年约 1 分钟。繁育日按 UTC+8 自然日计算，不加速。</small><small>{saveOk?'当前浏览器本机保存，旧版存档保留。':'暂时无法保存，请先不要关闭页面。'}</small><small>拖拽旋转视角，单击地面走动；双指捏合或滚轮缩放。</small></>}</section></div>}
   {!saveOk&&!sheet&&<div className="egg-save-warning">暂时无法保存，请不要关闭页面。</div>}
  </section></PhoneViewport></main>;
 }
