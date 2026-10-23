@@ -1,0 +1,111 @@
+{
+  "units": "1 unit = 1 metre",
+  "cell": 3.2,
+  "assets": [
+    {
+      "url": "/assets/world/icons/bait-1.svg",
+      "bytes": 959,
+      "sha256": "c372f92ca821a0bce4624b1bd09c143228cac068c1e3d277353e39b7a22dd92f"
+    },
+    {
+      "url": "/assets/world/icons/bait-2.svg",
+      "bytes": 967,
+      "sha256": "ca6966ce0e1e47c1bc4266ec657c9199008197cbc4468c59e4dc955735557778"
+    },
+    {
+      "url": "/assets/world/icons/bait-3.svg",
+      "bytes": 989,
+      "sha256": "66b4d49ae09220e0db87f3c1cae3271701f3dd3118265a25d9ed2bb3e47f1fbe"
+    },
+    {
+      "url": "/assets/world/icons/bait-4.svg",
+      "bytes": 952,
+      "sha256": "e1398ac084a17a54be99979883236437950eabf844711463835bc33dc2c04670"
+    },
+    {
+      "url": "/assets/world/icons/bait-5.svg",
+      "bytes": 971,
+      "sha256": "b2f2e4c8fc2d3852bc9b78250d530353b940789afbf65483be0ba4385cd6c872"
+    },
+    {
+      "url": "/assets/world/icons/seed-1.svg",
+      "bytes": 917,
+      "sha256": "8dc781b6221b329e33af98bc67db1555a5f2f062a8b329120775141e798a634f"
+    },
+    {
+      "url": "/assets/world/icons/seed-2.svg",
+      "bytes": 925,
+      "sha256": "f521e631fce3a15e893d26ffa8711025b0dc023292b63138beb66e5de303e0bf"
+    },
+    {
+      "url": "/assets/world/icons/seed-3.svg",
+      "bytes": 947,
+      "sha256": "c98bcf41c1aab198ec72ac896cba317b13deca22d298e352241769ba87e79c93"
+    },
+    {
+      "url": "/assets/world/icons/seed-4.svg",
+      "bytes": 910,
+      "sha256": "5ef6091f9732ea86b64aa3eaf0758002b8c94a7b76138c29eb30b61b53365cdd"
+    },
+    {
+      "url": "/assets/world/icons/seed-5.svg",
+      "bytes": 929,
+      "sha256": "486a44efe6a06e2601fecb1ad90e3468fb9e0f965dde390d4ba57db12ce3ffeb"
+    },
+    {
+      "url": "/assets/world/plants/daisy.glb",
+      "bytes": 256624,
+      "sha256": "6778a914e444c2d5f03239902a22f2479c9b8d7e42c41f5fd5de45a58dbbe2d1"
+    },
+    {
+      "url": "/assets/world/plants/dragonfruit.glb",
+      "bytes": 233504,
+      "sha256": "2123ffade7fece88ff452fccd9da493b36bc471274187ff080c3c922e2009aa2"
+    },
+    {
+      "url": "/assets/world/plants/grape.glb",
+      "bytes": 380664,
+      "sha256": "77939e5acaa91013d1d4c1427b7800aa0e85263e6ef6c5e84effd64d0030cee9"
+    },
+    {
+      "url": "/assets/world/plants/iris.glb",
+      "bytes": 148936,
+      "sha256": "4c63e4690b25b23758aaf34e427dffacffd3524d1fa0a46ab75e07929b3ce589"
+    },
+    {
+      "url": "/assets/world/plants/phalaenopsis.glb",
+      "bytes": 278640,
+      "sha256": "4bc6d3d2ff32637fc570cba0b0017e2dac8152244f7c5ed53fca322ee137bff3"
+    },
+    {
+      "url": "/assets/world/plants/pumpkin.glb",
+      "bytes": 60932,
+      "sha256": "245e020c28e4c4b5a76677669f9157e980741fa0cf5a59b3913e0ce9904b32c7"
+    },
+    {
+      "url": "/assets/world/plants/radish.glb",
+      "bytes": 121320,
+      "sha256": "f34d2cf693f12cb98307b880eacec82a9b59bd871c85ea35b0544856b9f16aed"
+    },
+    {
+      "url": "/assets/world/plants/sunflower.glb",
+      "bytes": 251348,
+      "sha256": "cd9b18d811e225e0d9ee56e56775da3423ccb789b8e53ce60d91e0994a6aa014"
+    },
+    {
+      "url": "/assets/world/plants/tomato.glb",
+      "bytes": 360768,
+      "sha256": "dedc1a8f78449530b32d780618229b8b5a700f85e83858207e2e24416aa9003c"
+    },
+    {
+      "url": "/assets/world/plants/tulip.glb",
+      "bytes": 109420,
+      "sha256": "3bb5a2232460fc8ac4f60d9aea3bd3d3fd709e3884de4dab6577a24d1d635dbc"
+    },
+    {
+      "url": "/assets/world/tile.glb",
+      "bytes": 12908,
+      "sha256": "ab52ae1f0232682ed117a6e86552f0ac98f0cefe128fd88db7226c4674e1dbe3"
+    }
+  ]
+}

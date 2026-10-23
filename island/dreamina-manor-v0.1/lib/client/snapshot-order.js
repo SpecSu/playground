@@ -1,0 +1,2 @@
+/** Revisions are scoped to each island owner, never to network response order. */
+export function createSnapshotReconciler(){const owners=new Map();return{accept(data){const merge=game=>{if(!game)return game;const old=owners.get(game.ownerUid);if(old&&old.revision>game.revision)return old;owners.set(game.ownerUid,game);return game;};return {...data,game:merge(data.game),island:merge(data.island)};}};}

@@ -1,0 +1,26 @@
+{
+  "speciesId": "phalaenopsis",
+  "path": "/assets/world/plants/phalaenopsis.glb",
+  "bounds": {
+    "min": [
+      -0.49685540795326233,
+      -0.011747092008590698,
+      -0.4553892910480499
+    ],
+    "max": [
+      0.6867832541465759,
+      1.3382529020309448,
+      0.4198770225048065
+    ],
+    "size": [
+      1.1836386620998383,
+      1.3499999940395355,
+      0.8752663135528564
+    ]
+  },
+  "animation": "Scene",
+  "durationSeconds": 4,
+  "rootAtGround": true,
+  "bytes": 278640,
+  "objects": 61
+}

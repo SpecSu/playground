@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {artFollowTarget,ART_FOLLOW} from '../lib/art/art-contract.js';
+const land=[{x:0,z:0},{x:1,z:0},{x:0,z:1},{x:1,z:1}],p={x:0,z:6.4};
+const a=artFollowTarget(p,land,3.2),b=artFollowTarget(p,[...land,{x:100,z:100}],3.2);
+assert.deepEqual(a,b,'distant expansion cannot drag the camera');
+assert.ok(a.x>p.x&&a.z<p.z,'dock view biases toward the nearby playable island');
+assert.ok(Math.hypot(a.x-p.x,a.z-p.z)<=ART_FOLLOW.maxBiasCells*3.2+1e-9);
+const translated=artFollowTarget({x:p.x+6.4,z:p.z-3.2},land.map(c=>({x:c.x+2,z:c.z-1})),3.2);
+assert.ok(Math.abs(translated.x-a.x-6.4)<1e-9&&Math.abs(translated.z-a.z+3.2)<1e-9);
+assert.deepEqual(artFollowTarget(p,[],3.2),{...p,y:.75});
+console.log('PASS local follow bias, max radius, world translation and distant expansion invariance');

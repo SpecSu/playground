@@ -1,0 +1,5 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';import {FISH_ART_IDS,createFishPresentation} from '../lib/art/fish-presentation.js';import {FISH_STANDARD_SIZES_CM} from '../lib/art/fish-sizing.js';
+const protectedPart=name=>/(^|[\s_-])eye(?:[-_\s]|$)|pupil|mouth|gill/i.test(name);
+const report=[];
+for(const id of FISH_ART_IDS){const size=FISH_STANDARD_SIZES_CM[id];const n=createFishPresentation({speciesId:id,lengthCm:size,worldLength:size*.01}),g=createFishPresentation({speciesId:id,lengthCm:size,worldLength:size*.01,variant:'gold'});const normal=[],gold=[];for(const [p,a]of [[n,normal],[g,gold]])p.root.traverse(x=>{if(x.isMesh&&protectedPart(x.name))a.push({name:x.name,colors:(Array.isArray(x.material)?x.material:[x.material]).map(m=>m.color.getHex())});});assert.deepEqual(normal,gold,'Eye/pupil/mouth/gill changed '+id);report.push({id,status:'PASS',protectedParts:normal.length});n.dispose();g.dispose();}
+fs.writeFileSync(new URL('../../art-evidence/fish-gold-anatomy-audit.json',import.meta.url),JSON.stringify(report,null,2));console.log('20 fish eye/pupil/mouth/gill gold protection passed (shell eyestalks may turn gold)');

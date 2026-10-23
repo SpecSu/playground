@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import * as THREE from 'three';
+import {GLTFExporter} from 'three/examples/jsm/exporters/GLTFExporter.js';
+import {createDockArt,createRodStationArt} from '../lib/art/dock.js';
+import {createAquariumArt} from '../lib/art/aquarium.js';
+globalThis.FileReader=class{readAsArrayBuffer(b){b.arrayBuffer().then(r=>{this.result=r;this.onloadend?.();});}readAsDataURL(b){b.arrayBuffer().then(r=>{this.result='data:'+b.type+';base64,'+Buffer.from(r).toString('base64');this.onloadend?.();});}};
+const d=createDockArt(),r=createRodStationArt();r.pose({state:'ready',time:0,readyAge:Infinity});d.root.add(r.root);d.root.position.y=.45;
+fs.writeFileSync(new URL('./previews/gear.glb',import.meta.url),Buffer.from(await new GLTFExporter().parseAsync(d.root,{binary:true})));
+const a=createAquariumArt({cells:[{x:0,z:0},{x:1,z:0}]});fs.writeFileSync(new URL('./previews/aquarium.glb',import.meta.url),Buffer.from(await new GLTFExporter().parseAsync(a.root,{binary:true})));
+console.log('Exported actual art module geometry for offline visual check');

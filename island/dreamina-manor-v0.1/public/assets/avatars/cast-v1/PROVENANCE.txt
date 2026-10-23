@@ -1,0 +1,6 @@
+Original uploaded fishing-boat cast, reused at the owner's request.
+Source Site: appgprj_6ad47fb843048191a8d5bd76f1684096
+Source commit: 55de7c92b90d54665d4f4772b793aa5be46e856b
+All twelve GLBs are byte-identical to that source and verified by manifest.json SHA-256.
+Portraits are copied unchanged from the same source. No private reference materials are included.
+The source directory supplied no separate asset-license file; this reuse does not assert a new public license.

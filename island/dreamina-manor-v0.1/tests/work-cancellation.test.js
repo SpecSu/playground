@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {createWorkCancellation}from'../lib/client/work-cancellation.js';
+import {createGame,applyCommand}from'../lib/game/state.js';
+import {parseCommand}from'../lib/server/service.js';
+test('cancelled placement preview cannot cancel a later action from another device',()=>{const c=createWorkCancellation();c.cancel(null);assert.equal(c.target({id:'another-device-intent'}),null);});
+test('real walking cancel is scoped to its exact intent and does not survive replacement',()=>{const c=createWorkCancellation();c.cancel({id:'first'});assert.equal(c.target({id:'first'}),'first');assert.equal(c.target({id:'second'}),null);c.clear('first');assert.equal(c.target({id:'second'}),null);});
+test('cancel during begin response arrival only cancels that returned intent',()=>{const c=createWorkCancellation(),token=c.begin();c.cancel(null);assert.equal(c.settle(token,{id:'delayed-first'}),false);assert.equal(c.target({id:'delayed-first'}),'delayed-first');assert.equal(c.target({id:'second-device'}),null);});
+test('late cancellation does not touch newer server work or resources',()=>{const original=createGame('qa-cancel',0),s=applyCommand(original,{type:'begin-work',action:'plant',tier:1,target:{kind:'land',cell:{x:0,z:0}}},{now:100,newId:()=> 'new-intent-123'}).state;const r=applyCommand(s,{type:'cancel-work',intentId:'old-intent-123'},{now:200});assert.equal(r.changed,false);assert.deepEqual(r.state,s);const done=applyCommand(s,{type:'cancel-work',intentId:s.pending.id},{now:200});assert.equal(done.state.pending,null);assert.equal(done.state.seeds[0],1);assert.equal(done.state.items.length+done.state.jobs.length,0);});
+test('legacy unscoped cancel cannot erase work from another page',()=>{assert.throws(()=>parseCommand({type:'cancel-work'}),{code:'STALE_ACTION'});assert.deepEqual(parseCommand({type:'cancel-work',intentId:'intent-123'}),{type:'cancel-work',intentId:'intent-123'});});

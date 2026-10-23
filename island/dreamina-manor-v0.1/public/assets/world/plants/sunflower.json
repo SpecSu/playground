@@ -1,0 +1,26 @@
+{
+  "speciesId": "sunflower",
+  "path": "/assets/world/plants/sunflower.glb",
+  "bounds": {
+    "min": [
+      -0.664462149143219,
+      -0.0009134054998867214,
+      -0.37655216455459595
+    ],
+    "max": [
+      0.5449151992797852,
+      2.5990865230560303,
+      0.45411306619644165
+    ],
+    "size": [
+      1.2093773484230042,
+      2.599999928555917,
+      0.8306652307510376
+    ]
+  },
+  "animation": "Scene",
+  "durationSeconds": 4,
+  "rootAtGround": true,
+  "bytes": 251348,
+  "objects": 24
+}

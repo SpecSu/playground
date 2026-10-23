@@ -1,0 +1,2 @@
+/** Response generation times never rewind an already running local timeline. */
+export function createMonotonicClock({wall=()=>Date.now(),mono=()=>performance.now()}={}){let epoch=wall(),tick=mono(),ready=false;return {now:()=>Math.floor(epoch+Math.max(0,mono()-tick)),observe(serverNow){if(!Number.isFinite(serverNow))return;const current=epoch+Math.max(0,mono()-tick);epoch=Math.max(current,serverNow);tick=mono();ready=true;}};}

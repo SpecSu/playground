@@ -1,0 +1,26 @@
+{
+  "speciesId": "dragonfruit",
+  "path": "/assets/world/plants/dragonfruit.glb",
+  "bounds": {
+    "min": [
+      -0.5774357318878174,
+      0.0,
+      -0.21813848614692688
+    ],
+    "max": [
+      0.5611600875854492,
+      2.25,
+      0.26571041345596313
+    ],
+    "size": [
+      1.1385958194732666,
+      2.25,
+      0.48384889960289
+    ]
+  },
+  "animation": "Scene",
+  "durationSeconds": 4,
+  "rootAtGround": true,
+  "bytes": 233504,
+  "objects": 43
+}
