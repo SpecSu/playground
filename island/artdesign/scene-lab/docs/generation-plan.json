@@ -1,0 +1,80 @@
+{
+  "mode": "offline_plan",
+  "paused": true,
+  "assets": [
+    {
+      "asset": "dog",
+      "name": "狗狗",
+      "reference": "art/v0.1/assets/dog/primary.png",
+      "reference_exists": true,
+      "face_limit": 50000,
+      "geometry_credits_estimate": 40,
+      "texture_credits_estimate": 20
+    },
+    {
+      "asset": "tree",
+      "name": "松树",
+      "reference": "art/v0.1/assets/tree/primary.png",
+      "reference_exists": true,
+      "face_limit": 65000,
+      "geometry_credits_estimate": 40,
+      "texture_credits_estimate": 20
+    },
+    {
+      "asset": "ground",
+      "name": "方形地块",
+      "reference": "art/v0.2/assets/ground/primary.png",
+      "reference_exists": true,
+      "face_limit": 26000,
+      "geometry_credits_estimate": 20,
+      "texture_credits_estimate": 20
+    },
+    {
+      "asset": "shrub",
+      "name": "花灌木",
+      "reference": "art/v0.1/assets/shrub/primary.png",
+      "reference_exists": true,
+      "face_limit": 35000,
+      "geometry_credits_estimate": 40,
+      "texture_credits_estimate": 20
+    },
+    {
+      "asset": "dock",
+      "name": "码头",
+      "reference": "art/v0.1/assets/dock/primary.png",
+      "reference_exists": true,
+      "face_limit": 35000,
+      "geometry_credits_estimate": 20,
+      "texture_credits_estimate": 20
+    },
+    {
+      "asset": "boat",
+      "name": "小船",
+      "reference": "art/v0.1/assets/boat/primary.png",
+      "reference_exists": true,
+      "face_limit": 30000,
+      "geometry_credits_estimate": 20,
+      "texture_credits_estimate": 20
+    },
+    {
+      "asset": "rock",
+      "name": "岸石",
+      "reference": "art/v0.1/assets/rock/primary.png",
+      "reference_exists": true,
+      "face_limit": 18000,
+      "geometry_credits_estimate": 20,
+      "texture_credits_estimate": 20
+    },
+    {
+      "asset": "fish",
+      "name": "鱼",
+      "reference": "art/v0.1/assets/fish/primary.png",
+      "reference_exists": true,
+      "face_limit": 6000,
+      "geometry_credits_estimate": 20,
+      "texture_credits_estimate": 20
+    }
+  ],
+  "estimated_total_credits": 380,
+  "note": "估算非报价。先狗狗/松树灰模，验收后才做纹理；其余资产须通过首批样板门槛。"
+}

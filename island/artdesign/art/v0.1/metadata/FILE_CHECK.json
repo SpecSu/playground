@@ -1,0 +1,132 @@
+{
+  "version": "0.1",
+  "destination": "art/v0.1",
+  "asset_count": 10,
+  "selected_reference_images": 14,
+  "rejected_images": 2,
+  "all_copied_images_match_source_sha256": true,
+  "all_manifest_prompt_and_gallery_paths_exist": true,
+  "browser_preview": "Not re-run. Filesystem links verified; prior preview was blocked by browser security policy.",
+  "copied_files": [
+    {
+      "source": "images/dog-primary.png",
+      "destination": "assets/dog/primary.png",
+      "sha256": "a28a74ede059f89039be85040f4efcb1d9b921b027ff90034c272a940893c037",
+      "bytes": 1396525
+    },
+    {
+      "source": "images/dog-back.png",
+      "destination": "assets/dog/back.png",
+      "sha256": "978155cc87cddb86447d85d0e4cf099a0b13b46eaf23fdc7056841d39010597e",
+      "bytes": 1646389
+    },
+    {
+      "source": "images/tree-primary.png",
+      "destination": "assets/tree/primary.png",
+      "sha256": "c52b10b69777336cffdf2d29d53c0cd220a45ef68ee80288f649415f6e06ae33",
+      "bytes": 1720407
+    },
+    {
+      "source": "images/tree-back.png",
+      "destination": "assets/tree/back.png",
+      "sha256": "211e75003613bd457765a73bd0e2bc2a979cd9583a6349a320d6498eb5168fd6",
+      "bytes": 1656176
+    },
+    {
+      "source": "images/shrub-primary.png",
+      "destination": "assets/shrub/primary.png",
+      "sha256": "0e4e05b8d3a639ac780ee4855086de92d891c83a60d6aadeca3851b9826406e7",
+      "bytes": 1722316
+    },
+    {
+      "source": "images/ground-primary.png",
+      "destination": "assets/ground/primary.png",
+      "sha256": "76b97103cfb5e3cd3b220e2cc48a18759337480f69125acd5575cf4504b0dde7",
+      "bytes": 1741290
+    },
+    {
+      "source": "images/dock-primary.png",
+      "destination": "assets/dock/primary.png",
+      "sha256": "0ebdd8ff5df4774b19c11005d4f8eb321085efed31992318628840af9cd9ca26",
+      "bytes": 1945968
+    },
+    {
+      "source": "images/dock-side.png",
+      "destination": "assets/dock/side.png",
+      "sha256": "640710778fdc9579e6559004882a4b61612ae4c028b575ce11ac97a61f3618e8",
+      "bytes": 1405751
+    },
+    {
+      "source": "images/boat-primary.png",
+      "destination": "assets/boat/primary.png",
+      "sha256": "93e5844d0bb596c39ae7be31399fc6a2c37aac65a020439e53f59fc9a94890fb",
+      "bytes": 1693189
+    },
+    {
+      "source": "images/boat-back.png",
+      "destination": "assets/boat/back.png",
+      "sha256": "84dd334769c8a2934c52b86f457d7caf99dc4f9d893fb63d37e406b4246649e5",
+      "bytes": 1724479
+    },
+    {
+      "source": "images/rock-primary.png",
+      "destination": "assets/rock/primary.png",
+      "sha256": "cd4159c6b7cf802a28494da711974e18537ca8fe251062066e1b93d0978f3e4a",
+      "bytes": 2108799
+    },
+    {
+      "source": "images/fish-primary.png",
+      "destination": "assets/fish/primary.png",
+      "sha256": "f50e4f9354a656a4a146c848eb578241e25511b7e057abc1429c9f6570224be9",
+      "bytes": 1361591
+    },
+    {
+      "source": "images/rod-primary.png",
+      "destination": "assets/rod/primary.png",
+      "sha256": "13aec2b6093c63144fd69b227f8b4337fd893ed9f5c40289bfc19879eae6c62c",
+      "bytes": 1168261
+    },
+    {
+      "source": "images/grass-primary.png",
+      "destination": "assets/grass/primary.png",
+      "sha256": "b516799eb6b23b0846e035af3301d26d3053c50054cddd4cf1cd18317f7067a4",
+      "bytes": 1433769
+    },
+    {
+      "source": "references/00-scene-original.png",
+      "destination": "references/scene-original.png",
+      "sha256": "fae861e2f17ddc2d36b8f851eb29adaddeb2a14c5849c0935d8eeeb169ff2d12",
+      "bytes": 2042379
+    },
+    {
+      "source": "references/scale-layout.svg",
+      "destination": "references/scale-layout.svg",
+      "sha256": "85e9c072d748cb0f780450cddc318579aff28752a310f01d9a86762031e44fe7",
+      "bytes": 6685
+    },
+    {
+      "source": "review/dog-back-rejected-head-turn.png",
+      "destination": "review/rejected/dog-back-head-turn.png",
+      "sha256": "0e45ebdc0eaaa348ad92cf2088164fbe9a8244ee8cfc7ad30890c793ccb63696",
+      "bytes": 1662499
+    },
+    {
+      "source": "review/dock-back-rejected-view-unchanged.png",
+      "destination": "review/rejected/dock-back-view-unchanged.png",
+      "sha256": "96a7b9f9de1e273b73228aec612777d828a52e4095d04820be5d389bbf9f97c3",
+      "bytes": 1856195
+    },
+    {
+      "source": "tripo-pilot-inputs/DOG-primary.png",
+      "destination": "tripo-pilot-inputs/DOG-primary.png",
+      "sha256": "a28a74ede059f89039be85040f4efcb1d9b921b027ff90034c272a940893c037",
+      "bytes": 1396525
+    },
+    {
+      "source": "tripo-pilot-inputs/TREE-primary.png",
+      "destination": "tripo-pilot-inputs/TREE-primary.png",
+      "sha256": "c52b10b69777336cffdf2d29d53c0cd220a45ef68ee80288f649415f6e06ae33",
+      "bytes": 1720407
+    }
+  ]
+}

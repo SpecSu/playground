@@ -1,0 +1,50 @@
+{
+  "source": "scene-lab/assets/models/fish/texture.glb",
+  "source_sha256": "460888327c3aa6f37068b792f80c603b353eaa023936710cc5c23921097a914b",
+  "output": "scene-lab/assets/models/fish/display.glb",
+  "output_sha256": "f343449c33e079ef4791637336c499f2d194870fd26705fbd7002a9d6740d31f",
+  "before_bytes": 12498968,
+  "after_bytes": 329824,
+  "images": [
+    {
+      "image": 0,
+      "role": "normal",
+      "before": [
+        4096,
+        4096
+      ],
+      "after": [
+        256,
+        256
+      ],
+      "bytes": 36446
+    },
+    {
+      "image": 1,
+      "role": "baseColor",
+      "before": [
+        4096,
+        4096
+      ],
+      "after": [
+        512,
+        512
+      ],
+      "bytes": 65461
+    },
+    {
+      "image": 2,
+      "role": "data",
+      "before": [
+        4096,
+        4096
+      ],
+      "after": [
+        256,
+        256
+      ],
+      "bytes": 72182
+    }
+  ],
+  "geometry": "unchanged; buffer views repacked"
+}

@@ -1,0 +1,35 @@
+{
+  "id": "boat",
+  "source": "scene-lab/assets/models/boat/display.glb",
+  "source_sha256": "f46ce503befdbbbf6d0161a90f49d6a3a6a28d71a4297fdb986d420613aa33b2",
+  "output": "scene-lab/assets/models/boat/runtime.glb",
+  "output_sha256": "554e6f77533978443ed08362b74e0537e6ea506c15ef39aebe5dbc8926dbb1da",
+  "settings": {
+    "ratio": 0.4,
+    "error": 0.002
+  },
+  "appearanceError": 0.001972298137843609,
+  "before": {
+    "triangles": 26936,
+    "vertices": 17269,
+    "geometryBytes": 714224,
+    "textures": [
+      "75fe12cb3f327a249893495a66fbbcc81442f2259b0cf864b2997329cd156ad5",
+      "a73433440c86b0dea3113d042698a79d47456501d72f956123233889975967f9",
+      "b2acf3509f9fa52e65dfa9aa7959863f71d46093304f93481bae2c861001f7b2"
+    ],
+    "fileBytes": 1394284
+  },
+  "after": {
+    "triangles": 14386,
+    "vertices": 10557,
+    "geometryBytes": 424140,
+    "textures": [
+      "75fe12cb3f327a249893495a66fbbcc81442f2259b0cf864b2997329cd156ad5",
+      "a73433440c86b0dea3113d042698a79d47456501d72f956123233889975967f9",
+      "b2acf3509f9fa52e65dfa9aa7959863f71d46093304f93481bae2c861001f7b2"
+    ],
+    "fileBytes": 1104200
+  },
+  "preserved": "Exact embedded images, retained vertex attributes, UV seams, topological borders, extrema, materials and node transforms."
+}

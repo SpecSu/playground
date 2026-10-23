@@ -1,0 +1,35 @@
+{
+  "id": "fish",
+  "source": "scene-lab/assets/models/fish/display.glb",
+  "source_sha256": "f343449c33e079ef4791637336c499f2d194870fd26705fbd7002a9d6740d31f",
+  "output": "scene-lab/assets/models/fish/runtime.glb",
+  "output_sha256": "bb4e68dc7fb06d12a45ce31baaf67218e782d090acd13d232b5015c6aa8c9112",
+  "settings": {
+    "ratio": 0.35,
+    "error": 0.003
+  },
+  "appearanceError": 0.0029945694841444492,
+  "before": {
+    "triangles": 5724,
+    "vertices": 3732,
+    "geometryBytes": 153768,
+    "textures": [
+      "18c2105ebba9ce8720e709ef5094f228e2d14afa1f5ccc7e772ac23ea21ed43f",
+      "61a1480399ee1aea33efe0f634a19a6e1170b3542f911182156ad5e392f9b43e",
+      "95d732ecab7c60e5ae0a9b625f86c03fac5b5d0265c509b34213908d9193d636"
+    ],
+    "fileBytes": 329824
+  },
+  "after": {
+    "triangles": 3002,
+    "vertices": 2272,
+    "geometryBytes": 90716,
+    "textures": [
+      "18c2105ebba9ce8720e709ef5094f228e2d14afa1f5ccc7e772ac23ea21ed43f",
+      "61a1480399ee1aea33efe0f634a19a6e1170b3542f911182156ad5e392f9b43e",
+      "95d732ecab7c60e5ae0a9b625f86c03fac5b5d0265c509b34213908d9193d636"
+    ],
+    "fileBytes": 266772
+  },
+  "preserved": "Exact embedded images, retained vertex attributes, UV seams, topological borders, extrema, materials and node transforms."
+}

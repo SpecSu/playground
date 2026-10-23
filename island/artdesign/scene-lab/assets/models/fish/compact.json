@@ -1,0 +1,154 @@
+{
+  "id": "fish",
+  "source": "scene-lab/assets/models/fish/runtime.glb",
+  "source_sha256": "bb4e68dc7fb06d12a45ce31baaf67218e782d090acd13d232b5015c6aa8c9112",
+  "output": "scene-lab/assets/models/fish/compact.glb",
+  "output_sha256": "0a02186a0761194a7945136e40b29323e7a21d710f08eb9c1cfe40208ec48a58",
+  "before_bytes": 266772,
+  "after_bytes": 212560,
+  "images": [
+    {
+      "index": 0,
+      "role": "data",
+      "dimensions": [
+        256,
+        256
+      ],
+      "before_bytes": 36446,
+      "before_sha256": "18c2105ebba9ce8720e709ef5094f228e2d14afa1f5ccc7e772ac23ea21ed43f",
+      "after_sha256": "42117508ab5fbf99eac4308dd30478b301171503a4c378788f5b9bc3ed8e863d",
+      "selected": {
+        "codec": "webp-lossless",
+        "mime": "image/webp",
+        "bytes": 25550,
+        "eligible": true,
+        "psnr": null,
+        "mae": 0.0
+      },
+      "candidates": [
+        {
+          "codec": "original",
+          "mime": "image/png",
+          "bytes": 36446,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        },
+        {
+          "codec": "oxipng4",
+          "mime": "image/png",
+          "bytes": 32583,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        },
+        {
+          "codec": "webp-lossless",
+          "mime": "image/webp",
+          "bytes": 25550,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "role": "color",
+      "dimensions": [
+        512,
+        512
+      ],
+      "before_bytes": 65461,
+      "before_sha256": "61a1480399ee1aea33efe0f634a19a6e1170b3542f911182156ad5e392f9b43e",
+      "after_sha256": "465a3ca348b8e18092e603d544350e74a4953726e25d55a765c7a61b32ff4c50",
+      "selected": {
+        "codec": "webp95",
+        "mime": "image/webp",
+        "bytes": 42276,
+        "eligible": true,
+        "psnr": 43.51417799287046,
+        "mae": 1.1359710693359375
+      },
+      "candidates": [
+        {
+          "codec": "original",
+          "mime": "image/jpeg",
+          "bytes": 65461,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        },
+        {
+          "codec": "mozjpeg90",
+          "mime": "image/jpeg",
+          "bytes": 51633,
+          "eligible": true,
+          "psnr": 44.59940955796089,
+          "mae": 0.8477668762207031
+        },
+        {
+          "codec": "mozjpeg93",
+          "mime": "image/jpeg",
+          "bytes": 62387,
+          "eligible": true,
+          "psnr": 47.877718490558514,
+          "mae": 0.5276985168457031
+        },
+        {
+          "codec": "webp95",
+          "mime": "image/webp",
+          "bytes": 42276,
+          "eligible": true,
+          "psnr": 43.51417799287046,
+          "mae": 1.1359710693359375
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "role": "data",
+      "dimensions": [
+        256,
+        256
+      ],
+      "before_bytes": 72182,
+      "before_sha256": "95d732ecab7c60e5ae0a9b625f86c03fac5b5d0265c509b34213908d9193d636",
+      "after_sha256": "e5cee6291d12bca0c4bd340ebc6afb1f4445b77ee21810e04b994374d580a454",
+      "selected": {
+        "codec": "webp-lossless",
+        "mime": "image/webp",
+        "bytes": 51872,
+        "eligible": true,
+        "psnr": null,
+        "mae": 0.0
+      },
+      "candidates": [
+        {
+          "codec": "original",
+          "mime": "image/png",
+          "bytes": 72182,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        },
+        {
+          "codec": "oxipng4",
+          "mime": "image/png",
+          "bytes": 68225,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        },
+        {
+          "codec": "webp-lossless",
+          "mime": "image/webp",
+          "bytes": 51872,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        }
+      ]
+    }
+  ]
+}

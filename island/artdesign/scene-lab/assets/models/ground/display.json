@@ -1,0 +1,50 @@
+{
+  "source": "scene-lab/assets/models/ground/texture.glb",
+  "source_sha256": "f24ec0c597ef289f5d896e3ae8ee05e7b89942cf7f80b7166776b1c456482d0b",
+  "output": "scene-lab/assets/models/ground/display.glb",
+  "output_sha256": "2d5532456adf7c2acc2546397a798b1c54a0edd0537c4efd710dc683404fa7df",
+  "before_bytes": 11088364,
+  "after_bytes": 1185724,
+  "images": [
+    {
+      "image": 0,
+      "role": "normal",
+      "before": [
+        4096,
+        4096
+      ],
+      "after": [
+        512,
+        512
+      ],
+      "bytes": 159263
+    },
+    {
+      "image": 1,
+      "role": "baseColor",
+      "before": [
+        4096,
+        4096
+      ],
+      "after": [
+        1024,
+        1024
+      ],
+      "bytes": 214546
+    },
+    {
+      "image": 2,
+      "role": "data",
+      "before": [
+        4096,
+        4096
+      ],
+      "after": [
+        512,
+        512
+      ],
+      "bytes": 186387
+    }
+  ],
+  "geometry": "unchanged; buffer views repacked"
+}

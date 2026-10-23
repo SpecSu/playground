@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@gltf-transform/core": "4.3.0",
+    "@gltf-transform/extensions": "4.3.0",
+    "@gltf-transform/functions": "4.3.0",
+    "meshoptimizer": "1.0.1",
+    "sharp": "0.35.5"
+  },
+  "name": "island-offline-mesh-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node simplify.mjs",
+    "test": "node verify.mjs"
+  }
+}

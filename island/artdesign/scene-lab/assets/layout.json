@@ -1,0 +1,130 @@
+{
+  "version": "0.3",
+  "units": "metres",
+  "note": "依据实际 GLB 与 round-05 浏览器截图校准；仅整体缩放和旋转资产。地表接点、甲板高度和植物埋根由场景装配器处理。",
+  "waterHeight": 0.32,
+  "tileSize": 2.48,
+  "assets": {
+    "dog": {
+      "axis": "y",
+      "size": 1.55,
+      "rotation": [
+        0,
+        -90,
+        0
+      ],
+      "position": [
+        1.2,
+        0,
+        1.35
+      ],
+      "anchor": "bottom"
+    },
+    "tree": {
+      "axis": "y",
+      "size": 3.5,
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "position": [
+        -1.25,
+        0,
+        -1.1
+      ],
+      "anchor": "bottom"
+    },
+    "ground": {
+      "axis": "x",
+      "size": 2.55,
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "anchor": "bottom"
+    },
+    "shrub": {
+      "axis": "y",
+      "size": 0.95,
+      "rotation": [
+        0,
+        -90,
+        0
+      ],
+      "position": [
+        -0.95,
+        0,
+        1.1
+      ],
+      "anchor": "bottom"
+    },
+    "dock": {
+      "axis": "z",
+      "size": 3.0,
+      "rotation": [
+        0,
+        -90,
+        0
+      ],
+      "position": [
+        1.1,
+        0,
+        3.73
+      ],
+      "anchor": "top"
+    },
+    "boat": {
+      "axis": "z",
+      "size": 2.7,
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "position": [
+        2.78,
+        0.26,
+        4.0
+      ],
+      "anchor": "waterline",
+      "waterlineFraction": 0.24
+    },
+    "rock": {
+      "axis": "z",
+      "size": 2.2,
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "position": [
+        -3.38,
+        -0.05,
+        0.95
+      ],
+      "anchor": "bottom"
+    },
+    "fish": {
+      "axis": "z",
+      "size": 0.65,
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "position": [
+        -1.5,
+        -0.4,
+        4
+      ],
+      "anchor": "center"
+    }
+  }
+}

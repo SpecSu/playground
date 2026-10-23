@@ -1,0 +1,286 @@
+{
+  "version": "0.4",
+  "algorithm": "meshoptimizer 1.0.1 simplifyWithAttributes; glTF Transform 4.3.0",
+  "assets": [
+    {
+      "id": "dog",
+      "source": "scene-lab/assets/models/dog/display.glb",
+      "source_sha256": "267492bcd89593ab5360defb593bb2154077a50d87cda99482c4a5d1b6500be7",
+      "output": "scene-lab/assets/models/dog/runtime.glb",
+      "output_sha256": "128fdb9cb9e2f26daafab8a480ee93bdb96f2da439f16f10899e1646b3485afb",
+      "settings": {
+        "ratio": 0.45,
+        "error": 0.002
+      },
+      "appearanceError": 0.0013591180322691798,
+      "before": {
+        "triangles": 47648,
+        "vertices": 26925,
+        "geometryBytes": 1147488,
+        "textures": [
+          "80de35fe14a5a9f610a46d5123d76ba83dee0f4166ab3929638463503641edf5",
+          "8d3b3f2f30d1ce900d646f1d24f9a3b2c58ce66331c4a71ab150fee8c2d14923",
+          "a1b8853ee7f85610b4640c1490ac30037c84cdacb846dc24f71f408797cf117f"
+        ],
+        "fileBytes": 3469644
+      },
+      "after": {
+        "triangles": 21440,
+        "vertices": 13458,
+        "geometryBytes": 559296,
+        "textures": [
+          "80de35fe14a5a9f610a46d5123d76ba83dee0f4166ab3929638463503641edf5",
+          "8d3b3f2f30d1ce900d646f1d24f9a3b2c58ce66331c4a71ab150fee8c2d14923",
+          "a1b8853ee7f85610b4640c1490ac30037c84cdacb846dc24f71f408797cf117f"
+        ],
+        "fileBytes": 2881448
+      },
+      "preserved": "Exact embedded images, retained vertex attributes, UV seams, topological borders, extrema, materials and node transforms."
+    },
+    {
+      "id": "tree",
+      "source": "scene-lab/assets/models/tree/display.glb",
+      "source_sha256": "763d52177fbf2891cb164fd52ba978d07c7a53cd2b677e11165a6f82f7d9eec0",
+      "output": "scene-lab/assets/models/tree/runtime.glb",
+      "output_sha256": "29531afbaeb4c2ecab29d17049d6e6f3c79b36e35428995e0f46ee71645a3397",
+      "settings": {
+        "ratio": 0.35,
+        "error": 0.003
+      },
+      "appearanceError": 0.002280615270137787,
+      "before": {
+        "triangles": 63926,
+        "vertices": 37170,
+        "geometryBytes": 1572996,
+        "textures": [
+          "3742846aa6e898f30f060d81d2fe0dcabe92c8e5a4e2bd3bf5f883c7f630e314",
+          "7bace4cb4782806eea039276a77faef83d5553540ab21dc995b64101223fd8ce",
+          "8b3e2d0498776538f71059673380d964d0ebdcdea5b5545213cb129c144d4da5"
+        ],
+        "fileBytes": 3317372
+      },
+      "after": {
+        "triangles": 22374,
+        "vertices": 15134,
+        "geometryBytes": 618532,
+        "textures": [
+          "3742846aa6e898f30f060d81d2fe0dcabe92c8e5a4e2bd3bf5f883c7f630e314",
+          "7bace4cb4782806eea039276a77faef83d5553540ab21dc995b64101223fd8ce",
+          "8b3e2d0498776538f71059673380d964d0ebdcdea5b5545213cb129c144d4da5"
+        ],
+        "fileBytes": 2362900
+      },
+      "preserved": "Exact embedded images, retained vertex attributes, UV seams, topological borders, extrema, materials and node transforms."
+    },
+    {
+      "id": "ground",
+      "source": "scene-lab/assets/models/ground/display.glb",
+      "source_sha256": "2d5532456adf7c2acc2546397a798b1c54a0edd0537c4efd710dc683404fa7df",
+      "output": "scene-lab/assets/models/ground/runtime.glb",
+      "output_sha256": "70afe7feaf443aaf77614aee478715d08d1a5b6bda2ae1c4bb19ce73684fcb2a",
+      "settings": {
+        "ratio": 0.3,
+        "error": 0.002
+      },
+      "appearanceError": 0.0019977325573563576,
+      "before": {
+        "triangles": 25606,
+        "vertices": 14685,
+        "geometryBytes": 623556,
+        "textures": [
+          "a79b22d48e654c2cd0d750addef1193e017e73d91fadfa65e8d76d4d3ee3e74a",
+          "aa445989ce57ad47b6f0562cae0bc91b00f4ae55f5f8006dbf54618fab54fe63",
+          "ace371600c0eade3dbe4cb63f3427bf63a0d479e75aea1c9793a8132f86253e4"
+        ],
+        "fileBytes": 1185724
+      },
+      "after": {
+        "triangles": 21842,
+        "vertices": 12777,
+        "geometryBytes": 539916,
+        "textures": [
+          "a79b22d48e654c2cd0d750addef1193e017e73d91fadfa65e8d76d4d3ee3e74a",
+          "aa445989ce57ad47b6f0562cae0bc91b00f4ae55f5f8006dbf54618fab54fe63",
+          "ace371600c0eade3dbe4cb63f3427bf63a0d479e75aea1c9793a8132f86253e4"
+        ],
+        "fileBytes": 1102092
+      },
+      "preserved": "Exact embedded images, retained vertex attributes, UV seams, topological borders, extrema, materials and node transforms."
+    },
+    {
+      "id": "shrub",
+      "source": "scene-lab/assets/models/shrub/display.glb",
+      "source_sha256": "ce6eeb031fd551efaf9ed2f6484f2973aaaddb92ff4f6162ec3268514769ff3a",
+      "output": "scene-lab/assets/models/shrub/runtime.glb",
+      "output_sha256": "b714558edb361f7978072456831e885cfc43775a8571b74a25f36f4153089fc8",
+      "settings": {
+        "ratio": 0.5,
+        "error": 0.002
+      },
+      "appearanceError": 0.00199642451480031,
+      "before": {
+        "triangles": 34358,
+        "vertices": 25974,
+        "geometryBytes": 1037316,
+        "textures": [
+          "32023b58ee4ce1892386cc0dad1bc74ed94986f8718c051f57324c7f1492a825",
+          "614677715f414353960394108a91f51e4724f3b9cf4fcf59e97a2a8f40e1edd1",
+          "a72d7d4f07ca0de6ffb7ab0efb1da2a13710e92ce077bc4f17e3b1bb0cccb1bf"
+        ],
+        "fileBytes": 1673216
+      },
+      "after": {
+        "triangles": 29046,
+        "vertices": 23111,
+        "geometryBytes": 913828,
+        "textures": [
+          "32023b58ee4ce1892386cc0dad1bc74ed94986f8718c051f57324c7f1492a825",
+          "614677715f414353960394108a91f51e4724f3b9cf4fcf59e97a2a8f40e1edd1",
+          "a72d7d4f07ca0de6ffb7ab0efb1da2a13710e92ce077bc4f17e3b1bb0cccb1bf"
+        ],
+        "fileBytes": 1549732
+      },
+      "preserved": "Exact embedded images, retained vertex attributes, UV seams, topological borders, extrema, materials and node transforms."
+    },
+    {
+      "id": "dock",
+      "source": "scene-lab/assets/models/dock/display.glb",
+      "source_sha256": "0123f8a4ce133d154f64a6db632cf871b34273118f30ee3e96f359471cf0f906",
+      "output": "scene-lab/assets/models/dock/runtime.glb",
+      "output_sha256": "04d78f275cf4f6c0b65294f71adf73cd50272ad131a021341d01c1cb7210d47f",
+      "settings": {
+        "ratio": 0.35,
+        "error": 0.002
+      },
+      "appearanceError": 0.0019692229107022285,
+      "before": {
+        "triangles": 31415,
+        "vertices": 20703,
+        "geometryBytes": 850986,
+        "textures": [
+          "803827fe47b460bed0694e730d1606ce3d9be5e843d638e6c9df1b948ce5e8c7",
+          "8b9f88684f9bef1edc3f9258571c21533c079aafd5960fc83e67cb3fcf382a18",
+          "90dc480e4ecffe0d0aea9d04385041152dfcf899fe1fb23177f30df0d20b826e"
+        ],
+        "fileBytes": 1869304
+      },
+      "after": {
+        "triangles": 21517,
+        "vertices": 15413,
+        "geometryBytes": 622318,
+        "textures": [
+          "803827fe47b460bed0694e730d1606ce3d9be5e843d638e6c9df1b948ce5e8c7",
+          "8b9f88684f9bef1edc3f9258571c21533c079aafd5960fc83e67cb3fcf382a18",
+          "90dc480e4ecffe0d0aea9d04385041152dfcf899fe1fb23177f30df0d20b826e"
+        ],
+        "fileBytes": 1640628
+      },
+      "preserved": "Exact embedded images, retained vertex attributes, UV seams, topological borders, extrema, materials and node transforms."
+    },
+    {
+      "id": "boat",
+      "source": "scene-lab/assets/models/boat/display.glb",
+      "source_sha256": "f46ce503befdbbbf6d0161a90f49d6a3a6a28d71a4297fdb986d420613aa33b2",
+      "output": "scene-lab/assets/models/boat/runtime.glb",
+      "output_sha256": "554e6f77533978443ed08362b74e0537e6ea506c15ef39aebe5dbc8926dbb1da",
+      "settings": {
+        "ratio": 0.4,
+        "error": 0.002
+      },
+      "appearanceError": 0.001972298137843609,
+      "before": {
+        "triangles": 26936,
+        "vertices": 17269,
+        "geometryBytes": 714224,
+        "textures": [
+          "75fe12cb3f327a249893495a66fbbcc81442f2259b0cf864b2997329cd156ad5",
+          "a73433440c86b0dea3113d042698a79d47456501d72f956123233889975967f9",
+          "b2acf3509f9fa52e65dfa9aa7959863f71d46093304f93481bae2c861001f7b2"
+        ],
+        "fileBytes": 1394284
+      },
+      "after": {
+        "triangles": 14386,
+        "vertices": 10557,
+        "geometryBytes": 424140,
+        "textures": [
+          "75fe12cb3f327a249893495a66fbbcc81442f2259b0cf864b2997329cd156ad5",
+          "a73433440c86b0dea3113d042698a79d47456501d72f956123233889975967f9",
+          "b2acf3509f9fa52e65dfa9aa7959863f71d46093304f93481bae2c861001f7b2"
+        ],
+        "fileBytes": 1104200
+      },
+      "preserved": "Exact embedded images, retained vertex attributes, UV seams, topological borders, extrema, materials and node transforms."
+    },
+    {
+      "id": "rock",
+      "source": "scene-lab/assets/models/rock/display.glb",
+      "source_sha256": "2555dc24acacf6736b1786a3b67bdf2bc3832868c8300b7028264b5434e7bad0",
+      "output": "scene-lab/assets/models/rock/runtime.glb",
+      "output_sha256": "832343049d6558f82ec4e3f2d6d5851e6368e10079c9a0455d6e6bea7daae598",
+      "settings": {
+        "ratio": 0.25,
+        "error": 0.003
+      },
+      "appearanceError": 0.002934298012405634,
+      "before": {
+        "triangles": 17918,
+        "vertices": 10221,
+        "geometryBytes": 434580,
+        "textures": [
+          "6df56234122a161946601c5036e8423c546dcea8b01900bad5c59aa7de41a7ef",
+          "b0ef87ea81bd792b20c1c1323d72d6f19bd3a338c3b1ea5400a068225695caf5",
+          "f56de239785b5fd62537c8ecc8cb7145f291e4ed40b56aa9bdd28672a9a2a521"
+        ],
+        "fileBytes": 1488516
+      },
+      "after": {
+        "triangles": 9964,
+        "vertices": 6106,
+        "geometryBytes": 255176,
+        "textures": [
+          "6df56234122a161946601c5036e8423c546dcea8b01900bad5c59aa7de41a7ef",
+          "b0ef87ea81bd792b20c1c1323d72d6f19bd3a338c3b1ea5400a068225695caf5",
+          "f56de239785b5fd62537c8ecc8cb7145f291e4ed40b56aa9bdd28672a9a2a521"
+        ],
+        "fileBytes": 1309108
+      },
+      "preserved": "Exact embedded images, retained vertex attributes, UV seams, topological borders, extrema, materials and node transforms."
+    },
+    {
+      "id": "fish",
+      "source": "scene-lab/assets/models/fish/display.glb",
+      "source_sha256": "f343449c33e079ef4791637336c499f2d194870fd26705fbd7002a9d6740d31f",
+      "output": "scene-lab/assets/models/fish/runtime.glb",
+      "output_sha256": "bb4e68dc7fb06d12a45ce31baaf67218e782d090acd13d232b5015c6aa8c9112",
+      "settings": {
+        "ratio": 0.35,
+        "error": 0.003
+      },
+      "appearanceError": 0.0029945694841444492,
+      "before": {
+        "triangles": 5724,
+        "vertices": 3732,
+        "geometryBytes": 153768,
+        "textures": [
+          "18c2105ebba9ce8720e709ef5094f228e2d14afa1f5ccc7e772ac23ea21ed43f",
+          "61a1480399ee1aea33efe0f634a19a6e1170b3542f911182156ad5e392f9b43e",
+          "95d732ecab7c60e5ae0a9b625f86c03fac5b5d0265c509b34213908d9193d636"
+        ],
+        "fileBytes": 329824
+      },
+      "after": {
+        "triangles": 3002,
+        "vertices": 2272,
+        "geometryBytes": 90716,
+        "textures": [
+          "18c2105ebba9ce8720e709ef5094f228e2d14afa1f5ccc7e772ac23ea21ed43f",
+          "61a1480399ee1aea33efe0f634a19a6e1170b3542f911182156ad5e392f9b43e",
+          "95d732ecab7c60e5ae0a9b625f86c03fac5b5d0265c509b34213908d9193d636"
+        ],
+        "fileBytes": 266772
+      },
+      "preserved": "Exact embedded images, retained vertex attributes, UV seams, topological borders, extrema, materials and node transforms."
+    }
+  ]
+}

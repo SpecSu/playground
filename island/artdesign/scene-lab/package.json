@@ -1,0 +1,10 @@
+{
+  "name": "island-asset-lab",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "python3 server.py",
+    "check": "node --check src/main.js && node --check src/asset.js && node --check src/lighting.js && node --check src/lagoon.js && node --check src/motion.js && node --check src/materials.js"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "id": "dog",
+  "source": "scene-lab/assets/models/dog/display.glb",
+  "source_sha256": "267492bcd89593ab5360defb593bb2154077a50d87cda99482c4a5d1b6500be7",
+  "output": "scene-lab/assets/models/dog/runtime.glb",
+  "output_sha256": "128fdb9cb9e2f26daafab8a480ee93bdb96f2da439f16f10899e1646b3485afb",
+  "settings": {
+    "ratio": 0.45,
+    "error": 0.002
+  },
+  "appearanceError": 0.0013591180322691798,
+  "before": {
+    "triangles": 47648,
+    "vertices": 26925,
+    "geometryBytes": 1147488,
+    "textures": [
+      "80de35fe14a5a9f610a46d5123d76ba83dee0f4166ab3929638463503641edf5",
+      "8d3b3f2f30d1ce900d646f1d24f9a3b2c58ce66331c4a71ab150fee8c2d14923",
+      "a1b8853ee7f85610b4640c1490ac30037c84cdacb846dc24f71f408797cf117f"
+    ],
+    "fileBytes": 3469644
+  },
+  "after": {
+    "triangles": 21440,
+    "vertices": 13458,
+    "geometryBytes": 559296,
+    "textures": [
+      "80de35fe14a5a9f610a46d5123d76ba83dee0f4166ab3929638463503641edf5",
+      "8d3b3f2f30d1ce900d646f1d24f9a3b2c58ce66331c4a71ab150fee8c2d14923",
+      "a1b8853ee7f85610b4640c1490ac30037c84cdacb846dc24f71f408797cf117f"
+    ],
+    "fileBytes": 2881448
+  },
+  "preserved": "Exact embedded images, retained vertex attributes, UV seams, topological borders, extrema, materials and node transforms."
+}

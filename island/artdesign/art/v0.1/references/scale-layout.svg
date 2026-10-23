@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+<defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#c5dcdd" stroke-width=".6"/></pattern><marker id="arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M0 0L7 3.5L0 7Z" fill="#536967"/></marker></defs>
+<rect width="1200" height="900" fill="#f5f3eb"/><g font-family="PingFang SC,Microsoft YaHei,sans-serif" fill="#263f3b">
+<text x="44" y="56" font-size="28" font-weight="700">小岛 · 尺寸与装配说明 v0.1</text>
+<text x="44" y="87" font-size="15" fill="#687b74">设计约定，不是原图测量。仅供装配与审核，不提交 Tripo；轮廓符号不是建模参考。</text>
+<rect x="30" y="112" width="675" height="710" rx="20" fill="#e0efee"/><rect x="30" y="112" width="675" height="710" rx="20" fill="url(#grid)"/>
+<g transform="translate(10,140)">
+<rect x="92" y="84" width="416" height="352" rx="28" fill="#b4cd78" stroke="#719b59" stroke-width="3"/>
+<path d="M300 89V432M97 260H503" stroke="#d9dc9d" stroke-width="8"/>
+<circle cx="188" cy="182" r="86" fill="#568f5c" fill-opacity=".6" stroke="#386d49" stroke-width="2"/>
+<circle cx="188" cy="182" r="10" fill="#b58047"/><text x="188" y="180" text-anchor="middle" font-size="18" fill="white">TREE</text><text x="188" y="204" text-anchor="middle" font-size="13" fill="white">冠宽 2.15 m</text>
+<circle cx="274" cy="332" r="44" fill="#3b9a76"/><text x="274" y="337" text-anchor="middle" font-size="14" fill="white">SHRUB</text>
+<circle cx="404" cy="372" r="26" fill="#dea86b" stroke="#a87c46" stroke-width="2"/><text x="404" y="376" text-anchor="middle" font-size="13">DOG</text>
+<path d="M70 276L116 285L140 345L121 391L66 391L45 352Z" fill="#929991" stroke="#6d7771" stroke-width="2"/><text x="87" y="340" text-anchor="middle" font-size="13" fill="white">ROCK</text>
+<rect x="354" y="436" width="132" height="192" rx="5" fill="#bc8d57" stroke="#8a643d" stroke-width="3"/>
+<path d="M358 452H482" stroke="#936d42"/><path d="M358 476H482" stroke="#936d42"/><path d="M358 500H482" stroke="#936d42"/><path d="M358 524H482" stroke="#936d42"/><path d="M358 548H482" stroke="#936d42"/><path d="M358 572H482" stroke="#936d42"/><path d="M358 596H482" stroke="#936d42"/><path d="M358 620H482" stroke="#936d42"/>
+<text x="420" y="527" text-anchor="middle" font-size="17" fill="white">DOCK</text><text x="420" y="551" text-anchor="middle" font-size="13" fill="white">2.40 × 1.65 m</text>
+<path d="M536 440Q564 410 612 440L612 594Q574 650 536 594Z" fill="#629cb3" stroke="#fcf4df" stroke-width="8"/><text x="574" y="520" text-anchor="middle" font-size="14" fill="white">BOAT</text><text x="574" y="544" text-anchor="middle" font-size="12" fill="white">2.25 m</text>
+<path d="M92 57H508" stroke="#536967" marker-start="url(#arrow)" marker-end="url(#arrow)"/><text x="300" y="44" text-anchor="middle" font-size="14">5.20 m</text>
+<path d="M61 84V436" stroke="#536967" marker-start="url(#arrow)" marker-end="url(#arrow)"/><text x="47" y="262" text-anchor="middle" font-size="14" transform="rotate(-90 47 262)">4.40 m</text>
+<path d="M120 660H280M120 652V668M200 652V668M280 652V668" stroke="#263f3b" stroke-width="3"/><text x="120" y="686" text-anchor="middle" font-size="13">0</text><text x="200" y="686" text-anchor="middle" font-size="13">1 m</text><text x="280" y="686" text-anchor="middle" font-size="13">2 m</text>
+<text x="430" y="677" font-size="13">俯视 · +Z 朝下 / +X 朝右</text></g>
+<rect x="728" y="112" width="442" height="710" rx="20" fill="white"/>
+<text x="752" y="151" font-size="19" font-weight="600">高度比例条</text><text x="752" y="177" font-size="13" fill="#687b74">同一接地基准 · 形状不表示模型轮廓</text>
+<path d="M766 528H1143" stroke="#e2e6dd"/><text x="746" y="533" font-size="12">0</text><path d="M766 453H1143" stroke="#e2e6dd"/><text x="746" y="458" font-size="12">1</text><path d="M766 378H1143" stroke="#e2e6dd"/><text x="746" y="383" font-size="12">2</text><path d="M766 303H1143" stroke="#e2e6dd"/><text x="746" y="308" font-size="12">3</text><path d="M766 228H1143" stroke="#e2e6dd"/><text x="746" y="233" font-size="12">4</text>
+<rect x="788" y="228" width="42" height="300" rx="5" fill="#568f5c"/><text x="809" y="218" text-anchor="middle" font-size="12">4 m</text><text x="809" y="555" text-anchor="middle" font-size="14">树</text><rect x="860" y="438" width="42" height="90" rx="5" fill="#dea86b"/><text x="881" y="428" text-anchor="middle" font-size="12">1.2 m</text><text x="881" y="555" text-anchor="middle" font-size="14">狗狗</text><rect x="932" y="471.75" width="42" height="56.25" rx="5" fill="#3b9a76"/><text x="953" y="461.75" text-anchor="middle" font-size="12">0.75 m</text><text x="953" y="555" text-anchor="middle" font-size="14">灌木</text><rect x="1004" y="434.25" width="42" height="93.75" rx="5" fill="#929991"/><text x="1025" y="424.25" text-anchor="middle" font-size="12">1.25 m</text><text x="1025" y="555" text-anchor="middle" font-size="14">岩石</text><rect x="1076" y="514.5" width="42" height="13.5" rx="5" fill="#b4cd78"/><text x="1097" y="504.5" text-anchor="middle" font-size="12">0.18 m</text><text x="1097" y="555" text-anchor="middle" font-size="14">草簇</text>
+<text x="752" y="611" font-size="18" font-weight="600">材质色彩方向</text>
+<rect x="752" y="635" width="54" height="42" rx="7" fill="#77a940"/><text x="779" y="699" text-anchor="middle" font-size="12">树叶</text><rect x="817" y="635" width="54" height="42" rx="7" fill="#abd349"/><text x="844" y="699" text-anchor="middle" font-size="12">草地</text><rect x="882" y="635" width="54" height="42" rx="7" fill="#b58047"/><text x="909" y="699" text-anchor="middle" font-size="12">木材</text><rect x="947" y="635" width="54" height="42" rx="7" fill="#93948b"/><text x="974" y="699" text-anchor="middle" font-size="12">岩石</text><rect x="1012" y="635" width="54" height="42" rx="7" fill="#f3ebd9"/><text x="1039" y="699" text-anchor="middle" font-size="12">奶白</text><rect x="1077" y="635" width="54" height="42" rx="7" fill="#317da9"/><text x="1104" y="699" text-anchor="middle" font-size="12">船蓝</text>
+<text x="752" y="736" font-size="13" fill="#687b74">示意色，不是从带光照参考图采样的基础色。</text>
+<text x="752" y="761" font-size="13" fill="#687b74">统一中性灯光后再校准；不要烘焙暖阳。</text>
+<text x="44" y="858" font-size="14" fill="#687b74">接口：地面近水平，码头岸端与岛岸对齐；角色所有部分共同变换。首次样板后允许统一修订尺寸。</text>
+</g></svg>

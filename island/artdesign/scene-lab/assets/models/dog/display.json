@@ -1,0 +1,50 @@
+{
+  "source": "scene-lab/assets/models/dog/texture.glb",
+  "source_sha256": "f287594068002a01663de51cd9cd3d25f55cf56de1706eb088ff2316aa01da27",
+  "output": "scene-lab/assets/models/dog/display.glb",
+  "output_sha256": "267492bcd89593ab5360defb593bb2154077a50d87cda99482c4a5d1b6500be7",
+  "before_bytes": 16171572,
+  "after_bytes": 3469644,
+  "images": [
+    {
+      "image": 0,
+      "role": "normal",
+      "before": [
+        4096,
+        4096
+      ],
+      "after": [
+        1024,
+        1024
+      ],
+      "bytes": 564982
+    },
+    {
+      "image": 1,
+      "role": "baseColor",
+      "before": [
+        4096,
+        4096
+      ],
+      "after": [
+        2048,
+        2048
+      ],
+      "bytes": 975683
+    },
+    {
+      "image": 2,
+      "role": "data",
+      "before": [
+        4096,
+        4096
+      ],
+      "after": [
+        1024,
+        1024
+      ],
+      "bytes": 779478
+    }
+  ],
+  "geometry": "unchanged; buffer views repacked"
+}

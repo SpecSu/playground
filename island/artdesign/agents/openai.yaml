@@ -1,0 +1,4 @@
+interface:
+  display_name: "小岛美术资产搭建流程 0.1"
+  short_description: "单体参考图、Tripo 3D/PBR、Three.js 组装、优化与证据验收"
+  default_prompt: "使用 $artdesign 按小岛美术资产搭建流程执行当前任务，先读取交接说明与对应阶段文档。"

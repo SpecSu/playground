@@ -1,0 +1,13 @@
+work/
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+*.tmp
+*.download
+.DS_Store
+.env
+.env.*
+.tripo/
+tripo-env.sh
+TRIPO_SETUP.md

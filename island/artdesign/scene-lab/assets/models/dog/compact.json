@@ -1,0 +1,154 @@
+{
+  "id": "dog",
+  "source": "scene-lab/assets/models/dog/runtime.glb",
+  "source_sha256": "128fdb9cb9e2f26daafab8a480ee93bdb96f2da439f16f10899e1646b3485afb",
+  "output": "scene-lab/assets/models/dog/compact.glb",
+  "output_sha256": "a7bd7a78f663caaac2097c9acdcd12eab6bdd8d338785c03cad581632912820a",
+  "before_bytes": 2881448,
+  "after_bytes": 2227364,
+  "images": [
+    {
+      "index": 0,
+      "role": "data",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "before_bytes": 564982,
+      "before_sha256": "80de35fe14a5a9f610a46d5123d76ba83dee0f4166ab3929638463503641edf5",
+      "after_sha256": "aca905121aca36de105b84d9f088722f11232cf020920d9574a0675beb233347",
+      "selected": {
+        "codec": "webp-lossless",
+        "mime": "image/webp",
+        "bytes": 398268,
+        "eligible": true,
+        "psnr": null,
+        "mae": 0.0
+      },
+      "candidates": [
+        {
+          "codec": "original",
+          "mime": "image/png",
+          "bytes": 564982,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        },
+        {
+          "codec": "oxipng4",
+          "mime": "image/png",
+          "bytes": 526635,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        },
+        {
+          "codec": "webp-lossless",
+          "mime": "image/webp",
+          "bytes": 398268,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "role": "color",
+      "dimensions": [
+        2048,
+        2048
+      ],
+      "before_bytes": 975683,
+      "before_sha256": "a1b8853ee7f85610b4640c1490ac30037c84cdacb846dc24f71f408797cf117f",
+      "after_sha256": "715048a11708cc6c2422210af68ee3728b5b7f7a01901c345c5d235ebb7cc15c",
+      "selected": {
+        "codec": "webp95",
+        "mime": "image/webp",
+        "bytes": 706488,
+        "eligible": true,
+        "psnr": 42.55452377632981,
+        "mae": 1.205456813176473
+      },
+      "candidates": [
+        {
+          "codec": "original",
+          "mime": "image/jpeg",
+          "bytes": 975683,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        },
+        {
+          "codec": "mozjpeg90",
+          "mime": "image/jpeg",
+          "bytes": 741160,
+          "eligible": true,
+          "psnr": 44.25019027043657,
+          "mae": 0.9420046806335449
+        },
+        {
+          "codec": "mozjpeg93",
+          "mime": "image/jpeg",
+          "bytes": 932791,
+          "eligible": true,
+          "psnr": 47.97978670005612,
+          "mae": 0.5501843293507894
+        },
+        {
+          "codec": "webp95",
+          "mime": "image/webp",
+          "bytes": 706488,
+          "eligible": true,
+          "psnr": 42.55452377632981,
+          "mae": 1.205456813176473
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "role": "data",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "before_bytes": 779478,
+      "before_sha256": "8d3b3f2f30d1ce900d646f1d24f9a3b2c58ce66331c4a71ab150fee8c2d14923",
+      "after_sha256": "429997af3d3a23cefd2022a4db0b15dec20238c49820ed669b22f218e6ad0733",
+      "selected": {
+        "codec": "webp-lossless",
+        "mime": "image/webp",
+        "bytes": 561118,
+        "eligible": true,
+        "psnr": null,
+        "mae": 0.0
+      },
+      "candidates": [
+        {
+          "codec": "original",
+          "mime": "image/png",
+          "bytes": 779478,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        },
+        {
+          "codec": "oxipng4",
+          "mime": "image/png",
+          "bytes": 720785,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        },
+        {
+          "codec": "webp-lossless",
+          "mime": "image/webp",
+          "bytes": 561118,
+          "eligible": true,
+          "psnr": null,
+          "mae": 0.0
+        }
+      ]
+    }
+  ]
+}

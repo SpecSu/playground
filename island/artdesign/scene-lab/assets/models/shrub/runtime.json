@@ -1,0 +1,35 @@
+{
+  "id": "shrub",
+  "source": "scene-lab/assets/models/shrub/display.glb",
+  "source_sha256": "ce6eeb031fd551efaf9ed2f6484f2973aaaddb92ff4f6162ec3268514769ff3a",
+  "output": "scene-lab/assets/models/shrub/runtime.glb",
+  "output_sha256": "b714558edb361f7978072456831e885cfc43775a8571b74a25f36f4153089fc8",
+  "settings": {
+    "ratio": 0.5,
+    "error": 0.002
+  },
+  "appearanceError": 0.00199642451480031,
+  "before": {
+    "triangles": 34358,
+    "vertices": 25974,
+    "geometryBytes": 1037316,
+    "textures": [
+      "32023b58ee4ce1892386cc0dad1bc74ed94986f8718c051f57324c7f1492a825",
+      "614677715f414353960394108a91f51e4724f3b9cf4fcf59e97a2a8f40e1edd1",
+      "a72d7d4f07ca0de6ffb7ab0efb1da2a13710e92ce077bc4f17e3b1bb0cccb1bf"
+    ],
+    "fileBytes": 1673216
+  },
+  "after": {
+    "triangles": 29046,
+    "vertices": 23111,
+    "geometryBytes": 913828,
+    "textures": [
+      "32023b58ee4ce1892386cc0dad1bc74ed94986f8718c051f57324c7f1492a825",
+      "614677715f414353960394108a91f51e4724f3b9cf4fcf59e97a2a8f40e1edd1",
+      "a72d7d4f07ca0de6ffb7ab0efb1da2a13710e92ce077bc4f17e3b1bb0cccb1bf"
+    ],
+    "fileBytes": 1549732
+  },
+  "preserved": "Exact embedded images, retained vertex attributes, UV seams, topological borders, extrema, materials and node transforms."
+}

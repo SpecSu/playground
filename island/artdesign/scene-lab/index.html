@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>小岛 · 资产工作台</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="./"><span class="brand-icon">◒</span><span>ISLAND <small>小岛资产工作台</small></span></a>
+    <div class="header-status"><span class="dot"></span><span id="pipeline-status">生成暂停</span><span class="version">视觉试验 v0.4</span></div>
+  </header>
+  <div class="intro"><div><p class="eyebrow">从单体资产，走向一座小岛</p><h1>先把每个细节做好。</h1><p>参考图 → 几何检查 → 材质打光 → 场景组装</p></div><div class="progress-card"><strong id="model-count">0 <small>/ 8</small></strong><span>已接入模型</span><p>狗狗与松树先试制</p></div></div>
+  <main class="workspace">
+    <aside class="library"><div class="panel-heading"><h2>资产清单</h2><span>01—08</span></div><nav id="asset-list" aria-label="资产选择"></nav><p class="library-note">当前方形地块使用 v0.2。<br>每个地块是同一母件的副本。</p></aside>
+    <section class="stage-section">
+      <div class="stage-tabs" role="tablist" aria-label="工作视图">
+        <button data-mode="reference" role="tab" aria-selected="true">参考图</button><button data-mode="inspect" role="tab" aria-selected="false">模型检查</button><button data-mode="scene" role="tab" aria-selected="false">场景预演</button>
+      </div>
+      <div id="stage" class="stage">
+        <div id="canvas-host"></div>
+        <figure id="reference-view"><img id="reference-image" alt="狗狗资产参考图"><figcaption>输入参考 · 不是实时 3D 画面</figcaption></figure>
+        <div class="stage-badge" id="stage-badge">DOG / v0.1</div>
+        <div id="empty-model" class="empty" hidden><span class="empty-symbol">◇</span><h2>模型待生成</h2><p>参考图已就绪。充值问题解决后，<br>先生成灰模，检查完整结构与比例。</p><label class="file-button">载入本地 GLB<input type="file" id="local-file" accept=".glb"></label><small>仅在浏览器中预览，不上传文件</small></div>
+        <div class="scene-note" id="scene-note" hidden><strong>装配方案 · 模型尚未齐备</strong><span>线框仅标识空间位置，水体为实时渲染。不是成品效果。</span></div>
+        <div class="immersive-controls"><button data-light="sun">日光</button><button data-light="dusk">暮色</button><button data-camera="hero">构图复位</button><button id="quick-capture">保存画面</button></div>
+        <div class="viewport-bottom" id="viewport-bottom" hidden><span id="render-status" role="status">准备渲染</span><span>拖动旋转 · 滚轮 / 双指缩放</span></div>
+        <div id="fatal-error" class="error" role="alert" hidden></div>
+      </div>
+      <div class="view-toolbar"><span id="asset-caption">头、耳、五官和身体一起验收</span><div><button id="immersive">沉浸预览</button><button id="scene-reference">整体参考</button><button id="reload">刷新模型</button></div></div>
+    </section>
+    <aside class="inspector">
+      <div class="panel-heading"><h2 id="asset-name">狗狗</h2><span id="asset-phase">待生成</span></div>
+      <p class="asset-description" id="asset-description"></p>
+      <section class="setting-group"><h3>通过条件</h3><ul id="checklist"></ul></section>
+      <div id="render-controls" hidden>
+        <section class="setting-group"><h3>检查材质</h3><div class="segmented"><button data-material="clay" aria-pressed="true">灰模</button><button data-material="pbr" aria-pressed="false">原材质</button><button data-material="base" aria-pressed="false">基础色</button></div></section>
+        <section class="setting-group"><h3>灯光</h3><div class="segmented"><button data-light="neutral" aria-pressed="true">中性</button><button data-light="sun" aria-pressed="false">暖阳</button><button data-light="dusk" aria-pressed="false">黄昏</button></div><label class="range-label">光照方向<input id="light-angle" type="range" min="-180" max="180" value="135"><output id="light-angle-value">135°</output></label><label class="range-label">曝光<input id="exposure" type="range" min="0.6" max="1.4" step="0.02" value="1"><output id="exposure-value">1.00</output></label></section>
+        <section class="setting-group"><h3>摄影机</h3><div class="segmented"><button data-camera="front">正面</button><button data-camera="side">侧面</button><button data-camera="back">背面</button><button data-camera="hero">主视角</button><button data-camera="plants">植物特写</button></div><label class="check-label"><input type="checkbox" id="turntable">缓慢转台</label></section>
+        <section class="setting-group"><h3>记录证据</h3><button class="full-button" id="capture">保存当前画面</button><button class="full-button" id="measure">测量 12 秒帧率</button><button class="full-button" id="measure-orbit">测量转动流畅度</button><p id="metrics" class="metrics" role="status">尚未测量。桌面浏览器结果不能替代手机实测。</p></section>
+      </div>
+      <section class="setting-group"><h3>模型信息</h3><dl id="model-info"><dt>GLB</dt><dd>尚无文件</dd></dl><p class="asset-description" id="load-note">当前仅完成参考图片与流程准备。</p></section>
+      <a class="doc-link" href="docs/WORKFLOW-v0.3.md" target="_blank" rel="noopener">查看执行说明 ↗</a>
+    </aside>
+  </main>
+  <footer><span>所有模型按单体生成，所有结论以真实画面为证。</span><span>本页不连接 Tripo，不会发起付费任务。</span></footer>
+  <script type="module" src="src/main.js"></script>
+</body></html>

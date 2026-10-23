@@ -1,0 +1,50 @@
+{
+  "source": "scene-lab/assets/models/shrub/texture.glb",
+  "source_sha256": "c5b47ede4df4808de25c93678421898fd99e28e937f22cb9c638cbdbfe63aef3",
+  "output": "scene-lab/assets/models/shrub/display.glb",
+  "output_sha256": "ce6eeb031fd551efaf9ed2f6484f2973aaaddb92ff4f6162ec3268514769ff3a",
+  "before_bytes": 14356856,
+  "after_bytes": 1673216,
+  "images": [
+    {
+      "image": 0,
+      "role": "normal",
+      "before": [
+        4096,
+        4096
+      ],
+      "after": [
+        512,
+        512
+      ],
+      "bytes": 66917
+    },
+    {
+      "image": 1,
+      "role": "baseColor",
+      "before": [
+        4096,
+        4096
+      ],
+      "after": [
+        1024,
+        1024
+      ],
+      "bytes": 332897
+    },
+    {
+      "image": 2,
+      "role": "data",
+      "before": [
+        4096,
+        4096
+      ],
+      "after": [
+        512,
+        512
+      ],
+      "bytes": 234073
+    }
+  ],
+  "geometry": "unchanged; buffer views repacked"
+}

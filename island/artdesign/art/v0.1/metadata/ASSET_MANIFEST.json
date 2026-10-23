@@ -1,0 +1,99 @@
+{
+  "version": "0.1",
+  "units": "meters",
+  "up": "+Y",
+  "forward": "+Z",
+  "assets": [
+    {
+      "id": "DOG",
+      "name": "狗狗",
+      "primary": "assets/dog/primary.png",
+      "supplement": "assets/dog/back.png",
+      "size": "高 1.20 m",
+      "status": "首批试制",
+      "note": "主图头身、四肢完整；背图已修正转头问题。尾巴与背部服装是补充设计，仍需 3D 连续性验收。"
+    },
+    {
+      "id": "TREE",
+      "name": "常绿树",
+      "primary": "assets/tree/primary.png",
+      "supplement": "assets/tree/back.png",
+      "size": "高 4.00 m · 冠宽 2.15 m",
+      "status": "首批试制",
+      "note": "主图厚叶和冠层可辨；补充图叶片不逐片对应，首轮只提交主图。"
+    },
+    {
+      "id": "SHRUB",
+      "name": "白花灌木",
+      "primary": "assets/shrub/primary.png",
+      "supplement": null,
+      "size": "高 0.75 m · 宽 1.10 m",
+      "status": "后续候选",
+      "note": "叶簇与花茎关系可读。花叶遮挡处需检查是否被生成成粘连团块。"
+    },
+    {
+      "id": "GROUND",
+      "name": "草皮与土层",
+      "primary": "assets/ground/primary.png",
+      "supplement": null,
+      "size": "5.20 × 4.40 × 0.95 m",
+      "status": "后续候选",
+      "note": "四个草坪区可辨；接缝较深，3D 阶段应保证底部相连，并校准可通行顶面。"
+    },
+    {
+      "id": "DOCK",
+      "name": "木码头",
+      "primary": "assets/dock/primary.png",
+      "supplement": "assets/dock/side.png",
+      "size": "长 2.40 m · 宽 1.65 m",
+      "status": "后续候选",
+      "note": "主图六根桩、板梁结构清楚；侧图只作结构说明，远侧绳圈细节不一致。"
+    },
+    {
+      "id": "BOAT",
+      "name": "小船",
+      "primary": "assets/boat/primary.png",
+      "supplement": "assets/boat/back.png",
+      "size": "长 2.25 m · 宽 0.95 m",
+      "status": "后续候选",
+      "note": "两张均保留两座板和蓝白船体；背面马达支架与船尾结构为补充，尚未验证几何一致性。"
+    },
+    {
+      "id": "ROCK",
+      "name": "岸边主岩",
+      "primary": "assets/rock/primary.png",
+      "supplement": null,
+      "size": "高 1.25 m · 宽 1.15 m",
+      "status": "后续候选",
+      "note": "轮廓和大折面清楚。细碎表面纹理较多，材质阶段需避免放大成高频噪点。"
+    },
+    {
+      "id": "FISH",
+      "name": "青蓝小鱼",
+      "primary": "assets/fish/primary.png",
+      "supplement": null,
+      "size": "体长 0.40 m",
+      "status": "造型参考",
+      "note": "轮廓、鱼鳍可辨。鱼眼比场景参考更显眼，最终水下尺度下可弱化。"
+    },
+    {
+      "id": "ROD",
+      "name": "钓竿",
+      "primary": "assets/rod/primary.png",
+      "supplement": null,
+      "size": "长 1.40 m",
+      "status": "造型参考",
+      "note": "完整细长道具；杆环是新增的功能性设计。钓线在引擎中单独制作。"
+    },
+    {
+      "id": "GRASS",
+      "name": "小草簇",
+      "primary": "assets/grass/primary.png",
+      "supplement": null,
+      "size": "高 0.18 m · 宽约 0.20 m",
+      "status": "造型参考",
+      "note": "厚叶与相连根部可辨；色彩偏鲜亮，进中性灯光后统一校准基础色。"
+    }
+  ],
+  "path_base": "art/v0.1/"
+}
