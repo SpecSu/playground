@@ -1,3 +1,5 @@
+import {foodSiteRating,FOOD_NUTRITION} from './food-resources.ts';
+import {addFood,transferFood,takeFood,reconcileFood,foodQuality,normalizeFoodBatches,type FoodLedger} from './food-ledger.ts';
 import {advanceLookout,startLookout,towerAccess,lookoutReservationSafe,type LookoutState} from './lookout.ts';
 import {feedingApproach} from './action-sequence.ts';
 import {encounterCommand,type EncounterState} from '../v7/encounter.ts';
@@ -8,7 +10,7 @@ import {advancePlayer,findPlayerPath} from './player-navigation.ts';
 import {findActorPath} from './actor-navigation.ts';
 import {createFarm,type Farm,type Avatar,type Action,type Personality} from '../model.ts';
 import {createLayout,findPath,isWalkable,isPlayerWalkable,isOwned,regionAt,buildingApproaches,shelterEntries,INITIAL_ACTOR_POINTS,INITIAL_PLAYER_POINT,previewEdit,commitEdit,tickConstruction,cancelConstruction,type GridPoint,type Layout,type LayoutEdit} from './layout.ts';
-import {createLife,settleOffline,advanceLife,feedingResult,growthSummary,playWith,type LifeState} from './life.ts';
+import {createLife,settleOffline,advanceLife,maintenanceMeal,feedingResult,growthSummary,playWith,type LifeState} from './life.ts';
 import {createThreat,stepThreat,guardianCommand,ensureOpeningThreat,type ThreatState,type GuardianKind} from './threat.ts';
 import {createCreation,type CreationState,type CreationCommand,type WorkCapture} from './creation.ts';
 import {applyEstateCreation,type CreationLayoutReceipt} from './creation-estate.ts';
@@ -18,9 +20,9 @@ import type {AnimalHusbandry,HerdEconomy} from './herd-economy.ts';
 import type {RaidCycle} from './raid-cycle.ts';
 import type {ProductionState} from './v6-production.ts';
 import {ensureWorkshop,workshopCommand,workshopTactic,type WorkshopState} from './workshop.ts';
-export type EstateAnimal={husbandry?:AnimalHusbandry;id:string;name:string;personality:Personality;preference:Action;color:string;appearance:'plain'|'starlit';life:LifeState;position:GridPoint;path:GridPoint[];following:boolean;memorial?:{at:number;eventId:string};restAssignment?:{buildingId:string;doorId:string;slot:number;door:GridPoint;phase:'walk'|'admitted';ordered:boolean;admitMs:number};offlineNeeds?:{pulseAt:number;hunger:number;energy:number}};
+export type EstateAnimal={dining?:{troughId:string;to:GridPoint;phase:'walk'|'eat';elapsedMs:number};husbandry?:AnimalHusbandry;id:string;name:string;personality:Personality;preference:Action;color:string;appearance:'plain'|'starlit';life:LifeState;position:GridPoint;path:GridPoint[];following:boolean;memorial?:{at:number;eventId:string};restAssignment?:{buildingId:string;doorId:string;slot:number;door:GridPoint;phase:'walk'|'admitted';ordered:boolean;admitMs:number};offlineNeeds?:{pulseAt:number;hunger:number;energy:number}};
 export type EstateJob={id:string;type:'feed'|'refill'|'delivery'|'survey';target?:string;food?:'milk'|'feed';progress:number;phase:'walk'|'act'|'out'|'unload'|'back';to:GridPoint;source?:GridPoint;rounds?:number;carried?:number};
-export type Profile={encounter?:EncounterState;v7?:V7State;production?:ProductionState;workshop?:WorkshopState;economy?:HerdEconomy;upgrades?:FarmUpgrades;raidCycle?:RaidCycle;id:'home'|'lab';journey?:JourneyState;runId?:string;createdAt:number;lastSeenAt:number;lastPulseAt:number;onlineMs:number;session:string;opening?:OpeningState;openingActed?:boolean;openingRetreatMs?:number;tutorial:'choose'|'defend'|'done';materials:number;troughFood?:Record<string,number>;inventory:{hand:number;pantry:number;workbenchMs:number};layout:Layout;animals:EstateAnimal[];position:GridPoint;path:GridPoint[];steering?:{direction:GridPoint;at:number};job:EstateJob|null;guardian:GuardianKind|null;guardianAt:GridPoint;guardianBehavior?:'follow'|'station'|'patrol';guardianPath?:GridPoint[];guardianTarget?:GridPoint;guardianPatrolIndex?:number;guardianLookout?:LookoutState;guardianSwitchAt:number;guardianReadyMs:number;threat:ThreatState|null;lastThreat?:ThreatState;rescueIntent?:{target:string;findBack?:boolean;wolfId?:string};creation:CreationState;creationLayouts?:CreationLayoutReceipt[];milestones:string[];regions:string[];surveyed:boolean;assistance:boolean;nextEventCheckMs:number;lastPlayAt:number;sharedRhythm:boolean;notice:string;events:{id:string;text:string;at:number;layoutVersion?:number}[];factory:{stock:number;ms:number;at:number};lastVisual:{id:string;action:Action|'eat'|'rest';target:string;at:number}|null};
+export type Profile={foodLedger?:FoodLedger;encounter?:EncounterState;v7?:V7State;production?:ProductionState;workshop?:WorkshopState;economy?:HerdEconomy;upgrades?:FarmUpgrades;raidCycle?:RaidCycle;id:'home'|'lab';journey?:JourneyState;runId?:string;createdAt:number;lastSeenAt:number;lastPulseAt:number;onlineMs:number;session:string;opening?:OpeningState;openingActed?:boolean;openingRetreatMs?:number;tutorial:'choose'|'defend'|'done';materials:number;troughFood?:Record<string,number>;inventory:{hand:number;pantry:number;workbenchMs:number};layout:Layout;animals:EstateAnimal[];position:GridPoint;path:GridPoint[];steering?:{direction:GridPoint;at:number};job:EstateJob|null;guardian:GuardianKind|null;guardianAt:GridPoint;guardianBehavior?:'follow'|'station'|'patrol';guardianPath?:GridPoint[];guardianTarget?:GridPoint;guardianPatrolIndex?:number;guardianLookout?:LookoutState;guardianSwitchAt:number;guardianReadyMs:number;threat:ThreatState|null;lastThreat?:ThreatState;rescueIntent?:{target:string;findBack?:boolean;wolfId?:string};creation:CreationState;creationLayouts?:CreationLayoutReceipt[];milestones:string[];regions:string[];surveyed:boolean;assistance:boolean;nextEventCheckMs:number;lastPlayAt:number;sharedRhythm:boolean;notice:string;events:{id:string;text:string;at:number;layoutVersion?:number}[];factory:{stock:number;ms:number;at:number};lastVisual:{id:string;action:Action|'eat'|'rest';target:string;at:number}|null};
 export type Estate={version:5;playerId:string;avatar:Avatar;activeProfile:'home'|'lab';profiles:{home:Profile;lab?:Profile};revision:number;legacy?:Farm};
 export type EstateCommand={id:string;type:string;[key:string]:unknown};
 export type EstateReply={state:Estate;accepted:boolean;message:string};
@@ -46,7 +48,57 @@ const cell=(a:GridPoint)=>({x:Math.round(a.x),z:Math.round(a.z)});
 function pathTo(p:Profile,to:GridPoint){return findPlayerPath(p.layout,p.position,cell(to));}
 function nearestApproach(p:Profile,target:GridPoint){return [{x:Math.round(target.x),z:Math.round(target.z)},...[[1,0],[-1,0],[0,1],[0,-1]].map(([x,z])=>({x:Math.round(target.x)+x,z:Math.round(target.z)+z}))].filter(q=>isWalkable(p.layout,q)).map(q=>({q,path:pathTo(p,q)})).filter(v=>v.path).sort((a,b)=>a.path!.length-b.path!.length)[0];}
 function walk(position:GridPoint,path:GridPoint[],distance:number):boolean{let moved=false;while(path.length&&distance>0){const next=path[0],length=dist(position,next);if(length<.001){path.shift();continue;}const amount=Math.min(length,distance);position.x+=(next.x-position.x)/length*amount;position.z+=(next.z-position.z)/length*amount;distance-=amount;moved=true;if(amount===length)path.shift();}return moved;}
-function cancelJob(p:Profile){delete p.steering;if(p.job?.type==='delivery'&&p.job.carried){p.factory.stock+=p.job.carried;p.job.carried=0;}p.job=null;p.path=[];}
+export function ensureFoodLedger(p:Profile):FoodLedger{
+ const old=p.foodLedger;
+ const l:FoodLedger={factory:normalizeFoodBatches(old?.factory),hand:normalizeFoodBatches(old?.hand),pantry:normalizeFoodBatches(old?.pantry),carried:normalizeFoodBatches(old?.carried),troughs:{}};
+ if(old?.troughs&&typeof old.troughs==='object'&&!Array.isArray(old.troughs))for(const [id,batches] of Object.entries(old.troughs))l.troughs[id]=normalizeFoodBatches(batches);
+ p.foodLedger=l;
+ reconcileFood(l.factory,p.factory.stock);reconcileFood(l.hand,p.inventory.hand);reconcileFood(l.pantry,p.inventory.pantry);reconcileFood(l.carried,p.job?.type==='delivery'?(p.job.carried??0):0);
+ for(const [id,n] of Object.entries(p.troughFood??{}))reconcileFood(l.troughs[id]??=[],n);
+ return l;
+}
+function produceFood(p:Profile,elapsed:number){
+ const f=p.layout.buildings.find(b=>b.kind==='factory');if(!f)return;
+ const l=ensureFoodLedger(p),rules=foodSiteRating(f,p.layout).production,capacity=12-(p.job?.type==='delivery'?(p.job.carried??0):0);
+ if(p.factory.stock>=capacity){p.factory.ms=0;return;}
+ const total=p.factory.ms+elapsed,batches=Math.floor(total/rules.intervalMs),n=Math.max(0,Math.min(capacity-p.factory.stock,batches*rules.batchSize));
+ addFood(l.factory,n,rules.quality);p.factory.stock+=n;p.factory.ms=p.factory.stock>=capacity?0:total-batches*rules.intervalMs;
+}
+function cancelDining(a:EstateAnimal){if(a.dining){delete a.dining;a.path=[];}}
+/** Reserve inventory and a distinct reachable approach, without debiting until eaten. */
+function advanceDining(p:Profile,a:EstateAnimal,now:number,dtMs:number):boolean{
+ const reserved=(id:string)=>p.animals.filter(other=>other!==a&&other.dining?.troughId===id);
+ if(a.dining){
+  const d=a.dining,t=p.layout.buildings.find(b=>b.id===d.troughId&&b.kind==='trough');
+  const prior=p.animals.slice(0,p.animals.indexOf(a)).filter(other=>other.dining?.troughId===d.troughId).length;
+  if(!t||!buildingApproaches(p.layout,t).some(q=>dist(q,d.to)<.001)||(p.troughFood?.[d.troughId]??0)<=prior||a.life.hunger>=70)cancelDining(a);
+ }
+ if(!a.dining&&a.life.hunger<=40){
+  const choices=p.layout.buildings.filter(b=>b.kind==='trough'&&(p.troughFood?.[b.id]??0)>reserved(b.id).length).flatMap(t=>buildingApproaches(p.layout,t).flatMap(to=>{
+   if(p.animals.some(other=>other!==a&&!other.memorial&&(other.dining&&dist(other.dining.to,to)<.1||dist(other.position,to)<.35)))return [];
+   const route=findActorPath(p.layout,a.position,to);return route?[{t,to,route}]:[];
+  })).sort((x,y)=>x.route.length-y.route.length||x.t.id.localeCompare(y.t.id));
+  const best=choices[0];if(best){a.dining={troughId:best.t.id,to:{...best.to},phase:'walk',elapsedMs:0};a.path=best.route.slice(1);}
+ }
+ const d=a.dining;if(!d)return false;
+ const route=findActorPath(p.layout,a.position,d.to);
+ if(!route){cancelDining(a);return false;}
+ a.path=route.slice(1);
+ const speed=a.personality==='shy'?.6:a.personality==='eager'?1.15:.9;
+ let length=0,from=a.position;for(const q of a.path){length+=dist(from,q);from=q;}
+ const moved=walk(a.position,a.path,dtMs/1000*speed);
+ a.life=advanceLife(a.life,{now,dtMs,sessionId:p.session,moving:moved});
+ if(!a.path.length&&dist(a.position,d.to)<.02){
+  d.phase='eat';d.elapsedMs+=Math.max(0,dtMs-length/speed*1000);
+  if(d.elapsedMs>=3000){
+   const l=ensureFoodLedger(p),stock=p.troughFood?.[d.troughId]??0;
+   if(stock>0){const quality=foodQuality(l.troughs[d.troughId]);takeFood(l.troughs[d.troughId],1);p.troughFood![d.troughId]=stock-1;a.life=maintenanceMeal(a.life,FOOD_NUTRITION[quality]);p.lastVisual={id:`dining-${a.id}-${now}`,action:'eat',target:a.id,at:now};}
+   cancelDining(a);
+  }
+ }else{d.phase='walk';d.elapsedMs=0;}
+ return true;
+}
+function cancelJob(p:Profile){const ledger=ensureFoodLedger(p);delete p.steering;if(p.job?.type==='delivery'&&p.job.carried){transferFood(ledger.carried,ledger.factory,p.job.carried);p.factory.stock+=p.job.carried;p.job.carried=0;}p.job=null;p.path=[];}
 /** Release a certified slot and reset unfinished rest; completed records remain. */
 export function releaseRest(p:Profile,animalId?:string):void{
  for(const a of p.animals){
@@ -74,7 +126,7 @@ export function requestRest(p:Profile,animalId:string,ordered=true):{ok:boolean;
   return path?[{entry,slot,path}]:[];
  }).sort((a,b)=>a.path.length-b.path.length||a.entry.doorId.localeCompare(b.entry.doorId));
  const best=choices[0];if(!best)return {ok:false,message:'没有空闲且可达的安全休息位'};
- a.following=false;a.path=best.path;
+ cancelDining(a);a.following=false;a.path=best.path;
  a.restAssignment={buildingId:best.entry.buildingId,doorId:best.entry.doorId,slot:best.slot,door:{x:best.entry.x,z:best.entry.z},phase:'walk',ordered,admitMs:0};
  return {ok:true,message:'已预约床位，沿入口回棚后安稳休息60秒'};
 }
@@ -82,6 +134,7 @@ export function requestRest(p:Profile,animalId:string,ordered=true):{ok:boolean;
 export function settleProfileOffline(p:Profile,now:number):void{
  for(const r of Object.values(p.v7?.recovery??{})){r.remainingOnlineMs=3000;r.lastOnlineMs=p.onlineMs;}
  if(!Number.isFinite(now)||now<=p.lastPulseAt)return;
+ ensureFoodLedger(p);for(const a of p.animals)cancelDining(a);
  if(p.job?.type==='feed'){cancelJob(p);p.notice='喂食已暂停，食物还在背包里，回来后可重新喂';}
  ensureFarmCycle(p,now);
  for(const a of p.animals){
@@ -90,12 +143,7 @@ export function settleProfileOffline(p:Profile,now:number):void{
   const baseline=a.offlineNeeds;
   a.life=settleOffline({...a.life,lastSettledAt:baseline.pulseAt,hunger:baseline.hunger,energy:baseline.energy},now);
  }
- if(now>p.factory.at&&p.layout.buildings.some(b=>b.kind==='factory')){
-  const capacity=12-(p.job?.type==='delivery'?(p.job.carried??0):0);
-  const elapsed=p.factory.ms+now-p.factory.at,intervals=Math.floor(elapsed/60_000);
-  if(p.factory.stock<capacity)p.factory.stock=Math.min(capacity,p.factory.stock+intervals*3);
-  p.factory.ms=p.factory.stock>=capacity?0:elapsed-intervals*60_000;p.factory.at=now;
- }
+ if(now>p.factory.at){produceFood(p,now-p.factory.at);p.factory.at=now;}
 }
 export function settleEstate(original:Estate,now:number):Estate{
  const s=structuredClone(original);if(!Number.isFinite(now))return s;
@@ -113,7 +161,7 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
  const elapsed=now-p.lastPulseAt;
  if(elapsed>5000){settleProfileOffline(p,now);p.lastSeenAt=now;p.lastPulseAt=now;return;}
  dtMs=Math.min(1500,Math.max(0,dtMs),elapsed);if(!dtMs)return;
- ensureFarmCycle(p,now);
+ ensureFarmCycle(p,now);ensureFoodLedger(p);
  if(p.tutorial==='done'&&p.threat&&(presentation?.ready===false||presentation?.covered)){p.lastSeenAt=now;p.lastPulseAt=now;delete p.steering;return;}
  if(p.tutorial!=='done'&&p.opening){
   const previousStage=p.opening.stage;p.opening=advanceOpening(p.opening,dtMs/1000,{ready:presentation?.ready===true,visible:true,covered:presentation?.covered===true});
@@ -123,15 +171,14 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
  if(event?.phase==='complete'&&p.tutorial==='defend'&&p.opening){p.openingRetreatMs=Math.min(3000,(p.openingRetreatMs??0)+dtMs);if(p.openingRetreatMs>=3000)p.opening=completeOpening(p.opening);}
  p.onlineMs+=dtMs;p.lastSeenAt=now;p.lastPulseAt=now;p.factory.at=now;
  for(const a of p.animals)delete a.offlineNeeds;
+ const productionBeforeBuild=!event&&p.layout.construction?Math.min(dtMs,Math.max(0,p.layout.construction.durationMs-p.layout.construction.elapsedMs)):0;
+ if(productionBeforeBuild>0)produceFood(p,productionBeforeBuild);
  if(!event){const built=tickConstruction(p.layout,dtMs);p.layout=built.layout;p.materials+=built.materialDelta;if(built.completed){remember(p,`built-${p.layout.version}`,'布置完成，新的路线已经生效',now);if(hasUsefulDevelopment(p)&&!p.milestones.includes('journey-developed'))p.milestones.push('journey-developed');}}
  if(p.guardianReadyMs>0)p.guardianReadyMs=Math.max(0,p.guardianReadyMs-dtMs);
- for(const [id,stock] of Object.entries(p.troughFood??{})){if(!p.layout.buildings.some(b=>b.kind==='trough'&&b.id===id)){p.inventory.pantry+=stock;delete p.troughFood![id];}}
- p.inventory.workbenchMs+=dtMs;while(p.inventory.workbenchMs>=30_000){p.inventory.workbenchMs-=30_000;p.inventory.pantry+=Math.max(0,Math.min(3,12-p.inventory.pantry));}
- if(p.layout.buildings.some(b=>b.kind==='factory')){
-  const capacity=12-(p.job?.type==='delivery'?(p.job.carried??0):0);
-  if(p.factory.stock>=capacity)p.factory.ms=0;
-  else {p.factory.ms+=dtMs;const intervals=Math.floor(p.factory.ms/60_000);p.factory.stock=Math.min(capacity,p.factory.stock+intervals*3);p.factory.ms=p.factory.stock>=capacity?0:p.factory.ms-intervals*60_000;}
- }
+ for(const [id,stock] of Object.entries(p.troughFood??{})){if(!p.layout.buildings.some(b=>b.kind==='trough'&&b.id===id)){transferFood(p.foodLedger!.troughs[id]??[],p.foodLedger!.pantry,stock);p.inventory.pantry+=stock;delete p.troughFood![id];delete p.foodLedger!.troughs[id];}}
+ p.inventory.workbenchMs+=dtMs;while(p.inventory.workbenchMs>=30_000){p.inventory.workbenchMs-=30_000;const n=Math.max(0,Math.min(3,12-p.inventory.pantry));addFood(p.foodLedger!.pantry,n);p.inventory.pantry+=n;}
+ if(dtMs>productionBeforeBuild)produceFood(p,dtMs-productionBeforeBuild);
+ if(event)for(const a of p.animals)cancelDining(a);
  const feedTarget=p.job?.type==='feed'?p.job.target:undefined;
  if(p.job?.type==='feed'){
   const target=p.animals.find(a=>a.id===p.job!.target);
@@ -183,10 +230,12 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
    else slots.add(key);
   }
   for(const a of p.animals){
-   if(a.memorial){releaseRest(p,a.id);a.path=[];a.following=false;continue;}
-   if(a.id===feedTarget){a.path=[];a.life=advanceLife(a.life,{now,dtMs,sessionId:p.session});continue;}
-   if(p.v7?.recovery[a.id]){a.path=[];a.following=false;a.life=advanceLife(a.life,{now,dtMs,sessionId:p.session});continue;}
+   if(a.memorial){cancelDining(a);releaseRest(p,a.id);a.path=[];a.following=false;continue;}
+   if(a.id===feedTarget){cancelDining(a);a.path=[];a.life=advanceLife(a.life,{now,dtMs,sessionId:p.session});continue;}
+   if(p.v7?.recovery[a.id]){cancelDining(a);a.path=[];a.following=false;a.life=advanceLife(a.life,{now,dtMs,sessionId:p.session});continue;}
+   if(a.following||a.restAssignment)cancelDining(a);
    if(!a.restAssignment&&a.life.energy<30)requestRest(p,a.id,false);
+   if(!a.following&&!a.restAssignment&&advanceDining(p,a,now,dtMs))continue;
    let r=a.restAssignment,target:GridPoint|undefined;
    if(r&&r.phase==='walk'){
     if(!a.path.length&&dist(a.position,r.door)>.02){const route=findActorPath(p.layout,a.position,r.door);if(route)a.path=route.slice(1);else releaseRest(p,a.id);}
@@ -223,8 +272,8 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
    const a=p.animals.find(a=>a.id===job.target);
    if(!a||dist(p.position,a.position)>1.1||p.inventory.hand<1){cancelJob(p);p.notice='目标走远了，食物还在背包里';}
    else {job.phase='act';job.progress+=actionMs;if(job.progress>=3000){
-    const result=feedingResult(a.life,{now,food:job.food!,manual:true});
-    if(result.accepted){a.life=result.life;p.inventory.hand--;p.lastVisual={id:job.id,action:'eat',target:a.id,at:now};remember(p,job.id,`${a.name}吃到了${job.food==='milk'?'奶':'饲料'} · ${result.message}`,now);
+    const result=feedingResult(a.life,{now,food:job.food!,manual:true,nutrition:FOOD_NUTRITION[foodQuality(p.foodLedger!.hand)]});
+    if(result.accepted){a.life=result.life;takeFood(p.foodLedger!.hand,1);p.inventory.hand--;p.lastVisual={id:job.id,action:'eat',target:a.id,at:now};remember(p,job.id,`${a.name}吃到了${job.food==='milk'?'奶':'饲料'} · ${result.message}`,now);
      if(!p.milestones.includes(`fed-${a.id}`))p.milestones.push(`fed-${a.id}`);
      if(p.animals.every(animal=>p.milestones.includes(`fed-${animal.id}`)))milestone(p,'first-meal',8,'第一顿完成 · +8金币',now);
     }else p.notice=result.message;
@@ -235,6 +284,7 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
    if(job.target&&(!trough||!buildingApproaches(p.layout,trough).some(q=>dist(q,p.position)<.02))){cancelJob(p);p.notice='食槽或取食位置已变化，食物没有扣除';}
    else {job.progress+=actionMs;if(job.progress>=2000){
     const available=job.target?(p.troughFood?.[job.target]??0):p.inventory.pantry,n=Math.max(0,Math.min(3-p.inventory.hand,available));
+    transferFood(job.target?(p.foodLedger!.troughs[job.target]??=[]):p.foodLedger!.pantry,p.foodLedger!.hand,n);
     if(job.target){p.troughFood??={};p.troughFood[job.target]=available-n;}else p.inventory.pantry-=n;
     p.inventory.hand+=n;p.notice=n?`从${job.target?'食槽':'工作台'}补充了${n}份食物`:job.target?'食槽暂时没有食物，可以从工作台免费补充':'工作台正在准备，基础食物免费';cancelJob(p);
    }}
@@ -245,7 +295,7 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
     const source=job.source;
     if(!source||dist(p.position,source)>.02||!p.layout.buildings.some(b=>b.kind==='factory'&&buildingApproaches(p.layout,b).some(q=>dist(q,source)<.001))){cancelJob(p);p.notice='工厂装货位置已变化，食物仍在工厂';}
     else {job.progress+=actionMs;if(job.progress>=2000){
-     job.carried=Math.min(3,p.factory.stock);p.factory.stock-=job.carried;job.progress=0;job.phase='out';
+     job.carried=Math.min(3,p.factory.stock);transferFood(p.foodLedger!.factory,p.foodLedger!.carried,job.carried);p.factory.stock-=job.carried;job.progress=0;job.phase='out';
      const route=job.carried>0?pathTo(p,job.to):null;
      if(route)p.path=route;else {const held=job.carried;cancelJob(p);p.notice=held?'配送断路，食物退回工厂':'工厂暂时没有可配送的食物';}
     }}
@@ -255,7 +305,7 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
     else {job.phase='unload';job.progress+=actionMs;if(job.progress>=2000){
      p.troughFood??={};const stored=p.troughFood[trough.id]??0,carried=job.carried??0;
      const unloaded=Math.max(0,Math.min(trough.capacity-stored,carried));
-     p.troughFood[trough.id]=stored+unloaded;job.carried=carried-unloaded;
+     transferFood(p.foodLedger!.carried,p.foodLedger!.troughs[trough.id]??=[],unloaded);p.troughFood[trough.id]=stored+unloaded;job.carried=carried-unloaded;
      if(p.troughFood[trough.id]>=trough.capacity)job.rounds=1;
      p.notice=job.carried?`食槽已满，卸下${unloaded}份，剩余${job.carried}份带回工厂`:`向食槽卸下${unloaded}份食物`;
      job.phase='back';job.progress=0;
@@ -263,7 +313,7 @@ function tick(p:Profile,now:number,dtMs:number,presentation?:{ready?:boolean;cov
      if(route)p.path=route;else {cancelJob(p);p.notice='返回路线已断，剩余食物退回工厂一次';}
     }}
    }else if(job.phase==='back'){
-    const returned=job.carried??0;if(returned){p.factory.stock+=returned;job.carried=0;}
+    const returned=job.carried??0;if(returned){transferFood(p.foodLedger!.carried,p.foodLedger!.factory,returned);p.factory.stock+=returned;job.carried=0;}
     job.rounds=(job.rounds??1)-1;
     if(job.rounds>0&&p.factory.stock>0){job.phase='walk';job.progress=0;}
     else {cancelJob(p);p.notice=returned?`配送结束，剩余${returned}份食物已退回工厂`:'配送完成，LX回到工厂';}
@@ -322,7 +372,7 @@ export function commandEstate(original:Estate,c:EstateCommand,now:number):Estate
  if(c.actor&&c.actor!==s.playerId&&c.type!=='creation')return reject('本地访客投影不能操作主人的动物或库存');
  if(!['enter','profile','avatar'].includes(c.type)&&p.session&&c.session!==p.session)return reject('这段会话已更新，请重新进入');
  if(p.opening&&p.tutorial!=='done'&&p.opening.stage!=='defend'&&!['enter','pulse','skipOpening','guardian','profile','finishTutorial','resetProfile','move','steer'].includes(c.type))return reject('先看完或跳过开场，再一起照顾幼崽');
- ensureFarmCycle(p,now);ensureWorkshop(p,now);settleFarmProducts(p,now);
+ ensureFoodLedger(p);ensureFarmCycle(p,now);ensureWorkshop(p,now);settleFarmProducts(p,now);
  const encounter=encounterCommand(p,c,now,s.avatar);
  if(encounter){s.revision++;p.notice=encounter.message;return {state:s,accepted:encounter.accepted,message:encounter.message};}
  const economyCommand=v7Command(p,c,now);
@@ -334,7 +384,7 @@ export function commandEstate(original:Estate,c:EstateCommand,now:number):Estate
  else if(c.type==='enter'){if(p.job?.type==='feed'){p.job.progress=0;p.job.phase='walk';}if(!p.opening&&p.tutorial==='defend')p.openingActed=true;p.opening??=initialOpening(p.tutorial);p.opening.guardian??=p.guardian;if(now-p.lastPulseAt>5000)settleProfileOffline(p,now);delete p.steering;p.session=c.id;p.lastPulseAt=now;p.lastSeenAt=now;message=p.events.length?'欢迎回家，它们记着与你的经历':'选一位伙伴，开始照顾幼崽';}
  else if(c.type==='skipOpening'){p.opening=skipOpening(p.opening??initialOpening(p.tutorial));message=p.opening.stage==='choose'?'选一位伙伴，保护幼崽':'伙伴已就位，点一次守护';}
  else if(c.type==='pulse'){
-  if(c.session!==p.session)return reject('这段会话已更新，请重新进入');const elapsed=Math.max(0,now-p.lastPulseAt);if(elapsed>5000){settleProfileOffline(p,now);p.lastPulseAt=now;p.lastSeenAt=now;}else if(c.presentationPaused===true){if(p.job?.type==='feed')cancelJob(p);p.lastPulseAt=now;p.lastSeenAt=now;delete p.steering;}else tick(p,now,Math.min(1500,elapsed),{ready:typeof c.presentationReady==='boolean'?c.presentationReady:undefined,covered:c.presentationCovered===true});if(p.assistance&&!p.threat&&!p.job){const last=p.events.findLast(e=>e.id.startsWith('reminder-'));const animal=p.animals.filter(a=>!a.memorial&&a.life.hunger<30).sort((a,b)=>a.life.hunger-b.life.hunger)[0];if(animal&&(!last||now-last.at>=60000))remember(p,`reminder-${c.id}`,`${animal.name}饿了 · 点卡片喂食，工作台可免费补充`,now);}message=p.notice;
+  if(c.session!==p.session)return reject('这段会话已更新，请重新进入');const elapsed=Math.max(0,now-p.lastPulseAt);if(elapsed>5000){settleProfileOffline(p,now);p.lastPulseAt=now;p.lastSeenAt=now;}else if(c.presentationPaused===true){for(const a of p.animals)cancelDining(a);if(p.job?.type==='feed')cancelJob(p);p.lastPulseAt=now;p.lastSeenAt=now;delete p.steering;}else tick(p,now,Math.min(1500,elapsed),{ready:typeof c.presentationReady==='boolean'?c.presentationReady:undefined,covered:c.presentationCovered===true});if(p.assistance&&!p.threat&&!p.job){const last=p.events.findLast(e=>e.id.startsWith('reminder-'));const animal=p.animals.filter(a=>!a.memorial&&a.life.hunger<30).sort((a,b)=>a.life.hunger-b.life.hunger)[0];if(animal&&(!last||now-last.at>=60000))remember(p,`reminder-${c.id}`,`${animal.name}饿了 · 点卡片喂食，工作台可免费补充`,now);}message=p.notice;
  }else if(c.type==='profile'){
   if(c.profile!=='home'&&c.profile!=='lab')return reject('请选择自然档或独立演示档');if(c.profile==='lab'&&!s.profiles.lab)s.profiles.lab=freshProfile(s.playerId,'lab',now);s.activeProfile=c.profile;if(now-currentProfile(s).lastPulseAt>5000)settleProfileOffline(currentProfile(s),now);currentProfile(s).lastPulseAt=now;currentProfile(s).session=c.id;message=c.profile==='lab'?'独立演示档 · 年龄240倍，照料与风险仍按规则':'回到自然档 · 关系和物品原样保留';
  }else if(c.type==='resetProfile'){
@@ -355,14 +405,14 @@ export function commandEstate(original:Estate,c:EstateCommand,now:number):Estate
   if(c.session!==p.session)return reject('会话已更新');const q=c.to as GridPoint;if(!q||!Number.isFinite(q.x)||!Number.isFinite(q.z))return reject('请选择可走的地面');const path=findPlayerPath(p.layout,p.position,cell(q));if(!path)return reject('这里被设施或水域挡住，换一条路吧');cancelJob(p);delete p.steering;p.path=path;message='正在走过去';
  }else if(c.type==='cancel'){if(c.jobId!==undefined&&c.jobId!==p.job?.id)return reject('这项行动已经变化，旧取消请求不会影响新行动');cancelJob(p);p.rescueIntent=undefined;for(const r of Object.values(p.v7?.recovery??{}))r.remainingOnlineMs=3000;message='取消了这次行动，食物不会扣除';}
  else if(c.type==='feed'){
-  if(p.job?.type==='feed'&&p.job.target!==c.target)cancelJob(p);if(p.job)return reject('先完成或取消手上的行动');const a=p.animals.find(a=>a.id===c.target&&!a.memorial&&!p.threat?.actors.some(t=>t.id===a.id&&t.status==='memorial'));if(!a)return reject('先选一只在家的羊');if(p.inventory.hand<1)return reject('背包空了，去工作台免费补充');const food=c.food??(a.life.stage==='baby'?'milk':'feed');if(food!=='milk'&&food!=='feed')return reject('请选择适配食物');const check=feedingResult(a.life,{now,food});if(!check.accepted)return reject(check.message);releaseRest(p,a.id);const to=feedingApproach(p.layout,p.position,a.position,p.animals.filter(other=>other.id!==a.id&&!other.memorial).map(other=>other.position));if(!to)return reject('它的侧前方没有可达空位，请先让出一点空间');p.path=to.path;p.job={id:c.id,type:'feed',target:a.id,food,progress:0,phase:'walk',to:to.to};message=`LX走近${a.name}再${food==='milk'?'喂奶':'喂食'}`;
+  if(p.job?.type==='feed'&&p.job.target!==c.target)cancelJob(p);if(p.job)return reject('先完成或取消手上的行动');const a=p.animals.find(a=>a.id===c.target&&!a.memorial&&!p.threat?.actors.some(t=>t.id===a.id&&t.status==='memorial'));if(!a)return reject('先选一只在家的羊');if(p.inventory.hand<1)return reject('背包空了，去工作台免费补充');const food=c.food??(a.life.stage==='baby'?'milk':'feed');if(food!=='milk'&&food!=='feed')return reject('请选择适配食物');const check=feedingResult(a.life,{now,food});if(!check.accepted)return reject(check.message);releaseRest(p,a.id);cancelDining(a);const to=feedingApproach(p.layout,p.position,a.position,p.animals.filter(other=>other.id!==a.id&&!other.memorial).map(other=>other.position));if(!to)return reject('它的侧前方没有可达空位，请先让出一点空间');p.path=to.path;p.job={id:c.id,type:'feed',target:a.id,food,progress:0,phase:'walk',to:to.to};message=`LX走近${a.name}再${food==='milk'?'喂奶':'喂食'}`;
  }else if(c.type==='refill'){
   if(p.inventory.hand>=3)return reject('背包已装满3份');const b=c.source==='trough'?p.layout.buildings.find(b=>b.kind==='trough'&&b.id===c.target):p.layout.buildings.find(b=>b.kind==='workbench');
   if(c.source==='trough'&&(!b||!(p.troughFood?.[b.id]??0)))return reject('这个食槽还没有可装的食物');const approach=b&&buildingApproaches(p.layout,b).map(q=>({q,path:pathTo(p,q)})).filter(v=>v.path).sort((a,b)=>a.path!.length-b.path!.length)[0];if(!approach)return reject('补给点暂时不可达');cancelJob(p);p.path=approach.path!;p.job={id:c.id,type:'refill',...(c.source==='trough'?{target:b!.id}:{}),to:approach.q,progress:0,phase:'walk'};message=c.source==='trough'?'走到食槽装食物':'去工作台免费补充';
  }else if(c.type==='play'){
   if(p.threat)return reject('先收好守护记录，再一起玩');  if(now-p.lastPlayAt<6000)return reject('它们还在回应，稍等一会儿');const a=p.animals.find(a=>a.id===c.target&&!a.memorial&&!p.threat?.actors.some(t=>t.id===a.id&&t.status==='memorial'));if(!a||!['dance','bounce','love'].includes(String(c.action)))return reject('选一只羊和一个动作');if(dist(a.position,p.position)>4)return reject('先走近它，再一起玩');releaseRest(p,a.id);const result=playWith(a.life,{now,sessionId:p.session,action:c.action as Action,manual:true});a.life=result.life;p.lastPlayAt=now;p.lastVisual={id:c.id,action:c.action as Action,target:a.id,at:now};message=result.message;remember(p,c.id,`${a.name}：${message}`,now);
  }else if(c.type==='follow'){
-  if(p.threat)return reject('先收好守护记录，再一起散步');  const a=p.animals.find(a=>a.id===c.target);if(!a||a.memorial)return reject('先选一只在家的羊');releaseRest(p,a.id);a.following=!a.following;message=a.following?`${a.name}愿意在附近陪你走`:`${a.name}回到自己的活动`;
+  if(p.threat)return reject('先收好守护记录，再一起散步');  const a=p.animals.find(a=>a.id===c.target);if(!a||a.memorial)return reject('先选一只在家的羊');releaseRest(p,a.id);cancelDining(a);a.following=!a.following;message=a.following?`${a.name}愿意在附近陪你走`:`${a.name}回到自己的活动`;
  }else if(c.type==='rest'){
   const r=requestRest(p,String(c.target));if(!r.ok)return reject(r.message);message=r.message;
  }else if(c.type==='rename'){

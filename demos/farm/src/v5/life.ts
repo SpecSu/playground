@@ -58,7 +58,7 @@ export type AdvanceLifeInput = {
   exploring?: boolean;
   withPlayer?: boolean;
 };
-export type FeedingInput = {now: number; food: Food; manual?: boolean};
+export type FeedingInput = {now: number; food: Food; manual?: boolean; nutrition?: number};
 export type FeedingResult = {life: LifeState; accepted: boolean; effective: boolean; bondAdded: number; message: string};
 export type PlayInput = {now: number; sessionId: string; action: LifeAction; manual?: boolean};
 export type PlayResult = FeedingResult & {habitProgressed: boolean};
@@ -281,6 +281,7 @@ export function advanceLife(original: LifeState, input: AdvanceLifeInput): LifeS
 
 export function feedingResult(original: LifeState, input: FeedingInput): FeedingResult {
   finite(input.now, 'now');
+  if(input.nutrition!==undefined&&finite(input.nutrition,'nutrition')<0)throw new RangeError('nutrition must be non-negative');
   const reject = (message: string): FeedingResult => ({life: original, accepted: false, effective: false, bondAdded: 0, message});
   if (input.now < original.lastSettledAt) return reject('照料时间已经变化，请重新尝试');
   const expected: Food = original.stage === 'baby' ? 'milk' : 'feed';
@@ -289,7 +290,7 @@ export function feedingResult(original: LifeState, input: FeedingInput): Feeding
   const life = structuredClone(original);
   const effective = input.manual !== false && life.hunger <= LIFE_RULES.effectiveFeedHunger
     && (life.lastEffectiveFeedAt === null || input.now - life.lastEffectiveFeedAt >= LIFE_RULES.effectiveFeedCooldownMs);
-  life.hunger = clamp(life.hunger + LIFE_RULES.feedHungerGain);
+  life.hunger = clamp(life.hunger + (input.nutrition ?? LIFE_RULES.feedHungerGain));
   let bondAdded = 0;
   if (effective) {
     life.lastEffectiveFeedAt = input.now;
@@ -363,4 +364,12 @@ export function claimProducts(original: LifeState, now: number): {life: LifeStat
   const materials = life.products.stored;
   life.products.stored = 0;
   return {life, materials};
+}
+
+/** Canteen maintenance is not personal care: no bond, memory or growth feed. */
+export function maintenanceMeal(original:LifeState,nutrition=30):LifeState{
+ const life=structuredClone(original);
+ finite(nutrition,'nutrition');
+ life.hunger=Math.max(life.hunger,Math.min(70,life.hunger+Math.max(0,nutrition)));
+ return life;
 }

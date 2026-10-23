@@ -1,4 +1,5 @@
 import {FarmActionRig} from './farm-action-rig.ts';
+import {resourcesAt,FOOD_RESOURCE_PATCHES} from './food-resources.ts';
 import {feedingPoseAt,guardianPoseAt,wolfPoseAt} from './action-sequence.ts';
 import type {LookoutState} from './lookout.ts';
 import {LookoutMotionTrack} from './lookout-motion.ts';
@@ -25,7 +26,7 @@ import {gridToWorld,worldToGrid,sceneResponse,sceneBuilding,legacyAnimal,scenePa
 import type {EstateSnapshot,EstateAnimal} from './estate.ts';
 import type {GuardianKind,ThreatWolf} from './threat.ts';
 export type EstateWorldHandlers={select:(id:string)=>void;destination:(p:GridPoint)=>void;status:(message:string)=>void;steer?:(direction:GridPoint)=>void;assetsReady?:(ready:boolean)=>void;place?:(to:GridPoint)=>void};
-export type EstateGhost={x:number;z:number;kind:BuildingKind;valid:boolean;interactive?:boolean};
+export type EstateGhost={x:number;z:number;kind:BuildingKind;valid:boolean;interactive?:boolean;rotation?:Building['rotation']};
 type SheepVisual=ReturnType<typeof makeSheep>&{label:HTMLButtonElement;name:HTMLElement;memory:HTMLElement;bubble:HTMLElement;cleanup:()=>void};
 type Mover={root:THREE.Group;path:GridPoint[];target:GridPoint;distance:number;track?:BufferedMotionTrack;sampleAt?:number;authorityAt?:number;future?:GridPoint[];speed?:number};
 const guardianKinds:Record<GuardianKind,ClubAvatarKind>={dog:'sword-shield-dog',cat:'miaocuijiao',frog:'milk-frog'};
@@ -177,6 +178,21 @@ export class EstateWorld{
   // Expanded ground uses a handful of draw calls, not one per world tile.
   const transform=new THREE.Matrix4();for(const [color,batch] of tileBatches){const tiles=new THREE.InstancedMesh(new THREE.BoxGeometry(1.006,.12,1.006),new THREE.MeshStandardMaterial({color,roughness:batch.water?.28:.88}),batch.positions.length);tiles.name='valley-ground';tiles.receiveShadow=true;batch.positions.forEach((position,index)=>tiles.setMatrixAt(index,transform.makeTranslation(position)));this.layoutGroup.add(tiles);}
   for(const r of p.layout.roads){const w=gridToWorld(r);box(this.layoutGroup,palette.road,w.x,.016,w.z,.84,.035,.84).castShadow=false;}
+  // Resource art is a ground layer, not an invisible navigation obstacle. It
+  // uses the exact natural-cell classifier used by production and previews.
+  for(const c of worldCells()){
+   if(p.layout.buildings.some(b=>buildingFootprint(b).some(q=>q.x===c.x&&q.z===c.z)))continue;
+   const resources=resourcesAt(c),w=gridToWorld(c);
+   if(resources.includes('grassland')){
+    const patch=box(this.layoutGroup,'#7eae65',w.x,.011,w.z,.89,.025,.89);patch.name='resource-grassland';patch.userData.pickThrough=true;
+    for(let i=0;i<3;i++){const tuft=ball(this.layoutGroup,'#c3d68d',w.x+(i-1)*.21,.065,w.z+(i%2-.5)*.25,.08,.06,.14);tuft.name='fertile-grass';tuft.userData.pickThrough=true;}
+   }
+   if(resources.includes('forest')){
+    const patch=box(this.layoutGroup,'#64866a',w.x,.012,w.z,.89,.026,.89);patch.name='resource-forest';patch.userData.pickThrough=true;
+    for(let i=0;i<3;i++){const leaves=ball(this.layoutGroup,i%2?'#87ab72':'#a9c08a',w.x+(i-1)*.22,.065,w.z+(i%2-.5)*.28,.15,.045,.1);leaves.name='woodland-groundcover';leaves.userData.pickThrough=true;}
+   }
+   if(resources.includes('freshwater')){const marker=ring(this.layoutGroup,'#c8f2e7',w.x,w.z,.29,.3);marker.name='resource-freshwater';marker.userData.pickThrough=true;}
+  }
   // Ground-only flowers never introduce unmodelled navigation blockers.
   for(let i=0;i<56;i++){const x=(i*47%113)/10,z=(i*31%113)/10,c={x:Math.round(x),z:Math.round(z)};if(terrainAt(c)!=='grass'||p.layout.roads.some(r=>r.x===c.x&&r.z===c.z)||p.layout.buildings.some(b=>buildingFootprint(b).some(q=>q.x===c.x&&q.z===c.z)))continue;const w=gridToWorld({x,z});const flower=ball(this.layoutGroup,i%3?'#e7dfae':'#efd8c3',w.x,.05,w.z,.035,.04,.035);flower.castShadow=false;}
   if(theme==='lotus')for(const c of p.layout.owned.filter(c=>terrainAt(c)==='shallow')){const w=gridToWorld(c);const leaf=mesh(this.layoutGroup,new THREE.CylinderGeometry(.25,.25,.025,18),'#8db899',w.x,.025,w.z);leaf.castShadow=false;ball(this.layoutGroup,'#ecc4cf',w.x,.09,w.z,.09,.09,.09);}
@@ -184,6 +200,7 @@ export class EstateWorld{
   for(const b of p.layout.buildings)this.building(b,palette.accent);
   if(p.layout.construction){const c=p.layout.construction;for(const cell of c.footprint){const w=gridToWorld(cell);box(this.layoutGroup,'#eeb76e',w.x,.045,w.z,.94,.08,.94,.4);}const point=c.footprint[0];if(point){const w=gridToWorld(point);const label=document.createElement('div');label.className='player-label';label.textContent='施工中';label.dataset.worldX=String(w.x);label.dataset.worldZ=String(w.z);this.host.append(label);this.labels.push(label);}}
   const landmarks=[{x:4,z:5,text:'保护区'},{x:8,z:2,text:'散养草场'},{x:9,z:8,text:'池岸 · 羊留岸上'},{x:3,z:10,text:'家园工作台'}];
+  for(const patch of FOOD_RESOURCE_PATCHES){if(patch.kind==='pond'||patch.kind==='river')continue;const c=patch.cells.find(c=>!p.layout.buildings.some(b=>buildingFootprint(b).some(q=>q.x===c.x&&q.z===c.z)));if(c)landmarks.push({...c,text:patch.kind==='forest'?'林地资源':'肥沃草场'});}
   for(const landmark of LANDMARKS){const w=gridToWorld(landmark.position),known=discoveredLandmarkIds(p).includes(landmark.id);landmarks.push({...landmark.position,text:`${known?'✓':'◇'} ${landmark.name}`});
    ring(this.layoutGroup,known?'#d2edb5':'#ffe5ad',w.x,w.z,.75,.7);
    // Ground-level scenery keeps the walkable discovery point unobstructed.
@@ -257,8 +274,9 @@ export class EstateWorld{
  }
  private drawGhost(){
   disposeTree(this.ghostGroup);if(!this.ghost)return;const ghost=this.ghost,rule=BUILDING_RULES[ghost.kind],w=gridToWorld(ghost),color=ghost.valid?'#9ae5b1':'#f2938b';
-  const footprint=box(this.ghostGroup,color,w.x+(rule.width-1)/2,.055,w.z+(rule.depth-1)/2,rule.width-.04,.06,rule.depth-.04,.42);footprint.name='placement-footprint';footprint.castShadow=false;
-  const b:Building={id:'placement-preview',kind:ghost.kind,x:ghost.x,z:ghost.z,rotation:0,paidCost:0,capacity:rule.capacity,doors:ghost.kind==='shelter'?[{id:'preview-door',x:ghost.x+1,z:ghost.z+3,open:true,paidCost:0}]:[]};
+  const rotated=ghost.rotation===90||ghost.rotation===270,width=rotated?rule.depth:rule.width,depth=rotated?rule.width:rule.depth;
+  const footprint=box(this.ghostGroup,color,w.x+(width-1)/2,.055,w.z+(depth-1)/2,width-.04,.06,depth-.04,.42);footprint.name='placement-footprint';footprint.castShadow=false;
+  const b:Building={id:'placement-preview',kind:ghost.kind,x:ghost.x,z:ghost.z,rotation:ghost.rotation??0,paidCost:0,capacity:rule.capacity,doors:ghost.kind==='shelter'?[{id:'preview-door',x:ghost.x+1,z:ghost.z+3,open:true,paidCost:0}]:[]};
   const model=this.building(b,color,this.ghostGroup);model.name='placement-model';model.position.y=.28;
   model.traverse(o=>{if(o instanceof THREE.Mesh){o.castShadow=false;o.receiveShadow=false;for(const material of Array.isArray(o.material)?o.material:[o.material]){material.transparent=true;material.opacity=.48;material.depthWrite=false;if(material instanceof THREE.MeshStandardMaterial){material.color.lerp(new THREE.Color(color),.4);material.emissive.set(color).multiplyScalar(.08);}}}});
   this.ghostGroup.traverse(o=>o.userData.pickThrough=true);
@@ -315,14 +333,15 @@ export class EstateWorld{
  private fit(){const w=this.host.clientWidth,h=this.host.clientHeight;if(!w||!h)return;this.renderer.setSize(w,h);this.cameraUpdate(0);}
  private updateSheep(a:EstateAnimal,t:number,now:number,dt:number){
   const s=this.sheep.get(a.id)!,m=this.animalMovers.get(a.id)!,speed=this.moveVisual(m,dt,now),event=this.data.profile.threat,inDanger=!!event&&event.phase!=='complete',response=sceneResponse(a,inDanger||this.data.profile.lastVisual?.action==='eat'?null:this.data.profile.lastVisual,now,inDanger?0:this.enteredAt,inDanger?undefined:this.data.profile.onlineMs),actor=event?.actors.find(item=>item.id===a.id);
-  const job=this.data.profile.job,feeding=job?.type==='feed'&&job.target===a.id&&job.phase==='act',pose=feeding?this.feedingFrame(now):null,action=actor?.status==='safe'||a.restAssignment?.phase==='admitted'?'rest':pose?.animal??response.action;
+  const job=this.data.profile.job,feeding=job?.type==='feed'&&job.target===a.id&&job.phase==='act',pose=feeding?this.feedingFrame(now):null,dining=!inDanger&&!feeding&&a.dining?.phase==='eat'&&now-this.data.profile.lastPulseAt<1200,action=actor?.status==='safe'||a.restAssignment?.phase==='admitted'?'rest':pose?.animal??(dining?(a.life.stage==='baby'?'suckle':'eat'):response.action);
+  if(dining){const trough=this.data.profile.layout.buildings.find(b=>b.id===a.dining?.troughId);if(trough){const point=gridToWorld(trough),heading=Math.atan2(point.x-s.root.position.x,point.z-s.root.position.z);s.root.rotation.y+=Math.atan2(Math.sin(heading-s.root.rotation.y),Math.cos(heading-s.root.rotation.y))*(1-Math.exp(-dt*10));}}
   if(feeding&&pose){const player=this.player?.root.position??gridToWorld(this.data.profile.position),heading=Math.atan2(player.x-s.root.position.x,player.z-s.root.position.z);s.root.rotation.y+=Math.atan2(Math.sin(heading-s.root.rotation.y),Math.cos(heading-s.root.rotation.y))*(1-Math.exp(-dt*10));}
-  s.update(legacyAnimal(a),pose?t:response.action?response.elapsed:t,action,pose?.animalWeight??(response.weight||Number(action==='rest')),speed,response.micro,this.selected===a.id,this.reduced,m.distance);
+  s.update(legacyAnimal(a),pose||dining?t:response.action?response.elapsed:t,action,pose?.animalWeight??(dining?1:response.weight||Number(action==='rest')),speed,response.micro,this.selected===a.id,this.reduced,m.distance);
 
   this.place(s.label,s.root.position,1.6*animalScale(a.life)+.24);if(!s.root.visible)s.label.hidden=true;s.label.classList.toggle('selected',this.selected===a.id);s.name.textContent=`${a.name}${a.appearance==='starlit'?' ✦':''}`;
-  const stage=a.life.stage==='baby'?'幼崽':a.life.stage==='juvenile'?'少年':'成年';s.memory.textContent=actor?.status==='queued'?'正在排队回棚':actor?.status==='safe'?'已经安全入棚':a.life.hunger<30?'肚子饿了':a.restAssignment?.phase==='admitted'?'安稳休息中':a.life.energy<30?'想休息':`${stage}${a.following?' · 陪你散步':''}`;
+  const stage=a.life.stage==='baby'?'幼崽':a.life.stage==='juvenile'?'少年':'成年';s.memory.textContent=actor?.status==='queued'?'正在排队回棚':actor?.status==='safe'?'已经安全入棚':dining?'自助吃饭 · 只补饱食':!inDanger&&a.dining?.phase==='walk'?'去食槽吃饭':a.life.hunger<30?'肚子饿了':a.restAssignment?.phase==='admitted'?'安稳休息中':a.life.energy<30?'想休息':`${stage}${a.following?' · 陪你散步':''}`;
   const nextCare=this.careTarget===a.id;if(nextCare&&this.careMarker){this.careMarker.position.x=s.root.position.x;this.careMarker.position.z=s.root.position.z;}
-  const startled=this.openingState&&['startle','choose','arrival'].includes(this.openingState.stage);s.root.rotation.z=0;const receipt=this.data.profile.lastVisual,feedingFeedback=receipt?.action==='eat'&&receipt.target===a.id&&now>=receipt.at&&now-receipt.at<1400?'吃好啦，谢谢你':'';s.bubble.textContent=startled?(a.personality==='shy'?'咩…先躲近一点':a.personality==='independent'?'我往围栏边退一退':'有动静，回小家！'):feedingFeedback||response.text||(nextCare?(a.life.stage==='baby'?'喂奶':'喂食'):'');s.bubble.hidden=!s.bubble.textContent;
+  const startled=this.openingState&&['startle','choose','arrival'].includes(this.openingState.stage);s.root.rotation.z=0;const receipt=this.data.profile.lastVisual,feedingFeedback=receipt?.action==='eat'&&receipt.target===a.id&&now>=receipt.at&&now-receipt.at<1400?(receipt.id.startsWith('dining-')?'自助吃好啦':'吃好啦，谢谢你'):'';s.bubble.textContent=startled?(a.personality==='shy'?'咩…先躲近一点':a.personality==='independent'?'我往围栏边退一退':'有动静，回小家！'):feedingFeedback||response.text||(nextCare?(a.life.stage==='baby'?'喂奶':'喂食'):'');s.bubble.hidden=!s.bubble.textContent;
  }
  private updateWolf(w:ThreatWolf,t:number,dt:number){
   const visual=this.wolves.get(w.id);if(!visual)return;const speed=this.moveVisual(visual.mover,dt),phase=w.opening?.phase,pose=wolfPoseAt(phase==='holding'||phase==='waiting'?'observe':w.status,speed,visual.mover.distance);

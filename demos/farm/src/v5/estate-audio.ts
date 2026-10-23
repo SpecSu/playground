@@ -5,6 +5,7 @@ import type {OpeningState} from './opening.ts';
 export const MUSIC_BARS=32;
 export const BEATS_PER_BAR=4;
 export const MUSIC_BPM=76;
+export type MusicMood='calm'|'warning'|'guard';
 export type MusicNote={voice:'melody'|'pad'|'bass';midi:number;duration:number;offset:number;gain:number};
 export type FarmAudioStatus='awaiting-gesture'|'playing'|'muted'|'paused'|'unavailable';
 export type FarmAudioCue='warning'|'arrival'|'safe';
@@ -18,8 +19,9 @@ const phrases:(number|null)[][]=[
  [69,74,72,69],[67,69,72,null],[74,76,79,74],[72,null,null,null],
 ];
 /** A deterministic 32-bar arrangement, measured in beats, for the WebAudio scheduler. */
-export function musicBeat(index:number):MusicNote[]{
+export function musicBeat(index:number,mood:MusicMood='calm'):MusicNote[]{
  const beat=((Math.max(0,Math.floor(Number.isFinite(index)?index:0)))%(MUSIC_BARS*BEATS_PER_BAR));
+ if(mood!=='calm')return tensionBeat(beat,mood);
  const bar=Math.floor(beat/BEATS_PER_BAR),within=beat%BEATS_PER_BAR,chord=chords[bar%chords.length],notes:MusicNote[]=[];
  if(within===0)for(const midi of chord)notes.push({voice:'pad',midi:midi+12,duration:3.85,offset:0,gain:.011});
  if(within===0||within===2)notes.push({voice:'bass',midi:chord[within===0?0:2],duration:1.55,offset:0,gain:.038});
@@ -30,6 +32,24 @@ export function musicBeat(index:number):MusicNote[]{
   // A sparse answering note gives the repeat a different, softer contour.
   if(secondHalf&&bar%4===1&&within===1)notes.push({voice:'melody',midi:72,duration:.42,offset:.5,gain:.024});
  }
+ return notes;
+}
+
+// A related A-minor theme shares the calm score's tempo and phrase grid. The
+// warning is spacious; protection adds low, rounded eighth-note movement, not
+// louder alarms. Neither arrangement contains the one-shot wolf cue.
+const tensionChords=[[45,48,52],[45,48,52],[43,47,50],[43,47,50],[41,45,48],[41,45,48],[40,43,47],[40,43,47]];
+const tensionPhrases:(number|null)[][]=[
+ [69,null,72,71],[67,null,64,null],[67,69,null,71],[74,null,71,67],
+ [69,null,72,69],[65,67,null,69],[67,null,71,67],[64,null,67,null],
+];
+function tensionBeat(beat:number,mood:'warning'|'guard'):MusicNote[]{
+ const bar=Math.floor(beat/BEATS_PER_BAR),within=beat%BEATS_PER_BAR,chord=tensionChords[bar%tensionChords.length],guard=mood==='guard',notes:MusicNote[]=[];
+ if(within===0)for(const midi of chord)notes.push({voice:'pad',midi:midi+12,duration:3.7,offset:0,gain:guard?.008:.009});
+ if(guard||within===0||within===2)notes.push({voice:'bass',midi:within%2===0?chord[0]:chord[0]+7,duration:guard?.58:.95,offset:0,gain:guard?.032:.029});
+ if(guard&&within%2===1)notes.push({voice:'bass',midi:chord[0],duration:.32,offset:.5,gain:.017});
+ const pitch=tensionPhrases[bar%tensionPhrases.length][within];
+ if(pitch!==null&&(guard||within%2===0))notes.push({voice:'melody',midi:bar>=16&&within===2?pitch-12:pitch,duration:guard?.66:1.2,offset:0,gain:guard?.029:.026});
  return notes;
 }
 
@@ -59,11 +79,14 @@ export class AudioCueTracker{
 
 const secondsPerBeat=60/MUSIC_BPM;
 const hz=(midi:number)=>440*2**((midi-69)/12);
-type Voice={oscillator:OscillatorNode;nodes:AudioNode[]};
+type Voice={oscillator:OscillatorNode;nodes:AudioNode[];envelope:GainNode;bus:GainNode;levelAt:(time:number)=>number;retiring:boolean};
+type MusicLayer={mood:MusicMood;bus:GainNode;from:number;to:number;start:number;end:number};
+const mixAt=(layer:MusicLayer,time:number)=>layer.from+(layer.to-layer.from)*Math.max(0,Math.min(1,(time-layer.start)/Math.max(.001,layer.end-layer.start)));
 /** Owns all WebAudio nodes/timers; construct/update are silent until a gesture calls unlock. */
 export class FarmAudio{
  private context:AudioContext|undefined;private master:GainNode|undefined;private music:GainNode|undefined;private effects:GainNode|undefined;
  private enabled=true;private visible=true;private disposed=false;private failed=false;private timer:ReturnType<typeof setInterval>|undefined;
+ private layers:MusicLayer[]=[];private mood:MusicMood='calm';
  private voices=new Set<Voice>();private tracker=new AudioCueTracker();private scene:AudioScene|undefined;
  private nextBeatAt=0;private beat=0;private lastStatus:FarmAudioStatus='awaiting-gesture';
  private onStatus?: (status:FarmAudioStatus)=>void;
@@ -82,6 +105,10 @@ export class FarmAudio{
     this.context=new Constructor();this.master=this.context.createGain();this.master.gain.value=.7;this.master.connect(this.context.destination);
     this.music=this.context.createGain();this.music.gain.value=.8;this.music.connect(this.master);
     this.effects=this.context.createGain();this.effects.gain.value=.8;this.effects.connect(this.master);
+    for(const mood of ['calm','warning','guard'] as const){const bus=this.context.createGain();bus.gain.value=0;bus.connect(this.music);this.layers.push({mood,bus,from:0,to:0,start:0,end:0});}
+    // An OS/browser suspension must drop scheduled notes, even before a game
+    // snapshot arrives. Visibility alone never resumes a suspended context.
+    this.context.onstatechange=()=>{if(!this.disposed)this.synchronize();};
    }
    if(this.context.state!=='running')await this.context.resume();
    if(this.disposed)return;
@@ -97,37 +124,60 @@ export class FarmAudio{
   const cues=this.scene?this.tracker.update(this.scene,audible):[];
   if(!audible)this.stop();
   else if(this.context){
-   if(this.timer===undefined){this.nextBeatAt=this.context.currentTime+.06;this.pump();this.timer=setInterval(()=>this.pump(),100);}
-   this.music?.gain.setTargetAtTime(this.scene?.active ? .45 : .8,this.context.currentTime,.35);
+   const starting=this.timer===undefined;
+   this.setScore(this.scene?.active?'guard':this.scene?.warning?'warning':'calm',starting);
+   if(starting){this.nextBeatAt=this.context.currentTime+.06;this.pump();this.timer=setInterval(()=>this.pump(),100);}
    for(const cue of cues)this.cue(cue);
   }
   this.publish();
+ }
+ /** Music is a persistent composition state, separate from transient sound effects. */
+ private setScore(mood:MusicMood,starting:boolean){
+  if(!starting&&mood===this.mood)return;
+  const now=this.context!.currentTime,duration=starting?.9:mood==='calm'?4.8:1.8;
+  for(const layer of this.layers){
+   const from=starting?0:mixAt(layer,now),to=layer.mood===mood?1:0;
+   layer.bus.gain.cancelScheduledValues(now);layer.bus.gain.setValueAtTime(from,now);layer.bus.gain.linearRampToValueAtTime(to,now+duration);
+   Object.assign(layer,{from,to,start:now,end:now+duration});
+  }
+  this.mood=mood;
  }
  private pump(){
   const ctx=this.context;if(!ctx||this.status!=='playing')return;
   // Suspended/system sleep clocks never create an unbounded catch-up burst.
   if(this.nextBeatAt<ctx.currentTime-.25)this.nextBeatAt=ctx.currentTime+.04;
   while(this.nextBeatAt<ctx.currentTime+.18){
-   for(const note of musicBeat(this.beat))this.note(note,this.nextBeatAt+note.offset*secondsPerBeat);
+   for(const layer of this.layers){
+    if(layer.to===0&&mixAt(layer,this.nextBeatAt)<=0)continue;
+    for(const note of musicBeat(this.beat,layer.mood))this.note(note,this.nextBeatAt+note.offset*secondsPerBeat,layer.bus);
+   }
    this.beat=(this.beat+1)%(MUSIC_BARS*BEATS_PER_BAR);this.nextBeatAt+=secondsPerBeat;
   }
  }
  private oscillator(type:OscillatorType,frequency:number,at:number,duration:number,gain:number,bus:GainNode,attack:number,release:number,cutoff?:number):OscillatorNode{
   const ctx=this.context!,osc=ctx.createOscillator(),envelope=ctx.createGain(),nodes:AudioNode[]=[osc,envelope];
   osc.type=type;osc.frequency.setValueAtTime(frequency,at);
+  const releaseAt=at+Math.max(attack,duration-release);
   envelope.gain.setValueAtTime(.0001,at);envelope.gain.linearRampToValueAtTime(gain,at+attack);
-  envelope.gain.setValueAtTime(gain,at+Math.max(attack,duration-release));envelope.gain.exponentialRampToValueAtTime(.0001,at+duration);
+  envelope.gain.setValueAtTime(gain,releaseAt);envelope.gain.exponentialRampToValueAtTime(.0001,at+duration);
   if(cutoff){const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=cutoff;filter.Q.value=.3;osc.connect(filter);filter.connect(envelope);nodes.push(filter);}else osc.connect(envelope);
-  envelope.connect(bus);const voice={oscillator:osc,nodes};this.voices.add(voice);
+  const levelAt=(time:number)=>time<=at||time>=at+duration?.0001:time<at+attack?.0001+(gain-.0001)*(time-at)/attack:time<=releaseAt?gain:gain*(.0001/gain)**((time-releaseAt)/(at+duration-releaseAt));
+  envelope.connect(bus);const voice={oscillator:osc,nodes,envelope,bus,levelAt,retiring:false};this.voices.add(voice);
   osc.onended=()=>{this.voices.delete(voice);for(const node of nodes)node.disconnect();};osc.start(at);osc.stop(at+duration+.03);return osc;
  }
- private note(note:MusicNote,at:number){
+ private note(note:MusicNote,at:number,bus:GainNode){
   const duration=note.duration*secondsPerBeat;
   const pad=note.voice==='pad',bass=note.voice==='bass';
-  this.oscillator(pad||bass?'sine':'triangle',hz(note.midi),at,duration,note.gain,this.music!,pad?.35:.025,pad?.65:duration*.7,pad?1100:bass?500:2400);
+  this.oscillator(pad||bass?'sine':'triangle',hz(note.midi),at,duration,note.gain,bus,pad?.35:bass?.055:.035,pad?.65:duration*.7,pad?1100:bass?500:2400);
  }
  private cue(cue:FarmAudioCue){
-  if(!this.context||!this.effects)return;const at=this.context.currentTime+.025;
+  if(!this.context||!this.effects)return;const now=this.context.currentTime,at=now+.025;
+  // Effects are one-shot accents, not layers in the score. A new event fades
+  // the previous accent, including notes scheduled to start in the future.
+  for(const voice of this.voices){
+   if(voice.bus!==this.effects||voice.retiring)continue;
+   voice.retiring=true;voice.envelope.gain.cancelScheduledValues(now);voice.envelope.gain.setValueAtTime(voice.levelAt(now),now);voice.envelope.gain.exponentialRampToValueAtTime(.0001,now+.16);voice.oscillator.stop(now+.18);
+  }
   if(cue==='warning'){
    // A brief rising wooden pair marks distant tracks before a wolf actually arrives.
    for(const [index,midi] of [62,67].entries())this.oscillator('triangle',hz(midi),at+index*.24,.55,.035,this.effects,.035,.4,1500);
@@ -145,5 +195,5 @@ export class FarmAudio{
   if(this.timer!==undefined){clearInterval(this.timer);this.timer=undefined;}
   for(const voice of [...this.voices]){voice.oscillator.onended=null;try{voice.oscillator.stop();}catch{/* Already-ended voices are harmless. */}for(const node of voice.nodes)node.disconnect();this.voices.delete(voice);}
  }
- dispose(){if(this.disposed)return;this.disposed=true;this.stop();this.music?.disconnect();this.effects?.disconnect();this.master?.disconnect();void this.context?.close().catch(()=>{});this.publish();}
+ dispose(){if(this.disposed)return;this.disposed=true;this.stop();if(this.context)this.context.onstatechange=null;for(const layer of this.layers)layer.bus.disconnect();this.layers=[];this.music?.disconnect();this.effects?.disconnect();this.master?.disconnect();void this.context?.close().catch(()=>{});this.publish();}
 }

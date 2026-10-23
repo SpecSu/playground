@@ -56,10 +56,10 @@ test('opening replay and an actual threat take precedence over an unrelated pend
 });
 
 // Minimal WebAudio boundary only: these assertions do not claim an audible browser check.
-class Param{value=0;setValueAtTime(v:number){this.value=v;}linearRampToValueAtTime(v:number){this.value=v;}exponentialRampToValueAtTime(v:number){this.value=v;}setTargetAtTime(v:number){this.value=v;}}
+class Param{value=0;cancelScheduledValues(){}setValueAtTime(v:number){this.value=v;}linearRampToValueAtTime(v:number){this.value=v;}exponentialRampToValueAtTime(v:number){this.value=v;}setTargetAtTime(v:number){this.value=v;}}
 class AudioNode{gain=new Param();frequency=new Param();Q=new Param();type='';onended:(()=>void)|null=null;at=-1;stopAt=-1;connect(){}disconnect(){}start(at:number){this.at=at;}stop(at?:number){this.stopAt=at??0;}}
 class Context{static last:Context;state='suspended';currentTime=0;destination=new AudioNode();oscillators:AudioNode[]=[];constructor(){Context.last=this;}createGain(){return new AudioNode();}createBiquadFilter(){return new AudioNode();}createOscillator(){const n=new AudioNode();this.oscillators.push(n);return n;}async resume(){this.state='running';}async close(){this.state='closed';}}
-test('warning emits a short soft two-note cue through WebAudio without changing the music scheduler',async context=>{
+test('warning keeps its short two-note effect separate from the persistent music transition',async context=>{
  const descriptor=Object.getOwnPropertyDescriptor(globalThis,'AudioContext');Object.defineProperty(globalThis,'AudioContext',{configurable:true,value:Context});
  context.mock.timers.enable({apis:['setInterval']});const audio=new FarmAudio();
  try{

@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
+import FoodSiteCard from './FoodSiteCard.tsx';
 import type {Profile} from './estate.ts';
 import {BUILDING_RULES,type BuildingKind,type GridPoint,type LayoutEdit} from './layout.ts';
 import {developmentPreview,developmentPreviewKey,suggestDevelopment,type DevelopmentKind} from './development.ts';
@@ -10,7 +11,7 @@ type Selection={edit:Extract<LayoutEdit,{type:'place'}>;version:number};
 const choices:{kind:DevelopmentKind;name:string;effect:string}[]=[
  {kind:'tower',name:'瞭望台',effect:'登台发现远处来袭'},
  {kind:'shelter',name:'保护围栏',effect:'多6个安全小窝'},
- {kind:'factory',name:'饲料坊',effect:'做饲料给小羊'},
+ {kind:'factory',name:'饲料坊',effect:'做照料餐送到食槽'},
 ];
 /** Small original facility drawings mirror the existing playable models. */
 function FacilityArt({kind}:{kind:DevelopmentKind}){
@@ -43,6 +44,8 @@ export default function QuickBuildPanel({profile:p,busy,placementPoint,send,onGh
  const [selection,setSelection]=useState<Selection|null>(null),[reason,setReason]=useState('');
  const submitted=useRef(false),legalityKey=developmentPreviewKey(p);
  const preview=useMemo(()=>selection?developmentPreview(p,selection.edit,selection.version):null,[legalityKey,selection]);
+ const currentFactory=p.layout.buildings.find(b=>b.kind==='factory');
+ const plannedFactory=selection?.edit.kind==='factory'?{...selection.edit,rotation:selection.edit.rotation??0,capacity:12,paidCost:0,doors:[]}:null;
  const blocked=!!p.threat||!!p.layout.construction;
  const selected=choices.find(choice=>choice.kind===selection?.edit.kind);
  const shortReason=p.threat?'先陪大家回家，再布置小家':p.layout.construction?'正在建造，回到场景看看吧':selection&&selection.version!==p.layout.version?'小家刚有变化，请重新选一次':preview&&!preview.ok&&p.materials<preview.cost?`还差${preview.cost-p.materials}金币，去山谷找找吧`:preview&&!preview.ok?'这里放不下，拖到空地再试试':reason;
@@ -50,13 +53,15 @@ export default function QuickBuildPanel({profile:p,busy,placementPoint,send,onGh
  useEffect(()=>{if(!placementPoint||!Number.isFinite(placementPoint.x)||!Number.isFinite(placementPoint.z))return;setSelection(old=>old?{...old,edit:{...old.edit,x:Math.round(placementPoint.x),z:Math.round(placementPoint.z)}}:old);},[placementPoint]);
  const choose=(kind:DevelopmentKind)=>{
   const plan=suggestDevelopment(p,kind);submitted.current=false;setSelection(plan.edit?{edit:plan.edit,version:p.layout.version}:null);
-  setReason(plan.edit?'':kind==='factory'&&p.layout.buildings.some(b=>b.kind==='factory')?'已经有饲料坊啦，先把饲料送给小羊':'暂时没有合适空地，可以自己摆放');
+  setReason(plan.edit?'':kind==='factory'&&p.layout.buildings.some(b=>b.kind==='factory')?'已经有饲料坊啦，先把照料餐送到食槽':'暂时没有合适空地，可以自己摆放');
  };
  const confirm=()=>{if(submitted.current||busy||blocked||!selection||!preview?.ok)return;submitted.current=true;send('layout',{edit:selection.edit,baseVersion:selection.version});onClose();};
  return <div className={`quick-build-panel ${selection?'is-placing':''}`} data-quick-build-panel>
   {!selection&&<div className="quick-build-caption"><span>选一件，放进小家</span><small>现有 {p.materials} 金币</small></div>}
   {!selection&&<div className="quick-build-choices">{choices.map(choice=><button key={choice.kind} type="button" className={selected?.kind===choice.kind?'selected':''} data-quick-kind={choice.kind} disabled={busy||blocked} aria-pressed={selected?.kind===choice.kind} onClick={()=>choose(choice.kind)}><FacilityArt kind={choice.kind}/><b>{choice.name}</b><span>{choice.effect}</span><small>{BUILDING_RULES[choice.kind].cost} 金币</small></button>)}</div>}
   {selection&&<div className="quick-build-drag-title" data-placement-controls><b>{selected?.name}</b><span>拖动虚影，放到喜欢的位置</span><button data-placement-cancel onClick={()=>{setSelection(null);setReason('');submitted.current=false;}}>换一个</button></div>}
+  {!selection&&currentFactory&&<FoodSiteCard building={currentFactory} layout={p.layout}/>}
+  {plannedFactory&&<FoodSiteCard building={plannedFactory} layout={preview?.after??p.layout} planned valid={!!preview?.ok}/>}
   {shortReason?<p className="quick-build-status" role="status">{shortReason}</p>:selection?<p className="quick-build-status" role="status">绿色可放 · 拖到屏幕边缘移动视野</p>:<p className="quick-build-status">先看看位置，确认后才花金币</p>}
   {selection&&!blocked&&<button type="button" className="quick-build-confirm" data-command="quick-build-confirm" disabled={busy||!preview?.ok} onClick={confirm}>建这里 · 花{preview?.cost??0}金币</button>}
   {selection&&preview&&p.materials<preview.cost&&onExplore&&<button className="quick-build-explore" data-quick-explore onClick={onExplore}>去探索找金币</button>}

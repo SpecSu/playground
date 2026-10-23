@@ -18,6 +18,8 @@ import EncounterPanel from '../v7/EncounterPanel.tsx';
 import HarvestPanel from '../v7/HarvestPanel.tsx';
 import InventoryPanel from '../v7/InventoryPanel.tsx';
 import CompactAnimalCard from './CompactAnimalCard.tsx';
+import FoodSiteCard,{FOOD_RESOURCE_LABEL} from './FoodSiteCard.tsx';
+import {foodSiteRating,resourcesAt} from './food-resources.ts';
 import QuickBuildPanel from './QuickBuildPanel.tsx';
 import {playPrompt} from './play-prompt.ts';
 import WorkshopPanel from './WorkshopPanel.tsx';
@@ -30,7 +32,7 @@ import {LOCAL_VISITORS,THEME_TEMPLATES,type CreationCommand,type Theme} from './
 
 export type EstateSheet = null|'animal'|'actions'|'guardian'|'build'|'creation'|'visits'|'works'|'settings'|'reset'|'view'|'avatar'|'journal'|'journey'|'animalDetails'|'planner'|'cycle'|'workshop'|'encounter'|'harvest';
 export const isSceneCardSheet=(sheet:EstateSheet)=>sheet==='animal'||sheet==='build'||sheet==='workshop'||sheet==='cycle'||sheet==='encounter'||sheet==='harvest';
-type Ghost={x:number;z:number;kind:BuildingKind;valid:boolean;interactive?:boolean};
+type Ghost={x:number;z:number;kind:BuildingKind;rotation?:Rotation;valid:boolean;interactive?:boolean};
 type Send=(type:string,extra?:Record<string,unknown>)=>void;
 export type EstateViewProps={
   openingOverlay?:ReactNode;interactionLocked?:boolean;data:EstateSnapshot;target:string;sheet:EstateSheet;camera:ClubCameraMode;reduced:boolean;busy:boolean;
@@ -41,7 +43,7 @@ export type EstateViewProps={
   onWorkshopPreview?:(draft:WorkshopDraft|null,position?:GridPoint)=>void;
   soundEnabled?:boolean;soundStatus?:FarmAudioStatus;onSound?:()=>void;
 };
-const BUILDING_LABEL:Record<BuildingKind,string>={shelter:'保护区',trough:'食槽',workbench:'工作台',tower:'观察台',factory:'饲料厂',ramp:'池岸坡道',decor:'装饰'};
+const BUILDING_LABEL:Record<BuildingKind,string>={shelter:'保护区',trough:'自助食槽',workbench:'工作台',tower:'观察台',factory:'饲料坊',ramp:'池岸坡道',decor:'装饰'};
 const REGION_LABEL={pen:'圈养区',meadow:'草场',shore:'池岸',home:'家园'};
 const STAGE_LABEL={baby:'幼崽',juvenile:'少年',adult:'成年'};
 const GUARDIANS:{kind:GuardianKind;asset:string}[]=[
@@ -94,7 +96,7 @@ function Inventory({profile:p,busy,send,onCraft}:{profile:Profile;busy:boolean;s
   return <details className="estate-details"><summary><Backpack size={14}/> 物资背包 · 随身食物 {p.inventory.hand}/3</summary><InventoryPanel profile={p} busy={busy} send={send} onCraft={onCraft}/><button className="actions-join" data-inventory-claim disabled={busy||!stored||!!p.threat&&p.threat.phase!=='complete'} onClick={()=>send('claimWool')}>收好羊毛 · {stored}份</button></details>;
 }
 
-function BuildPanel({profile:p,busy,send,onGhost,initialMode='place'}:{profile:Profile;busy:boolean;send:Send;onGhost:(g?:Ghost)=>void;initialMode?:LayoutEdit['type']}){
+export function BuildPanel({profile:p,busy,send,onGhost,initialMode='place'}:{profile:Profile;busy:boolean;send:Send;onGhost:(g?:Ghost)=>void;initialMode?:LayoutEdit['type']}){
   const [mode,setMode]=useState<LayoutEdit['type']>(initialMode),[kind,setKind]=useState<BuildingKind>('trough');
   const [point,setPoint]=useState<GridPoint>({x:8,z:3}),[rotation,setRotation]=useState<Rotation>(0);
   const [selectedId,setSelectedId]=useState(p.layout.buildings.find(b=>b.kind==='trough')?.id??p.layout.buildings[0]?.id??'');
@@ -112,11 +114,14 @@ function BuildPanel({profile:p,busy,send,onGhost,initialMode='place'}:{profile:P
   },[mode,p.layout.version,kind,point,rotation,selected,roadCells,removeRoad,doorId,doorOpen]);
   const actors=useMemo(()=>layoutActors(p),[p]);
   const preview=useMemo(()=>layoutPreview(p,edit),[p,edit]);
+  const plannedFactory=(edit.type==='place'&&edit.kind==='factory')?{...edit,rotation:edit.rotation??0,paidCost:0,capacity:12,doors:[]}:(edit.type==='move'&&selected?.kind==='factory')?{...selected,...edit,rotation:edit.rotation??selected.rotation}:null;
+  const currentFactory=p.layout.buildings.find(b=>b.kind==='factory');
+  const foodBorder=plannedFactory?foodSiteRating(plannedFactory,preview.after).border:[];
   useEffect(()=>{
-    if(mode==='place'||mode==='move')onGhost({...point,kind:mode==='place'?kind:selected?.kind??kind,valid:preview.ok});
+    if(mode==='place'||mode==='move')onGhost({...point,rotation,kind:mode==='place'?kind:selected?.kind??kind,valid:preview.ok});
     else onGhost();
     return ()=>onGhost();
-  },[mode,point,kind,selected?.kind,preview.ok,onGhost]);
+  },[mode,point,rotation,kind,selected?.kind,preview.ok,onGhost]);
   const columns=p.layout.owned.length>144||mode==='expand'?18:12;
   const ghostCells=mode==='place'||mode==='move'?buildingFootprint({id:'ghost',kind:mode==='place'?kind:selected?.kind??kind,...point,rotation,paidCost:0,doors:[],capacity:0}):mode==='road'?(roadCells.length?roadCells:[point]):[point];
   const recommend=()=>{
@@ -149,13 +154,16 @@ function BuildPanel({profile:p,busy,send,onGhost,initialMode='place'}:{profile:P
     {mode==='door-state'&&<div className="estate-coordinate-row"><label>入口<select value={doorId||selected?.doors[0]?.id||''} onChange={event=>setDoorId(event.target.value)}>{selected?.doors.map(d=><option value={d.id} key={d.id}>({d.x},{d.z}) · {d.open?'开启':'关闭'}</option>)}</select></label><label>状态<select value={doorOpen?'open':'closed'} onChange={event=>setDoorOpen(event.target.value==='open')}><option value="open">开启</option><option value="closed">关闭</option></select></label></div>}
     {mode==='road'&&<div className="estate-secondary"><button className={!removeRoad?'selected':''} onClick={()=>setRemoveRoad(false)}>铺路 · 1金币/格</button><button className={removeRoad?'selected':''} onClick={()=>setRemoveRoad(true)}>拆路 · 按实付返还</button></div>}
     {!['remove','door-state','expand'].includes(mode)&&<div className="estate-coordinate-row"><label>X<input aria-label="建造X坐标" type="number" min={0} max={17} value={point.x} onChange={event=>setPoint({...point,x:Number(event.target.value)})}/></label><label>Z<input aria-label="建造Z坐标" type="number" min={0} max={11} value={point.z} onChange={event=>setPoint({...point,z:Number(event.target.value)})}/></label>{(mode==='place'||mode==='move')&&<label>朝向<select value={rotation} onChange={event=>setRotation(Number(event.target.value) as Rotation)}>{[0,90,180,270].map(value=><option key={value} value={value}>{value}°</option>)}</select></label>}</div>}
+    {currentFactory&&<FoodSiteCard building={currentFactory} layout={p.layout}/>}
+    {plannedFactory&&<FoodSiteCard building={plannedFactory} layout={preview.after} planned valid={preview.ok}/>}
     <div className="estate-map-wrap"><div className="estate-map" role="group" aria-label="庄园格点规划图" style={{gridTemplateColumns:`repeat(${columns},1fr)`}}>{Array.from({length:12},(_,z)=>Array.from({length:columns},(_,x)=>{
       const owned=p.layout.owned.some(c=>c.x===x&&c.z===z),building=p.layout.buildings.find(b=>buildingFootprint(b).some(c=>c.x===x&&c.z===z));
       const terrain=terrainAt({x,z}),ghost=ghostCells.some(c=>c.x===x&&c.z===z)&&!['remove','door-state','expand'].includes(mode),road=p.layout.roads.some(c=>c.x===x&&c.z===z);
+      const resource=resourcesAt({x,z})[0],border=foodBorder.some(c=>c.x===x&&c.z===z);
       const actor=living(p).some(a=>round(a.position).x===x&&round(a.position).z===z);
-      return <button type="button" key={`${x},${z}`} aria-label={`${REGION_LABEL[regionAt({x,z})]} ${x},${z} ${building?BUILDING_LABEL[building.kind]:terrain==='grass'?'陆地':'水域'}${ghost?preview.ok?' 可建':' 不可建':''}`} className={`${owned?'owned':'unowned'} ${regionAt({x,z})} ${terrain} ${road?'road':''} ${building?'occupied':''} ${ghost?preview.ok?'ghost-valid':'ghost-invalid':''}`} onClick={()=>{setPoint({x,z});if(mode==='road')setRoadCells(cells=>cells.some(c=>c.x===x&&c.z===z)?cells.filter(c=>c.x!==x||c.z!==z):[...cells,{x,z}]);}}>{building?(x===building.x+Math.floor((buildingFootprint(building).reduce((n,c)=>Math.max(n,c.x),building.x)-building.x)/2)&&z===building.z+Math.floor((buildingFootprint(building).reduce((n,c)=>Math.max(n,c.z),building.z)-building.z)/2)?<span className="estate-map-name">{BUILDING_LABEL[building.kind]}</span>:null):actor?'羊':round(p.position).x===x&&round(p.position).z===z?'我':terrain==='grass'?(road?'·':''):terrain==='deep'?'≈':'∿'}</button>;
+      return <button type="button" key={`${x},${z}`} aria-label={`${REGION_LABEL[regionAt({x,z})]} ${x},${z} ${building?BUILDING_LABEL[building.kind]:terrain==='grass'?'陆地':'水域'}${resource?' '+FOOD_RESOURCE_LABEL[resource]:''}${border?' 四边相邻边界':''}${ghost?preview.ok?' 可建':' 不可建':''}`} className={`${owned?'owned':'unowned'} ${regionAt({x,z})} ${terrain} ${resource&&!building?'food-resource-'+resource:''} ${border?'food-border':''} ${road?'road':''} ${building?'occupied':''} ${ghost?preview.ok?'ghost-valid':'ghost-invalid':''}`} onClick={()=>{setPoint({x,z});if(mode==='road')setRoadCells(cells=>cells.some(c=>c.x===x&&c.z===z)?cells.filter(c=>c.x!==x||c.z!==z):[...cells,{x,z}]);}}>{building?(x===building.x+Math.floor((buildingFootprint(building).reduce((n,c)=>Math.max(n,c.x),building.x)-building.x)/2)&&z===building.z+Math.floor((buildingFootprint(building).reduce((n,c)=>Math.max(n,c.z),building.z)-building.z)/2)?<span className="estate-map-name">{BUILDING_LABEL[building.kind]}</span>:null):actor?'羊':round(p.position).x===x&&round(p.position).z===z?'我':terrain==='grass'?(road?'·':''):terrain==='deep'?'≈':'∿'}</button>;
     }))}</div></div>
-    <p className="sheet-note">绿框可应用，红框显示原因。羊和LX不能走入水域；点击格点选位置{mode==='road'?'，再次点击取消道路格':''}。</p>
+    <p className="sheet-note">绿框可应用，红框显示原因。金边是食堂四边相邻范围；浅绿为肥沃草地，深绿为天然树林，蓝色为淡水。羊和LX不能走入水域；点击格点选位置{mode==='road'?'，再次点击取消道路格':''}。</p>
     {mode==='expand'&&<div className="estate-callout"><b>东侧相邻6×6 · 30金币 / 60在线秒</b><p>{p.surveyed?'边界已经勘察，拓荒后增加36格土地。':'先走到东侧边界X≥10，原地勘察5秒。勘察不花金币。'}</p><div className="estate-secondary"><button disabled={busy} onClick={()=>send('move',{to:{x:11,z:4}})}>走到勘察点</button><button disabled={busy||p.surveyed||p.position.x<10} onClick={()=>send('survey')}>{p.surveyed?'已勘察':'开始勘察'}</button></div></div>}
     <section className={`estate-preview ${preview.ok?'valid':'invalid'}`} aria-live="polite"><b>{preview.ok?'这份方案可以应用':'这份方案还不能应用'}</b><div className="estate-stat-row"><span>预留 <b>{preview.cost}金币</b></span><span>拆除返还 <b>{preview.refund}</b></span><span>耗时 <b>{preview.durationMs/1000}秒</b></span></div><p>最远回棚路线 {preview.beforeMetrics.maxReachablePath} → {preview.metrics.maxReachablePath}格 · 棚位{preview.metrics.capacity} · 不可达{preview.metrics.unreachable.length}处</p>{preview.reasons.map(reason=><p key={reason}>· {reason}</p>)}<button className="estate-primary" data-command="layout" disabled={busy||!preview.ok} onClick={()=>send('layout',{edit,baseVersion:p.layout.version})}>确认这次改造</button></section>
     <button className="actions-join" disabled={busy||!preview.ok||edit.type==='expand'} onClick={saveBlueprint}>保存当前预览为蓝图 · 暂不施工</button>
@@ -316,7 +324,7 @@ export default function EstateView(props:EstateViewProps){
       {sheet==='avatar'&&<><p className="sheet-note">换个样子，它们仍然认得你。当前分身：{AVATAR_LABEL[data.avatar]}。</p><div className="option-grid farm-avatar-grid">{(['human-lx','miaocuijiao','banana-cat'] as const).map(id=><button key={id} className={`option-card ${data.avatar===id?'selected':''}`} aria-pressed={data.avatar===id} disabled={busy} onClick={()=>send('avatar',{avatar:id})}><img src={`/avatars/portraits/${id}.webp`} alt=""/><span>{AVATAR_LABEL[id]}</span></button>)}</div><button className="actions-join" onClick={()=>props.onSheet('works')}>看看我的私有作品</button><button className="actions-join" onClick={()=>props.onSheet('settings')}>存档与体验设置</button></>}
       {sheet==='view'&&<div className="option-grid view-grid">{([{id:'overview',label:'庄园总览',hint:'同一斜俯方向，看更大的邻域'},{id:'third-person',label:'斜俯随行',hint:'固定朝向，镜头随LX平移'}] as const).map(v=><button key={v.id} className={`option-card view-option ${camera===v.id?'selected':''}`} onClick={()=>{props.onCamera(v.id);close();}}>{v.id==='overview'?<Maximize/>:<ScanEye/>}<span>{v.label}</span><small>{v.hint}</small></button>)}</div>}
       {sheet==='reset'&&<ResetPanel key={`${p.id}:${p.session}`} profile={p} busy={busy} send={send} onCancel={close}/>}
-      {sheet==='settings'&&<><button className="actions-join" data-sound-toggle onClick={props.onSound}>{props.soundEnabled===false?'开启':'关闭'}音乐与音效</button><p className="sheet-note">原创轻音乐与远处狼啸。首次点击后播放，切到后台暂停，声音偏好保存在设备上。</p><button className="actions-join" data-command="request-reset" disabled={busy} onClick={()=>send('requestReset')}>重置当前存档 · 从头演示</button><button className="actions-join" disabled={busy} onClick={()=>send('replayOpening')}>重看开场 · 独立演示，不改存档</button><div className="estate-callout"><b>{p.id==='home'?'自然档 · 安心相处':'独立演示档 · 年龄240倍'}</b><p>自然成长：幼崽至少24小时，少年再至少72小时，同时完成有效照料、探索与休息。离线不推进威胁、救援与施工。</p></div><div className="estate-secondary"><button className={p.id==='home'?'selected':''} disabled={busy||p.id==='home'} onClick={()=>send('profile',{profile:'home'})}>自然档</button><button className={p.id==='lab'?'selected':''} disabled={busy||p.id==='lab'} onClick={()=>send('profile',{profile:'lab'})}>独立演示档</button></div><p className="sheet-note">两个存档的动物、金币、作品和权限分别保存。演示档年龄门槛6/18分钟，照料条件仍要真实完成。</p><button className="actions-join" onClick={props.onReduced}>{reduced?'简化动效已开启':'简化动效'}<Check size={14} style={{opacity:reduced?1:0}}/></button><button className="actions-join" disabled={busy} onClick={()=>send('assistance',{enabled:!p.assistance})}>{p.assistance?'关闭基础提醒':'开启基础提醒'}</button><p className="sheet-note">记录保存在这台Mac。基础提醒不替你花金币、不替你开启挑战或发布作品。</p><p className="sheet-note">{assetStatus}</p></>}
+      {sheet==='settings'&&<><button className="actions-join" data-sound-toggle onClick={props.onSound}>{props.soundEnabled===false?'开启':'关闭'}音乐与音效</button><p className="sheet-note">平静时原创轻音乐，狼袭时渐入轻紧张节奏，安全后渐缓。首次点击后播放，切到后台暂停，声音偏好保存在设备上。</p><button className="actions-join" data-command="request-reset" disabled={busy} onClick={()=>send('requestReset')}>重置当前存档 · 从头演示</button><button className="actions-join" disabled={busy} onClick={()=>send('replayOpening')}>重看开场 · 独立演示，不改存档</button><div className="estate-callout"><b>{p.id==='home'?'自然档 · 安心相处':'独立演示档 · 年龄240倍'}</b><p>自然成长：幼崽至少24小时，少年再至少72小时，同时完成有效照料、探索与休息。离线不推进威胁、救援与施工。</p></div><div className="estate-secondary"><button className={p.id==='home'?'selected':''} disabled={busy||p.id==='home'} onClick={()=>send('profile',{profile:'home'})}>自然档</button><button className={p.id==='lab'?'selected':''} disabled={busy||p.id==='lab'} onClick={()=>send('profile',{profile:'lab'})}>独立演示档</button></div><p className="sheet-note">两个存档的动物、金币、作品和权限分别保存。演示档年龄门槛6/18分钟，照料条件仍要真实完成。</p><button className="actions-join" onClick={props.onReduced}>{reduced?'简化动效已开启':'简化动效'}<Check size={14} style={{opacity:reduced?1:0}}/></button><button className="actions-join" disabled={busy} onClick={()=>send('assistance',{enabled:!p.assistance})}>{p.assistance?'关闭基础提醒':'开启基础提醒'}</button><p className="sheet-note">记录保存在这台Mac。基础提醒不替你花金币、不替你开启挑战或发布作品。</p><p className="sheet-note">{assetStatus}</p></>}
       {message&&<p className="estate-sheet-message" role="status">{message}</p>}
     </FeedSheet>}
   </section></PhoneViewport></main>;
