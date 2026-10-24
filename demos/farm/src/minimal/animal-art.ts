@@ -7,6 +7,9 @@ export type FarmSex='male'|'female';
 export type FarmAnimalPose={time:number;speed:number;distance:number;activity:string;carried?:boolean;hatch?:number;selected?:boolean;drinkPhase?:number;/** Contact in animal root-local coordinates, supplied by the terrain surface. */waterContact?:{x:number;y:number;z:number}};
 const clamp=(n:number,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const ease=(n:number)=>{const t=clamp(n);return t*t*(3-2*t);};
+/** Small animals curl their legs away from the support beneath the belly.
+ * Adult widths already straddle a head, while baby widths need a wider fold. */
+export const smallAnimalCarryFold=(scale:number)=>ease((1-scale)/.4);
 function dispose(root:THREE.Object3D){const geometries=new Set<THREE.BufferGeometry>(),materials=new Set<THREE.Material>();root.traverse(o=>{if(o instanceof THREE.Mesh){geometries.add(o.geometry);(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>materials.add(m));}});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());}
 function material(color:string,roughness=.72){return new THREE.MeshStandardMaterial({color,roughness,metalness:0});}
 function ellipsoid(parent:THREE.Object3D,mat:THREE.Material,x:number,y:number,z:number,sx:number,sy=sx,sz=sx,segments=18){const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,segments,12),mat);mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
@@ -106,10 +109,11 @@ function createPlushCow(sex:FarmSex){
  anchors.head.name='animal-head';head.add(anchors.head);
  const halo=new THREE.Mesh(new THREE.RingGeometry(.48,.515,40),new THREE.MeshBasicMaterial({color:'#FFF1AB',transparent:true,opacity:.8,side:THREE.DoubleSide,depthWrite:false}));halo.name='selection-halo';halo.rotation.x=-Math.PI/2;halo.position.y=.012;halo.visible=false;root.add(halo);
  const drinkAction=createDrinkAction(root,body,head,mouth,neck,head.position.clone(),neck.position.clone(),neck.scale.clone());
- const height=1.31;
+ const height=1.31,worldScale=new THREE.Vector3();
  return {root,mouth,height,anchors,
   update(p:FarmAnimalPose){
    const t=p.time,walk=clamp(p.speed/.8),phase=p.distance/.7*Math.PI*2,carried=!!p.carried;
+   const carryFold=carried?smallAnimalCarryFold(root.getWorldScale(worldScale).x):0;
    const rest=p.activity==='rest'&&!carried,feeding=['eat','graze'].includes(p.activity)&&!carried;
    const h=clamp(p.hatch??1),bounce=h<1?Math.sin(clamp((h-.1)/.9)*Math.PI)*.65:0;
    // Feet remain at the ground datum. Breathing expands the torso, not all joints.
@@ -120,7 +124,8 @@ function createPlushCow(sex:FarmSex){
    head.position.set(0,.94+(feeding?-.035:0),.36);
    legs.forEach((leg,i)=>{
     const stride=Math.sin(phase+(i===0||i===3?0:Math.PI));
-    leg.rotation.x=carried?(i<2?-.22:.25):rest?(i<2?-.65:.6):stride*.32*walk;
+    leg.rotation.x=carried?THREE.MathUtils.lerp(i<2?-.22:.25,i<2?1.3:-1.3,carryFold):rest?(i<2?-.65:.6):stride*.32*walk;
+    leg.rotation.z=carried?(i%2?1:-1)*.35*carryFold:0;
     leg.position.y=.45+(carried||rest?0:Math.max(0,stride)*.045*walk);
    });
    ears.forEach((ear,i)=>ear.rotation.z=(i===0?1:-1)*.22+Math.sin(t*2+i)*.025);
@@ -232,10 +237,11 @@ function createClassicAnimal(species:FarmSpecies,sex:FarmSex){
  const support=new THREE.Object3D();support.name='animal-support';support.position.set(0,species==='sheep'?fleeceBottom:bodyY-belly.scale.y,supportZ);body.add(support);
  const originalEarRot=ears.map(e=>e.rotation.z);const tailBase=tail.rotation.y;
  const drinkAction=createDrinkAction(root,body,head,mouth,neck,head.position.clone(),neck.position.clone(),neck.scale.clone());
- const height=species==='bunny'?1.36:species==='cow'?1.18:1.08;
+ const height=species==='bunny'?1.36:species==='cow'?1.18:1.08,worldScale=new THREE.Vector3();
  return {root,mouth,height,
   update(p:FarmAnimalPose){
    const walk=clamp(p.speed/.8),phase=p.distance/.62*Math.PI*2,t=p.time;
+   const carryFold=p.carried?smallAnimalCarryFold(root.getWorldScale(worldScale).x):0;
    const resting=p.activity==='rest'&&!p.carried,feeding=(p.activity==='graze'||p.activity==='eat')&&!p.carried;
    const reveal=p.hatch===undefined?1:clamp(p.hatch);
    let bounce=0,squash=1;
@@ -248,7 +254,7 @@ function createClassicAnimal(species:FarmSpecies,sex:FarmSex){
    head.rotation.x=feeding?.38+Math.sin(t*4)*.045:resting?.13:Math.sin(t*1.5)*.035;
    head.rotation.y=walk>.15?0:Math.sin(t*.8)*.055;
    head.position.set(0,(species==='bunny'?.76:.7)+(feeding?-.08:0),species==='bunny'?.19:.33);
-   legs.forEach((leg,i)=>{leg.rotation.x=p.carried?(i<2?-.62:.62):resting?(i<2?-.85:.8):Math.sin(phase+(species==='bunny'?(i<2?Math.PI*.4:0):(i===0||i===3?0:Math.PI)))*.45*walk;leg.rotation.z=p.carried?(i%2?.14:-.14):0;});
+   legs.forEach((leg,i)=>{leg.rotation.x=p.carried?THREE.MathUtils.lerp(i<2?-.62:.62,i<2?1.3:-1.3,carryFold):resting?(i<2?-.85:.8):Math.sin(phase+(species==='bunny'?(i<2?Math.PI*.4:0):(i===0||i===3?0:Math.PI)))*.45*walk;leg.rotation.z=p.carried?(i%2?1:-1)*THREE.MathUtils.lerp(.14,.35,carryFold):0;});
    ears.forEach((ear,i)=>{ear.rotation.z=originalEarRot[i]+Math.sin(t*2.7+i)*.045+(species==='bunny'?Math.sin(phase+i)*walk*.055:0);});
    tail.rotation.y=tailBase+Math.sin(t*3)*.12;
    const blink=(t%4.3)>4.13?.14:1;eyes.forEach(eye=>eye.scale.y=.046*blink);

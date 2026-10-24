@@ -1,5 +1,5 @@
 {
-  "version": "v14.0-skeletal-cow-gentle-walk",
+  "version": "v15.0-three-stage-growth",
   "defaultMode": "minimal",
   "legacyMode": "?legacy",
   "camera": "orthographic-manor-10.4-offset-9-13.8-18",
@@ -28,10 +28,22 @@
   "defaultZoom": 1.6,
   "grounding": "farm-stride-actual-skin-sole-probes",
   "carry": "anatomical-belly-support-head-contact",
-  "growth": "birth-potential-visible-age-growth-no-extra-penalty",
+  "growth": "saved-random-monotone-baby-juvenile-adult-60s-stages",
   "weather": "simulated-UTC8-day-night-sunny-cloudy-rain-snow-storm",
   "audio": "gesture-unlocked-calm-and-wolf-crossfade",
   "water": "pond-blocked-creek-walkable-bank-drink",
   "cowAnimation": "blender-26bones-5clips-AnimationMixer",
-  "otherAnimalAnimation": "shared-procedural-articulated"
+  "otherAnimalAnimation": "shared-procedural-articulated",
+  "growthStages": [
+    "baby",
+    "juvenile",
+    "adult"
+  ],
+  "growthStageSeconds": 60,
+  "newAnimalAdultSeconds": 120,
+  "growthScaleBounds": [
+    0.6,
+    2.2
+  ],
+  "legacyGrowth": "preserve-v14-curve-and-adulthood"
 }

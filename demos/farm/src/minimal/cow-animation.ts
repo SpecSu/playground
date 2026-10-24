@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type {FarmAnimalPose} from './animal-art.ts';
+import {smallAnimalCarryFold,type FarmAnimalPose} from './animal-art.ts';
 
 /** Runtime for genuine Blender-authored skin weights and bone animation clips.
  * The terrain contact adjustment is a small IK-like head correction, not generated locomotion. */
@@ -12,6 +12,10 @@ export function createSkeletalCowController(root:THREE.Group,clips:THREE.Animati
  const head=bones.find(b=>b.name==='cow_head'||b.name.toLowerCase()==='head');
  if(!head)throw new Error('Cow asset missing Head bone');
  const headRest=head.position.clone(),mixer=new THREE.AnimationMixer(root);
+ // Carry is a local additive articulation, not a scale or root-height correction.
+ // Clear it before the mixer so putting the animal down restores authored feet.
+ const carryLegs=bones.filter(b=>/^cow_(front|back)_[LR]_upper$/.test(b.name)).map(bone=>({bone,applied:new THREE.Quaternion(),front:bone.name.includes('_front_'),side:bone.name.includes('_L_')?-1:1}));
+ const carryScale=new THREE.Vector3(),rootRotation=new THREE.Quaternion(),parentRotation=new THREE.Quaternion(),basis=new THREE.Quaternion(),foldRotation=new THREE.Quaternion(),foldEuler=new THREE.Euler();
  const actions=new Map(required.map(name=>{const clip=clips.find(c=>c.name===name)!;const action=mixer.clipAction(clip);action.setEffectiveTimeScale(0);return [name,action];}));
  let active='',previousTime:number|undefined;
  const worldTarget=new THREE.Vector3(),worldMouth=new THREE.Vector3(),delta=new THREE.Vector3();
@@ -29,6 +33,7 @@ export function createSkeletalCowController(root:THREE.Group,clips:THREE.Animati
    const action=actions.get(name)!;action.time=THREE.MathUtils.clamp(fraction,0,.999999)*action.getClip().duration;
    // Reset correction before evaluating the authored channels; never accumulate offsets.
    head.position.copy(headRest);
+   for(const leg of carryLegs){leg.bone.quaternion.premultiply(leg.applied.invert());leg.applied.identity();}
    mixer.update(previousTime===undefined?0:THREE.MathUtils.clamp(p.time-previousTime,0,.1));previousTime=p.time;
    const lower=drinking?smooth((phase-.12)/.2)*(1-smooth((phase-.78)/.22)):grazing?1:0;
    if(lower>0&&p.waterContact&&head.parent){
@@ -36,6 +41,18 @@ export function createSkeletalCowController(root:THREE.Group,clips:THREE.Animati
     head.parent.worldToLocal(worldTarget);head.parent.worldToLocal(worldMouth);delta.copy(worldTarget).sub(worldMouth);
     // A bad bank selection must not stretch the face back through the body.
     delta.clampLength(0,.18).multiplyScalar(lower);head.position.add(delta);root.updateWorldMatrix(true,true);
+   }
+   const carryFold=p.carried?smallAnimalCarryFold(contactRoot.getWorldScale(carryScale).x):0;
+   if(carryFold>0){
+    root.updateWorldMatrix(true,true);root.getWorldQuaternion(rootRotation);
+    for(const leg of carryLegs){
+     leg.bone.parent!.getWorldQuaternion(parentRotation);basis.copy(parentRotation).invert().multiply(rootRotation);
+     // The welded hide blends inner upper-leg skin with the belly. Lateral
+     // splay keeps that skin outside the head while the legs fold fore/aft.
+     foldRotation.setFromEuler(foldEuler.set((leg.front?-1:1)*1.3*carryFold,0,leg.side*.7*carryFold));
+     leg.applied.copy(basis).multiply(foldRotation).multiply(basis.invert());
+     leg.bone.quaternion.premultiply(leg.applied);
+    }
    }
    const h=THREE.MathUtils.clamp(p.hatch??1,0,1);root.position.y=h<1?Math.sin(THREE.MathUtils.clamp((h-.1)/.9,0,1)*Math.PI)*.65:0;
   },

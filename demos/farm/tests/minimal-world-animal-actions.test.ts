@@ -14,7 +14,8 @@ test('World contacts real bank water and repairs autonomous guardian routes afte
  const host=w.document.createElement('div');w.document.body.appendChild(host);Object.defineProperties(host,{clientWidth:{value:390},clientHeight:{value:844}});
  const canvas=w.document.createElement('canvas');canvas.getBoundingClientRect=()=>new w.DOMRect(0,0,390,844);canvas.setPointerCapture=()=>{};canvas.hasPointerCapture=()=>false;canvas.releasePointerCapture=()=>{};Object.defineProperties(canvas,{clientWidth:{value:390},clientHeight:{value:844}});
  const renderer={domElement:canvas,shadowMap:{},setPixelRatio(){},setSize(){},render(){},dispose(){}};
- const {MinimalWorld}=await import('../src/minimal/World.ts');const now=Date.now();const state=minimalCommand(createMinimalState(now),{type:'welcome'},now).state;state.animals=[{id:'water-cow',name:'小牛',species:'cow',sex:'female',size:'normal',position:{x:2,z:2},activity:'drink',energy:60,bond:0,bornAt:now-120000,activityUntil:now+3000}];state.tiles.find(t=>t.x===3&&t.z===2)!.terrain='pond';const selected:string[]=[];
+ const {MinimalWorld}=await import('../src/minimal/World.ts');const originalNow=Date.now,now=originalNow();Date.now=()=>now; // Contact fixture holds the steady sip phase, independent of scene/GLB setup time.
+ const state=minimalCommand(createMinimalState(now),{type:'welcome'},now).state;state.animals=[{id:'water-cow',name:'小牛',species:'cow',sex:'female',size:'normal',position:{x:2,z:2},activity:'drink',energy:60,bond:0,bornAt:now-120000,activityUntil:now+3000}];state.tiles.find(t=>t.x===3&&t.z===2)!.terrain='pond';const selected:string[]=[];
  const originalLoad=GLTFLoader.prototype.loadAsync;GLTFLoader.prototype.loadAsync=async function(){const bytes=readFileSync(new URL('../public/models/farm/cow-animated.glb',import.meta.url));return this.parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');};
  const world=new MinimalWorld(host as unknown as HTMLElement,state,{select:t=>selected.push(t.kind),arrive(){}},()=>renderer as unknown as THREE.WebGLRenderer);
 
@@ -34,5 +35,5 @@ test('World contacts real bank water and repairs autonomous guardian routes afte
   const rerouted=structuredClone(converted);rerouted.tiles.find(t=>t.x===1&&t.z===3)!.terrain='pond';world.update(rerouted);
   assert.ok(internals.guardPath.every(p=>isWalkableTile(rerouted,grid(p))),'stale route cleared after pond edit');
   assert.ok(isWalkableTile(rerouted,grid(internals.guardTarget)),'stale target cleared');
- }finally{world.dispose();GLTFLoader.prototype.loadAsync=originalLoad;hook.deregister();await w.happyDOM.close();}
+ }finally{world.dispose();Date.now=originalNow;GLTFLoader.prototype.loadAsync=originalLoad;hook.deregister();await w.happyDOM.close();}
 });

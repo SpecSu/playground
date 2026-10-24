@@ -1,3 +1,6 @@
+import {ANIMAL_ADULT_MS,ANIMAL_STAGE_MS,LEGACY_ADULT_MS,animalGrowthAgeMs,animalGrowthStage,validAnimalGrowth,createAnimalGrowth,type AnimalGrowthProfile} from './animal-growth.ts';
+export {animalScale,animalGrowthStage,animalGrowthLabel,animalGrowthRemainingMs,animalGrowthProgress} from './animal-growth.ts';
+export type {AnimalGrowthProfile,AnimalGrowthStage} from './animal-growth.ts';
 import {advancePlayerMotion,MAX_PLAYER_SPEED} from './player-motion.ts';
 /** V12 egg farm: isolated browser save; V11/V9 saves are deliberately untouched. */
 export type Terrain='meadow'|'creek'|'pond'|'hill'|'grove';
@@ -7,8 +10,8 @@ export type GuardianKind='dog'|'cat'|'frog';
 export type Species='sheep'|'pig'|'cow'|'bunny';
 export type Sex='male'|'female';
 export type AnimalSize='normal'|'large'|'giant';
-export type MinimalAnimal={id:string;name:string;species:Species;sex:Sex;size:AnimalSize;position:Point;target?:Point;path?:Point[];targetActivity?:'drink'|'rest'|'graze';activity:'idle'|'walk'|'drink'|'rest'|'graze'|'carried';energy:number;bond:number;bornAt:number;activityUntil:number;lastBreedAttemptDay?:string};
-export type FarmEgg={id:string;source:'shop'|'bred';species:Species;sex:Sex;size:AnimalSize;location:'bag'|'ground';position?:Point;boughtAt:number;placedAt?:number;readyAt?:number;parents?:[string,string]};
+export type MinimalAnimal={id:string;name:string;species:Species;sex:Sex;size:AnimalSize;growth?:AnimalGrowthProfile;growthAgeMs?:number;position:Point;target?:Point;path?:Point[];targetActivity?:'drink'|'rest'|'graze';activity:'idle'|'walk'|'drink'|'rest'|'graze'|'carried';energy:number;bond:number;bornAt:number;activityUntil:number;lastBreedAttemptDay?:string};
+export type FarmEgg={id:string;source:'shop'|'bred';species:Species;sex:Sex;size:AnimalSize;growth?:AnimalGrowthProfile;location:'bag'|'ground';position?:Point;boughtAt:number;placedAt?:number;readyAt?:number;parents?:[string,string]};
 /** Kept as an empty compatibility surface for older render consumers; V12 never produces gifts. */
 export type Gift={id:string;kind:'wool'|'flower'|'pebble';location:'ground'|'bag'|'display';createdAt:number;animalId:string;rare:boolean};
 export type WolfEvent={startedAt:number;endsAt:number;helped:boolean};
@@ -20,7 +23,7 @@ export type MinimalCommand=
  |{type:'guardian';guardian:GuardianKind}|{type:'wolf'}|{type:'help'};
 export type MinimalReply={state:MinimalState;accepted:boolean;message:string};
 export const MINIMAL_STORAGE_KEY='dreamina-egg-farm-v2';
-export const MINIMAL_RULES={min:-3,max:6,welcomeCoins:120,eggCost:30,firstHatchMs:10_000,hatchMs:15_000,adultMs:60_000,maxAnimals:16,expandCost:40,convertCost:20,breedChance:.35,wolfMs:18_000,wolfIntervalMs:240_000} as const;
+export const MINIMAL_RULES={min:-3,max:6,welcomeCoins:120,eggCost:30,firstHatchMs:10_000,hatchMs:15_000,adultMs:ANIMAL_ADULT_MS,stageMs:ANIMAL_STAGE_MS,maxAnimals:16,expandCost:40,convertCost:20,breedChance:.35,wolfMs:18_000,wolfIntervalMs:240_000} as const;
 export const SHOP_TILES:Point[]=[{x:0,z:0},{x:1,z:0}];
 export const SHOP_APPROACH:Point={x:1,z:1};
 export const WATER_BOWL:Point={x:0,z:1};
@@ -55,16 +58,8 @@ function pondsHaveShore(s:MinimalState):boolean{
 }
 export function nearShop(s:MinimalState):boolean{return distance(s.player,SHOP_APPROACH)<=1.2&&walkable(s,s.player);}
 export function dayKey(now:number):string{return new Date(now+8*3600000).toISOString().slice(0,10);}
-export function isAdult(a:MinimalAnimal,now:number):boolean{return now-a.bornAt>=MINIMAL_RULES.adultMs;}
+export function isAdult(a:MinimalAnimal,now:number):boolean{return animalGrowthStage(a,now)==='adult';}
 export function sellValue(a:MinimalAnimal):number{return a.size==='giant'?100:a.size==='large'?65:40;}
-// Visual growth is derived from birth time, including time away; it never rerolls size or sale value.
-export function animalScale(a:MinimalAnimal,now=Date.now()):number{
- const birth=a.size==='giant'?1.8:a.size==='large'?1.3:1;
- const adult=a.size==='giant'?2.2:a.size==='large'?1.625:1.25;
- const progress=Math.max(0,Math.min(1,(now-a.bornAt)/MINIMAL_RULES.adultMs));
- const eased=progress*progress*(3-2*progress);
- return birth+(adult-birth)*eased;
-}
 export function terrainFor(p:Point):Terrain{if((p.x===4||p.x===5)&&(p.z===2||p.z===3))return 'pond';if(p.x===4||p.x===3&&p.z>=2)return 'creek';if(p.z<=-1&&p.x>=1)return 'hill';if(p.x<=-1&&p.z>=1||p.z>=4&&p.x<3)return 'grove';return 'meadow';}
 export function createMinimalState(now:number):MinimalState{
  const time=Number.isFinite(now)?now:0,tiles:Tile[]=[];for(let x=-3;x<=6;x++)for(let z=-3;z<=6;z++)tiles.push({x,z,terrain:terrainFor({x,z}),owned:x>=0&&x<4&&z>=0&&z<4});
@@ -118,7 +113,7 @@ export function playerWalkRoute(state:MinimalState,from:Point,to:Point):Point[]|
 function moveAlong(position:Point,path:Point[],travel:number):void{while(path.length&&travel>0){const next=path[0],d=distance(position,next);if(d<.00001){path.shift();continue;}const step=Math.min(d,travel);position.x+=(next.x-position.x)*step/d;position.z+=(next.z-position.z)*step/d;travel-=step;if(step===d){position.x=next.x;position.z=next.z;path.shift();}}}
 export function canPlaceEgg(s:MinimalState,at:Point):boolean{return validPoint(at)&&walkable(s,at)&&!same(at,WATER_BOWL)&&!same(at,REST_MAT)&&!s.eggs.some(e=>e.location==='ground'&&e.position&&same(e.position,at))&&!s.animals.some(a=>a.id!==s.carriedAnimalId&&same(point(a.position),at));}
 function random(s:MinimalState,salt:number):number{let x=(Math.floor(s.createdAt/1000)^Math.imul(s.sequence+1,0x9e3779b9)^Math.imul(salt+7,0x85ebca6b))>>>0;x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;x=Math.imul(x,0x846ca68b);x^=x>>>16;return (x>>>0)/4294967296;}
-function egg(s:MinimalState,now:number,source:'shop'|'bred',species?:Species):FarmEgg{s.sequence++;const roll=random(s,2);return {id:`egg-${s.sequence}`,source,species:species??speciesList[Math.min(3,Math.floor(random(s,0)*4))],sex:random(s,1)<.5?'male':'female',size:roll<.7?'normal':roll<.95?'large':'giant',location:'bag',boughtAt:now};}
+function egg(s:MinimalState,now:number,source:'shop'|'bred',species?:Species):FarmEgg{s.sequence++;const roll=random(s,2),size:AnimalSize=roll<.7?'normal':roll<.95?'large':'giant',id=`egg-${s.sequence}`;return {id,source,species:species??speciesList[Math.min(3,Math.floor(random(s,0)*4))],sex:random(s,1)<.5?'male':'female',size,growth:createAnimalGrowth(`${s.createdAt}:${id}:${now}`,size),location:'bag',boughtAt:now};}
 function stopAnimal(a:MinimalAnimal,now:number){delete a.target;delete a.path;delete a.targetActivity;a.activity='idle';a.activityUntil=now+5000;}
 export function eligiblePairs(s:MinimalState,now:number):[string,string][]{
  if(s.breedingDay===dayKey(now)||s.animals.length+s.eggs.length>=MINIMAL_RULES.maxAnimals)return [];
@@ -160,7 +155,12 @@ function drinkDestinations(s:MinimalState):Tile[]{return s.tiles.filter(t=>walka
 function naturalActivity(terrain:Terrain):'drink'|'rest'|'graze'{return terrain==='creek'?'drink':terrain==='meadow'?'graze':'rest';}
 function startWolf(s:MinimalState,now:number){s.wolfEvent={startedAt:now,endsAt:now+MINIMAL_RULES.wolfMs,helped:false};s.notice='两只小狼在边缘探头，伙伴会照看大家。';}
 export function advanceMinimalState(input:MinimalState,now:number):MinimalState{
- const s=copy(input);if(!Number.isFinite(now)||now<s.updatedAt)return s;const gap=now-s.updatedAt,dt=Math.min(2000,Math.max(0,gap))/1000;s.updatedAt=now;s.playerSpeed=advancePlayerMotion(s.player,s.playerPath,dt,s.playerSpeed??0).speed;
+ const s=copy(input);
+ // Persist a monotone age floor, including the last known age of pre-growth saves.
+ // A backwards device clock must not make an animal smaller or take adulthood away.
+ const growthNow=Number.isFinite(now)?Math.max(now,s.updatedAt):s.updatedAt;
+ for(const a of s.animals)a.growthAgeMs=animalGrowthAgeMs(a,growthNow);
+ if(!Number.isFinite(now)||now<s.updatedAt)return s;const gap=now-s.updatedAt,dt=Math.min(2000,Math.max(0,gap))/1000;s.updatedAt=now;s.playerSpeed=advancePlayerMotion(s.player,s.playerPath,dt,s.playerSpeed??0).speed;
  for(let i=0;i<s.animals.length;i++){
   const a=s.animals[i],navigation=animalNavigation(s);if(a.id===s.carriedAnimalId){a.position={...s.player};a.activity='carried';delete a.target;delete a.path;continue;}
   if((a.activity==='drink'||a.targetActivity==='drink')&&!getDrinkSpot(s,a)){stopAnimal(a,now);continue;}
@@ -180,7 +180,7 @@ export function minimalCommand(input:MinimalState,command:MinimalCommand,now:num
  if(command.type==='emergencyEgg'){if(!nearShop(s)||s.coins>=30||s.animals.length||s.eggs.length)return reply(false,'只有金币不足且没有动物或蛋时，店主才会送一颗起步蛋');s.eggs.push(egg(s,now,'shop'));return reply(true,'店主送你一颗起步蛋，重新开始吧');}
  if(command.type==='buyEgg'){if(!nearShop(s))return reply(false,'先走到小店柜台前');if(s.coins<30)return reply(false,'惊喜蛋需要 30 金币');if(s.animals.length+s.eggs.length>=16)return reply(false,'小家暂时最多容纳 16 位伙伴和待孵的蛋');s.coins-=30;s.eggs.push(egg(s,now,'shop'));return reply(true,'拿到一颗惊喜蛋！找块空地放下吧');}
  if(command.type==='placeEgg'){const e=s.eggs.find(e=>e.id===command.eggId&&e.location==='bag');if(!e)return reply(false,'这颗蛋已经放好，或不在背包里');if(!canPlaceEgg(s,command.at))return reply(false,'找一块没有动物和蛋的已开辟空地');if(distance(s.player,command.at)>1.6)return reply(false,'走近那块空地再放下蛋');e.location='ground';e.position={...command.at};e.placedAt=now;e.readyAt=now+(s.placedEggCount===0?MINIMAL_RULES.firstHatchMs:MINIMAL_RULES.hatchMs);s.placedEggCount++;s.playerPath=[];s.playerSpeed=0;return reply(true,'蛋放好了，等它摇摇晃晃准备好');}
- if(command.type==='hatch'){const e=s.eggs.find(e=>e.id===command.eggId&&e.location==='ground');if(!e||!e.position||e.readyAt===undefined)return reply(false,'先把蛋放到地上');if(now<e.readyAt)return reply(false,'再等一小会，里面正在准备');if(distance(s.player,e.position)>1.6)return reply(false,'走近一点，看看谁要出来');const hatchSpace={...s,eggs:s.eggs.filter(x=>x!==e)},landing=s.tiles.filter(t=>canPlaceEgg(hatchSpace,t)).sort((u,v)=>distance(u,e.position!)-distance(v,e.position!))[0];if(!landing)return reply(false,'先给新伙伴腾出一块空地吧');s.sequence++;const id=`animal-${s.sequence}`,a:MinimalAnimal={id,name:SPECIES_LABELS[e.species],species:e.species,sex:e.sex,size:e.size,position:{x:landing.x,z:landing.z},activity:'idle',energy:85,bond:0,bornAt:now,activityUntil:now+8000};s.animals.push(a);s.hatchedCount++;s.eggs=s.eggs.filter(x=>x!==e);s.lastHatch={animalId:id,at:now,position:{...e.position}};if(!s.collection.includes(a.species))s.collection.push(a.species);return reply(true,`${a.size==='giant'?'哇，是巨大':a.size==='large'?'是一只大大的':'蹦出来一只'}${SPECIES_LABELS[a.species]}！`);}
+ if(command.type==='hatch'){const e=s.eggs.find(e=>e.id===command.eggId&&e.location==='ground');if(!e||!e.position||e.readyAt===undefined)return reply(false,'先把蛋放到地上');if(now<e.readyAt)return reply(false,'再等一小会，里面正在准备');if(distance(s.player,e.position)>1.6)return reply(false,'走近一点，看看谁要出来');const hatchSpace={...s,eggs:s.eggs.filter(x=>x!==e)},landing=s.tiles.filter(t=>canPlaceEgg(hatchSpace,t)).sort((u,v)=>distance(u,e.position!)-distance(v,e.position!))[0];if(!landing)return reply(false,'先给新伙伴腾出一块空地吧');s.sequence++;const id=`animal-${s.sequence}`,a:MinimalAnimal={id,name:SPECIES_LABELS[e.species],species:e.species,sex:e.sex,size:e.size,growth:e.growth??createAnimalGrowth(`${s.createdAt}:${e.id}:${e.boughtAt}`,e.size),growthAgeMs:0,position:{x:landing.x,z:landing.z},activity:'idle',energy:85,bond:0,bornAt:now,activityUntil:now+8000};s.animals.push(a);s.hatchedCount++;s.eggs=s.eggs.filter(x=>x!==e);s.lastHatch={animalId:id,at:now,position:{...e.position}};if(!s.collection.includes(a.species))s.collection.push(a.species);return reply(true,`孵出一只${SPECIES_LABELS[a.species]}幼崽，慢慢长大吧！`);}
  if(command.type==='pickup'){const a=s.animals.find(a=>a.id===command.animalId);if(!a)return reply(false,'这只小动物已经不在这里');if(s.carriedAnimalId)return reply(false,'先把头顶的小伙伴放下来');if(distance(s.player,a.position)>1.6)return reply(false,'走近一点才能举起来');stopAnimal(a,now);a.activity='carried';s.carriedAnimalId=a.id;a.position={...s.player};return reply(true,`把${a.name}举起来啦！可以带去小店，或找地方放下`);}
  if(command.type==='putdown'){const a=s.animals.find(a=>a.id===s.carriedAnimalId);if(!a)return reply(false,'现在没有举着小动物');const p=command.at??point(s.player);if(!canPlaceEgg(s,p)||distance(s.player,p)>1.6)return reply(false,'找身边一块空地放下它');a.position={...p};stopAnimal(a,now);s.carriedAnimalId=null;return reply(true,'小伙伴稳稳落地，继续自在散步');}
  if(command.type==='sellAnimal'){const a=s.animals.find(a=>a.id===s.carriedAnimalId);if(!a)return reply(false,'先把想出售的小动物举起来');if(!nearShop(s))return reply(false,'举着它走到小店柜台前');const value=sellValue(a);s.animals=s.animals.filter(x=>x!==a);s.carriedAnimalId=null;s.coins+=value;return reply(true,`小店接走了${a.name}，收到 ${value} 金币`);}
@@ -208,8 +208,8 @@ function validSave(value:unknown):value is MinimalState{
  const onOwned=(p:Point)=>freePoint(p)&&walkable(s,p),path=(v:unknown)=>Array.isArray(v)&&v.every(p=>integer(p)&&onOwned(p)),validDay=(v:unknown)=>v===null||typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v);
  if(s.playerSpeed!==undefined&&(!finite(s.playerSpeed)||s.playerSpeed<0||s.playerSpeed>MAX_PLAYER_SPEED))return false;
  if(!freePoint(s.player)||!walkable(s,s.player)||!Array.isArray(s.playerPath)||!s.playerPath.every(p=>freePoint(p)&&walkable(s,p))||!Array.isArray(s.animals)||!Array.isArray(s.eggs)||s.animals.length+s.eggs.length>16||new Set(s.animals.map(a=>a?.id)).size!==s.animals.length)return false;
- if(!s.animals.every(a=>a&&typeof a.id==='string'&&typeof a.name==='string'&&speciesList.includes(a.species)&&['male','female'].includes(a.sex)&&['normal','large','giant'].includes(a.size)&&onOwned(a.position)&&[a.bornAt,a.energy,a.bond,a.activityUntil].every(finite)&&a.energy>=0&&a.energy<=100&&a.bond>=0&&a.bond<=100&&['idle','walk','drink','rest','graze','carried'].includes(a.activity)&&(!a.lastBreedAttemptDay||validDay(a.lastBreedAttemptDay))&&(!a.targetActivity||['drink','rest','graze'].includes(a.targetActivity))&&(!a.target||integer(a.target)&&onOwned(a.target)&&path(a.path))))return false;
- if(!s.eggs.every(e=>e&&typeof e.id==='string'&&['shop','bred'].includes(e.source)&&speciesList.includes(e.species)&&['male','female'].includes(e.sex)&&['normal','large','giant'].includes(e.size)&&finite(e.boughtAt)&&(e.location==='bag'||e.location==='ground'&&!!e.position&&integer(e.position)&&onOwned(e.position)&&finite(e.placedAt)&&finite(e.readyAt)&&e.readyAt>=e.placedAt)&&(!e.parents||e.parents.length===2&&e.parents.every(v=>typeof v==='string')))||new Set(s.eggs.map(e=>e.id)).size!==s.eggs.length)return false;
+ if(!s.animals.every(a=>a&&typeof a.id==='string'&&typeof a.name==='string'&&speciesList.includes(a.species)&&['male','female'].includes(a.sex)&&['normal','large','giant'].includes(a.size)&&(a.growth===undefined||validAnimalGrowth(a.growth))&&(a.growthAgeMs===undefined||finite(a.growthAgeMs)&&a.growthAgeMs>=0&&a.growthAgeMs<=(a.growth?ANIMAL_ADULT_MS:LEGACY_ADULT_MS))&&onOwned(a.position)&&[a.bornAt,a.energy,a.bond,a.activityUntil].every(finite)&&a.energy>=0&&a.energy<=100&&a.bond>=0&&a.bond<=100&&['idle','walk','drink','rest','graze','carried'].includes(a.activity)&&(!a.lastBreedAttemptDay||validDay(a.lastBreedAttemptDay))&&(!a.targetActivity||['drink','rest','graze'].includes(a.targetActivity))&&(!a.target||integer(a.target)&&onOwned(a.target)&&path(a.path))))return false;
+ if(!s.eggs.every(e=>e&&typeof e.id==='string'&&['shop','bred'].includes(e.source)&&speciesList.includes(e.species)&&['male','female'].includes(e.sex)&&['normal','large','giant'].includes(e.size)&&(e.growth===undefined||validAnimalGrowth(e.growth))&&finite(e.boughtAt)&&(e.location==='bag'||e.location==='ground'&&!!e.position&&integer(e.position)&&onOwned(e.position)&&finite(e.placedAt)&&finite(e.readyAt)&&e.readyAt>=e.placedAt)&&(!e.parents||e.parents.length===2&&e.parents.every(v=>typeof v==='string')))||new Set(s.eggs.map(e=>e.id)).size!==s.eggs.length)return false;
  if(s.animals.some(a=>a.path?.some((p,i)=>!clearPlayerSegment(s,i?a.path![i-1]:a.position,p))))return false;
  const navigation=playerNavigation(s,s.player);if(!s.playerPath.every((p,i)=>clearPlayerSegment(navigation,i?s.playerPath[i-1]:s.player,p)))return false;
  if(s.carriedAnimalId!==null&&!s.animals.some(a=>a.id===s.carriedAnimalId&&a.activity==='carried'))return false;
