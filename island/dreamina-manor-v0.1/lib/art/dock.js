@@ -37,8 +37,9 @@ export function createDockArt({cellSize=SHARED_CELL_SIZE}={}){
 }
 
 /** Fixed rod. Working/mature variations are authored poses; caller supplies factual state. */
+export const ROD_VISUAL_SCALE=1.5;
 export function createRodStationArt(){
- const root=new THREE.Group();root.name='Art_FixedRodStation';
+ const root=new THREE.Group();root.name='Art_FixedRodStation';root.scale.setScalar(ROD_VISUAL_SCALE);root.position.z=1.36*(1-ROD_VISUAL_SCALE);
  const warmWood=new THREE.MeshStandardMaterial({color:'#926640',roughness:.57});
  const charcoal=new THREE.MeshStandardMaterial({color:'#31504A',roughness:.38});
  const metal=new THREE.MeshStandardMaterial({color:'#8D998D',roughness:.32,metalness:.45});
@@ -60,7 +61,9 @@ export function createRodStationArt(){
  const body=new THREE.Mesh(new THREE.SphereGeometry(.1,14,8),floatMat);body.scale.set(.85,1.6,.85);float.add(body);
  const cap=new THREE.Mesh(new THREE.SphereGeometry(.077,12,8),creamMat);cap.position.y=.11;cap.scale.y=.5;float.add(cap);
  const floatStem=segment(float,'FloatStem',.018,creamMat);setSegment(floatStem,v(0,.1,0),v(0,.34,0));
- const waterRing=loopMesh(.30,.013,accentMat);waterRing.name='MatureSurfacePulse';castGroup.add(waterRing);
+ const splashMat=new THREE.MeshBasicMaterial({color:'#e9ffff',transparent:true,opacity:.8,depthWrite:false});
+ const splashPool=new THREE.Group();splashPool.name='HookedWaterSplashes';castGroup.add(splashPool);const dropGeo=new THREE.SphereGeometry(.036,5,4);for(let i=0;i<12;i++){const p=new THREE.Mesh(dropGeo,splashMat);p.scale.set(.65,1.9,.65);splashPool.add(p);}
+ const waterRing=loopMesh(.30,.017,splashMat);waterRing.name='MatureSurfacePulse';castGroup.add(waterRing);
  const curve=new THREE.CubicBezierCurve3();
  const base=v(0,.59,1.36),p1=v(.035,1.55,1.9),p2=v(.17,1.95,2.65),tip=v(.25,1.62,3.44);
  let lastState='idle';
@@ -68,16 +71,17 @@ export function createRodStationArt(){
   const ready=state==='ready',active=ready||state==='working';lastState=state;
   castGroup.visible=active;matureRing.visible=ready;ring.visible=!ready;
   // Continual low-frequency tug, not an attention loop that stops after a timer.
-  const beat=reducedMotion?0:Math.max(0,Math.sin(time*TAU/3.2));
-  const pull=ready?(reducedMotion?.25:.22+.38*beat*beat):(active&&!reducedMotion?.025*Math.sin(time*1.7):0);
+  const cycle=((time%2.8)+2.8)%2.8;const beat=reducedMotion?0:cycle<1.05?Math.sin(Math.PI*cycle/1.05):0;
+  const pull=ready?(reducedMotion?.25:.24+.91*beat*beat):(active&&!reducedMotion?.025*Math.sin(time*1.7):0);
   const arrival=ready&&!reducedMotion&&readyAge>=0&&readyAge<1.2?Math.sin(Math.PI*readyAge/1.2)**2:0;
-  curve.v0.copy(base);curve.v1.copy(p1);curve.v2.copy(p2).add(v(0,-pull*.45,arrival*.04));curve.v3.copy(tip).add(v(0,-pull-arrival*.26,.12*pull));
+  curve.v0.copy(base);curve.v1.copy(p1);curve.v2.copy(p2).add(v(0,-pull*.45,arrival*.04));curve.v3.copy(tip).add(v(ready&&!reducedMotion?Math.sin(time*14)*beat*.085:0,-pull-arrival*.26,.12*pull));
   for(let i=0;i<rods.length;i++)setSegment(rods[i],curve.getPoint(i/rods.length),curve.getPoint((i+1)/rods.length));
-  float.position.set(.25+(reducedMotion?0:Math.sin(time*1.1)*.035),SEA_SURFACE_Y-GROUND_TOP_Y+.035-pull*.32-arrival*.14,3.88);
+  float.position.set(.25+(reducedMotion?0:Math.sin(time*1.1)*.035),(SEA_SURFACE_Y-GROUND_TOP_Y+.035)/ROD_VISUAL_SCALE-pull*.32-arrival*.14,3.88);
   setSegment(fishingLine,curve.v3,float.position.clone().add(v(0,.2,0)));
   body.material=ready?accentMat:floatMat;
-  waterRing.visible=ready;waterRing.position.set(float.position.x,SEA_SURFACE_Y-GROUND_TOP_Y+.025,float.position.z);
-  const pulse=reducedMotion?1:1+.65*beat+arrival*.75;waterRing.scale.setScalar(pulse);
+  waterRing.visible=ready;waterRing.position.set(float.position.x,(SEA_SURFACE_Y-GROUND_TOP_Y+.025)/ROD_VISUAL_SCALE,float.position.z);
+  splashPool.visible=ready&&!reducedMotion;const waterY=(SEA_SURFACE_Y-GROUND_TOP_Y+.03)/ROD_VISUAL_SCALE;for(let i=0;i<splashPool.children.length;i++){const p=splashPool.children[i],age=cycle-(i%4)*.065;const life=.56+(i%3)*.035;p.visible=splashPool.visible&&age>=0&&age<life;if(p.visible){const angle=i*2.39996,speed=.45+(i%3)*.17;p.position.set(float.position.x+Math.cos(angle)*speed*age,waterY+1.75*age-2.8*age*age,float.position.z+Math.sin(angle)*speed*age);}}
+  const pulse=reducedMotion?1:1+1.05*beat+arrival*.75;waterRing.scale.setScalar(pulse);
   matureRing.scale.setScalar(reducedMotion?1:1+.035*beat);
  }
  pose();

@@ -1,4 +1,8 @@
+import {actionSound} from './action-sounds.js';
 /** Waves only, preserved from the original fishing boat's procedural stereo surf. */
+export const SFX_LEVEL=1.01;
+export const softLimitSfx=value=>.70*Math.tanh(value/.70);
+export function sfxLimitCurve(){return Float32Array.from({length:4097},(_,i)=>softLimitSfx(i/2048-1));}
 export const OCEAN_MUTE_KEY = 'manor-next:ocean-muted:v1';
 
 /** Deterministic coloured noise with the original crossfaded loop seam. */
@@ -63,10 +67,10 @@ export function createOceanAudioController(options = {}) {
   let muted = false;
   try { muted = storage?.getItem(OCEAN_MUTE_KEY) === 'true'; } catch { /* Storage is optional. */ }
   let current = {muted, playing: false, needsGesture: false, unavailable: false};
-  let context = null, master = null, nodes = [], sources = [];
+  let context = null, master = null, cueMaster = null, nodes = [], sources = [];
   let requested = false, hidden = false, disposed = false, revision = 0;
   let pauseTimer = null, pendingSuspend = null;
-  const listeners = new Set();
+  const listeners = new Set();const cueSeen=new Set(),cueSources=new Set();let lastCueAt=-Infinity,pendingCue=null;const wallNow=options.now??Date.now;
 
   const snapshot = () => ({...current});
   const wantsPlayback = () => !disposed && !hidden && requested && !current.muted;
@@ -86,6 +90,7 @@ export function createOceanAudioController(options = {}) {
   function fade(value, immediate = false) {
     if (!master || !context) return;
     const gain = master.gain, now = context.currentTime;
+    if(cueMaster){const fx=cueMaster.gain;fx.cancelScheduledValues(now);const target=value>0?SFX_LEVEL:0;if(immediate)fx.setValueAtTime(target,now);else fx.setTargetAtTime(target,now,target>0?.008:.025);}
     gain.cancelScheduledValues(now);
     // Starting from the computed gain preserves continuity when a fade reverses.
     if (immediate) gain.setValueAtTime(value, now);
@@ -94,10 +99,10 @@ export function createOceanAudioController(options = {}) {
   function releaseGraph() {
     const previous = context;
     if (previous) previous.onstatechange = null;
-    context = null; master = null; pendingSuspend = null;
+    context = null; master = null; cueMaster = null; pendingSuspend = null;
     for (const source of sources) { try { source.stop(); } catch { /* May not have started. */ } }
     for (const node of nodes) { try { node.disconnect(); } catch { /* Already disconnected. */ } }
-    sources = []; nodes = [];
+    for(const source of cueSources){try{source.stop();source.disconnect();}catch{}}cueSources.clear();sources = []; nodes = [];
     try { if (previous?.state !== 'closed') void previous?.close().catch(() => {}); } catch { /* Already released. */ }
   }
   function buildGraph(ctx) {
@@ -107,6 +112,7 @@ export function createOceanAudioController(options = {}) {
     const buffer = ctx.createBuffer(2, channels[0].length, 22050);
     channels.forEach((data, channel) => buffer.getChannelData(channel).set(data));
     master = track(ctx.createGain()); master.gain.value = 0; master.connect(ctx.destination);
+    cueMaster=track(ctx.createGain());cueMaster.gain.value=0;const limiter=track(ctx.createWaveShaper());limiter.curve=sfxLimitCurve();limiter.oversample="2x";cueMaster.connect(limiter);limiter.connect(ctx.destination);
     // Exact original two-layer parameters: independent slow swells, quiet foam.
     for (const layer of [
       {high: 85, low: 950, level: .3575, swell: .208, rate: .076, offset: 0},
@@ -138,7 +144,7 @@ export function createOceanAudioController(options = {}) {
     catch { settled(); }
   }
   function pause(immediate = false) {
-    const token = ++revision;
+    const token = ++revision;pendingCue=null;
     clearPause(); fade(0, immediate); update({playing: false, needsGesture: false});
     if (!context) return;
     if (immediate) suspend();
@@ -162,7 +168,7 @@ export function createOceanAudioController(options = {}) {
           if (ctx.state !== 'running') {
             update({playing: false, needsGesture: wantsPlayback() && !pendingSuspend});
           } else if (wantsPlayback()) {
-            fade(.18); update({playing: true, needsGesture: false, unavailable: false});
+            fade(.18); update({playing: true, needsGesture: false, unavailable: false});flushCue();
           } else {
             fade(0, true); update({playing: false, needsGesture: false}); suspend();
           }
@@ -190,7 +196,7 @@ export function createOceanAudioController(options = {}) {
         if (ctx.state !== 'running') {
           update({playing: false, needsGesture: !pendingSuspend}); return;
         }
-        fade(.18); update({playing: true, needsGesture: false, unavailable: false});
+        fade(.18); update({playing: true, needsGesture: false, unavailable: false});flushCue();
       }, rejected);
     } catch { rejected(); }
   }
@@ -213,7 +219,7 @@ export function createOceanAudioController(options = {}) {
   }
   function dispose() {
     if (disposed) return;
-    disposed = true; revision++; clearPause(); fade(0, true);
+    disposed = true; pendingCue=null;revision++; clearPause(); fade(0, true);
     current = {...current, playing: false, needsGesture: false};
     listeners.clear(); releaseGraph();
   }
@@ -223,10 +229,26 @@ export function createOceanAudioController(options = {}) {
     if (current.muted || current.playing) toggleMute();
     else startFromGesture();
   }
+  function renderCue(kind){
+    if(!context||!cueMaster||!wantsPlayback()||context.state!=='running'||cueSources.size>=3||context.currentTime-lastCueAt<.055)return false;
+    lastCueAt=context.currentTime;const data=actionSound(kind),buffer=context.createBuffer(1,data.length,22050);buffer.getChannelData(0).set(data);
+    const source=context.createBufferSource();source.buffer=buffer;source.connect(cueMaster);cueSources.add(source);source.onended=()=>{cueSources.delete(source);source.disconnect();};source.start();return true;
+  }
+  function flushCue(){const cue=pendingCue;pendingCue=null;if(cue&&wallNow()-cue.at<=1200)renderCue(cue.kind);}
+  function playCue(kind,id){
+    if(id&&cueSeen.has(id))return false;
+    if(!context||!master||!wantsPlayback())return false;
+    if(id){cueSeen.add(id);if(cueSeen.size>512)cueSeen.delete(cueSeen.values().next().value);}
+    // A gesture can start resume() before it resolves. Keep only the latest short
+    // local feedback during that bounded unlock, not a backlog or future ACK cue.
+    if(context.state!=='running'){pendingCue={kind,at:wallNow()};return true;}
+    return renderCue(kind);
+  }
   return {
     get status() { return snapshot(); },
     get state() { return snapshot(); },
     startFromGesture, toggleMute, togglePlayback, setHidden, dispose,
+    playCue,
     subscribe(listener) {
       if (disposed) return () => {};
       listeners.add(listener); notify(listener);

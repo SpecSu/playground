@@ -1,5 +1,5 @@
 # Dependencies
-/node_modules/
+/node_modules
 /.pnp
 .pnp.*
 # Keep authored Yarn tooling if the project adopts Yarn.
@@ -59,3 +59,8 @@ yarn-error.log*
 
 /public/qa-responsive.html
 /public/qa-fish-art.html
+
+/public/qa-v19.html
+/public/qa-v17.html
+
+/public/qa-audio-resume.html

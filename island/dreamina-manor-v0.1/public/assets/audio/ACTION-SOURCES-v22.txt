@@ -1,0 +1,9 @@
+Three recorded action sounds, all CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/).
+Wood knock and cloth bag: Kenney Vleugels, RPG Audio, chop.ogg / dropLeather.ogg / cloth4.ogg.
+Official source: https://kenney.nl/assets/rpg-audio
+License also included as Kenney-RPG-Audio-CC0.txt.
+Bait plop: rubberduck, 40 CC0 water splash slime SFX, splash_09.ogg.
+Official source: https://opengameart.org/content/40-cc0-water-splash-slime-sfx
+Original archive: https://opengameart.org/sites/default/files/water-splash-slime-sfx.zip
+Adaptations: short fades, low-pass filtering, gentle pitch lowering, mono 22050Hz signed16 PCM and bounded sample level; cloth bag combines dropLeather and cloth4. No change to app master/SFX/ocean buses.
+WAV files and equivalent inline PCM are included; runtime uses preloaded PCM to avoid first-play network and OGG decoding dependencies.

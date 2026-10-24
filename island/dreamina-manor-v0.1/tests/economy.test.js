@@ -1,8 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {ECONOMY,priceItem} from '../lib/game/economy.js';import {CATALOGUE,SPECIES_BY_ID} from '../lib/game/catalogue.js';import {rollProduct} from '../lib/game/random.js';
-test('ten distinct plants and twenty original fish, two plants / four fish each tier',()=>{
- assert.equal(CATALOGUE.length,30);assert.equal(new Set(CATALOGUE.map(s=>s.id)).size,30);
- for(const kind of ['plant','fish'])for(let tier=1;tier<=5;tier++)assert.equal(CATALOGUE.filter(s=>s.kind===kind&&s.tier===tier).length,kind==='plant'?2:4);
+test('twenty distinct plants and twenty original fish, four species each tier',()=>{
+ assert.equal(CATALOGUE.length,40);assert.equal(new Set(CATALOGUE.map(s=>s.id)).size,40);
+ for(const kind of ['plant','fish'])for(let tier=1;tier<=5;tier++)assert.equal(CATALOGUE.filter(s=>s.kind===kind&&s.tier===tier).length,4);
 });
 test('every legal draw is one product, deterministic across refresh, no downgrade',()=>{
  for(let tier=1;tier<=5;tier++)for(let seed=0;seed<600;seed++){

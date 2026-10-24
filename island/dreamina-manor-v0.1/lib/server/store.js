@@ -1,11 +1,19 @@
 import {migrateFishHousing} from '../game/fish-housing.js';
 import {isDemoUid} from '../game/demo-catalogue.js';
-import {createDemoGame} from './demo-games.js';
+import {createDemoGame,createDemoGameV2,DEMO_LAYOUT_VERSION} from './demo-games.js';
 import {createGame,GameError} from '../game/state.js';
 /** Same UID is deliberately a demo identity, not a credential or secure account. */
 export class GameStore{
  constructor(db){this.db=db;}
- async ensure(uid,now){const existing=await this.read(uid);if(existing)return this.migrateHousing(existing,now);await this.db.prepare('INSERT INTO manor_games(uid,revision,state_json,mutation_id,updated_at) VALUES (?,0,?,?,?) ON CONFLICT(uid) DO NOTHING').bind(uid,JSON.stringify(isDemoUid(uid)?createDemoGame(uid,now):createGame(uid,now)),'',now).run();return this.migrateHousing(await this.read(uid),now);}
+ async ensure(uid,now){const existing=await this.read(uid);if(existing)return this.migrateHousing(await this.migrateDemo(existing,now),now);await this.db.prepare('INSERT INTO manor_games(uid,revision,state_json,mutation_id,updated_at) VALUES (?,0,?,?,?) ON CONFLICT(uid) DO NOTHING').bind(uid,JSON.stringify(isDemoUid(uid)?createDemoGame(uid,now):createGame(uid,now)),'',now).run();return this.migrateHousing(await this.migrateDemo(await this.read(uid),now),now);}
+ async migrateDemo(game,now){
+  for(let attempt=0;attempt<6;attempt++){
+   if(!isDemoUid(game.ownerUid)||game.demo!==true||(game.demoLayoutVersion??1)>=DEMO_LAYOUT_VERSION)return game;
+   const next={...createDemoGameV2(game.ownerUid,now),revision:game.revision+1,createdAt:game.createdAt,activity:structuredClone(game.activity??[])};
+   if(await this.commit(game.ownerUid,game.revision,next,'demo-layout-v2','demo-layout-v2',{type:'demo-layout-v2',previous:game},now))return next;
+   game=await this.read(game.ownerUid);
+  }throw new GameError('BUSY','正在更新小岛，再试一下');
+ }
  async migrateHousing(game,now){
   for(let attempt=0;attempt<6;attempt++){
    const change=migrateFishHousing(game,now);if(!change)return game;

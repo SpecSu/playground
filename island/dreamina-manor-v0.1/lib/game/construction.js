@@ -7,8 +7,7 @@ export function constructionView(original,now){const pending=original.constructi
 export function startConstruction(s,c,context,applyImmediate,fail){
  if(!['land','dock','tank'].includes(c.kind)||!Array.isArray(c.cells)||!c.cells.length||c.cells.length>32||c.cells.some(p=>!validCell(p))||new Set(c.cells.map(cellKey)).size!==c.cells.length)fail('BAD_BUILD','重新选一下要建的位置');
  const occupied=reservedCells(s);if(c.cells.some(p=>occupied.some(x=>same(x,p))))fail('BUILDING','这里还在建，等一会儿吧');
- if(c.kind==='tank'&&(s.constructions??[]).some(x=>x.kind==='tank'))fail('BUILDING','鱼缸还在建，等一会儿吧');
- let shadow={...structuredClone(s),constructions:[]};const cells=c.cells.map(p=>({...p}));
+ let shadow={...structuredClone(s),constructions:[],...(c.kind==='tank'?{tank:[...s.tank,...reservedCells(s,'tank')]}:{})};const cells=c.cells.map(p=>({...p}));
  if(c.kind==='land'){
   const left=[...cells];while(left.length){const index=left.findIndex(p=>shadow.land.some(x=>Math.abs(x.x-p.x)+Math.abs(x.z-p.z)===1));if(index<0)fail('NOT_ADJACENT','选中的地块要连着小岛');const cell=left.splice(index,1)[0];shadow=applyImmediate(shadow,{type:'expand-land',cell},context).state;}
  }else if(c.kind==='dock'){if(cells.length!==1)fail('BAD_BUILD','每次接一段码头');shadow=applyImmediate(shadow,{type:'build-dock',cell:cells[0]},context).state;

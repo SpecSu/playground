@@ -79,6 +79,7 @@ class FakeAudioContext {
   createBufferSource() { const node = new AudioNode(); this.sources.push(node); return node; }
   createGain() { const node = Object.assign(new AudioNode(), {gain: new AudioParam()}); this.gains.push(node); return node; }
   createBiquadFilter() { const node = Object.assign(new AudioNode(), {frequency: new AudioParam(), Q: new AudioParam()}); this.filters.push(node); return node; }
+  createWaveShaper() { return new AudioNode(); }
   createOscillator() { const node = Object.assign(new AudioNode(), {frequency: new AudioParam()}); this.oscillators.push(node); return node; }
   transition(state) { this.state = state; this.onstatechange?.(); }
   async resume() {
@@ -146,16 +147,16 @@ test('one waves-only graph preserves both legacy layers, routing, offsets and qu
   assert.deepEqual(h.ctx.filters.map(node => [node.type, node.frequency.value, node.Q.value]), [
     ['highpass', 85, .5], ['lowpass', 950, .5], ['highpass', 620, .5], ['lowpass', 2300, .5],
   ]);
-  assert.deepEqual(h.ctx.gains.map(node => node.gain.value), [.18, .3575, .208, .06175, .052]);
+  assert.deepEqual(h.ctx.gains.filter((_,i)=>i!==1).map(node => node.gain.value), [.18, .3575, .208, .06175, .052]);
   assert.deepEqual(h.ctx.oscillators.map(node => [node.type, node.frequency.value]), [['sine', .076], ['sine', .057]]);
   assert.deepEqual(h.ctx.gains[0].connections, [h.ctx.destination]);
   for (let i = 0; i < 2; i++) {
     assert.deepEqual(h.ctx.sources[i].connections, [h.ctx.filters[i * 2]]);
     assert.deepEqual(h.ctx.filters[i * 2].connections, [h.ctx.filters[i * 2 + 1]]);
-    assert.deepEqual(h.ctx.filters[i * 2 + 1].connections, [h.ctx.gains[i * 2 + 1]]);
-    assert.deepEqual(h.ctx.gains[i * 2 + 1].connections, [h.ctx.gains[0]]);
-    assert.deepEqual(h.ctx.oscillators[i].connections, [h.ctx.gains[i * 2 + 2]]);
-    assert.deepEqual(h.ctx.gains[i * 2 + 2].connections, [h.ctx.gains[i * 2 + 1].gain]);
+    assert.deepEqual(h.ctx.filters[i * 2 + 1].connections, [h.ctx.gains[i * 2 + 2]]);
+    assert.deepEqual(h.ctx.gains[i * 2 + 2].connections, [h.ctx.gains[0]]);
+    assert.deepEqual(h.ctx.oscillators[i].connections, [h.ctx.gains[i * 2 + 3]]);
+    assert.deepEqual(h.ctx.gains[i * 2 + 3].connections, [h.ctx.gains[i * 2 + 2].gain]);
   }
   assert.ok(h.ctx.gains[0].gain.events.some(event => event[0] === 'target' && event[1] === .18 && event[3] === .35));
   h.audio.startFromGesture(); h.audio.startFromGesture(); await flush();
@@ -338,3 +339,20 @@ test('dispose is idempotent, closes/stops the whole graph, clears timers and ign
 
 test('saved mute is published to UI at construction, before any state change',()=>{const h=setup({muted:true});assert.equal(h.statuses[0]?.muted,true);assert.equal(h.created(),0);h.audio.dispose();});
 test('playback button opens saved mute, mutes running gain and reopens exactly once',async()=>{const h=setup({muted:true});assert.equal(typeof h.audio.togglePlayback,'function');h.audio.togglePlayback();await flush();assert.equal(h.audio.status.playing,true);assert.equal(h.ctx.gains[0].gain.value,.18);h.audio.togglePlayback();await h.fireTimers();assert.equal(h.ctx.gains[0].gain.value,0);assert.equal(h.ctx.state,'suspended');assert.equal(h.storage.get(ocean.OCEAN_MUTE_KEY),'true');h.audio.togglePlayback();await flush();assert.equal(h.audio.status.playing,true);assert.equal(h.ctx.sources.length,2);h.audio.dispose();});
+
+test('action cues unlock only with gesture, respect mute/background, dedupe opID and cap voices',async()=>{const ctx=new FakeAudioContext(),a=ocean.createOceanAudioController({createContext:()=>ctx,storage:{getItem:()=>null,setItem(){}}});assert.equal(a.playCue('buy','before'),false);a.startFromGesture();await Promise.resolve();assert.equal(a.playCue('buy','op-1'),true);ctx.currentTime+=.1;assert.equal(a.playCue('buy','op-1'),false);assert.equal(a.playCue('sell','op-2'),true);ctx.currentTime+=.1;assert.equal(a.playCue('plant','op-3'),true);ctx.currentTime+=.1;assert.equal(a.playCue('catch','op-4'),false);ctx.sources.at(-1).onended();assert.equal(a.playCue('catch','op-5'),true);a.toggleMute();ctx.currentTime+=.1;assert.equal(a.playCue('bag','muted'),false);a.setHidden(true);assert.equal(a.playCue('shop','hidden'),false);a.dispose();assert.ok(ctx.sources.every(s=>s.stopped||s.disconnected));});
+test('SFX have an independent audible bus and bounded mix without raising surf',async()=>{const h=setup();h.audio.startFromGesture();await flush();assert.equal(ocean.SFX_LEVEL,1.01);assert.equal(h.ctx.gains[0].gain.value,.18);assert.equal(h.ctx.gains[1].gain.value,1.01);assert.equal(h.audio.playCue('sell','audible'),true);assert.equal(h.ctx.sources.at(-1).connections[0],h.ctx.gains[1]);h.audio.toggleMute();assert.equal(h.ctx.gains[0].gain.value,0);assert.equal(h.ctx.gains[1].gain.value,0);h.audio.dispose();});
+
+test('a local sale during gesture resume plays once after unlock, not silently discarded', async()=>{
+ const h=setup(),gate=deferred();h.ctx.resumeGate=gate.promise;
+ h.audio.startFromGesture();assert.equal(h.audio.playCue('sell','sale-resume'),true);
+ assert.equal(h.ctx.sources.length,2);assert.equal(h.audio.playCue('sell','sale-resume'),false);
+ gate.resolve();await flush();assert.equal(h.ctx.sources.length,3);
+ assert.ok(h.ctx.sources.at(-1).buffer.getChannelData(0).some(x=>Math.abs(x)>.01));
+ assert.equal(h.audio.playCue('sell','sale-resume'),false);h.audio.dispose();
+});
+test('queued first-resume cue is discarded on mute or background, never surprises later',async()=>{
+ for(const pause of [a=>a.toggleMute(),a=>a.setHidden(true)]){
+  const h=setup(),gate=deferred();h.ctx.resumeGate=gate.promise;h.audio.startFromGesture();h.audio.playCue('sell','sale-hidden');pause(h.audio);gate.resolve();await flush();assert.equal(h.ctx.sources.length,2);h.audio.dispose();
+ }
+});

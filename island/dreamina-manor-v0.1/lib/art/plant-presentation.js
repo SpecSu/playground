@@ -1,11 +1,13 @@
+import{plantVisualMultiplier}from'./plant-tier-scale.js';
 import * as THREE from 'three';
+import {CHARACTER_PLANT_VISUAL_SCALE} from './physical-contract.js';
 
 /** Art-owned animation and appearance only. Server progress / final size are inputs. */
-export function createPlantPresentation(gltf,{instanceScale=1,variant='normal'}={}) {
+export function createPlantPresentation(gltf,{instanceScale=1,variant='normal',speciesId=null}={}) {
   // Botanical GLBs use node animation, not skinning. Clone nodes per instance; geometry stays cached.
   const root=gltf.scene.clone(true);
   if(!Number.isFinite(instanceScale)||instanceScale<=0)throw new Error('Invalid physical plant scale');
-  root.scale.setScalar(instanceScale);
+  root.scale.setScalar(instanceScale*CHARACTER_PLANT_VISUAL_SCALE*plantVisualMultiplier(speciesId));
   root.userData.artPhysicalScale=instanceScale;
   const mixer=new THREE.AnimationMixer(root);
   const actions=(gltf.animations||[]).map(clip=>{

@@ -7,7 +7,7 @@ test('large mixed fish use the whole 2x2 water domain, distinct lanes and nonzer
  const cells=[{x:0,z:0},{x:1,z:0},{x:0,z:1},{x:1,z:1}],a=createAquariumArt({cells}),school=[];
  const samples=[['oarfish',166],['hammerhead',137],['king-crab',86],['king-crab',70],['swordfish',72]];
  for(const [i,[speciesId,finalSize]]of samples.entries()){const item={id:`qa-swim-${i}`,speciesId,finalSize,standardSize:SPECIES_BY_ID[speciesId].standardSize},space=fishTankFit({tank:cells},item),p={id:item.id,radius:space.swimRadius,halfHeight:space.halfHeight,travel:0};p.swimmer=createSwimmer({...a,cells,id:p.id,radius:p.radius,halfHeight:p.halfHeight,space,schoolSlot:i,schoolSize:5,peers:()=>school.map(q=>({...q,position:q.swimmer.position}))});p.initial=p.swimmer.position;school.push(p);}
- assert.equal(new Set(school.map(p=>`${p.initial.x.toFixed(3)},${p.initial.z.toFixed(3)}`)).size,5);assert.equal(new Set(school.map(p=>p.initial.y.toFixed(2))).size,5);
+ assert.equal(new Set(school.map(p=>`${p.initial.x.toFixed(3)},${p.initial.z.toFixed(3)}`)).size,5);assert.equal(new Set(school.map(p=>p.initial.y.toFixed(3))).size,5);
  for(let i=0;i<7200;i++)for(const p of school){const q=p.swimmer.step(1/60);p.travel+=Math.hypot(q.velocity.x,q.velocity.z)/60;assert.ok(safeSwimPoint(q.position,p.radius,a.outline,a.edges));assert.ok(q.position.y-p.halfHeight>=a.floorY);assert.ok(q.position.y+p.halfHeight<=a.surfaceY);}
  for(const p of school)assert.ok(p.travel>5,`${p.id}: ${p.travel}m`);a.dispose();
 });

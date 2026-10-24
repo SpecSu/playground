@@ -5,7 +5,7 @@ import schemaSql from '../../../drizzle/0000_lumpy_slipstream.sql?raw';
 import friendsSql from '../../../drizzle/0001_dizzy_jack_flag.sql?raw';
 import {observeStore,serviceFailure} from '../../../lib/server/diagnostics.js';
 let localSchema:Promise<unknown>|null=null;
-async function store(){if(!env.DB)throw new Error('Database binding unavailable');const db=env.DB;if(import.meta.env.DEV){localSchema??=db.batch((schemaSql+'--> statement-breakpoint'+friendsSql).split('--> statement-breakpoint').map((s:string)=>s.trim()).filter(Boolean).map((s:string)=>db.prepare(s.replace('CREATE TABLE ','CREATE TABLE IF NOT EXISTS ').replace('CREATE INDEX ','CREATE INDEX IF NOT EXISTS '))));await localSchema;}return new SocialStore(db);}
+async function store(){if(!env.DB)throw new Error('Database binding unavailable');const db=env.DB;if(import.meta.env.DEV){localSchema??=db.batch((schemaSql+'--> statement-breakpoint'+friendsSql).split('--> statement-breakpoint').map((s:string)=>s.trim()).filter(Boolean).map((s:string)=>db.prepare(s.replace(/CREATE TABLE (?!IF NOT EXISTS )/g,'CREATE TABLE IF NOT EXISTS ').replace(/CREATE INDEX (?!IF NOT EXISTS )/g,'CREATE INDEX IF NOT EXISTS '))));await localSchema;}return new SocialStore(db);}
 const headers={'Cache-Control':'no-store'};
 type Trace={correlation:string;stage:string;failureStage?:string};
 const errorResponse=(e:any,trace:Trace)=>{if((e.status??503)>=500)console.error(JSON.stringify(serviceFailure(e,trace)));return Response.json({error:{code:e.code??'UNAVAILABLE',message:e.code?e.message:'暂时没连上，稍后再试',...(e.requiredNxN?{requiredNxN:e.requiredNxN}:{}),...(e.requiredNxM?{requiredNxM:e.requiredNxM}:{}),...(e.requiredWaterHeight?{requiredWaterHeight:e.requiredWaterHeight}:{})}},{status:e.status??503,headers});};

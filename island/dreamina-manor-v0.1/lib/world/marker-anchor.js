@@ -1,0 +1,5 @@
+import{EXOTIC_PLANT_IDS,exoticPlantMarkerHeight}from'../art/exotic-plants.js';
+import{plantVisualMultiplier}from'../art/plant-tier-scale.js';
+import {PLANT_STANDARD_METRES} from '../art/plant-sizing.js';import{PLANT_GROWTH_HEIGHTS}from'../art/plant-growth-heights.js';import{GROUND_TOP_Y,CHARACTER_PLANT_VISUAL_SCALE}from'../art/physical-contract.js';
+/** Continuous authored growth envelope, identical for projected/cold/loaded/confirmed jobs. */
+export function plantMarkerHeight(item,progress=1){if(EXOTIC_PLANT_IDS.includes(item.speciesId))return GROUND_TOP_Y+exoticPlantMarkerHeight(item.speciesId,progress,item.finalSize/item.standardSize)+.08;const p=Math.max(0,Math.min(1,Number.isFinite(progress)?progress:0)),curve=PLANT_GROWTH_HEIGHTS[item.speciesId],q=p*100,a=Math.floor(q);const h=curve?curve[a]+((curve[Math.min(100,a+1)]??curve[a])-curve[a])*(q-a):(PLANT_STANDARD_METRES[item.speciesId]??1)*(.12+.88*p);return GROUND_TOP_Y+h*(item.finalSize/item.standardSize)*CHARACTER_PLANT_VISUAL_SCALE*plantVisualMultiplier(item.speciesId)+.08;}

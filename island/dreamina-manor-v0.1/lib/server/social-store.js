@@ -1,4 +1,5 @@
 import {GameStore} from './store.js';
+import {nearestDryPosition} from '../game/grid.js';
 import {projectedPosition,GameError} from '../game/state.js';
 
 /** All effects below share the D1 batch transaction and a private mutation token.
@@ -7,9 +8,15 @@ export class SocialStore extends GameStore {
  async visit(sessionId,uid,islandUid,now,cachedIsland=null){
   const island=cachedIsland??await this.read(islandUid);if(!island)throw new GameError('NO_ISLAND','还没找到这个庄园',404);
   const old=await this.readVisit(sessionId);if(old&&old.uid!==uid)throw new GameError('SESSION_CHANGED','重新打开页面再试试');
+  if(old?.islandUid===islandUid&&island.demo&&(island.demoLayoutVersion??1)>(old.state.demoLayoutVersion??1)){
+   const state={position:nearestDryPosition(island.land,island.docks,island.tank,visitPosition(old,island,now))??island.position,pending:null,demoLayoutVersion:island.demoLayoutVersion};
+   const result=await this.db.prepare('UPDATE manor_visits SET state_json=?,revision=revision+1,updated_at=? WHERE session_id=? AND uid=? AND island_uid=? AND revision=?').bind(JSON.stringify(state),now,sessionId,uid,islandUid,old.revision).run();
+   if(!result.meta.changes)throw new GameError('BUSY','小岛刚更新，再试一下');
+   return {...state,revision:old.revision+1,islandUid};
+  }
   if(old?.islandUid===islandUid&&now-old.updatedAt<5000){const self=islandUid===uid?island:await this.read(uid);return {...old.state,position:visitPosition(old,self,now),revision:old.revision,islandUid:old.islandUid};}
   const free=island.land.find(c=>!island.tank.some(t=>t.x===c.x&&t.z===c.z))??island.land[0];
-  const initial={position:islandUid===uid?projectedPosition(island,now):{x:free.x,z:free.z+.45},pending:null};
+  const initial={...(island.demo?{demoLayoutVersion:island.demoLayoutVersion??1}:{}),position:islandUid===uid?projectedPosition(island,now):{x:free.x,z:free.z+.45},pending:null};
   // A heartbeat never reserializes state read earlier: that could erase an arriving command.
   await this.db.prepare('INSERT INTO manor_visits(session_id,uid,island_uid,revision,state_json,updated_at) VALUES (?,?,?,0,?,?) ON CONFLICT(session_id) DO UPDATE SET island_uid=excluded.island_uid,state_json=CASE WHEN manor_visits.island_uid<>excluded.island_uid THEN excluded.state_json ELSE manor_visits.state_json END,revision=CASE WHEN manor_visits.island_uid<>excluded.island_uid THEN manor_visits.revision+1 ELSE manor_visits.revision END,updated_at=excluded.updated_at WHERE manor_visits.island_uid<>excluded.island_uid OR manor_visits.updated_at<=excluded.updated_at-5000').bind(sessionId,uid,islandUid,JSON.stringify(initial),now).run();
   const visit=await this.readVisit(sessionId),self=islandUid===uid?island:await this.read(uid);return {...visit.state,position:visitPosition(visit,self,now),revision:visit.revision,islandUid:visit.islandUid};
@@ -21,7 +28,7 @@ export class SocialStore extends GameStore {
   const token=crypto.randomUUID(),next=nextGame??{...game,revision:game.revision+1,updatedAt:now};
   const results=await this.db.batch([
    this.db.prepare('UPDATE manor_games SET revision=?,state_json=?,mutation_id=?,updated_at=? WHERE uid=? AND revision=? AND EXISTS(SELECT 1 FROM manor_visits WHERE session_id=? AND uid=? AND island_uid=? AND revision=?) AND NOT EXISTS(SELECT 1 FROM manor_operations WHERE uid=? AND op_id=?)').bind(next.revision,JSON.stringify(next),token,now,game.ownerUid,game.revision,visit.sessionId,game.ownerUid,visit.islandUid,visit.revision,game.ownerUid,opId),
-   this.db.prepare('UPDATE manor_visits SET state_json=?,revision=revision+1,updated_at=? WHERE session_id=? AND EXISTS(SELECT 1 FROM manor_games WHERE uid=? AND mutation_id=?)').bind(JSON.stringify(nextVisit),now,visit.sessionId,game.ownerUid,token),
+   this.db.prepare('UPDATE manor_visits SET state_json=?,revision=revision+1,updated_at=? WHERE session_id=? AND EXISTS(SELECT 1 FROM manor_games WHERE uid=? AND mutation_id=?)').bind(JSON.stringify({...visit.state,...nextVisit}),now,visit.sessionId,game.ownerUid,token),
    this.db.prepare('INSERT INTO manor_operations(uid,op_id,request_hash,receipt_json,created_at) SELECT ?,?,?,?,? WHERE EXISTS(SELECT 1 FROM manor_games WHERE uid=? AND mutation_id=?)').bind(game.ownerUid,opId,hash,JSON.stringify(receipt),now,game.ownerUid,token),
   ]);return results.every(r=>r.meta.changes===1);
  }
@@ -33,7 +40,7 @@ export class SocialStore extends GameStore {
   const results=await this.db.batch([
    this.db.prepare('UPDATE manor_games SET revision=?,state_json=?,mutation_id=?,updated_at=? WHERE uid=? AND revision=? AND EXISTS(SELECT 1 FROM manor_games WHERE uid=? AND revision=?) AND EXISTS(SELECT 1 FROM manor_visits WHERE session_id=? AND uid=? AND island_uid=? AND revision=? AND updated_at>?) AND NOT EXISTS(SELECT 1 FROM manor_operations WHERE uid=? AND op_id=?)'+targetClause).bind(...args),
    this.db.prepare('UPDATE manor_games SET revision=?,state_json=?,mutation_id=?,updated_at=? WHERE uid=? AND EXISTS(SELECT 1 FROM manor_games WHERE uid=? AND mutation_id=?)').bind(nextOther.revision,JSON.stringify(nextOther),token,now,other.ownerUid,actor.ownerUid,token),
-   this.db.prepare('UPDATE manor_visits SET state_json=?,revision=revision+1,updated_at=? WHERE session_id=? AND EXISTS(SELECT 1 FROM manor_games WHERE uid=? AND mutation_id=?)').bind(JSON.stringify(nextVisit),now,visit.sessionId,actor.ownerUid,token),
+   this.db.prepare('UPDATE manor_visits SET state_json=?,revision=revision+1,updated_at=? WHERE session_id=? AND EXISTS(SELECT 1 FROM manor_games WHERE uid=? AND mutation_id=?)').bind(JSON.stringify({...visit.state,...nextVisit}),now,visit.sessionId,actor.ownerUid,token),
    this.db.prepare('INSERT INTO manor_operations(uid,op_id,request_hash,receipt_json,created_at) SELECT ?,?,?,?,? WHERE EXISTS(SELECT 1 FROM manor_games WHERE uid=? AND mutation_id=?) AND EXISTS(SELECT 1 FROM manor_games WHERE uid=? AND mutation_id=?)').bind(actor.ownerUid,opId,hash,JSON.stringify(receipt),now,actor.ownerUid,token,other.ownerUid,token),
   ]);return results.every(r=>r.meta.changes===1);
  }

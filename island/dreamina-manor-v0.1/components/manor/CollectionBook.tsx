@@ -1,15 +1,16 @@
 'use client';
 import {useState,useRef,useEffect} from 'react';
+import {ChevronDown} from 'lucide-react';
 import ItemThumb from './ItemThumb';
 import {CATALOGUE} from '../../lib/game/catalogue.js';
 import {TIER_LABELS} from '../../lib/game/economy.js';
-export default function CollectionBook({game}:{game:any}){
+export default function CollectionBook({game,onCollapse}:{game:any,onCollapse:()=>void}){
  const[kind,setKind]=useState('plant');const grid=useRef<HTMLDivElement>(null);useEffect(()=>{if(grid.current)grid.current.scrollTop=0;},[kind]);
  const entries=CATALOGUE.filter(s=>s.kind===kind);
  return <div className="collection-book">
-  <div className="section-label">图鉴 · {CATALOGUE.filter(s=>game?.discovered?.[s.id]).length} / 30</div>
-  <div className="collection-tabs" aria-label="图鉴类别">
-   {(['plant','fish'] as const).map(value=><button key={value} aria-pressed={kind===value} onClick={()=>setKind(value)}>{value==='plant'?'植物':'鱼'} <small>{CATALOGUE.filter(s=>s.kind===value&&game?.discovered[s.id]).length}/{value==='plant'?10:20}</small></button>)}
+  <div className="collection-tabs counted-tabs" aria-label="图鉴类别">
+   {(['plant','fish'] as const).map(value=><button key={value} aria-pressed={kind===value} onClick={()=>setKind(value)}>{value==='plant'?'植物':'鱼'} <small className="category-count">{CATALOGUE.filter(s=>s.kind===value&&game?.discovered[s.id]).length}/{CATALOGUE.filter(s=>s.kind===value).length}</small></button>)}
+   <button className="collection-collapse" aria-label="收起图鉴" onClick={onCollapse}><ChevronDown size={18}/></button>
   </div>
   <div className="collection-grid" ref={grid} aria-label={kind==='plant'?'植物图鉴':'鱼图鉴'}>
    {entries.map(s=>{

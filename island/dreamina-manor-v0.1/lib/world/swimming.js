@@ -14,19 +14,17 @@ export function swimDomain({outline,edges,radius,spacing=.30}){
  return {nodes,map,minX,maxX,minZ,maxZ};
 }
 const lane=index=>[.12,.88,.5,.31,.69][index%5];
-export function createSwimmer({id,cells,outline,edges,floorY,surfaceY,radius,halfHeight,space,schoolSlot=0,schoolSize=1,peers=()=>[],cellSize=SHARED_CELL_SIZE}){
- if(space?.restricted&&space.rectangle)return createRestrictedSwimmer({id,space,floorY,surfaceY,cellSize,schoolSlot,schoolSize});
+export function createSwimmer({id,cells,outline,edges,floorY,surfaceY,getSurfaceY=()=>surfaceY,radius,halfHeight,space,schoolSlot=0,schoolSize=1,peers=()=>[],cellSize=SHARED_CELL_SIZE}){
+ if(space?.restricted&&space.rectangle)return createRestrictedSwimmer({id,space,floorY,surfaceY,getSurfaceY,cellSize,schoolSlot,schoolSize});
  let seed=hash(id);seed=Math.imul(seed^(seed>>>16),0x7feb352d);seed=Math.imul(seed^(seed>>>15),0x846ca68b);seed=(seed^(seed>>>16))>>>0;
  const phase=seed/4294967296*Math.PI*2,random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
  const safe=p=>safeSwimPoint(p,radius,outline,edges),domain=swimDomain({outline,edges,radius}),{nodes,map}=domain;
  if(!nodes.length)throw new Error('No safe swim centre for approved fish envelope');
- const heightLow=floorY+halfHeight+.08,heightHigh=surfaceY-halfHeight-.08;if(heightLow>heightHigh)throw new Error('Approved fish exceeds aquarium water height');
- const heightRange=heightHigh-heightLow,heightCentre=schoolSize>1?heightLow+heightRange*lane(schoolSlot):heightLow+heightRange*.5;
- const bob=schoolSize>1?Math.min(.12,heightRange*.075):heightRange*.32;
+ const heightLow=floorY+halfHeight+.08;
  let position=null,yaw=0,route=[],pause=0,age=0;
- const y=()=>heightCentre+bob*Math.sin(age*.31+phase);
+ const y=()=>{const heightRange=Math.max(0,getSurfaceY()-halfHeight-.08-heightLow),heightCentre=heightLow+heightRange*(schoolSize>1?lane(schoolSlot):.5),bob=schoolSize>1?Math.min(.12,heightRange*.075):heightRange*.32;return heightCentre+bob*Math.sin(age*.31+phase);};
  const lineSafe=(a,b)=>{const n=Math.max(1,Math.ceil(Math.hypot(a.x-b.x,a.z-b.z)/.08));for(let i=0;i<=n;i++)if(!safe({x:a.x+(b.x-a.x)*i/n,z:a.z+(b.z-a.z)*i/n}))return false;return true;};
- function score(p){let separation=5;for(const other of peers()){if(other.id===id)continue;const q=other.position;separation=Math.min(separation,Math.hypot((p.x-q.x)/(radius+other.radius),(p.z-q.z)/(radius+other.radius),(y()-q.y)/(halfHeight+other.halfHeight)));}return separation+(position?Math.min(2,Math.hypot(p.x-position.x,p.z-position.z))*.35:0);}
+ function score(p){let separation=5;for(const other of peers()){if(other.id===id)continue;const q=other.position;if(!position&&Math.hypot(p.x-q.x,p.z-q.z)<.10)return -100;separation=Math.min(separation,Math.hypot((p.x-q.x)/(radius+other.radius),(p.z-q.z)/(radius+other.radius),(y()-q.y)/(halfHeight+other.halfHeight)));}return separation+(position?Math.min(2,Math.hypot(p.x-position.x,p.z-position.z))*.35:0);}
  const cx=(domain.minX+domain.maxX)/2,cz=(domain.minZ+domain.maxZ)/2,quadrant=[[-1,-1],[1,-1],[-1,1],[1,1]][Math.max(0,schoolSlot-2)%4],assigned=schoolSize>2&&schoolSlot>=2?nodes.filter(p=>(p.x-cx)*quadrant[0]>=(domain.maxX-domain.minX)*.18&&(p.z-cz)*quadrant[1]>=(domain.maxZ-domain.minZ)*.18):nodes,pool=assigned.length>=3?assigned:nodes;
  function select(){let best=null,bestScore=-Infinity;for(let i=0;i<48;i++){const p=pool[Math.floor(random()*pool.length)],v=score(p)+random()*.12;if(v>bestScore){best=p;bestScore=v;}}return {x:best.x,z:best.z};}
  position=select();
@@ -48,13 +46,13 @@ export function createSwimmer({id,cells,outline,edges,floorY,surfaceY,radius,hal
 /** In a long narrow tank, keep the actual unscaled fish in a bounded long-axis hover.
  * No impossible 180-degree turn: only a gentle finite yaw, fin motion and small water drift.
  */
-function createRestrictedSwimmer({id,space,floorY,surfaceY,cellSize,schoolSlot=0,schoolSize=1}){
+function createRestrictedSwimmer({id,space,floorY,surfaceY,getSurfaceY=()=>surfaceY,cellSize,schoolSlot=0,schoolSize=1}){
  const r=space.rectangle,phase=hash(id)/4294967296*Math.PI*2,axis=r.rotated?Math.PI/2:0,base=axis+(hash(id+'facing')%2?Math.PI:0);
  const xHalf=r.width*cellSize/2-TANK_OUTER_EDGE_INSET-.0175,zHalf=r.depth*cellSize/2-TANK_OUTER_EDGE_INSET-.0175;
  const ex=r.rotated?space.turnZ:space.turnX,ez=r.rotated?space.turnX:space.turnZ;
  const sx=xHalf-ex-.035,sz=zHalf-ez-.035;if(sx<0||sz<0)throw new Error('No safe rectangular swim envelope');
- const low=floorY+space.halfHeight+.08,high=surfaceY-space.halfHeight-.08;if(low>high)throw new Error('Approved fish exceeds aquarium water height');
+ const low=floorY+space.halfHeight+.08;
  const cx=(r.x+(r.width-1)/2)*cellSize,cz=(r.z+(r.depth-1)/2)*cellSize,ax=Math.min(r.rotated?.07:.40,sx*.7),az=Math.min(r.rotated?.40:.07,sz*.7);
- let age=0;const mid=schoolSize>1?lane(schoolSlot):.5,bob=schoolSize>1?.045:.42;const pose=()=>({x:cx+ax*Math.sin(age*.35+phase),z:cz+az*Math.sin(age*.31+phase*.7),y:low+(high-low)*(mid+bob*Math.sin(age*.27+phase))});
+ let age=0;const mid=schoolSize>1?lane(schoolSlot):.5,bob=schoolSize>1?.045:.42;const pose=()=>({x:cx+ax*Math.sin(age*.35+phase),z:cz+az*Math.sin(age*.31+phase*.7),y:low+Math.max(0,getSurfaceY()-space.halfHeight-.08-low)*(mid+bob*Math.sin(age*.27+phase))});
  return {get position(){return pose();},get yaw(){return base+.10*Math.sin(age*.17+phase);},step(dt){const before=pose();age+=dt;const after=pose();return {position:after,yaw:this.yaw,velocity:{x:(after.x-before.x)/dt,z:(after.z-before.z)/dt}};}};
 }

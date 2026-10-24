@@ -53,12 +53,15 @@ export function createAquariumArt({cells,cellSize=SHARED_CELL_SIZE,groundY=GROUN
  if(!cells?.length)throw new Error('Missing aquarium cells');
  const root=new THREE.Group();root.name='Art_ContinuousAboveGroundAquarium';
  const outline=aquariumOutline(cells,cellSize),shape=shapesFromOutline(outline);
- const floorY=groundY+(TANK_FLOOR_Y-GROUND_TOP_Y),surfaceY=floorY+waterHeight;
+ const floorY=groundY+(TANK_FLOOR_Y-GROUND_TOP_Y),initialHeight=waterHeight;let surfaceY=floorY+waterHeight;
  const baseMaterial=new THREE.MeshStandardMaterial({color:'#D8D0B8',roughness:.67});
- const floorMaterial=new THREE.MeshStandardMaterial({color:'#AFCEC2',roughness:.61});
- const glassMaterial=new THREE.MeshPhysicalMaterial({color:'#C3DFDD',roughness:.16,metalness:0,transparent:true,opacity:.15,depthWrite:false,side:THREE.DoubleSide});
+ const floorMaterial=new THREE.MeshStandardMaterial({color:'#8FBEB3',roughness:.61});
+ const glassMaterial=new THREE.MeshPhysicalMaterial({color:'#92D3D6',roughness:.12,metalness:0,transparent:true,opacity:.20,depthWrite:false,side:THREE.DoubleSide});
  const rimMaterial=new THREE.MeshStandardMaterial({color:'#DDE4D4',roughness:.40});
- const surfaceMaterial=new THREE.MeshPhysicalMaterial({color:'#65B6BA',roughness:.28,transparent:true,opacity:.12,depthWrite:false,side:THREE.DoubleSide});
+ const waterUniforms={uTime:{value:0}};
+ const waterVertex='varying vec3 vWorld;void main(){vec4 p=modelMatrix*vec4(position,1.);vWorld=p.xyz;gl_Position=projectionMatrix*viewMatrix*p;}';
+ const surfaceMaterial=new THREE.ShaderMaterial({uniforms:waterUniforms,transparent:true,depthWrite:false,side:THREE.DoubleSide,vertexShader:waterVertex,fragmentShader:`varying vec3 vWorld;uniform float uTime;void main(){vec2 p=vWorld.xz;float a=sin(p.x*2.2+p.y*1.5+uTime*.72),b=sin(p.y*2.8-p.x*.8-uTime*.53);vec3 n=normalize(vec3(a*.045,1.,b*.045));float f=pow(1.-abs(dot(n,normalize(cameraPosition-vWorld))),2.);float ribbon=pow(max(0.,sin(p.x*3.1+p.y*2.2+uTime*.45)),18.);vec3 color=mix(vec3(.18,.58,.64),vec3(.73,.91,.92),f*.7+ribbon*.24);gl_FragColor=vec4(color,.14+f*.19+ribbon*.055);\n#include <tonemapping_fragment>
+#include <colorspace_fragment>}`});
  // A soft, low-contrast grounding wash extends 12 cm beyond the thin plinth.
  // It is not a cutout: the original turf and its full cell thickness stay intact.
  const outer=aquariumOutline(cells,cellSize,TANK_OUTER_EDGE_INSET-.12),cp=[],cu=[],ci=[];
@@ -71,6 +74,8 @@ export function createAquariumArt({cells,cellSize=SHARED_CELL_SIZE,groundY=GROUN
  const base=new THREE.Mesh(baseGeometry,baseMaterial);base.name='ThinAboveGroundPlinth';base.position.y=groundY+.015;base.receiveShadow=true;base.castShadow=true;root.add(base);
  const floorGeometry=new THREE.ShapeGeometry(shape);floorGeometry.rotateX(-Math.PI/2);
  const floor=new THREE.Mesh(floorGeometry,floorMaterial);floor.name='ReadableBlueGreenFloor';floor.position.y=floorY;floor.receiveShadow=true;root.add(floor);
+ const causticMaterial=new THREE.ShaderMaterial({uniforms:waterUniforms,transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,vertexShader:waterVertex,fragmentShader:`varying vec3 vWorld;uniform float uTime;void main(){vec2 p=vWorld.xz;float w=sin(p.x*4.1+sin(p.y*2.3+uTime*.4))+sin(p.y*4.4+cos(p.x*1.8-uTime*.3));float c=pow(max(0.,1.-abs(w)*1.7),9.);gl_FragColor=vec4(.47,.86,.76,c*.13);}`});
+ const caustics=new THREE.Mesh(floorGeometry.clone(),causticMaterial);caustics.name='WaterFloorCaustics';caustics.position.y=floorY+.008;caustics.renderOrder=1;root.add(caustics);
  const water=new THREE.Mesh(floorGeometry.clone(),surfaceMaterial);water.name='ContinuousWaterSurface';water.position.y=surfaceY;water.renderOrder=3;root.add(water);
  const edges=[];
  for(const loop of outline)for(let i=0;i<loop.points.length;i++){
@@ -83,7 +88,7 @@ export function createAquariumArt({cells,cellSize=SHARED_CELL_SIZE,groundY=GROUN
  }
  root.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(root);
  root.userData={artWorldRoot:true,floorY,surfaceY,waterHeight,landCutout:false,outline,sharedGlassCount:0};
- return {root,bounds,floorY,surfaceY,waterHeight,outline,edges,dispose(){
+ return {root,bounds,floorY,get surfaceY(){return surfaceY},get waterHeight(){return waterHeight},outline,edges,update(time,reducedMotion=false){waterUniforms.uTime.value=reducedMotion?0:time;},setWaterHeight(value){waterHeight=Math.max(.1,value);surfaceY=floorY+waterHeight;water.position.y=surfaceY;for(const mesh of root.children){if(mesh.name==='OuterGlassOnly'){mesh.scale.y=(waterHeight+.08)/(initialHeight+.08);mesh.position.y=floorY+(waterHeight+.08)/2;}else if(mesh.name==='ThinTopRim')mesh.position.y=surfaceY+.08;}Object.assign(root.userData,{surfaceY,waterHeight});root.updateMatrixWorld(true);bounds.setFromObject(root);},dispose(){
   const geos=new Set(),mats=new Set();root.traverse(n=>{if(n.isMesh){geos.add(n.geometry);mats.add(n.material);}});geos.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());
  }};
 }

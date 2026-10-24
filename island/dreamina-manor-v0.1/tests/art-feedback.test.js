@@ -24,7 +24,7 @@ test('one exhibition ruler enlarges small fish while preserving within-species r
 test('all twenty maxima stay within the true required rectangle in both orientations for120s',()=>{
  for(const [id,standard] of Object.entries(FISH_STANDARD_SIZES_CM))for(const rotated of [false,true]){
   const finalSize=standard*1.56,req=fishSpaceRequirement({speciesId:id,standardSize:standard,finalSize}),n=rotated?req.requiredM:req.requiredN,m=rotated?req.requiredN:req.requiredM;
-  const cells=Array.from({length:n*m},(_,i)=>({x:i%n,z:Math.floor(i/n)})),tank=createAquariumArt({cells}),space=fishTankFit({tank:cells},{speciesId:id,standardSize:standard,finalSize});
+  const cells=Array.from({length:n*m},(_,i)=>({x:i%n,z:Math.floor(i/n)})),space=fishTankFit({tank:cells},{speciesId:id,standardSize:standard,finalSize}),tank=createAquariumArt({cells,waterHeight:space.waterHeight});
   const p=createFishPresentation({speciesId:id,lengthCm:finalSize,worldLength:fishWorldLength(finalSize,standard),instanceId:'audit-'+id});
   const swimmer=createSwimmer({id:'audit-'+id,cells,outline:tank.outline,edges:tank.edges,floorY:tank.floorY,surfaceY:tank.surfaceY,radius:space.swimRadius,halfHeight:space.halfHeight,space});
   for(let i=0;i<1200;i++){

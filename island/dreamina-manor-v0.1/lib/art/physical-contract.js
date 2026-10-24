@@ -1,5 +1,6 @@
 /** World grid uses metres. Fish use one approved exhibition ruler in every context. */
 export const WORLD_UNIT_METRES=1;
+export const CHARACTER_PLANT_VISUAL_SCALE=1.5;
 export const FISH_DISPLAY_RULER=Object.freeze({referenceCm:16,referenceWorldLength:.45,standardExponent:.5,enlargement:3,standardCap:1.43});
 export function fishWorldLength(finalSizeCm,standardSizeCm){
  if(!Number.isFinite(finalSizeCm)||finalSizeCm<=0)throw new Error('Invalid final fish size');

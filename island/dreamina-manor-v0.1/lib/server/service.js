@@ -7,7 +7,7 @@ import {SOCIAL_FIELDS,performSocial,socialResponse} from './social-commands.js';
 import {visitPosition} from './social-store.js';
 const fields={...SOCIAL_FIELDS,'sync-local':['operations'],'recover-local-journal':['base','operations'],
  'construct':['kind','cells'],'buy-input':['kind','tier'],'emergency-seed':[],
- 'begin-work':['action','target','tier','itemId','destination'],'cancel-work':['intentId'],
+ 'begin-work':['action','target','tier','itemId','destination','catalogueVersion'],'cancel-work':['intentId'],
  'finish-work':['intentId'],'hold':['itemId'],'store-hand':[],'sell':['itemId'],
  'expand-land':['cell'],'build-dock':['cell'],'build-tank':['cells'],'profile':['name','avatar'],
 };

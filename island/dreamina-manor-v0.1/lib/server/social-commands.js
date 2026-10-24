@@ -5,7 +5,7 @@ import {visitPosition} from './social-store.js';
 import {planFreeWalk} from '../game/movement.js';
 import {pathDistance} from '../game/grid.js';
 import {ECONOMY} from '../game/economy.js';
-export const SOCIAL_FIELDS=Object.freeze({'begin-social':['action','jobId','targetUid','itemId'],'finish-social':['intentId'],'cancel-social':[],'move':['point'],'finish-move':['intentId'],'chat':['message','islandUid']});
+export const SOCIAL_FIELDS=Object.freeze({'begin-social':['action','jobId','targetUid','itemId','islandUid'],'finish-social':['intentId'],'cancel-social':[],'move':['point'],'finish-move':['intentId'],'chat':['message','islandUid']});
 const fail=(code,message,status=409)=>{throw new GameError(code,message,status);};
 export async function performSocial(store,{uid,sessionId,opId,command},hash,now){
  for(let attempt=0;attempt<6;attempt++){
@@ -13,6 +13,7 @@ export async function performSocial(store,{uid,sessionId,opId,command},hash,now)
   const [game,visit]=await Promise.all([store.read(uid),store.readVisit(sessionId)]);
   if(!visit||visit.uid!==uid||visit.updatedAt<=now-15000)fail('VISIT_EXPIRED','重新进入这个庄园再试试');
   if(game.pending&&['move','begin-social'].includes(command.type))fail('WORK_PENDING','手边的事还没好，马上继续');
+  if(command.type==='begin-social'&&command.islandUid&&command.islandUid!==visit.islandUid)fail('WRONG_ISLAND','已经离开原来的庄园，这次没有收取');
   if(command.type==='move'){
    const island=constructionView(await store.read(visit.islandUid),now),from=visitPosition(visit,game,now),path=planFreeWalk(island,from,command.point);if(!path)fail('NO_PATH','那里暂时走不到');
    const arriveAt=now+Math.ceil(pathDistance(path)*ECONOMY.walkSecondsPerCell*1000),pending={id:crypto.randomUUID(),action:'move',path,startedAt:now,arriveAt,finishAt:arriveAt};

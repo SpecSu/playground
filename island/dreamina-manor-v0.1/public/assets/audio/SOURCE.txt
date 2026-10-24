@@ -1,0 +1,4 @@
+Coin sound: handleCoins2, RPG Audio by Kenney Vleugels (Kenney.nl).
+Source: https://kenney.nl/assets/rpg-audio
+License: CC0 1.0 https://creativecommons.org/publicdomain/zero/1.0/
+Adaptation: mono 22050 Hz, mild low-pass/compression, bounded loudness, short fade-out.

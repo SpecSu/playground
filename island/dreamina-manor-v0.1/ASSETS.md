@@ -1,15 +1,13 @@
 # 素材与来源
 
-本目录包含运行所需素材及来源工程已有的可编辑美术文件。所有文件 SHA-256 见 ARCHIVE-MANIFEST.json；人物还保留原 cast/portrait manifests。
+本目录包含运行素材、程序化生成代码、正式来源许可与来源工程已有可编辑文件。全部逐文件 SHA-256/Git SHA 见 ARCHIVE-MANIFEST.json；授权归档到此仓库不等于授予素材通用公开再分发或商业许可。
 
-- 12 位人物 GLB 与 12 张头像 WebP：由原钓鱼工程 `55de7c92b90d54665d4f4772b793aa5be46e856b` 按所有者要求沿用，详见 `public/assets/avatars/cast-v1/PROVENANCE.txt`。已归档必要演示副本；未附原人物建模工程或私人参考图，不假定可由本仓库生成器重新生成。
-- 10 株植物、地块、10 个当前 botanical-v10b 种子/鱼饵图标（另保留原 10 个图标）：生产文件在 public；Blender 工程、生成脚本与规范在 art-source。
-- 20 种鱼、码头、鱼缸和海洋场景：由 `lib/art/` / `lib/world/` 中的代码生成，保留生成代码即保留运行资产。
-- 海浪：`lib/client/ocean-audio.js` 的程序化合成，不依赖音频文件或第三方音乐下载。
-- 保留 package-lock、vendored Sites 插件 MIT 许可和 shadcn CSS 许可。依赖遵循各自包内 LICENSE；本目录没有擅自给整个工程或用户素材附加统一开源许可。
+- 12位人物的12 GLB与12 WebP：沿用所有者指定原钓鱼工程，来源提交和校验在 `public/assets/avatars/cast-v1/PROVENANCE.txt` 及人物 manifests。没有私人参考图，不假定原人物建模工程可以重建。
+- 20植物：`public/assets/world/plants/` 的10原 GLB/元数据，以及 `lib/art/exotic-plants.js` 的10种程序化异植。生成/导出/对照脚本与已有 Blender 源保存在 `art-source/`；图标和种子/鱼饵袋也在 public 中。
+- 20鱼、码头/鱼缸与场景：`lib/art/`、`lib/world/` 代码生成，不依赖缺失的外部鱼 GLB。
+- 原授权海底装饰 fish/rock compact 与新版纹理地块保存在 `public/assets/lagoon/`、`public/assets/world/ground/`。参考来源/权利边界在 `art-source/lagoon-reference/`、`art-source/ground-reference/`，保留 notices 和 Three.js MIT 文本。文档中的来源工程路径不是本demo漏件。
+- 海浪：`lib/client/ocean-audio.js` 程序合成。当前进包、金币、建造与抛竿反馈使用用户为本 Demo 提供的四段音轨，已提取为 `inventory-user-v23.wav`、`coins-user-v23.wav`、`build-user-v23.wav`、`cast-user-v23.wav` 及运行所需内嵌 PCM；来源与处理见 `public/assets/audio/USER-AUDIO-SOURCE-v23.txt`。这些音轨不是 CC0，不附原视频、视频元数据或私人参考文件。
+- 投饵入水等旧录音及保留的来源素材在 `public/assets/audio/`。Kenney RPG Audio 与 rubberduck water splash 的 CC0 1.0 许可仅适用于各自具名素材，正式来源、处理方法及许可见 SOURCE.txt、ACTION-SOURCES-v22.txt、Kenney-RPG-Audio-CC0.txt。旧 Kenney 买/收/币文件的保留不表示它们仍是当前对应 cue；版本化文件名也不是当前发布版本。
+- package-lock、Sites 插件 MIT、shadcn CSS 许可和依赖自身许可均保留。不擅自给整个工程或用户资产另加统一开源许可。
 
-用户授权归档到此仓库不代表所有人物/资产都已获通用再分发或商业授权。来源工程没有完整提供人物建模原件或独立素材许可，应在进一步公开分发/商业使用前确认权利或替换未知项。
-
-## 海面新增素材
-
-`public/assets/lagoon/fish-compact-e94279c.glb` 与 `rock-compact-e94279c.glb` 取自授权的 `SpecSu/playground/island/artdesign` 来源提交 e94279c，供海底装饰使用；不是玩家库存或个人记录。动态海岸/日光/海面与运动代码在 lib/art 中适配。保留 `art-source/lagoon-reference/SOURCE.md`、来源 notices 与 Three.js MIT 文本；其对源工程 art/、vendor/ 等路径的引用不是本 demo 缺失运行资源的声明。归档不扩展素材的通用商业/公开再分发授权。
+进一步公开分发或商业使用前，需确认未明确提供独立授权的人物/美术来源权利，或替换相应素材。具名音频的CC0许可不覆盖用户提供音轨或其他资产。

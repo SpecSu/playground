@@ -69,6 +69,7 @@ export function applyCommand(original,command,context={}){
   if(!canClaimEmergency(s,cfg))fail('RESCUE_UNAVAILABLE','你还有种子或等待收获的东西');s.seeds[0]++;break;
  }
  case 'begin-work':{
+  if(c.catalogueVersion!==undefined&&![1,2].includes(c.catalogueVersion))fail('BAD_CATALOGUE','更新一下页面再种吧',400);
   validateWork(s,c.action,c.target,c.tier,c.itemId,now,context);
   const same=s.pending&&s.pending.action===c.action&&targetKey(s.pending.target)===targetKey(c.target)&&s.pending.tier===c.tier&&s.pending.itemId===c.itemId&&s.pending.destination===c.destination;
   if(same)return {state:original,receipt:{type:c.type,intentId:s.pending.id},changed:false};
@@ -76,7 +77,7 @@ export function applyCommand(original,command,context={}){
   const paths=(c.target.kind==='tank'?s.tank.map(cell=>planWalk(s.land,s.docks,s.tank,from,{type:'land',cell},s)):[planWalk(s.land,s.docks,s.tank,from,target,s)]).filter(Boolean);const path=paths.sort((a,b)=>pathDistance(a)-pathDistance(b))[0];if(!path)fail('NO_PATH','现在走不到这里，换个位置吧');
   const arrival=now+Math.ceil(pathDistance(path)*cfg.walkSecondsPerCell*1000);
   const actionMs=c.action==='plant'?cfg.plantActionMs:['fish','display'].includes(c.action)?450:cfg.harvestActionMs;
-  s.position=from;s.pending={id:newId(),...(context.operationId?{operationId:context.operationId}:{}),...(context.sessionId?{sessionId:context.sessionId}:{}),action:c.action,target:structuredClone(c.target),path,startedAt:now,arriveAt:arrival,finishAt:arrival+actionMs,...(c.tier?{tier:c.tier}:{}),...(c.itemId?{itemId:c.itemId}:{}),...(c.action==='harvest'?{jobId:jobAt(s,c.target).id}:{}),...(c.destination?{destination:c.destination}:{})};receipt={...receipt,intentId:s.pending.id};break;
+  s.position=from;s.pending={id:newId(),...(context.operationId?{operationId:context.operationId}:{}),...(context.sessionId?{sessionId:context.sessionId}:{}),action:c.action,target:structuredClone(c.target),path,startedAt:now,arriveAt:arrival,finishAt:arrival+actionMs,...(c.tier?{tier:c.tier}:{}),...(c.action==='plant'&&c.catalogueVersion!==undefined?{catalogueVersion:c.catalogueVersion}:{}),...(c.itemId?{itemId:c.itemId}:{}),...(c.action==='harvest'?{jobId:jobAt(s,c.target).id}:{}),...(c.destination?{destination:c.destination}:{})};receipt={...receipt,intentId:s.pending.id};break;
  }
  case 'cancel-work':if(c.intentId&&s.pending?.id!==c.intentId)return {state:original,receipt:{type:c.type,cancelled:false},changed:false};s.position=projectedPosition(s,now);s.pending=null;receipt.cancelled=true;break;
  case 'finish-work':{
@@ -88,7 +89,7 @@ export function applyCommand(original,command,context={}){
    const duration=kind==='fish'?fishingWaitSeconds(p.tier,context.seed,cfg):!s.firstPlantStarted?cfg.firstPlantSeconds:cfg.growSeconds[p.tier-1];
    if(kind==='plant')s.firstPlantStarted=true;
    const id=newId(),seed=context.seed;if(!Number.isSafeInteger(seed))throw new Error('Server random seed required');
-   const product={...rollProduct(kind,p.tier,seed,`${id}-product`,now,cfg),sourceIntentId:p.id};
+   const product={...rollProduct(kind,p.tier,seed,`${id}-product`,now,cfg,p.catalogueVersion??1),sourceIntentId:p.id};
    s.jobs.push({id:`${id}-job`,target:p.target,inputTier:p.tier,seed,startedAt:now,readyAt:now+duration*1000,product});receipt={...receipt,action:p.action,jobId:`${id}-job`};
   }else if(p.action==='harvest'){
    const job=jobAt(s,p.target),item={...job.product,harvestedAt:now,location:{kind:'bag'}};s.jobs=s.jobs.filter(j=>j.id!==job.id);s.items.push(item);if(item.kind==='fish')hold(s,item);recordDiscovery(s,item);receipt={...receipt,action:'harvest',itemId:item.id};
@@ -146,5 +147,5 @@ export function assertGame(s){
 }
 export function publicGame(s,now,{viewerUid=s.ownerUid}={}){
  s=constructionView(s,now);const self=viewerUid===s.ownerUid;
- return {demo:!!s.demo,gameId:s.gameId,schemaVersion:s.schemaVersion,ownerUid:s.ownerUid,revision:s.revision,serverNow:now,profile:structuredClone(s.profile),constructions:structuredClone(s.constructions??[]),land:structuredClone(s.land),docks:structuredClone(s.docks),tank:structuredClone(s.tank),jobs:s.jobs.map(({seed,...j})=>structuredClone(j)),items:structuredClone(self?s.items:s.items.filter(i=>i.location.kind!=='bag')),position:projectedPosition(s,now),...(self?{localSync:structuredClone(s.localSync??null),firstPlantStarted:s.firstPlantStarted,coins:s.coins,seeds:[...s.seeds],baits:[...s.baits],pending:structuredClone(s.pending),activity:structuredClone(s.activity),discovered:{...s.discovered},discoveredVariants:collectionVariants(s),theftAvailableAt:s.theftAvailableAt,canClaimEmergency:canClaimEmergency(s)}:{})};
+ return {demo:!!s.demo,...(s.demo?{demoLayoutVersion:s.demoLayoutVersion??1}:{}),gameId:s.gameId,schemaVersion:s.schemaVersion,ownerUid:s.ownerUid,revision:s.revision,serverNow:now,profile:structuredClone(s.profile),constructions:structuredClone(s.constructions??[]),land:structuredClone(s.land),docks:structuredClone(s.docks),tank:structuredClone(s.tank),jobs:s.jobs.map(({seed,...j})=>structuredClone(j)),items:structuredClone(self?s.items:s.items.filter(i=>i.location.kind!=='bag')),position:projectedPosition(s,now),...(self?{localSync:structuredClone(s.localSync??null),firstPlantStarted:s.firstPlantStarted,coins:s.coins,seeds:[...s.seeds],baits:[...s.baits],pending:structuredClone(s.pending),activity:structuredClone(s.activity),discovered:{...s.discovered},discoveredVariants:collectionVariants(s),theftAvailableAt:s.theftAvailableAt,canClaimEmergency:canClaimEmergency(s)}:{})};
 }

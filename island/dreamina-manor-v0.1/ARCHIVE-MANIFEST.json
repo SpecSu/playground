@@ -1,61 +1,60 @@
 {
+  "sourceSitesVersion": 23,
+  "sourceCommit": "c02644d3a997f3d40b3f9dfb9125780a4e1e9b1a",
+  "updatedDate": "2026-10-24",
+  "sourceSavedVersion": "appgver_0fd2bf3a74e88191b07edc16a390113e",
+  "sourceDeployment": {
+    "id": "appgdep_6adc357a24608191974178d5cb2384d9",
+    "status": "succeeded",
+    "publishedAt": "2026-10-24T04:35:17.487219Z"
+  },
   "schemaVersion": 1,
   "version": "0.1",
   "packageVersion": "0.1.0",
-  "sourceSitesVersion": 15,
-  "sourceCommit": "c8fedba1de4565289cf89ed38986f80af939bb97",
-  "updatedDate": "2026-10-23",
-  "sourceSavedVersion": "appgver_fed58d32352c8191b71e1797958d60dd",
-  "sourceDeployment": {
-    "id": "appgdep_6adb5c1afdfc8191b5c9f20e2bc66aad",
-    "status": "succeeded",
-    "publishedAt": "2026-10-23T13:07:49Z"
-  },
   "repositoryPath": "island/dreamina-manor-v0.1",
   "updateMode": "Replace current snapshot in the original 0.1 directory; preserve Git history.",
-  "previousSourceCommit": "085d34080ba13c0719e0e2396846a4a85f2682dc",
+  "previousSourceCommit": "c8fedba1de4565289cf89ed38986f80af939bb97",
   "manifestExcludesItself": true,
-  "fileCount": 366,
-  "totalBytes": 61480612,
-  "sourceTrackedFileCount": 361,
+  "fileCount": 424,
+  "totalBytes": 62989937,
+  "sourceTrackedFileCount": 419,
   "archiveDifferences": [
     {
       "path": ".openai/hosting.json",
-      "reason": "Production project_id remains null; DB binding retained for safe local builds."
+      "reason": "Production project_id removed; database binding retained for safe independent deployment."
     },
     {
       "path": "README.md",
-      "reason": "Standalone full-asset restore instructions, current behavior and published version provenance; replaces stale split-Library instructions."
+      "reason": "Standalone full-asset restore instructions and current release provenance."
     }
   ],
   "addedFiles": [
     ".openai/hosting.example.json",
-    "HANDOFF.md",
     "ASSETS.md",
+    "HANDOFF.md",
     "VERIFICATION.md",
     "scripts/verify-archive.mjs"
   ],
   "excludedCategories": [
     "source git history and local tool state",
-    "dependencies",
-    "build output and caches",
+    "dependencies, build output and caches",
     "player save exports and original operation arrays",
     "cloud/local databases and receipt dumps",
-    "private recovery evidence and logs",
+    "private recovery evidence, QA images and logs",
     "credentials and environment variables",
-    "private QA, reference and collaboration files"
+    "private reference and collaboration notes"
   ],
-  "privacyBoundary": "Recovery code contains only its one-time SHA-256 commitment and algorithm. No personal recovery payload or original player operation list is archived. Formal tests use synthetic fixtures.",
+  "privacyBoundary": "Recovery code retains only bounded commitments and generic algorithms, never original player recovery payloads. Formal tests use synthetic fixtures.",
   "files": [
     {
       "path": ".gitignore",
-      "bytes": 910,
-      "sha256": "60f10331cad72aaaabd883262521fea6853ed41af7581bed4a44d039cbcbc579",
-      "gitBlobSha": "46da11a52cd70608e55921c47e5d273f65e21623",
+      "bytes": 980,
+      "sha256": "f4538e76da3c18a4550fb2b1bcd7c7b831804883cb53903aef6f7fb01077aef1",
+      "gitBlobSha": "9345ad903d95c9648eadb0f9c8e9c738e8bec553",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "60f10331cad72aaaabd883262521fea6853ed41af7581bed4a44d039cbcbc579",
-      "sourceGitBlobSha": "46da11a52cd70608e55921c47e5d273f65e21623"
+      "sourceSha256": "f4538e76da3c18a4550fb2b1bcd7c7b831804883cb53903aef6f7fb01077aef1",
+      "sourceGitBlobSha": "9345ad903d95c9648eadb0f9c8e9c738e8bec553"
     },
     {
       "path": ".npmrc",
@@ -69,9 +68,9 @@
     },
     {
       "path": ".openai/hosting.example.json",
-      "bytes": 96,
-      "sha256": "46e40299affee21f094fdc5947692a63d9869efabb5ca34aa50c910fe01b483d",
-      "gitBlobSha": "3512d6f2d881d151c4c3b7ebc28c946a2b038225",
+      "bytes": 83,
+      "sha256": "8d97b6184f4c8fa94e9c807745f06e58a1995a1fc0cc9409f8b44caba4aeacea",
+      "gitBlobSha": "64bca204967cfdec7c06a83400ccae51b8353e7d",
       "mode": "100644",
       "change": "added"
     },
@@ -87,25 +86,25 @@
     },
     {
       "path": "ASSETS.md",
-      "bytes": 1943,
-      "sha256": "ef869cffad9eb84db402680cdd3dedfcae5325957ac7feeb8dadd3dbcc6b2a37",
-      "gitBlobSha": "2467a3bbe1d92fda7293d0c473a1f2275a027125",
+      "bytes": 2388,
+      "sha256": "e91555f66493ec32cf91659da47a270a9d3687d71f02c54b3390aab0d3005cba",
+      "gitBlobSha": "cd77c095af566275da2b356e7fe4b8b500aba231",
       "mode": "100644",
       "change": "added"
     },
     {
       "path": "HANDOFF.md",
-      "bytes": 13434,
-      "sha256": "efa79c6c45a799dab2328088cec0053eae33468b7b7daa0b450d36ab6f3762fb",
-      "gitBlobSha": "8867b91f58d6ef2a2e32ee36aa20a9a526288e46",
+      "bytes": 7532,
+      "sha256": "e6eb263c3f921df418324ddcc03da7daeafd97330c3e40aadfa5d7811bbc4bdd",
+      "gitBlobSha": "a7617fac5ec6d01a45516da089a4857d837fab1b",
       "mode": "100644",
       "change": "added"
     },
     {
       "path": "README.md",
-      "bytes": 10102,
-      "sha256": "7ee66ca317784dfd243d24453cec2760692479bd103bdde6514990f63fa1663c",
-      "gitBlobSha": "bb282b254d3bc91c94b3286e8865b491d75099d5",
+      "bytes": 4842,
+      "sha256": "94b29e7a412e8cefbfe582240c1d977ea534653c3fb0eda9234fe275e6112f0c",
+      "gitBlobSha": "4c867aefc55de8400a8afd7dbc0d21fd2a3bffc1",
       "mode": "100644",
       "change": "modified",
       "sourceSha256": "a6087d64dad829e413dd52e687a97e189514fc5dac039b3f19669d05cf72ab47",
@@ -113,9 +112,9 @@
     },
     {
       "path": "VERIFICATION.md",
-      "bytes": 4788,
-      "sha256": "e57fe6195d6eb066293d35c9d49ea61d1b4dfb518760584240c1ec0a345a2bf9",
-      "gitBlobSha": "4be169ddde9c9eb30f0ac40a622cf8c649b9daa4",
+      "bytes": 2082,
+      "sha256": "627396919fac4bc0d85cc6214dc10bc47867ff1ec2e6ffd0d7e57272b0a2012c",
+      "gitBlobSha": "61d7963e5c85552d0bfe24c6014b2d198ea7bfa6",
       "mode": "100644",
       "change": "added"
     },
@@ -131,13 +130,13 @@
     },
     {
       "path": "app/api/game/route.ts",
-      "bytes": 2749,
-      "sha256": "0c80f28da59dc953f5f88ded0c48f81ad15dcde650db873be90440c01c536ab3",
-      "gitBlobSha": "814da4d7fbad8bfb9384819bd0c63c8e6cffb6a0",
+      "bytes": 2787,
+      "sha256": "38c3a99ca9de1fea1f2e7d9c8c49183e117cffeb76a43deec55248f241662408",
+      "gitBlobSha": "48a4af755c486dd17b13df0c6c17a4ab8930e4d2",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "0c80f28da59dc953f5f88ded0c48f81ad15dcde650db873be90440c01c536ab3",
-      "sourceGitBlobSha": "814da4d7fbad8bfb9384819bd0c63c8e6cffb6a0"
+      "sourceSha256": "38c3a99ca9de1fea1f2e7d9c8c49183e117cffeb76a43deec55248f241662408",
+      "sourceGitBlobSha": "48a4af755c486dd17b13df0c6c17a4ab8930e4d2"
     },
     {
       "path": "app/chatgpt-auth.ts",
@@ -151,13 +150,13 @@
     },
     {
       "path": "app/globals.css",
-      "bytes": 24266,
-      "sha256": "9eb575920fc0b9f2e826e982d11589d5aa6d04d4692af58648398076c700b90b",
-      "gitBlobSha": "59e52ce25ef93bf81780ad4379951549bdf959ca",
+      "bytes": 33860,
+      "sha256": "ed72c15df3a8dfab32963e5ffca81daf36aa3e84542976e5224d44fbac4f5c91",
+      "gitBlobSha": "d0642082d06fb79848f6d41fa0662b473d6c4a8b",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "9eb575920fc0b9f2e826e982d11589d5aa6d04d4692af58648398076c700b90b",
-      "sourceGitBlobSha": "59e52ce25ef93bf81780ad4379951549bdf959ca"
+      "sourceSha256": "ed72c15df3a8dfab32963e5ffca81daf36aa3e84542976e5224d44fbac4f5c91",
+      "sourceGitBlobSha": "d0642082d06fb79848f6d41fa0662b473d6c4a8b"
     },
     {
       "path": "app/layout.tsx",
@@ -208,6 +207,16 @@
       "change": "unchanged",
       "sourceSha256": "a00bf47df7bd18879a6b85918af5a483db2ad38e14d38618b7b6e111ca18c393",
       "sourceGitBlobSha": "a5bf66ae9b52d4216970dee644aa326566773667"
+    },
+    {
+      "path": "art-source/build-growth-anchors.mjs",
+      "bytes": 1105,
+      "sha256": "d81a5a7684dd4af8bcce88b2ef76455088a73af2f1d09dfa6a22e663a0d1b6be",
+      "gitBlobSha": "783cb8147249488917ea01cade2e4e551cd8a3eb",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "d81a5a7684dd4af8bcce88b2ef76455088a73af2f1d09dfa6a22e663a0d1b6be",
+      "sourceGitBlobSha": "783cb8147249488917ea01cade2e4e551cd8a3eb"
     },
     {
       "path": "art-source/build_botanical.py",
@@ -310,6 +319,56 @@
       "sourceGitBlobSha": "54505620a4669c05ef5ead5f41bdaab653be5830"
     },
     {
+      "path": "art-source/exotic-export-comparison.mjs",
+      "bytes": 2271,
+      "sha256": "59104c02fbe2643716e67140ac36c42c8198a46ad42cdd53f8e3e14db7b6398e",
+      "gitBlobSha": "0bb8e2290f619d660b743de505e8dfa88a99b552",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "59104c02fbe2643716e67140ac36c42c8198a46ad42cdd53f8e3e14db7b6398e",
+      "sourceGitBlobSha": "0bb8e2290f619d660b743de505e8dfa88a99b552"
+    },
+    {
+      "path": "art-source/exotic-export.mjs",
+      "bytes": 1143,
+      "sha256": "e3a8a03a6eb7ed0b7a366d815878244763690749691061617e0659f1845ea264",
+      "gitBlobSha": "6c37fd0e0ad5a394606216cb45668c1794d6f571",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "e3a8a03a6eb7ed0b7a366d815878244763690749691061617e0659f1845ea264",
+      "sourceGitBlobSha": "6c37fd0e0ad5a394606216cb45668c1794d6f571"
+    },
+    {
+      "path": "art-source/exotic-render-sheets.py",
+      "bytes": 3632,
+      "sha256": "9ac16bee98b5d3247cb19ca749fdf5805c54721879887e063652b9b5d9a8e9df",
+      "gitBlobSha": "4e4c7fc8915506778d847d7546763feff9eb7956",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "9ac16bee98b5d3247cb19ca749fdf5805c54721879887e063652b9b5d9a8e9df",
+      "sourceGitBlobSha": "4e4c7fc8915506778d847d7546763feff9eb7956"
+    },
+    {
+      "path": "art-source/exotic-render.py",
+      "bytes": 2111,
+      "sha256": "19b29116954b68e4ffd650ef621b2f7e15de42b5cf6cd7cad7444c1997b77ed9",
+      "gitBlobSha": "5a8ebe2471cc8c0a79b9d1d0489cbca59c7fb4c7",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "19b29116954b68e4ffd650ef621b2f7e15de42b5cf6cd7cad7444c1997b77ed9",
+      "sourceGitBlobSha": "5a8ebe2471cc8c0a79b9d1d0489cbca59c7fb4c7"
+    },
+    {
+      "path": "art-source/exotic-review-sheets.mjs",
+      "bytes": 2373,
+      "sha256": "8a966a6d05248db95e249fdf6679b5a94f10a411bd5675849b0ee9fe5cf8aec2",
+      "gitBlobSha": "53ed16c79e44b5be1604bec4d5678705d15c7dd0",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "8a966a6d05248db95e249fdf6679b5a94f10a411bd5675849b0ee9fe5cf8aec2",
+      "sourceGitBlobSha": "53ed16c79e44b5be1604bec4d5678705d15c7dd0"
+    },
+    {
       "path": "art-source/export_fish_gallery.mjs",
       "bytes": 994,
       "sha256": "6a056b28ff5454ecfe6e3141ded6d71e1cd47e7151f29adf59a3b37ae2a59668",
@@ -338,6 +397,26 @@
       "change": "unchanged",
       "sourceSha256": "fd2cf6e85630e9a465d6678135ab226cbbf38392a56b60edf1c5600aa0e7e939",
       "sourceGitBlobSha": "3e34b5e9b9101c50f2ebfb1967d77a7797c4c165"
+    },
+    {
+      "path": "art-source/ground-reference/SOURCE.md",
+      "bytes": 610,
+      "sha256": "e14fa3e2b5dc32c586c290dfe9d3e26def234c166c07de6a50132d9c6b0e17be",
+      "gitBlobSha": "a174cd587f795596952de15006d5d41a7740c32f",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "e14fa3e2b5dc32c586c290dfe9d3e26def234c166c07de6a50132d9c6b0e17be",
+      "sourceGitBlobSha": "a174cd587f795596952de15006d5d41a7740c32f"
+    },
+    {
+      "path": "art-source/ground-reference/THIRD_PARTY_NOTICES.md",
+      "bytes": 1718,
+      "sha256": "a8530b4e022f81e5b06e5de691c053549ed9e1cb3d7bae0089c04a93059370ba",
+      "gitBlobSha": "058e3fd37289d3db3b465623cd3188fe3b2621c6",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "a8530b4e022f81e5b06e5de691c053549ed9e1cb3d7bae0089c04a93059370ba",
+      "sourceGitBlobSha": "058e3fd37289d3db3b465623cd3188fe3b2621c6"
     },
     {
       "path": "art-source/lagoon-reference/SOURCE.md",
@@ -540,16 +619,6 @@
       "sourceGitBlobSha": "856e090c902917b4e1cebee0e08ea1d398fd01c3"
     },
     {
-      "path": "components.json",
-      "bytes": 420,
-      "sha256": "31f4ca67a4a62572571003d3d5aac85ee6fbfca67a192924bac6b168d95e98fd",
-      "gitBlobSha": "c8f5bb16f79ed774f67415a8dc2b4a38243e3e90",
-      "mode": "100644",
-      "change": "unchanged",
-      "sourceSha256": "31f4ca67a4a62572571003d3d5aac85ee6fbfca67a192924bac6b168d95e98fd",
-      "sourceGitBlobSha": "c8f5bb16f79ed774f67415a8dc2b4a38243e3e90"
-    },
-    {
       "path": "components/connector-error.tsx",
       "bytes": 1082,
       "sha256": "2d0d04559952ce9c9a327cca499f4b99f35d885cccfce375230e116695d3f155",
@@ -561,13 +630,13 @@
     },
     {
       "path": "components/manor/CollectionBook.tsx",
-      "bytes": 1708,
-      "sha256": "1dc8bf1f6fe59a245ed26ba34d53f202708f0981390c13ea10d2c172ea097ef8",
-      "gitBlobSha": "84d3f70a659e0b39c9d6315cc6ded57fc43ae501",
+      "bytes": 1857,
+      "sha256": "f0ac62f8aa0cf3864edb479aff12bd4a17a6a92ec23c0845b2a5da83b518b478",
+      "gitBlobSha": "811518c4414542445ec8ceef7ea1d5614c7f6f34",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "1dc8bf1f6fe59a245ed26ba34d53f202708f0981390c13ea10d2c172ea097ef8",
-      "sourceGitBlobSha": "84d3f70a659e0b39c9d6315cc6ded57fc43ae501"
+      "sourceSha256": "f0ac62f8aa0cf3864edb479aff12bd4a17a6a92ec23c0845b2a5da83b518b478",
+      "sourceGitBlobSha": "811518c4414542445ec8ceef7ea1d5614c7f6f34"
     },
     {
       "path": "components/manor/ItemThumb.tsx",
@@ -581,13 +650,23 @@
     },
     {
       "path": "components/manor/Manor.tsx",
-      "bytes": 44845,
-      "sha256": "82992bc7b6bcf8eee38031478ddcffac6ca9d973becbd17235565994822c528b",
-      "gitBlobSha": "86b311803e4e88e7ca726df5ccfed1b798d7c0d1",
+      "bytes": 47150,
+      "sha256": "f22db3b6f97bcc14a25b3de0b37733beda839cacd975ae97df30f1a2ff71908f",
+      "gitBlobSha": "d6555f1d12ce2c3d923f0201ebe775f0ce76df1e",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "82992bc7b6bcf8eee38031478ddcffac6ca9d973becbd17235565994822c528b",
-      "sourceGitBlobSha": "86b311803e4e88e7ca726df5ccfed1b798d7c0d1"
+      "sourceSha256": "f22db3b6f97bcc14a25b3de0b37733beda839cacd975ae97df30f1a2ff71908f",
+      "sourceGitBlobSha": "d6555f1d12ce2c3d923f0201ebe775f0ce76df1e"
+    },
+    {
+      "path": "components/manor/TankManager.tsx",
+      "bytes": 1930,
+      "sha256": "4b4ebc78e4a1a478c137680f0e5d1cda8a5cff75b91f923574a903117cd5903a",
+      "gitBlobSha": "923f614e7442042a3b4bbcb3feb031dbf46b22fd",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "4b4ebc78e4a1a478c137680f0e5d1cda8a5cff75b91f923574a903117cd5903a",
+      "sourceGitBlobSha": "923f614e7442042a3b4bbcb3feb031dbf46b22fd"
     },
     {
       "path": "components/ui/accordion.tsx",
@@ -1200,6 +1279,16 @@
       "sourceGitBlobSha": "ec65c1e4255f050d9555c6cdade90a5f8a6c0c29"
     },
     {
+      "path": "components.json",
+      "bytes": 420,
+      "sha256": "31f4ca67a4a62572571003d3d5aac85ee6fbfca67a192924bac6b168d95e98fd",
+      "gitBlobSha": "c8f5bb16f79ed774f67415a8dc2b4a38243e3e90",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "31f4ca67a4a62572571003d3d5aac85ee6fbfca67a192924bac6b168d95e98fd",
+      "sourceGitBlobSha": "c8f5bb16f79ed774f67415a8dc2b4a38243e3e90"
+    },
+    {
       "path": "db/index.ts",
       "bytes": 423,
       "sha256": "dc7610b00b918e0ffff1360a63626f16655ced3064b2eaf96095a4101fb14bcd",
@@ -1228,16 +1317,6 @@
       "change": "unchanged",
       "sourceSha256": "b4aa03f3d97815d86a30ccddd00cc51c18736d02fd4d950f9a966f19e6a445b7",
       "sourceGitBlobSha": "61b8e3826ac01fbf34401271569fe324f6c89d1b"
-    },
-    {
-      "path": "drizzle.config.ts",
-      "bytes": 148,
-      "sha256": "af081f7384aaeb0082cf422e29f139d137ca2f6a57c69b2c37b9fb1f8479867b",
-      "gitBlobSha": "c2b2f34376984744343453838ce66658ad9d9b6a",
-      "mode": "100644",
-      "change": "unchanged",
-      "sourceSha256": "af081f7384aaeb0082cf422e29f139d137ca2f6a57c69b2c37b9fb1f8479867b",
-      "sourceGitBlobSha": "c2b2f34376984744343453838ce66658ad9d9b6a"
     },
     {
       "path": "drizzle/0000_lumpy_slipstream.sql",
@@ -1290,6 +1369,16 @@
       "sourceGitBlobSha": "55a20d573aa3b8ee30cc0726c7ab1b7667b0084d"
     },
     {
+      "path": "drizzle.config.ts",
+      "bytes": 148,
+      "sha256": "af081f7384aaeb0082cf422e29f139d137ca2f6a57c69b2c37b9fb1f8479867b",
+      "gitBlobSha": "c2b2f34376984744343453838ce66658ad9d9b6a",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "af081f7384aaeb0082cf422e29f139d137ca2f6a57c69b2c37b9fb1f8479867b",
+      "sourceGitBlobSha": "c2b2f34376984744343453838ce66658ad9d9b6a"
+    },
+    {
       "path": "eslint.config.mjs",
       "bytes": 791,
       "sha256": "eeda7faabe9560fa9fdb26675b0011fa78461ca7061989732f5da9245b87e315",
@@ -1331,23 +1420,23 @@
     },
     {
       "path": "lib/art/aquarium.js",
-      "bytes": 7005,
-      "sha256": "4cf70c8d85dcf58a4901ce606f0e68c330fa5451f6ebb74852fec037e7777503",
-      "gitBlobSha": "6da2d47f41b9781426f8a150f28b11a8459e91a8",
+      "bytes": 8908,
+      "sha256": "0aea674cd2fbaac1f9c38f696b7b39a8725c3326b7885f68c06df904d0759d51",
+      "gitBlobSha": "1630b0b6633268114d5aab18bdad574c047eef45",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "4cf70c8d85dcf58a4901ce606f0e68c330fa5451f6ebb74852fec037e7777503",
-      "sourceGitBlobSha": "6da2d47f41b9781426f8a150f28b11a8459e91a8"
+      "sourceSha256": "0aea674cd2fbaac1f9c38f696b7b39a8725c3326b7885f68c06df904d0759d51",
+      "sourceGitBlobSha": "1630b0b6633268114d5aab18bdad574c047eef45"
     },
     {
       "path": "lib/art/art-contract.js",
-      "bytes": 2327,
-      "sha256": "123b2160b644959da0ed2a23174b0801ed87d4d065af48bb8841d3e4cd83c94e",
-      "gitBlobSha": "0e4bafc637fe548133699d09187d10369d63feae",
+      "bytes": 1942,
+      "sha256": "2ed6ad26f3ef5c8be842acdf45d26b074439d85c2eeddadc865ad978bb204067",
+      "gitBlobSha": "27d287440e57c3325285b4707a35376a7e3b3534",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "123b2160b644959da0ed2a23174b0801ed87d4d065af48bb8841d3e4cd83c94e",
-      "sourceGitBlobSha": "0e4bafc637fe548133699d09187d10369d63feae"
+      "sourceSha256": "2ed6ad26f3ef5c8be842acdf45d26b074439d85c2eeddadc865ad978bb204067",
+      "sourceGitBlobSha": "27d287440e57c3325285b4707a35376a7e3b3534"
     },
     {
       "path": "lib/art/avatar-actions.js",
@@ -1381,13 +1470,33 @@
     },
     {
       "path": "lib/art/dock.js",
-      "bytes": 6960,
-      "sha256": "9face085f9c1b0273226eed3af8f2994a8bd231fbca8aa1ddd3b799ceb8532bd",
-      "gitBlobSha": "040e43e2e4e7d2779db317a8d95562a086f09a73",
+      "bytes": 8039,
+      "sha256": "f61d4f7a61f7ccf8cd33dac57bd01e2853c007a2e89118e2926224988f7808c1",
+      "gitBlobSha": "011985e5985340b3edbeeed2664fbc7a83c6a4e0",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "9face085f9c1b0273226eed3af8f2994a8bd231fbca8aa1ddd3b799ceb8532bd",
-      "sourceGitBlobSha": "040e43e2e4e7d2779db317a8d95562a086f09a73"
+      "sourceSha256": "f61d4f7a61f7ccf8cd33dac57bd01e2853c007a2e89118e2926224988f7808c1",
+      "sourceGitBlobSha": "011985e5985340b3edbeeed2664fbc7a83c6a4e0"
+    },
+    {
+      "path": "lib/art/exotic-plant-sizing.js",
+      "bytes": 535,
+      "sha256": "84a0f7b4a1e4d4e4f9050bcf3ac0c36d073a5488eb2305005ba6406da04572d8",
+      "gitBlobSha": "01dd8ca9d21a25051105332317d7749d86f9e16e",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "84a0f7b4a1e4d4e4f9050bcf3ac0c36d073a5488eb2305005ba6406da04572d8",
+      "sourceGitBlobSha": "01dd8ca9d21a25051105332317d7749d86f9e16e"
+    },
+    {
+      "path": "lib/art/exotic-plants.js",
+      "bytes": 19958,
+      "sha256": "c2d1ddc718bbf6e77ffd82bb835247eb56ead6e94742ec5c7745748e407fad48",
+      "gitBlobSha": "dc4b9606d6897705b14fa4c0f6f5d847e2e19d48",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "c2d1ddc718bbf6e77ffd82bb835247eb56ead6e94742ec5c7745748e407fad48",
+      "sourceGitBlobSha": "dc4b9606d6897705b14fa4c0f6f5d847e2e19d48"
     },
     {
       "path": "lib/art/fish-presentation.js",
@@ -1408,6 +1517,16 @@
       "change": "unchanged",
       "sourceSha256": "8af2fbd8499db22586e915f1ded7e24231676f6f343375ed500d08becfd7deec",
       "sourceGitBlobSha": "0b3ba76cf260ae285898e384028a47c644856fb2"
+    },
+    {
+      "path": "lib/art/ground-tile.js",
+      "bytes": 1485,
+      "sha256": "ee91490f3363dec939a7f9d0bd117d311cc10a3dffa1aadb577ba0597811d1c5",
+      "gitBlobSha": "e89a79e0d510980c92d4cb5ea6edb3540e828613",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "ee91490f3363dec939a7f9d0bd117d311cc10a3dffa1aadb577ba0597811d1c5",
+      "sourceGitBlobSha": "e89a79e0d510980c92d4cb5ea6edb3540e828613"
     },
     {
       "path": "lib/art/item-icons.js",
@@ -1431,13 +1550,13 @@
     },
     {
       "path": "lib/art/lagoon.js",
-      "bytes": 12737,
-      "sha256": "4db7cad2ab523aeb4533a7c8ff69bcb941bf92059a690749c22d6e4905e73181",
-      "gitBlobSha": "998fe22e9172ecfa47bdbd69bdc06d7c17ae53f0",
+      "bytes": 13375,
+      "sha256": "7834bce85c6f0873b228c9bcd2c97f4f3705f3aa05121640770526194e6b2b37",
+      "gitBlobSha": "25e0dbf3c637cc105a175c599422b9aa5b32f7f8",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "4db7cad2ab523aeb4533a7c8ff69bcb941bf92059a690749c22d6e4905e73181",
-      "sourceGitBlobSha": "998fe22e9172ecfa47bdbd69bdc06d7c17ae53f0"
+      "sourceSha256": "7834bce85c6f0873b228c9bcd2c97f4f3705f3aa05121640770526194e6b2b37",
+      "sourceGitBlobSha": "25e0dbf3c637cc105a175c599422b9aa5b32f7f8"
     },
     {
       "path": "lib/art/manor-lagoon.js",
@@ -1471,13 +1590,13 @@
     },
     {
       "path": "lib/art/physical-contract.js",
-      "bytes": 1501,
-      "sha256": "a142da78ea611d2c8d5d16ca7a9abea315d2e26c798cfdc619b5a5ca9fadd036",
-      "gitBlobSha": "3bc42e0892fb97d8f82b380e2f77402a6f5be394",
+      "bytes": 1548,
+      "sha256": "65f34da7efe58431f772710e60cd05d49e01a72cbef76c7ec5b9d1999999b69e",
+      "gitBlobSha": "fb8b205ef6496a221f9c6b6ffebcd696032c95cc",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "a142da78ea611d2c8d5d16ca7a9abea315d2e26c798cfdc619b5a5ca9fadd036",
-      "sourceGitBlobSha": "3bc42e0892fb97d8f82b380e2f77402a6f5be394"
+      "sourceSha256": "65f34da7efe58431f772710e60cd05d49e01a72cbef76c7ec5b9d1999999b69e",
+      "sourceGitBlobSha": "fb8b205ef6496a221f9c6b6ffebcd696032c95cc"
     },
     {
       "path": "lib/art/plant-carry.js",
@@ -1490,14 +1609,24 @@
       "sourceGitBlobSha": "451e46d101c9ce9e28731ceb067a5a2d9d23ab57"
     },
     {
-      "path": "lib/art/plant-presentation.js",
-      "bytes": 2710,
-      "sha256": "4063e4deeb7b6de9c581119c86bd816f33599ec337a2d812c9997e5e9ae1a24c",
-      "gitBlobSha": "065d50cf857caa51ccab29a2eba4263140f8541c",
+      "path": "lib/art/plant-growth-heights.js",
+      "bytes": 9093,
+      "sha256": "8fc31903a91ba15dea09cde6e05fa47f2f6c708150a83870944d1bcbb03a71c3",
+      "gitBlobSha": "fe42cdedbde9c2581dc4501c94bbc5970bc50626",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "4063e4deeb7b6de9c581119c86bd816f33599ec337a2d812c9997e5e9ae1a24c",
-      "sourceGitBlobSha": "065d50cf857caa51ccab29a2eba4263140f8541c"
+      "sourceSha256": "8fc31903a91ba15dea09cde6e05fa47f2f6c708150a83870944d1bcbb03a71c3",
+      "sourceGitBlobSha": "fe42cdedbde9c2581dc4501c94bbc5970bc50626"
+    },
+    {
+      "path": "lib/art/plant-presentation.js",
+      "bytes": 2914,
+      "sha256": "dce258677c3c397d0f1140e707f0521db86f266fcc8fe909a574047015097e81",
+      "gitBlobSha": "61dc53539e24612177dfc006bd4145b0b0bd787f",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "dce258677c3c397d0f1140e707f0521db86f266fcc8fe909a574047015097e81",
+      "sourceGitBlobSha": "61dc53539e24612177dfc006bd4145b0b0bd787f"
     },
     {
       "path": "lib/art/plant-sizing.js",
@@ -1508,6 +1637,16 @@
       "change": "unchanged",
       "sourceSha256": "7964403e078dda7125f2eb5d50af492a493b6473bcad8da5d62ba75974667001",
       "sourceGitBlobSha": "56015db914f3fc6f84911d1c7460d2107ad9768c"
+    },
+    {
+      "path": "lib/art/plant-tier-scale.js",
+      "bytes": 602,
+      "sha256": "9af4c36a9314e6ac7d663fc4b40046eacab9391dc32a797ba240e4c546cbf28b",
+      "gitBlobSha": "08ec3b5e6ac5478a3c37b350d5b839705026a99e",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "9af4c36a9314e6ac7d663fc4b40046eacab9391dc32a797ba240e4c546cbf28b",
+      "sourceGitBlobSha": "08ec3b5e6ac5478a3c37b350d5b839705026a99e"
     },
     {
       "path": "lib/art/shore-field.js",
@@ -1541,13 +1680,13 @@
     },
     {
       "path": "lib/avatars/avatar-controller.js",
-      "bytes": 4480,
-      "sha256": "601ada3c5ccb30a1e5769b4779575bd88e515035bc766ac8a0f91b5367e513a3",
-      "gitBlobSha": "f5904746be7664d1727ef537ab01fcef732a97dc",
+      "bytes": 6885,
+      "sha256": "2524f228bc4c9d2a2bbc278823b416e3405d55dd318927f4a31ead402f2cf0b4",
+      "gitBlobSha": "2def463d77d05eb0600416b7f32846de55726fca",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "601ada3c5ccb30a1e5769b4779575bd88e515035bc766ac8a0f91b5367e513a3",
-      "sourceGitBlobSha": "f5904746be7664d1727ef537ab01fcef732a97dc"
+      "sourceSha256": "2524f228bc4c9d2a2bbc278823b416e3405d55dd318927f4a31ead402f2cf0b4",
+      "sourceGitBlobSha": "2def463d77d05eb0600416b7f32846de55726fca"
     },
     {
       "path": "lib/avatars/avatar-loading.js",
@@ -1630,24 +1769,84 @@
       "sourceGitBlobSha": "17dd18cd76ea6ff4b7dfaa0f1cf968c94b845d14"
     },
     {
-      "path": "lib/client/action-queue.js",
-      "bytes": 8584,
-      "sha256": "855bd2f6f5f70b75c01974ba470fa9beaee5e47c913d07f78f9c25cb5c5db3fb",
-      "gitBlobSha": "dbda3af54d55b582cf20b13d43ac727d2b1245fc",
+      "path": "lib/avatars/walk-gait.js",
+      "bytes": 416,
+      "sha256": "f79f099302a1a74d0754f62492a9191ec6eaa173816830d43c51523b0bf2e9f7",
+      "gitBlobSha": "d6b6c711c5c55f495ef0c87bfa686e8948b55462",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "855bd2f6f5f70b75c01974ba470fa9beaee5e47c913d07f78f9c25cb5c5db3fb",
-      "sourceGitBlobSha": "dbda3af54d55b582cf20b13d43ac727d2b1245fc"
+      "sourceSha256": "f79f099302a1a74d0754f62492a9191ec6eaa173816830d43c51523b0bf2e9f7",
+      "sourceGitBlobSha": "d6b6c711c5c55f495ef0c87bfa686e8948b55462"
+    },
+    {
+      "path": "lib/client/action-feedback.js",
+      "bytes": 4022,
+      "sha256": "a27541a136145d33726aa0f7104b3f52de0db8f99a9107c7f3c39a1d5d41b28c",
+      "gitBlobSha": "38e346a7ec9511417cc4e899ebb9aa9a79997baf",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "a27541a136145d33726aa0f7104b3f52de0db8f99a9107c7f3c39a1d5d41b28c",
+      "sourceGitBlobSha": "38e346a7ec9511417cc4e899ebb9aa9a79997baf"
+    },
+    {
+      "path": "lib/client/action-queue.js",
+      "bytes": 10868,
+      "sha256": "5e47e1e6973228b306dd9d2a1df1699b18e5f97a99cf7cf951c03df46982921a",
+      "gitBlobSha": "b3489bfc4f3f5149c5ef56766e15451589845c3b",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "5e47e1e6973228b306dd9d2a1df1699b18e5f97a99cf7cf951c03df46982921a",
+      "sourceGitBlobSha": "b3489bfc4f3f5149c5ef56766e15451589845c3b"
+    },
+    {
+      "path": "lib/client/action-sounds.js",
+      "bytes": 2431,
+      "sha256": "86c820649f87ff26a3e194441419d192883aa71fb24b7797ed5720c055e38f55",
+      "gitBlobSha": "ca67ff913033ecabcc54056cca920a801145e9dd",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "86c820649f87ff26a3e194441419d192883aa71fb24b7797ed5720c055e38f55",
+      "sourceGitBlobSha": "ca67ff913033ecabcc54056cca920a801145e9dd"
     },
     {
       "path": "lib/client/api.js",
-      "bytes": 7128,
-      "sha256": "8291f653b39405b0261d4f63738d6c3344a10b3cc6f826b6720a048355f4a012",
-      "gitBlobSha": "0a0add3a9e62f2560e5b2d85c61e378188795686",
+      "bytes": 7891,
+      "sha256": "a1dc8ae6370db6e32892a400653c15eca47bf55604cfcb9369fcabb7db49da4c",
+      "gitBlobSha": "d364452eabbad66081d9c87d1c23949127c92982",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "8291f653b39405b0261d4f63738d6c3344a10b3cc6f826b6720a048355f4a012",
-      "sourceGitBlobSha": "0a0add3a9e62f2560e5b2d85c61e378188795686"
+      "sourceSha256": "a1dc8ae6370db6e32892a400653c15eca47bf55604cfcb9369fcabb7db49da4c",
+      "sourceGitBlobSha": "d364452eabbad66081d9c87d1c23949127c92982"
+    },
+    {
+      "path": "lib/client/audio/action-recordings.js",
+      "bytes": 70702,
+      "sha256": "0a3890a364aa8cc7e1dd4d23081bb9e38fbc796d6e62fd038eb01b230925fe95",
+      "gitBlobSha": "25949e4c9f1adb1029bfbe5a11f8cb13174c78fa",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "0a3890a364aa8cc7e1dd4d23081bb9e38fbc796d6e62fd038eb01b230925fe95",
+      "sourceGitBlobSha": "25949e4c9f1adb1029bfbe5a11f8cb13174c78fa"
+    },
+    {
+      "path": "lib/client/audio/coin-recording.js",
+      "bytes": 20558,
+      "sha256": "12c95299ec84dc1afc35838962cb08a0ba389dbe7446a1f309eed427421d22da",
+      "gitBlobSha": "875a44262d6a97b3a6bc949047361f0c1685976b",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "12c95299ec84dc1afc35838962cb08a0ba389dbe7446a1f309eed427421d22da",
+      "sourceGitBlobSha": "875a44262d6a97b3a6bc949047361f0c1685976b"
+    },
+    {
+      "path": "lib/client/audio/user-action-recordings.js",
+      "bytes": 143716,
+      "sha256": "4a5c055da4e99f679eb16b5b2c0b8a06213cad6bfd489f57adde3dcd09153003",
+      "gitBlobSha": "390e3d2c81e2de28ffdc4ed0888c7d1d8edd0b28",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "4a5c055da4e99f679eb16b5b2c0b8a06213cad6bfd489f57adde3dcd09153003",
+      "sourceGitBlobSha": "390e3d2c81e2de28ffdc4ed0888c7d1d8edd0b28"
     },
     {
       "path": "lib/client/chat-outbox.js",
@@ -1671,13 +1870,13 @@
     },
     {
       "path": "lib/client/local-journal.js",
-      "bytes": 10478,
-      "sha256": "7f239215872088a002810395a984158e0d1b9c53ca85198628eadd98731225f7",
-      "gitBlobSha": "7ad963e65801c21d4191b2863ea12072875878d3",
+      "bytes": 10880,
+      "sha256": "8a55680a0d89a76d5531bdbff349bfff9ab3c69b286786ae01924ae68a15a3c6",
+      "gitBlobSha": "dc03c6bddfac09ee1a4db619a9c4cbbd19714e26",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "7f239215872088a002810395a984158e0d1b9c53ca85198628eadd98731225f7",
-      "sourceGitBlobSha": "7ad963e65801c21d4191b2863ea12072875878d3"
+      "sourceSha256": "8a55680a0d89a76d5531bdbff349bfff9ab3c69b286786ae01924ae68a15a3c6",
+      "sourceGitBlobSha": "dc03c6bddfac09ee1a4db619a9c4cbbd19714e26"
     },
     {
       "path": "lib/client/monotonic-clock.js",
@@ -1691,23 +1890,23 @@
     },
     {
       "path": "lib/client/ocean-audio.js",
-      "bytes": 10586,
-      "sha256": "1ded76e9688d10c020f844a88287f9a3f9bd6f353ed9e9de227adbbacd1f4a0a",
-      "gitBlobSha": "3244ff1dd8b946073134335beb5c706691062250",
+      "bytes": 12719,
+      "sha256": "c5cdbee5197bf3a78878d22b475e45de99276348db2932f4117a744161ce23c9",
+      "gitBlobSha": "f48a4570b96fa24d2b37bc81416ea57cba41b66f",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "1ded76e9688d10c020f844a88287f9a3f9bd6f353ed9e9de227adbbacd1f4a0a",
-      "sourceGitBlobSha": "3244ff1dd8b946073134335beb5c706691062250"
+      "sourceSha256": "c5cdbee5197bf3a78878d22b475e45de99276348db2932f4117a744161ce23c9",
+      "sourceGitBlobSha": "f48a4570b96fa24d2b37bc81416ea57cba41b66f"
     },
     {
       "path": "lib/client/pending-recovery.js",
-      "bytes": 1497,
-      "sha256": "e1ffe0470b728251b37c824af6101433b04af1c81669217432609ee4599aad2b",
-      "gitBlobSha": "de8d877cecd0b67bed113381f31800a1a2668eb0",
+      "bytes": 2316,
+      "sha256": "200f9a41747617fd6e7880f4f2f63177aeb3c3b0fc764cf33147f942ce756ced",
+      "gitBlobSha": "1fd4440f5996f15b3953f18b6d166a90f7cee66b",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "e1ffe0470b728251b37c824af6101433b04af1c81669217432609ee4599aad2b",
-      "sourceGitBlobSha": "de8d877cecd0b67bed113381f31800a1a2668eb0"
+      "sourceSha256": "200f9a41747617fd6e7880f4f2f63177aeb3c3b0fc764cf33147f942ce756ced",
+      "sourceGitBlobSha": "1fd4440f5996f15b3953f18b6d166a90f7cee66b"
     },
     {
       "path": "lib/client/snapshot-order.js",
@@ -1721,13 +1920,13 @@
     },
     {
       "path": "lib/client/sync-notice.js",
-      "bytes": 1009,
-      "sha256": "2b6ccf07f9e22517ce8c75a746bea10ccd1f1c52ef974634ad7909071c0aec52",
-      "gitBlobSha": "670ef9d6e5df325aebbb005ae681dfd7372e4d32",
+      "bytes": 1108,
+      "sha256": "3777fc310d16422f5d29ba677172db73384d087ba200e1e89bdf1fbab606ffee",
+      "gitBlobSha": "74639f088effd2cd847a0a808bc7781e054d2ed6",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "2b6ccf07f9e22517ce8c75a746bea10ccd1f1c52ef974634ad7909071c0aec52",
-      "sourceGitBlobSha": "670ef9d6e5df325aebbb005ae681dfd7372e4d32"
+      "sourceSha256": "3777fc310d16422f5d29ba677172db73384d087ba200e1e89bdf1fbab606ffee",
+      "sourceGitBlobSha": "74639f088effd2cd847a0a808bc7781e054d2ed6"
     },
     {
       "path": "lib/client/visual-motion.js",
@@ -1810,24 +2009,34 @@
       "sourceGitBlobSha": "41c12417e9650bdb3a74b8d17d7e5e7561905811"
     },
     {
-      "path": "lib/game/build-options.js",
-      "bytes": 976,
-      "sha256": "91e587a6a05e89e32532ee15bcc7671fec841d7302cfae7dde22ceda90353ab7",
-      "gitBlobSha": "6d4787b9f6de1e25a2b1138c80c8a6da6ce6c608",
+      "path": "lib/game/build-click.js",
+      "bytes": 789,
+      "sha256": "45d9f86584eb6ea0a921cb822d6a12bb1dbd90c1afe3ada1dc0cae93f7974e1d",
+      "gitBlobSha": "da981299638256688b215b37a498c1d2e0209299",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "91e587a6a05e89e32532ee15bcc7671fec841d7302cfae7dde22ceda90353ab7",
-      "sourceGitBlobSha": "6d4787b9f6de1e25a2b1138c80c8a6da6ce6c608"
+      "sourceSha256": "45d9f86584eb6ea0a921cb822d6a12bb1dbd90c1afe3ada1dc0cae93f7974e1d",
+      "sourceGitBlobSha": "da981299638256688b215b37a498c1d2e0209299"
+    },
+    {
+      "path": "lib/game/build-options.js",
+      "bytes": 1063,
+      "sha256": "e65344f43f345a0776902b0dbbac7c3d3560a1f45cbdbe87f83b393da9c5b077",
+      "gitBlobSha": "e403052ed80665432ef2f9205277748dba0fb62a",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "e65344f43f345a0776902b0dbbac7c3d3560a1f45cbdbe87f83b393da9c5b077",
+      "sourceGitBlobSha": "e403052ed80665432ef2f9205277748dba0fb62a"
     },
     {
       "path": "lib/game/catalogue.js",
-      "bytes": 1759,
-      "sha256": "f7d97b51f171c03c50b0b05e8649ec17fe72ce120d0cd5dbc793d2bbea466d73",
-      "gitBlobSha": "0637259aa1b000d6e9c32d6d897ce4dabcbe4ce7",
+      "bytes": 2692,
+      "sha256": "e22afa1e18be8faae6aeaf8d82c8238050ed945684a5399acce4e6ce2bf948ed",
+      "gitBlobSha": "11cefd15607be4cd0e03ccbcf1cf2b2506a65585",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "f7d97b51f171c03c50b0b05e8649ec17fe72ce120d0cd5dbc793d2bbea466d73",
-      "sourceGitBlobSha": "0637259aa1b000d6e9c32d6d897ce4dabcbe4ce7"
+      "sourceSha256": "e22afa1e18be8faae6aeaf8d82c8238050ed945684a5399acce4e6ce2bf948ed",
+      "sourceGitBlobSha": "11cefd15607be4cd0e03ccbcf1cf2b2506a65585"
     },
     {
       "path": "lib/game/collection.js",
@@ -1841,13 +2050,13 @@
     },
     {
       "path": "lib/game/construction.js",
-      "bytes": 2660,
-      "sha256": "f6af8a5fe92abae9401474cdb669b940bab53224829c193cf5e8a3fd8a6a2fa3",
-      "gitBlobSha": "ee97ca522be5d6499d9f6e78f4b47948415b7e24",
+      "bytes": 2608,
+      "sha256": "1ae8976b51d13d03e276ca910495897761259388c399e86d06b6cca59ef899f5",
+      "gitBlobSha": "39af16dd7710c7844073a7c0707dc0a25127f4b2",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "f6af8a5fe92abae9401474cdb669b940bab53224829c193cf5e8a3fd8a6a2fa3",
-      "sourceGitBlobSha": "ee97ca522be5d6499d9f6e78f4b47948415b7e24"
+      "sourceSha256": "1ae8976b51d13d03e276ca910495897761259388c399e86d06b6cca59ef899f5",
+      "sourceGitBlobSha": "39af16dd7710c7844073a7c0707dc0a25127f4b2"
     },
     {
       "path": "lib/game/demo-catalogue.js",
@@ -1891,13 +2100,13 @@
     },
     {
       "path": "lib/game/fish-space.js",
-      "bytes": 2094,
-      "sha256": "6e950c184e48f09e4de6d027b17a73152ab45ebcae05e786c9ec6282129c4c31",
-      "gitBlobSha": "e7188579d3fdacd0dcea3c41721f6e86f35e79de",
+      "bytes": 2319,
+      "sha256": "f629a80844940b72c613562ad6a3c6e8b0624ec1455e8e4236f0b530c634da24",
+      "gitBlobSha": "6daca180e216123a16ba69ed7639db3df79b2ef9",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "6e950c184e48f09e4de6d027b17a73152ab45ebcae05e786c9ec6282129c4c31",
-      "sourceGitBlobSha": "e7188579d3fdacd0dcea3c41721f6e86f35e79de"
+      "sourceSha256": "f629a80844940b72c613562ad6a3c6e8b0624ec1455e8e4236f0b530c634da24",
+      "sourceGitBlobSha": "6daca180e216123a16ba69ed7639db3df79b2ef9"
     },
     {
       "path": "lib/game/fishing-time.js",
@@ -1920,14 +2129,24 @@
       "sourceGitBlobSha": "0ce99cd16b2f2241ee6c92270a03759a0f6803db"
     },
     {
-      "path": "lib/game/inventory-groups.js",
-      "bytes": 1402,
-      "sha256": "e9676dcf7fd0dedf51c9c8f888be613626a5c2c4979e3a856bbcb99b3c836ffa",
-      "gitBlobSha": "b5fec693840723e5fd89d03c6643077b9b410c86",
+      "path": "lib/game/inventory-counts.js",
+      "bytes": 348,
+      "sha256": "ebf2419dbe4e84fb84fe62fb2b036d3dcbe86327f9af039861fd5760f09ebdc4",
+      "gitBlobSha": "f9e81f725194c51990c763cc4151ff668b90460b",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "e9676dcf7fd0dedf51c9c8f888be613626a5c2c4979e3a856bbcb99b3c836ffa",
-      "sourceGitBlobSha": "b5fec693840723e5fd89d03c6643077b9b410c86"
+      "sourceSha256": "ebf2419dbe4e84fb84fe62fb2b036d3dcbe86327f9af039861fd5760f09ebdc4",
+      "sourceGitBlobSha": "f9e81f725194c51990c763cc4151ff668b90460b"
+    },
+    {
+      "path": "lib/game/inventory-groups.js",
+      "bytes": 1325,
+      "sha256": "34964c3801fbbc8314bf734e4b1e713fe8b1b823dd3fe1aca30e6a8de14e165e",
+      "gitBlobSha": "b85400c40e93ea26ade9f541e77e936e12ff6f6c",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "34964c3801fbbc8314bf734e4b1e713fe8b1b823dd3fe1aca30e6a8de14e165e",
+      "sourceGitBlobSha": "b85400c40e93ea26ade9f541e77e936e12ff6f6c"
     },
     {
       "path": "lib/game/journal-recovery.js",
@@ -1971,23 +2190,23 @@
     },
     {
       "path": "lib/game/presentation.js",
-      "bytes": 1522,
-      "sha256": "dd7b4abaf271597002fdaefadb298f46439c0e768c21d1142711e0b689bc70d5",
-      "gitBlobSha": "a5ee635f1eb25f208818ba408c82478b0e4c3ea0",
+      "bytes": 1781,
+      "sha256": "1825b36943f31e3feb932ed48f493d862ab06b28913b7093598033f4fd967899",
+      "gitBlobSha": "2fc4b98a27d9eec0114c216959d3d6573dcb7957",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "dd7b4abaf271597002fdaefadb298f46439c0e768c21d1142711e0b689bc70d5",
-      "sourceGitBlobSha": "a5ee635f1eb25f208818ba408c82478b0e4c3ea0"
+      "sourceSha256": "1825b36943f31e3feb932ed48f493d862ab06b28913b7093598033f4fd967899",
+      "sourceGitBlobSha": "2fc4b98a27d9eec0114c216959d3d6573dcb7957"
     },
     {
       "path": "lib/game/random.js",
-      "bytes": 1512,
-      "sha256": "22428323e681cf4a8bbc83dcbffcd02db8e1866dd7b92a04837d6e8d95394771",
-      "gitBlobSha": "4e17d29c8721f0c65fc697b45584578c6c0a8efe",
+      "bytes": 1657,
+      "sha256": "cb75e7094c07f5c4d7ee80121aa2dc5579e9407574e090349694814238021a25",
+      "gitBlobSha": "e71a604b69c1be554d05b0d7c6dee8fafbebb741",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "22428323e681cf4a8bbc83dcbffcd02db8e1866dd7b92a04837d6e8d95394771",
-      "sourceGitBlobSha": "4e17d29c8721f0c65fc697b45584578c6c0a8efe"
+      "sourceSha256": "cb75e7094c07f5c4d7ee80121aa2dc5579e9407574e090349694814238021a25",
+      "sourceGitBlobSha": "e71a604b69c1be554d05b0d7c6dee8fafbebb741"
     },
     {
       "path": "lib/game/seed-paint.js",
@@ -2001,23 +2220,33 @@
     },
     {
       "path": "lib/game/state.js",
-      "bytes": 16222,
-      "sha256": "5169547aa3702759fdf50a24d5f45a98addf62b07e761950865ce1c5665306f6",
-      "gitBlobSha": "cf292c93f3bc5849be51d20aa595566cb33d0c42",
+      "bytes": 16529,
+      "sha256": "5b51d882ec201e608a262fe46a741a6499bc7b9a6da99a7bc3ef37a2fcd690ca",
+      "gitBlobSha": "659686b602ae2a802d5ccdd44de6499e09c2efa3",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "5169547aa3702759fdf50a24d5f45a98addf62b07e761950865ce1c5665306f6",
-      "sourceGitBlobSha": "cf292c93f3bc5849be51d20aa595566cb33d0c42"
+      "sourceSha256": "5b51d882ec201e608a262fe46a741a6499bc7b9a6da99a7bc3ef37a2fcd690ca",
+      "sourceGitBlobSha": "659686b602ae2a802d5ccdd44de6499e09c2efa3"
+    },
+    {
+      "path": "lib/game/tank-management.js",
+      "bytes": 1026,
+      "sha256": "7e76b17047b4c03bceb0c8b5d31531c8484954644bacdf7e2750c651d15ccbfd",
+      "gitBlobSha": "e88494e2847c782f326ddff37b3c9238d8b34da0",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "7e76b17047b4c03bceb0c8b5d31531c8484954644bacdf7e2750c651d15ccbfd",
+      "sourceGitBlobSha": "e88494e2847c782f326ddff37b3c9238d8b34da0"
     },
     {
       "path": "lib/game/tank-space.js",
-      "bytes": 1321,
-      "sha256": "fd894ac33e41c4354f938ba77fcebedadfc384c3f2744f9c5276afe729622c3b",
-      "gitBlobSha": "69f62085726813248fde02bbc2aedb626566fabc",
+      "bytes": 1822,
+      "sha256": "c051ce5292963d2d130945afa8b266d200359de85d294d1e371558cdd4962e31",
+      "gitBlobSha": "b49224a81f7d765197b588564fb700401b91431a",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "fd894ac33e41c4354f938ba77fcebedadfc384c3f2744f9c5276afe729622c3b",
-      "sourceGitBlobSha": "69f62085726813248fde02bbc2aedb626566fabc"
+      "sourceSha256": "c051ce5292963d2d130945afa8b266d200359de85d294d1e371558cdd4962e31",
+      "sourceGitBlobSha": "b49224a81f7d765197b588564fb700401b91431a"
     },
     {
       "path": "lib/raw.d.ts",
@@ -2031,13 +2260,13 @@
     },
     {
       "path": "lib/server/demo-games.js",
-      "bytes": 2582,
-      "sha256": "0978673e2d51d99237ce04bf1c6773402cc2797b4c7f6e7d3feef7ee7d815150",
-      "gitBlobSha": "8182918faeeeb09c0fa8b897c738537ecb716f86",
+      "bytes": 5150,
+      "sha256": "0b497d8a63b8ce20fd9dc54026ae62da2b6d9de1188c6f9d7efb43c53692f034",
+      "gitBlobSha": "305d7d0815a92ee4082a65abab75bdb0161fc24d",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "0978673e2d51d99237ce04bf1c6773402cc2797b4c7f6e7d3feef7ee7d815150",
-      "sourceGitBlobSha": "8182918faeeeb09c0fa8b897c738537ecb716f86"
+      "sourceSha256": "0b497d8a63b8ce20fd9dc54026ae62da2b6d9de1188c6f9d7efb43c53692f034",
+      "sourceGitBlobSha": "305d7d0815a92ee4082a65abab75bdb0161fc24d"
     },
     {
       "path": "lib/server/diagnostics.js",
@@ -2081,23 +2310,23 @@
     },
     {
       "path": "lib/server/service.js",
-      "bytes": 6309,
-      "sha256": "17e713e34346aeccfabb6391d48c58a84832ba5970672b76b1c8c62e1ef91f9e",
-      "gitBlobSha": "a12a77be3a833e0d3184e8afad43e09d3724bde6",
+      "bytes": 6328,
+      "sha256": "34fcf9ce108ba3ebac23c700d98646205078b143a613ee904543110e7c27ecf3",
+      "gitBlobSha": "f051259b5b19fd93172ad84bff05f9fbfa7f5aeb",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "17e713e34346aeccfabb6391d48c58a84832ba5970672b76b1c8c62e1ef91f9e",
-      "sourceGitBlobSha": "a12a77be3a833e0d3184e8afad43e09d3724bde6"
+      "sourceSha256": "34fcf9ce108ba3ebac23c700d98646205078b143a613ee904543110e7c27ecf3",
+      "sourceGitBlobSha": "f051259b5b19fd93172ad84bff05f9fbfa7f5aeb"
     },
     {
       "path": "lib/server/social-commands.js",
-      "bytes": 5834,
-      "sha256": "2983948a856d2a929f55b1f8fe6c25b19a82cf960b02c573be6e1ef106f03cd6",
-      "gitBlobSha": "23f2f4a850de00b6a0ad52d765bfe0b7a5bf73a6",
+      "bytes": 6010,
+      "sha256": "ffeafc0f002e5333876b5f3e696fc16da5304960a675faaacc994772c16b0778",
+      "gitBlobSha": "c1c586b1a0bb9ac7102cfefaada5c323f55122a0",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "2983948a856d2a929f55b1f8fe6c25b19a82cf960b02c573be6e1ef106f03cd6",
-      "sourceGitBlobSha": "23f2f4a850de00b6a0ad52d765bfe0b7a5bf73a6"
+      "sourceSha256": "ffeafc0f002e5333876b5f3e696fc16da5304960a675faaacc994772c16b0778",
+      "sourceGitBlobSha": "c1c586b1a0bb9ac7102cfefaada5c323f55122a0"
     },
     {
       "path": "lib/server/social-service.js",
@@ -2111,23 +2340,23 @@
     },
     {
       "path": "lib/server/social-store.js",
-      "bytes": 8597,
-      "sha256": "df117be773e850da95e1b713450c5d55b7c712041e8e72e3ba1151b250a45011",
-      "gitBlobSha": "846a8ea6019ac3d33201542cd158d0c510c77ce2",
+      "bytes": 9452,
+      "sha256": "3c309a053f861f6c3c2134dc399a06cced8311e50ea3b6331bcc4cff82129c9f",
+      "gitBlobSha": "254e6ec457af20c7c5de09e46f7414822875c394",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "df117be773e850da95e1b713450c5d55b7c712041e8e72e3ba1151b250a45011",
-      "sourceGitBlobSha": "846a8ea6019ac3d33201542cd158d0c510c77ce2"
+      "sourceSha256": "3c309a053f861f6c3c2134dc399a06cced8311e50ea3b6331bcc4cff82129c9f",
+      "sourceGitBlobSha": "254e6ec457af20c7c5de09e46f7414822875c394"
     },
     {
       "path": "lib/server/store.js",
-      "bytes": 5153,
-      "sha256": "3a077dbb49b80ae89ac5529fae072862a1181a385ed6e8467615b48b01631d4e",
-      "gitBlobSha": "32574a713e86d8ad0226cc5531a0e21d29211cf7",
+      "bytes": 5839,
+      "sha256": "789823e49f1b8d21545ee3008e2589cd8b439a1262b5da15fae9587bae3b5947",
+      "gitBlobSha": "0f0f4c0b4609a364d5f2250d42da6ea044e3e6b0",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "3a077dbb49b80ae89ac5529fae072862a1181a385ed6e8467615b48b01631d4e",
-      "sourceGitBlobSha": "32574a713e86d8ad0226cc5531a0e21d29211cf7"
+      "sourceSha256": "789823e49f1b8d21545ee3008e2589cd8b439a1262b5da15fae9587bae3b5947",
+      "sourceGitBlobSha": "0f0f4c0b4609a364d5f2250d42da6ea044e3e6b0"
     },
     {
       "path": "lib/utils.ts",
@@ -2161,13 +2390,23 @@
     },
     {
       "path": "lib/world/item-preview.js",
-      "bytes": 3242,
-      "sha256": "45c870b48caaeadaf70dfb3ecf97df8b183cabf2f890557592175768035c71e4",
-      "gitBlobSha": "2dcb44e35469d7f2ffa7b2c0dbe3fb4df34283ae",
+      "bytes": 3613,
+      "sha256": "564f3b195ad16fc750441ccaec9c43bc987175480062797de2b0454c47ba074a",
+      "gitBlobSha": "e1fddcb80ceca68e6a6895ab3d13ba093c6efe0b",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "45c870b48caaeadaf70dfb3ecf97df8b183cabf2f890557592175768035c71e4",
-      "sourceGitBlobSha": "2dcb44e35469d7f2ffa7b2c0dbe3fb4df34283ae"
+      "sourceSha256": "564f3b195ad16fc750441ccaec9c43bc987175480062797de2b0454c47ba074a",
+      "sourceGitBlobSha": "e1fddcb80ceca68e6a6895ab3d13ba093c6efe0b"
+    },
+    {
+      "path": "lib/world/marker-anchor.js",
+      "bytes": 1048,
+      "sha256": "afb6fec4780fa405e5f000114303121001d39a98cfe00682cfc743223f706e90",
+      "gitBlobSha": "d7220766dd768837c83fdc3424012c0d60102734",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "afb6fec4780fa405e5f000114303121001d39a98cfe00682cfc743223f706e90",
+      "sourceGitBlobSha": "d7220766dd768837c83fdc3424012c0d60102734"
     },
     {
       "path": "lib/world/overlay-positions.js",
@@ -2191,33 +2430,33 @@
     },
     {
       "path": "lib/world/scene.js",
-      "bytes": 30622,
-      "sha256": "fc12b38957cd7250a3c1f5a72d940891131fb1b9b9de25c46333f0d28e2fc6e5",
-      "gitBlobSha": "3f42798af110892a56d40f9f0aacb271d1de698b",
+      "bytes": 32390,
+      "sha256": "1de21877476775ae7d07595724d707c17a7a3f13953f7feb081e583937edf35b",
+      "gitBlobSha": "9163a397b5fcc5bcc820356a5feb3269d1a6375b",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "fc12b38957cd7250a3c1f5a72d940891131fb1b9b9de25c46333f0d28e2fc6e5",
-      "sourceGitBlobSha": "3f42798af110892a56d40f9f0aacb271d1de698b"
+      "sourceSha256": "1de21877476775ae7d07595724d707c17a7a3f13953f7feb081e583937edf35b",
+      "sourceGitBlobSha": "9163a397b5fcc5bcc820356a5feb3269d1a6375b"
     },
     {
       "path": "lib/world/swimming.js",
-      "bytes": 7547,
-      "sha256": "7b9ae82eaec86856022ae5e9754b6cd3b4770da68ec5a61deae1f62f414b6a7f",
-      "gitBlobSha": "b3731faf8dbf456786945abb825b04a3d7e4e2e7",
+      "bytes": 7485,
+      "sha256": "f0095cafef4b52d8fa3312384b2f275b05e29b10788ac11545fb7136fa095ef9",
+      "gitBlobSha": "82cbb82213595dbe567c2b0ab51adb718e9141cc",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "7b9ae82eaec86856022ae5e9754b6cd3b4770da68ec5a61deae1f62f414b6a7f",
-      "sourceGitBlobSha": "b3731faf8dbf456786945abb825b04a3d7e4e2e7"
+      "sourceSha256": "f0095cafef4b52d8fa3312384b2f275b05e29b10788ac11545fb7136fa095ef9",
+      "sourceGitBlobSha": "82cbb82213595dbe567c2b0ab51adb718e9141cc"
     },
     {
       "path": "lib/world/thumbnail-cache.js",
       "bytes": 1242,
-      "sha256": "226e1c4f0d16aa82b067c7b8629b9452134abff07a52faabdd20736c196c6a10",
-      "gitBlobSha": "2fed5252f79c57ab09bace144a83fac0a08e8ea4",
+      "sha256": "6047cadff69a6097b135abdcf8691226fbc03a79c969926ba866caf877634370",
+      "gitBlobSha": "75d95026ffc4d535fc0ea93883f4d3f653bce1db",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "226e1c4f0d16aa82b067c7b8629b9452134abff07a52faabdd20736c196c6a10",
-      "sourceGitBlobSha": "2fed5252f79c57ab09bace144a83fac0a08e8ea4"
+      "sourceSha256": "6047cadff69a6097b135abdcf8691226fbc03a79c969926ba866caf877634370",
+      "sourceGitBlobSha": "75d95026ffc4d535fc0ea93883f4d3f653bce1db"
     },
     {
       "path": "lib/world/thumbnail-frame.js",
@@ -2228,6 +2467,16 @@
       "change": "unchanged",
       "sourceSha256": "fe08a15778d2dbbc8acbb04eb31d8b40f45783387ddf6d272c5b2f6a415605ac",
       "sourceGitBlobSha": "025308b712169edf74c13f32b8bc3fafd8931ef0"
+    },
+    {
+      "path": "lib/world/view-coverage.js",
+      "bytes": 700,
+      "sha256": "d762d4f058863b93d08ad0f0396de7604920a55e9d1b5f187f68fa7a1e21260d",
+      "gitBlobSha": "b0a77549de07513e9604cc783be41d794761ba20",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "d762d4f058863b93d08ad0f0396de7604920a55e9d1b5f187f68fa7a1e21260d",
+      "sourceGitBlobSha": "b0a77549de07513e9604cc783be41d794761ba20"
     },
     {
       "path": "next.config.ts",
@@ -2268,6 +2517,126 @@
       "change": "unchanged",
       "sourceSha256": "dfac7ac2d86d326a0e5adb024e7943c181393ed17a5fcb8f0315b24c7da6ddde",
       "sourceGitBlobSha": "61e36849cf7cfa9f1f71b4a3964a4953e3e243d3"
+    },
+    {
+      "path": "public/assets/audio/ACTION-SOURCES-v22.txt",
+      "bytes": 872,
+      "sha256": "fcae3d7a1f18ab6500e2ecc4da7054e4d43708cf755b1f457b4a96a34c6b93ff",
+      "gitBlobSha": "fb6fe39f166cd2231000acf612d87ab4af75359c",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "fcae3d7a1f18ab6500e2ecc4da7054e4d43708cf755b1f457b4a96a34c6b93ff",
+      "sourceGitBlobSha": "fb6fe39f166cd2231000acf612d87ab4af75359c"
+    },
+    {
+      "path": "public/assets/audio/Kenney-RPG-Audio-CC0.txt",
+      "bytes": 478,
+      "sha256": "5735dfd72cb64cbbceda4ebc00c380c41ca680edb82ff153aa7c9ab97614c539",
+      "gitBlobSha": "c19921a2fb2402ead892083a2a5d09ce90e7e9e4",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "5735dfd72cb64cbbceda4ebc00c380c41ca680edb82ff153aa7c9ab97614c539",
+      "sourceGitBlobSha": "c19921a2fb2402ead892083a2a5d09ce90e7e9e4"
+    },
+    {
+      "path": "public/assets/audio/SOURCE.txt",
+      "bytes": 267,
+      "sha256": "ea43c54446ea0dd313904aeba6ebab845085267486262c50b8b1f1a79708dbd2",
+      "gitBlobSha": "0ebd69c8b026f0d82fd79c4346dc6e428f7601b4",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "ea43c54446ea0dd313904aeba6ebab845085267486262c50b8b1f1a79708dbd2",
+      "sourceGitBlobSha": "0ebd69c8b026f0d82fd79c4346dc6e428f7601b4"
+    },
+    {
+      "path": "public/assets/audio/USER-AUDIO-SOURCE-v23.txt",
+      "bytes": 947,
+      "sha256": "c1fff280acee99723030f8d78f89a8a10b812b898a2114f7ee819fa6a9d19ef6",
+      "gitBlobSha": "f94a3953c901e11419e3939ad08be5685b72923b",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "c1fff280acee99723030f8d78f89a8a10b812b898a2114f7ee819fa6a9d19ef6",
+      "sourceGitBlobSha": "f94a3953c901e11419e3939ad08be5685b72923b"
+    },
+    {
+      "path": "public/assets/audio/build-user-v23.wav",
+      "bytes": 8854,
+      "sha256": "cb36c271c44edd77f4669240d0613c94c51e9df77df64b57d54600a33602857b",
+      "gitBlobSha": "dc5b73957d7df25577ad5a5efc30ace9b8e57da9",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "cb36c271c44edd77f4669240d0613c94c51e9df77df64b57d54600a33602857b",
+      "sourceGitBlobSha": "dc5b73957d7df25577ad5a5efc30ace9b8e57da9"
+    },
+    {
+      "path": "public/assets/audio/cast-user-v23.wav",
+      "bytes": 45370,
+      "sha256": "cfe4820b8bde4e6ed9fcb3fb43cc6755cd7709e248b63273d0757089f7c537f8",
+      "gitBlobSha": "515e859b09fb70a6fbd8264739a9f040fd30a589",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "cfe4820b8bde4e6ed9fcb3fb43cc6755cd7709e248b63273d0757089f7c537f8",
+      "sourceGitBlobSha": "515e859b09fb70a6fbd8264739a9f040fd30a589"
+    },
+    {
+      "path": "public/assets/audio/cloth-bag-kenney-v22.wav",
+      "bytes": 21582,
+      "sha256": "37f25412c06bdf012dbd7394098769365596efeb1355d6100a59d084e20c4ca7",
+      "gitBlobSha": "ba5fea8b6cb9829b648e6e71959ab9a942fa5add",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "37f25412c06bdf012dbd7394098769365596efeb1355d6100a59d084e20c4ca7",
+      "sourceGitBlobSha": "ba5fea8b6cb9829b648e6e71959ab9a942fa5add"
+    },
+    {
+      "path": "public/assets/audio/coins-kenney-v19.wav",
+      "bytes": 14994,
+      "sha256": "ba67057945b2ccf748f71f123be86eb75ec38ea7a236404c6d940e388151f815",
+      "gitBlobSha": "fc90a28aa7f39685ad82b65379c1d714c15a37d5",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "ba67057945b2ccf748f71f123be86eb75ec38ea7a236404c6d940e388151f815",
+      "sourceGitBlobSha": "fc90a28aa7f39685ad82b65379c1d714c15a37d5"
+    },
+    {
+      "path": "public/assets/audio/coins-user-v23.wav",
+      "bytes": 31126,
+      "sha256": "7df1c9049851928b22b523021ce0ec7c45a19d9c3c5d5e2c33466593a559b6ba",
+      "gitBlobSha": "3388cd9dff5be86811dd85ef580d27000906fb23",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "7df1c9049851928b22b523021ce0ec7c45a19d9c3c5d5e2c33466593a559b6ba",
+      "sourceGitBlobSha": "3388cd9dff5be86811dd85ef580d27000906fb23"
+    },
+    {
+      "path": "public/assets/audio/inventory-user-v23.wav",
+      "bytes": 22128,
+      "sha256": "0e40fa7bf46cf62007026625f9c15b26d4db2e61919cec47c6235bbbbafc7547",
+      "gitBlobSha": "f185ee38f07408497b318ba894f5db428f23dfb9",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "0e40fa7bf46cf62007026625f9c15b26d4db2e61919cec47c6235bbbbafc7547",
+      "sourceGitBlobSha": "f185ee38f07408497b318ba894f5db428f23dfb9"
+    },
+    {
+      "path": "public/assets/audio/water-plop-cc0-v22.wav",
+      "bytes": 17664,
+      "sha256": "cd33aa9e279d5fae6ccb903748845dc86ae9bea3d1b7ed0abae4ee1f51a3fc7d",
+      "gitBlobSha": "a179cda2178c16225f5395aef76e0ffa1d7af7e2",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "cd33aa9e279d5fae6ccb903748845dc86ae9bea3d1b7ed0abae4ee1f51a3fc7d",
+      "sourceGitBlobSha": "a179cda2178c16225f5395aef76e0ffa1d7af7e2"
+    },
+    {
+      "path": "public/assets/audio/wood-knock-kenney-v22.wav",
+      "bytes": 13290,
+      "sha256": "578c9db7dccb04dbab7bcc0846918060a64e9a2eab66d3e2acdbd71fcc4f17a2",
+      "gitBlobSha": "236f555f3b5f7c6c4050443dc9eb4a8fcd646223",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "578c9db7dccb04dbab7bcc0846918060a64e9a2eab66d3e2acdbd71fcc4f17a2",
+      "sourceGitBlobSha": "236f555f3b5f7c6c4050443dc9eb4a8fcd646223"
     },
     {
       "path": "public/assets/avatars/cast-v1/PROVENANCE.txt",
@@ -2558,6 +2927,16 @@
       "change": "unchanged",
       "sourceSha256": "70ed78116bc8c63ed234c3614f34ead48e2f16fa9502e5da92cce5591e9d8fd1",
       "sourceGitBlobSha": "d01412d06a4b05282ec0b82d7a74df8febee4dec"
+    },
+    {
+      "path": "public/assets/world/ground/artdesign-4bc5d2c1.glb",
+      "bytes": 955936,
+      "sha256": "4bc5d2c18e49677b3fe23e65d4966c3a3228309c0472aa2a8516e1af486ad025",
+      "gitBlobSha": "1bf465690e4d40791a21c0799b6145bbc02e010d",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "4bc5d2c18e49677b3fe23e65d4966c3a3228309c0472aa2a8516e1af486ad025",
+      "sourceGitBlobSha": "1bf465690e4d40791a21c0799b6145bbc02e010d"
     },
     {
       "path": "public/assets/world/icons/bait-1-botanical-v10b.svg",
@@ -3171,9 +3550,9 @@
     },
     {
       "path": "scripts/verify-archive.mjs",
-      "bytes": 2164,
-      "sha256": "ae749b20d56a9d6d849bf344a696cf79fcd7026a479770d92fa115f21014d211",
-      "gitBlobSha": "3496f3fd43a8ae9a6c3494bcdac29fe838be3167",
+      "bytes": 2165,
+      "sha256": "c62464c877ac10817fc3895177eb3f7be5c8bbe49aa0bd8536b5cb824c9acd7c",
+      "gitBlobSha": "454076a33d66cd98afe29be0f505b9d17a39a32f",
       "mode": "100644",
       "change": "added"
     },
@@ -3208,14 +3587,64 @@
       "sourceGitBlobSha": "2ece1b96530b40a7ea4981e6341b52771a07813e"
     },
     {
-      "path": "tests/art-feedback.test.js",
-      "bytes": 4689,
-      "sha256": "a2d26d573808ae78080d1d219bc4a7bd6f3064d1c0cf3f3b31b5f0ed25cd5e3f",
-      "gitBlobSha": "914335e9dd0d9652fa718cd6adc8d2cde69bc62d",
+      "path": "tests/action-feedback.test.js",
+      "bytes": 4792,
+      "sha256": "4c4c3c652aa592fc7f5fe8e6f6ba04e160ae847cbcccc3fd7409f7bb555ed42c",
+      "gitBlobSha": "534b59ac312703a1c6e55927699bd52c94234d6b",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "a2d26d573808ae78080d1d219bc4a7bd6f3064d1c0cf3f3b31b5f0ed25cd5e3f",
-      "sourceGitBlobSha": "914335e9dd0d9652fa718cd6adc8d2cde69bc62d"
+      "sourceSha256": "4c4c3c652aa592fc7f5fe8e6f6ba04e160ae847cbcccc3fd7409f7bb555ed42c",
+      "sourceGitBlobSha": "534b59ac312703a1c6e55927699bd52c94234d6b"
+    },
+    {
+      "path": "tests/art-feedback.test.js",
+      "bytes": 4719,
+      "sha256": "f73a6306564ca5907dba4b4178c56be7723c378b39c3768d523e349c06052be8",
+      "gitBlobSha": "de72212ae4b3efc4aaeef3a7185b51123f5018b7",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "f73a6306564ca5907dba4b4178c56be7723c378b39c3768d523e349c06052be8",
+      "sourceGitBlobSha": "de72212ae4b3efc4aaeef3a7185b51123f5018b7"
+    },
+    {
+      "path": "tests/audio-soften.test.js",
+      "bytes": 954,
+      "sha256": "f3f82c543b65853b46480d451bc3134dd45decc070b8f5752db859f3b00d9029",
+      "gitBlobSha": "2a2785105245d6c370db4cdbdb3fce1aafa38f1d",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "f3f82c543b65853b46480d451bc3134dd45decc070b8f5752db859f3b00d9029",
+      "sourceGitBlobSha": "2a2785105245d6c370db4cdbdb3fce1aafa38f1d"
+    },
+    {
+      "path": "tests/boot-error.test.js",
+      "bytes": 1208,
+      "sha256": "ee5b0153236cbfb808566ae612d3a0d4a079e0d66f256b1ae7453c5a85381f28",
+      "gitBlobSha": "60b90773e2c65496cea401051d3645c20377dcc0",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "ee5b0153236cbfb808566ae612d3a0d4a079e0d66f256b1ae7453c5a85381f28",
+      "sourceGitBlobSha": "60b90773e2c65496cea401051d3645c20377dcc0"
+    },
+    {
+      "path": "tests/catalogue-upgrade.test.js",
+      "bytes": 3614,
+      "sha256": "f9c1076011eb50afb295f318253a111b7221122a58bd3a0483a370d476929887",
+      "gitBlobSha": "7ed8f25a85f42229f1f60e1b793b6c9baae126fe",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "f9c1076011eb50afb295f318253a111b7221122a58bd3a0483a370d476929887",
+      "sourceGitBlobSha": "7ed8f25a85f42229f1f60e1b793b6c9baae126fe"
+    },
+    {
+      "path": "tests/catalogue-v1-vectors.json",
+      "bytes": 13605,
+      "sha256": "ee77c4cd7d3c14f07208e1942a3764dcd5785e87e1105fa50e2f136307c4bc14",
+      "gitBlobSha": "a4c9538dba6014e49b0a9886bfc96f2744269d64",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "ee77c4cd7d3c14f07208e1942a3764dcd5785e87e1105fa50e2f136307c4bc14",
+      "sourceGitBlobSha": "a4c9538dba6014e49b0a9886bfc96f2744269d64"
     },
     {
       "path": "tests/chat-outbox.test.js",
@@ -3288,6 +3717,16 @@
       "sourceGitBlobSha": "36a391c1c3f829be4e7079f21bceb3de5409ecc9"
     },
     {
+      "path": "tests/demo-layout-upgrade.test.js",
+      "bytes": 3983,
+      "sha256": "e5ef63c87e5ee168d6e8319c2257c3a03c2047692db33e70dbeefe2506ef82f0",
+      "gitBlobSha": "711d9394be4c70645798af2486d09937829aeffd",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "e5ef63c87e5ee168d6e8319c2257c3a03c2047692db33e70dbeefe2506ef82f0",
+      "sourceGitBlobSha": "711d9394be4c70645798af2486d09937829aeffd"
+    },
+    {
       "path": "tests/diagnostics.test.js",
       "bytes": 1362,
       "sha256": "71601409cf0175d62b7473a62fcce304f976d3be8629ae9414a67d41ce340fb4",
@@ -3308,14 +3747,34 @@
       "sourceGitBlobSha": "b92acbff4b8afd782adeb7eea992e43d4335ceaa"
     },
     {
-      "path": "tests/economy.test.js",
-      "bytes": 2028,
-      "sha256": "1757f49945c10db0455d6b0e0b3dbc4e46acb8a3b65cbb8390897c9a41e86a37",
-      "gitBlobSha": "0dbe13ac18bb10d24c3f89ae057c21bdc763bcc7",
+      "path": "tests/dynamic-shadow.test.js",
+      "bytes": 1225,
+      "sha256": "3ed8552a19ff68842a008553682d242a92c7cd9fc988c2a61d6b39f887655a64",
+      "gitBlobSha": "5d550e370c866040be2f1fc3a76ba9d79b94fcdd",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "1757f49945c10db0455d6b0e0b3dbc4e46acb8a3b65cbb8390897c9a41e86a37",
-      "sourceGitBlobSha": "0dbe13ac18bb10d24c3f89ae057c21bdc763bcc7"
+      "sourceSha256": "3ed8552a19ff68842a008553682d242a92c7cd9fc988c2a61d6b39f887655a64",
+      "sourceGitBlobSha": "5d550e370c866040be2f1fc3a76ba9d79b94fcdd"
+    },
+    {
+      "path": "tests/economy.test.js",
+      "bytes": 2004,
+      "sha256": "cc633207ef4e3af795960714b49c4e5daa4a049b31b8cefa54bc7d75ef85dc9b",
+      "gitBlobSha": "0778d29f6a13d2048441a2d98492b14e1c2514bd",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "cc633207ef4e3af795960714b49c4e5daa4a049b31b8cefa54bc7d75ef85dc9b",
+      "sourceGitBlobSha": "0778d29f6a13d2048441a2d98492b14e1c2514bd"
+    },
+    {
+      "path": "tests/exotic-plants.test.js",
+      "bytes": 4204,
+      "sha256": "36b71a25773f1691baaffde442f57e2acce6a78903e3263513478ea427f431aa",
+      "gitBlobSha": "3851943a4da2d7a6d11268cec4a3cd220e774d1c",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "36b71a25773f1691baaffde442f57e2acce6a78903e3263513478ea427f431aa",
+      "sourceGitBlobSha": "3851943a4da2d7a6d11268cec4a3cd220e774d1c"
     },
     {
       "path": "tests/fish-space-bait.test.js",
@@ -3340,12 +3799,12 @@
     {
       "path": "tests/gesture.test.js",
       "bytes": 1828,
-      "sha256": "3733edc99c0b4c2cf2a7c2bfa83ab9829497dadf297d185149daeeb3f8c1772d",
-      "gitBlobSha": "1a0869f2cb13fb0107fec9eec14171f7ddb9afbe",
+      "sha256": "6125cf2d8aec08577f41398ac04e24b4710a4c3fb1218262f41295be873e0e51",
+      "gitBlobSha": "6890c81e32873b9aa2bdc8639e4d5c72d368f216",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "3733edc99c0b4c2cf2a7c2bfa83ab9829497dadf297d185149daeeb3f8c1772d",
-      "sourceGitBlobSha": "1a0869f2cb13fb0107fec9eec14171f7ddb9afbe"
+      "sourceSha256": "6125cf2d8aec08577f41398ac04e24b4710a4c3fb1218262f41295be873e0e51",
+      "sourceGitBlobSha": "6890c81e32873b9aa2bdc8639e4d5c72d368f216"
     },
     {
       "path": "tests/grid.test.js",
@@ -3369,13 +3828,13 @@
     },
     {
       "path": "tests/inventory-groups.test.js",
-      "bytes": 2326,
-      "sha256": "1c53394a4a49a8cf2aeefd37d8f524e4426d108dd8aa1d767935c90f3ca196c8",
-      "gitBlobSha": "b4d18ff0251ead24c5f0331100e5808f8071cfa0",
+      "bytes": 2883,
+      "sha256": "7dccd78645f5071b1ea07376c447263357b2fc34a6968a15c56002d351778ab9",
+      "gitBlobSha": "7a7092a4667ea3fdd6ae543bdbbd6bcb64e9e9bf",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "1c53394a4a49a8cf2aeefd37d8f524e4426d108dd8aa1d767935c90f3ca196c8",
-      "sourceGitBlobSha": "b4d18ff0251ead24c5f0331100e5808f8071cfa0"
+      "sourceSha256": "7dccd78645f5071b1ea07376c447263357b2fc34a6968a15c56002d351778ab9",
+      "sourceGitBlobSha": "7a7092a4667ea3fdd6ae543bdbbd6bcb64e9e9bf"
     },
     {
       "path": "tests/journal-recovery.test.js",
@@ -3409,13 +3868,23 @@
     },
     {
       "path": "tests/ocean-audio.test.js",
-      "bytes": 18555,
-      "sha256": "9535faf8a835dd399b754608b04e71a2c3d3bf1ae0ddda9cf3b6c6b99d4ddf9f",
-      "gitBlobSha": "fcd3b4fe9f88c4f15f9a2888016ce6524dc18778",
+      "bytes": 21031,
+      "sha256": "aba67e3c6a51b0610b6332ae3bf0f057cf0404c7d59f3b86fc690c83ada262f7",
+      "gitBlobSha": "b14c13cf8d38a534017c3ef3c7e1c838aa7da6bf",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "9535faf8a835dd399b754608b04e71a2c3d3bf1ae0ddda9cf3b6c6b99d4ddf9f",
-      "sourceGitBlobSha": "fcd3b4fe9f88c4f15f9a2888016ce6524dc18778"
+      "sourceSha256": "aba67e3c6a51b0610b6332ae3bf0f057cf0404c7d59f3b86fc690c83ada262f7",
+      "sourceGitBlobSha": "b14c13cf8d38a534017c3ef3c7e1c838aa7da6bf"
+    },
+    {
+      "path": "tests/ocean-follow-rod.test.js",
+      "bytes": 2027,
+      "sha256": "621f092af9e2d1d27acb7e690bf3e1ecc8d686f44bcc373d0eee007ccf8d2e1d",
+      "gitBlobSha": "6b972f28d793d343a0b8743c015c805df9f7fbf3",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "621f092af9e2d1d27acb7e690bf3e1ecc8d686f44bcc373d0eee007ccf8d2e1d",
+      "sourceGitBlobSha": "6b972f28d793d343a0b8743c015c805df9f7fbf3"
     },
     {
       "path": "tests/outage-recovery.test.js",
@@ -3429,43 +3898,63 @@
     },
     {
       "path": "tests/overlay-positions.test.js",
-      "bytes": 1265,
-      "sha256": "d86ef19670071b7eb1d6f3341f3f2b6943a0472e4d12d024b7749dd8ec67190a",
-      "gitBlobSha": "545781a74d64fdb66a88c551bc0fc29985a50333",
+      "bytes": 1300,
+      "sha256": "38468f48742f473bed84b963171c38a0bc60c66b7d650d6f5c6bb93a1c71042a",
+      "gitBlobSha": "872e1691e8e35eeb9eaf1b514de096a81b98dd3d",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "d86ef19670071b7eb1d6f3341f3f2b6943a0472e4d12d024b7749dd8ec67190a",
-      "sourceGitBlobSha": "545781a74d64fdb66a88c551bc0fc29985a50333"
+      "sourceSha256": "38468f48742f473bed84b963171c38a0bc60c66b7d650d6f5c6bb93a1c71042a",
+      "sourceGitBlobSha": "872e1691e8e35eeb9eaf1b514de096a81b98dd3d"
+    },
+    {
+      "path": "tests/panel-navigation.test.js",
+      "bytes": 1236,
+      "sha256": "1b5995b9b7432be5a69bde05fd304b53ba1b203777ce6dbb7915aac9d8c74c6a",
+      "gitBlobSha": "290145b58fac300c8d730d8bf9b74a514090837b",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "1b5995b9b7432be5a69bde05fd304b53ba1b203777ce6dbb7915aac9d8c74c6a",
+      "sourceGitBlobSha": "290145b58fac300c8d730d8bf9b74a514090837b"
     },
     {
       "path": "tests/panel-v9.test.js",
-      "bytes": 2050,
-      "sha256": "6fdafd31bd66d12edbb54f6be2971e15934ca594aa15d54b38fbfbea9bb5fa67",
-      "gitBlobSha": "2c3f7089c4a06b659b58aa35ea44b9d87015c833",
+      "bytes": 2018,
+      "sha256": "896460b5b87e09f7c543b58f301799a7c6de69e34aa7cd2410a169c78296db36",
+      "gitBlobSha": "8a5b549c2ba09cae42224a9923f6a2c11a88db19",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "6fdafd31bd66d12edbb54f6be2971e15934ca594aa15d54b38fbfbea9bb5fa67",
-      "sourceGitBlobSha": "2c3f7089c4a06b659b58aa35ea44b9d87015c833"
+      "sourceSha256": "896460b5b87e09f7c543b58f301799a7c6de69e34aa7cd2410a169c78296db36",
+      "sourceGitBlobSha": "8a5b549c2ba09cae42224a9923f6a2c11a88db19"
     },
     {
       "path": "tests/placement-preview.test.js",
-      "bytes": 2191,
-      "sha256": "d9ea8744b85ce9073c1649ad59ffb75b1d9cc7d354747786febbf1efb4d82da4",
-      "gitBlobSha": "9f8166012b748f8ca47d1ec3c9dfc7573ecc61a6",
+      "bytes": 2337,
+      "sha256": "cfc8cec1f464cedcb270169f99fd24def6a1b0c71e45fe2e34039ace7f21d9bf",
+      "gitBlobSha": "f7d19280b404d8f61f69350d8c74ed230fe16a0b",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "d9ea8744b85ce9073c1649ad59ffb75b1d9cc7d354747786febbf1efb4d82da4",
-      "sourceGitBlobSha": "9f8166012b748f8ca47d1ec3c9dfc7573ecc61a6"
+      "sourceSha256": "cfc8cec1f464cedcb270169f99fd24def6a1b0c71e45fe2e34039ace7f21d9bf",
+      "sourceGitBlobSha": "f7d19280b404d8f61f69350d8c74ed230fe16a0b"
+    },
+    {
+      "path": "tests/plant-tier-scale.test.js",
+      "bytes": 1031,
+      "sha256": "9a3553afcd887cf20f1d172fa51a3669d23ec309c00ca4ca130b5ce966fdae3a",
+      "gitBlobSha": "f78a49e5fa64d67cc50bb86e458c0e6534b4c786",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "9a3553afcd887cf20f1d172fa51a3669d23ec309c00ca4ca130b5ce966fdae3a",
+      "sourceGitBlobSha": "f78a49e5fa64d67cc50bb86e458c0e6534b4c786"
     },
     {
       "path": "tests/presentation.test.js",
-      "bytes": 1271,
-      "sha256": "83c7c3751f8934c4c80ba77a7947f5f3a043b4b17ffa9d123e5eb84963aa0aea",
-      "gitBlobSha": "1f877283b33ab5ede550b2ef92cd1bd58d69768b",
+      "bytes": 1551,
+      "sha256": "40eb7c1737c97228d38e93f031d95fcc5a8f7f67182c1b4560a08ed879d678eb",
+      "gitBlobSha": "15733dfd1d51a54983d1d87d347bcfa5e421b5a8",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "83c7c3751f8934c4c80ba77a7947f5f3a043b4b17ffa9d123e5eb84963aa0aea",
-      "sourceGitBlobSha": "1f877283b33ab5ede550b2ef92cd1bd58d69768b"
+      "sourceSha256": "40eb7c1737c97228d38e93f031d95fcc5a8f7f67182c1b4560a08ed879d678eb",
+      "sourceGitBlobSha": "15733dfd1d51a54983d1d87d347bcfa5e421b5a8"
     },
     {
       "path": "tests/queued-actions.test.js",
@@ -3476,6 +3965,26 @@
       "change": "unchanged",
       "sourceSha256": "f07c687a9bb9368d67506d691a8b84d3c17b8f8fc39a21fef3d8e9e4bede4d5f",
       "sourceGitBlobSha": "04bbc236ee8035e5e91488b29f8dcfa6226832a6"
+    },
+    {
+      "path": "tests/quick-build.test.js",
+      "bytes": 1094,
+      "sha256": "7e90218ccb6e75983d0182088922faa4c1a8fbd3d2fd8bb22a6f726d10211cf9",
+      "gitBlobSha": "c9cc1919c472a8773e1281f29b6c657515ba5615",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "7e90218ccb6e75983d0182088922faa4c1a8fbd3d2fd8bb22a6f726d10211cf9",
+      "sourceGitBlobSha": "c9cc1919c472a8773e1281f29b6c657515ba5615"
+    },
+    {
+      "path": "tests/recorded-action-cues.test.js",
+      "bytes": 2163,
+      "sha256": "e3cddd3f4d74eea3bed029b2bfc0f101a3e0fe0d0b949346f53a3e557630c487",
+      "gitBlobSha": "851261e8fa86242a3e114ebbe660285dfce54702",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "e3cddd3f4d74eea3bed029b2bfc0f101a3e0fe0d0b949346f53a3e557630c487",
+      "sourceGitBlobSha": "851261e8fa86242a3e114ebbe660285dfce54702"
     },
     {
       "path": "tests/responsive-network.test.js",
@@ -3528,6 +4037,26 @@
       "sourceGitBlobSha": "779bcf748d06122d05ee54ea8a74ecbf6f793c3b"
     },
     {
+      "path": "tests/social-pending-recovery.test.js",
+      "bytes": 1295,
+      "sha256": "b58d50c14aafcbd862e12975d466d14cb693e87ae5c8ed1bc270b9510e2e7396",
+      "gitBlobSha": "56ab3f4611733053937df7dfb97bc2711072981c",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "b58d50c14aafcbd862e12975d466d14cb693e87ae5c8ed1bc270b9510e2e7396",
+      "sourceGitBlobSha": "56ab3f4611733053937df7dfb97bc2711072981c"
+    },
+    {
+      "path": "tests/social-queue.test.js",
+      "bytes": 3826,
+      "sha256": "46ae7d0891fb7b81a74144d35e34ef9b0096ceb0d767633f50fc7e63c3e4117e",
+      "gitBlobSha": "677888257a2bfe91065fbfa8cb46a7f16c0ec428",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "46ae7d0891fb7b81a74144d35e34ef9b0096ceb0d767633f50fc7e63c3e4117e",
+      "sourceGitBlobSha": "677888257a2bfe91065fbfa8cb46a7f16c0ec428"
+    },
+    {
       "path": "tests/social.test.js",
       "bytes": 14100,
       "sha256": "0dc9902636e12d763a592dd201c33ad6c3ad022741667a28bebc7329aa5cadec",
@@ -3560,12 +4089,12 @@
     {
       "path": "tests/swimming.test.js",
       "bytes": 3607,
-      "sha256": "39d4788815b5256f53ec8bede06f7802b1242bef6af745343e1b4110eb53072b",
-      "gitBlobSha": "7decdf08b90ec7a5f6ba2dc4cd499bfb15d4f29d",
+      "sha256": "0e11cf9d324d72f78c4979491f19266ce70a83bfe93ef932f727e36c5792367b",
+      "gitBlobSha": "0b590902fb0de5a06eacb15568f03e56b343d70b",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "39d4788815b5256f53ec8bede06f7802b1242bef6af745343e1b4110eb53072b",
-      "sourceGitBlobSha": "7decdf08b90ec7a5f6ba2dc4cd499bfb15d4f29d"
+      "sourceSha256": "0e11cf9d324d72f78c4979491f19266ce70a83bfe93ef932f727e36c5792367b",
+      "sourceGitBlobSha": "0b590902fb0de5a06eacb15568f03e56b343d70b"
     },
     {
       "path": "tests/sync-notice.test.js",
@@ -3576,6 +4105,36 @@
       "change": "unchanged",
       "sourceSha256": "e57c48a9c24cc54b3b31d5a0fbf1c83c79ea3c133a959e84fb2790929ad0f7c1",
       "sourceGitBlobSha": "c04dd01b1a3c2afc90cc62518ec52fe46ff5b4b9"
+    },
+    {
+      "path": "tests/tank-continuous-build.test.js",
+      "bytes": 1075,
+      "sha256": "39a047d7081816928eb609104e5928a290eb3ba613233c2b96f62dad2babf9f1",
+      "gitBlobSha": "0e4c2f7169b535948ea3f64a30f6642802d1c95f",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "39a047d7081816928eb609104e5928a290eb3ba613233c2b96f62dad2babf9f1",
+      "sourceGitBlobSha": "0e4c2f7169b535948ea3f64a30f6642802d1c95f"
+    },
+    {
+      "path": "tests/tank-height.test.js",
+      "bytes": 2003,
+      "sha256": "3c335c28794f830720f566fc87a5a9bfb69cabca1acba1ff807360d7b6b9de79",
+      "gitBlobSha": "392706e3e057073e8db4e3a3acb619a1bd1e1be1",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "3c335c28794f830720f566fc87a5a9bfb69cabca1acba1ff807360d7b6b9de79",
+      "sourceGitBlobSha": "392706e3e057073e8db4e3a3acb619a1bd1e1be1"
+    },
+    {
+      "path": "tests/tank-management.test.js",
+      "bytes": 1860,
+      "sha256": "e280b16278c44ee61cdb0906176fc92d432c3e075299fbe907a623b48dff6731",
+      "gitBlobSha": "e90dcf429e0e6152d9fb26d4c3a142b8a33da7a0",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "e280b16278c44ee61cdb0906176fc92d432c3e075299fbe907a623b48dff6731",
+      "sourceGitBlobSha": "e90dcf429e0e6152d9fb26d4c3a142b8a33da7a0"
     },
     {
       "path": "tests/tank-rotation.test.js",
@@ -3599,13 +4158,23 @@
     },
     {
       "path": "tests/ui-polish.test.js",
-      "bytes": 3498,
-      "sha256": "8cc44e2a788f4dc8e15ff190b82d447d4eadb9e559ed111024f8e1eeaee06eb7",
-      "gitBlobSha": "301fe92b255d4eaac869c88737adc61ff28394b1",
+      "bytes": 3521,
+      "sha256": "b540d8ccea17407bc9626267e2aa98a3163734e0816a9bbdbbf577ef6474fd43",
+      "gitBlobSha": "fad2257955ff723279dae6b6c43238d7dcd009e7",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "8cc44e2a788f4dc8e15ff190b82d447d4eadb9e559ed111024f8e1eeaee06eb7",
-      "sourceGitBlobSha": "301fe92b255d4eaac869c88737adc61ff28394b1"
+      "sourceSha256": "b540d8ccea17407bc9626267e2aa98a3163734e0816a9bbdbbf577ef6474fd43",
+      "sourceGitBlobSha": "fad2257955ff723279dae6b6c43238d7dcd009e7"
+    },
+    {
+      "path": "tests/user-action-cues.test.js",
+      "bytes": 1629,
+      "sha256": "68d179220f00b6a810fa7e58c3fc2d4171b35ca4b85dce5418d55bfd0d5fbef1",
+      "gitBlobSha": "522236f77c65c903ef90714ec1485a7ff1d65928",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "68d179220f00b6a810fa7e58c3fc2d4171b35ca4b85dce5418d55bfd0d5fbef1",
+      "sourceGitBlobSha": "522236f77c65c903ef90714ec1485a7ff1d65928"
     },
     {
       "path": "tests/v10-presentation.test.js",
@@ -3619,13 +4188,13 @@
     },
     {
       "path": "tests/visitor-motion.test.js",
-      "bytes": 4483,
-      "sha256": "3c26dd5918dd294515358e19b624e6bc651277817e8279421556b90091054116",
-      "gitBlobSha": "5a24c49a85063e87fc72675b6b8ce621fcf7f12d",
+      "bytes": 4529,
+      "sha256": "ab42777dd4c5f58fd65d8d5f2934bf8f7207643c05a4e25198d64afb0aa740fd",
+      "gitBlobSha": "a7566f43c134fb8219905593679acb61e1b3b244",
       "mode": "100644",
       "change": "unchanged",
-      "sourceSha256": "3c26dd5918dd294515358e19b624e6bc651277817e8279421556b90091054116",
-      "sourceGitBlobSha": "5a24c49a85063e87fc72675b6b8ce621fcf7f12d"
+      "sourceSha256": "ab42777dd4c5f58fd65d8d5f2934bf8f7207643c05a4e25198d64afb0aa740fd",
+      "sourceGitBlobSha": "a7566f43c134fb8219905593679acb61e1b3b244"
     },
     {
       "path": "tests/visual-motion.test.js",
@@ -3636,6 +4205,16 @@
       "change": "unchanged",
       "sourceSha256": "00af9896b956c87b1b4d997b6a1e669103a969dd2212ba2f9a771365a85a0db5",
       "sourceGitBlobSha": "0586dd5b77cb97da055339c961de00ac9c193b55"
+    },
+    {
+      "path": "tests/visual-repair.test.js",
+      "bytes": 5313,
+      "sha256": "c83679d59e09754be6ffa7e82e33539bbcc9334079ac7cd71f7d1eba87f81e61",
+      "gitBlobSha": "024a91278effefcae44f10aa1185ccf79d7a2183",
+      "mode": "100644",
+      "change": "unchanged",
+      "sourceSha256": "c83679d59e09754be6ffa7e82e33539bbcc9334079ac7cd71f7d1eba87f81e61",
+      "sourceGitBlobSha": "024a91278effefcae44f10aa1185ccf79d7a2183"
     },
     {
       "path": "tests/work-cancellation.test.js",
