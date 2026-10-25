@@ -5,7 +5,8 @@ export const PLANT_CATALOGUE_VERSION=2;
 /** @type {Array<[string,string,number,number]>} */
 const legacyPlantRows=[['radish','萝卜',1,0],['daisy','雏菊',1,1],['tomato','番茄',2,0],['tulip','郁金香',2,1],['pumpkin','南瓜',3,0],['sunflower','向日葵',3,1],['dragonfruit','火龙果',4,0],['iris','鸢尾',4,1],['grape','葡萄',5,0],['phalaenopsis','蝴蝶兰',5,1]];
 /** @type {Array<[string,string,number,number]>} */
-const exoticPlantRows=[['lithops','生石花',1,0],['corkscrew-grass','弹簧草',1,1],['mimosa','含羞草',2,0],['string-of-pearls','佛珠藤',2,1],['pitcher-plant','猪笼草',3,0],['spiral-aloe','螺旋芦荟',3,1],['fantasy-chomper','食人花',4,0],['travellers-palm','旅人蕉',4,1],['rafflesia','霸王花',5,0],['titan-arum','巨魔芋',5,1]];
+// Stable lithops/rafflesia identities present as strawberry/dragon tree; draw order and economics stay unchanged.
+const exoticPlantRows=[['lithops','草莓',1,0],['corkscrew-grass','弹簧草',1,1],['mimosa','含羞草',2,0],['string-of-pearls','佛珠藤',2,1],['pitcher-plant','猪笼草',3,0],['spiral-aloe','螺旋芦荟',3,1],['fantasy-chomper','食人花',4,0],['travellers-palm','旅人蕉',4,1],['rafflesia','龙血树',5,0],['titan-arum','巨魔芋',5,1]];
 export const LEGACY_PLANT_IDS=Object.freeze(legacyPlantRows.map(r=>r[0]));
 // Original twenty identities with the approved new overall-size contract.
 // The artist validates the physical renderer separately; island scaling is forbidden.

@@ -26,7 +26,7 @@ export function createLocalJournal({uid,sessionId,storage=globalThis.localStorag
  function base(){const old=legacy.view();return legacy.pending&&old?old:authority;}
  function view(){const source=base();if(!source)return null;const data=clone(source);let g=data.game;const dirty=new Set();if(recovery)g.position=clone(recovery.base.position);
   for(const e of entries){if(e.cancelled)continue;
-   if(e.localDone&&e.op){try{const r=applyLocalOperation(g,e.op,{approvedLegacyHousing:!!recovery&&recovery.operations.some(op=>op.id===e.id)});g=r.state;if(r.receipt.itemId)dirty.add(r.receipt.itemId);if(r.receipt.jobId)dirty.add(`${e.id}-product`);}catch{/* Keep unresolved branch in the journal; authority decides its outcome. */}}
+   if(e.localDone&&e.op){try{const r=applyLocalOperation(g,e.op,{approvedLegacyHousing:!!recovery&&recovery.operations.some(op=>op.id===e.id)});g=r.state;if(r.receipt.itemId)dirty.add(r.receipt.itemId);for(const item of r.receipt.items??[])dirty.add(item.id);if(r.receipt.jobId)dirty.add(`${e.id}-product`);}catch{/* Keep unresolved branch in the journal; authority decides its outcome. */}}
    else if(e.command.type==='begin-work'&&['plant','fish'].includes(e.command.action)){const stock=e.command.action==='plant'?'seeds':'baits';g[stock][e.command.tier-1]=Math.max(0,g[stock][e.command.tier-1]-1);}
   }
   if(recovery&&entries.every(e=>recovery.operations.some(op=>op.id===e.id)))g.position=clone(source.game.position);
@@ -35,7 +35,7 @@ export function createLocalJournal({uid,sessionId,storage=globalThis.localStorag
   g=constructionView(g,now());data.game=g;if(data.island?.ownerUid===uid)data.island=g;else if(data.island)data.island=constructionView(data.island,now());return data;
  }
  function emit(){save();onChange();}
- function dependencies(command){const keys=new Set(operationResourceKeys(command));const ids=[];for(const e of entries){if(e.cancelled)continue;if(operationResourceKeys(e.command).some(k=>keys.has(k))||command.itemId===`${e.id}-product`||e.product?.id===command.itemId)ids.push(e.id);}return ids.slice(-24);}
+ function dependencies(command){const keys=new Set(operationResourceKeys(command));const ids=[];for(const e of entries){if(e.cancelled)continue;if(operationResourceKeys(e.command).some(k=>keys.has(k))||(typeof command.itemId==='string'&&command.itemId.length>0&&(command.itemId===`${e.id}-product`||e.product?.id===command.itemId||e.localReceipt?.items?.some(i=>i.id===command.itemId))))ids.push(e.id);}return ids.slice(-24);}
  function startNext(){if(legacy.pending||entries.some(e=>e.op?.motion&&!e.localDone))return;const e=entries.find(e=>!e.localDone&&!e.cancelled);if(!e||!authority)return;const g=view().game;if(['plant','fish'].includes(e.command.action))g[e.command.action==='plant'?'seeds':'baits'][e.command.tier-1]++;
   if(lastPosition)g.position=clone(lastPosition);
   try{e.op=planLocalOperation(g,e.command,{id:e.id,now:now(),dependsOn:e.dependencies});e.local=e.op.motion??null;if(!e.op.motion){e.localDone=true;onLocalComplete(e);}emit();}catch(error){reject(e.id,error.message);}

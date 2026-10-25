@@ -30,3 +30,4 @@ assert.equal(seen.size, manifest.fileCount, 'File count mismatch');
 assert.equal(bytes, manifest.totalBytes, 'Byte count mismatch');
 console.log(JSON.stringify({version:manifest.version, sourceCommit:manifest.sourceCommit, files:seen.size, bytes, avatarFiles:24, plantGlbs:10, sha256:'verified', note:'Manifest excludes itself; generated/local files are ignored.'}, null, 2));
 
+

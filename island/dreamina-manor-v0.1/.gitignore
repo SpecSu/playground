@@ -64,3 +64,9 @@ yarn-error.log*
 /public/qa-v17.html
 
 /public/qa-audio-resume.html
+
+/public/qa-v32.html
+
+/public/qa-v33.html
+
+/public/qa-v34-*.html

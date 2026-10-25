@@ -6,7 +6,7 @@ import {secureSeed} from '../game/random.js';
 import {SOCIAL_FIELDS,performSocial,socialResponse} from './social-commands.js';
 import {visitPosition} from './social-store.js';
 const fields={...SOCIAL_FIELDS,'sync-local':['operations'],'recover-local-journal':['base','operations'],
- 'construct':['kind','cells'],'buy-input':['kind','tier'],'emergency-seed':[],
+ 'harvest-batch':['targets'],'construct':['kind','cells'],'buy-input':['kind','tier'],'emergency-seed':[],
  'begin-work':['action','target','tier','itemId','destination','catalogueVersion'],'cancel-work':['intentId'],
  'finish-work':['intentId'],'hold':['itemId'],'store-hand':[],'sell':['itemId'],
  'expand-land':['cell'],'build-dock':['cell'],'build-tank':['cells'],'profile':['name','avatar'],
@@ -16,7 +16,7 @@ export function parseCommand(value){
  if(!value||typeof value!=='object'||Array.isArray(value)||!Object.hasOwn(fields,value.type))throw new GameError('BAD_COMMAND','换个操作试试',400);
  if(Object.keys(value).some(k=>k!=='type'&&!fields[value.type].includes(k)))throw new GameError('BAD_COMMAND','更新页面后再试试',400);
  if(value.type==='cancel-work'&&!identifier(value.intentId))throw new GameError('STALE_ACTION','这次操作已经结束了',409);
- if(JSON.stringify(value).length>(value.type==='recover-local-journal'?524288:value.type==='sync-local'?48000:2000))throw new GameError('BAD_COMMAND','这次内容太长了',400);
+ if(JSON.stringify(value).length>(value.type==='recover-local-journal'?524288:['sync-local','harvest-batch'].includes(value.type)?48000:2000))throw new GameError('BAD_COMMAND','这次内容太长了',400);
  if(value.type==='sync-local'){validateLocalOperations(value.operations);for(const op of value.operations)parseCommand(op.command);}
  return structuredClone(value);
 }
@@ -31,7 +31,7 @@ export async function performCommand(store,body,now=Date.now()){
  for(let attempt=0;attempt<6;attempt++){
   const recorded=await store.receipt(uid,opId);if(recorded){if(recorded.hash!==hash)throw new GameError('OPERATION_CONFLICT','这次操作已结束，重新点一下吧');return socialResponse(store,uid,sessionId,recorded.receipt,now,true);}
   const game=await store.read(uid);let visit=await store.readVisit(sessionId);
-  const worldCommand=['construct','begin-work','finish-work','cancel-work','expand-land','build-dock','build-tank'].includes(command.type);
+  const worldCommand=['harvest-batch','construct','begin-work','finish-work','cancel-work','expand-land','build-dock','build-tank'].includes(command.type);
   if(worldCommand&&!visit){await store.visit(sessionId,uid,uid,now);visit=await store.readVisit(sessionId);}
   if(worldCommand&&visit?.islandUid!==uid&&!(command.type==='finish-work'&&game.pending?.id===command.intentId))throw new GameError('OWN_ISLAND_REQUIRED','回自己的庄园再做吧');
   if(command.type==='begin-work'&&game.pending){const p=game.pending;if(p.operationId!==opId)throw new GameError('WORK_IN_PROGRESS','手边的事还没好，马上继续');}

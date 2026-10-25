@@ -1,5 +1,6 @@
 /** Artist-authored one-cell boardwalk and one fixed rod station. No inventory/game state. */
 import * as THREE from 'three';
+import {ALERT_GOLD,ROD_RING_COLORS} from './feedback-palette.js';
 import {SHARED_CELL_SIZE,GROUND_TOP_Y,SEA_SURFACE_Y} from './physical-contract.js';
 import {RoundedBoxGeometry} from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 const TAU=Math.PI*2;
@@ -12,6 +13,36 @@ function segment(parent,name,radius,material){
 }
 function setSegment(mesh,a,b){const delta=b.clone().sub(a);mesh.position.copy(a).add(b).multiplyScalar(.5);mesh.scale.y=delta.length();mesh.quaternion.setFromUnitVectors(v(0,1,0),delta.normalize());}
 function loopMesh(radius,tube,material){const m=new THREE.Mesh(new THREE.TorusGeometry(radius,tube,5,32),material);m.rotation.x=-Math.PI/2;return m;}
+
+/** Small fixed pool: a comic crown above the bite and an anonymous shape below it. */
+function createHookedAttention(parent){
+ const rays=new THREE.Group();rays.name='HookedAttentionRays';rays.userData.waterPass='above';parent.add(rays);
+ const yellow=new THREE.MeshBasicMaterial({color:ALERT_GOLD,toneMapped:false});
+ const rayGeometry=new THREE.CapsuleGeometry(.038,.25,3,6);
+ for(let i=0;i<4;i++){
+  const angle=i*TAU/4+Math.PI/4,direction=v(Math.cos(angle)*.8,.7,Math.sin(angle)*.8).normalize();
+  const ray=new THREE.Mesh(rayGeometry,yellow);ray.name='HookedComicRay_'+i;
+  ray.position.copy(direction).multiplyScalar(.45);ray.quaternion.setFromUnitVectors(v(0,1,0),direction);rays.add(ray);
+ }
+ const fish=new THREE.Group();fish.name='HookedFishSilhouette';fish.userData.waterPass='below';parent.add(fish);
+ // No eyes, species colours or catalogue model: this never reveals the future catch.
+ const shadow=new THREE.MeshBasicMaterial({color:'#174B50'});
+ const body=new THREE.Mesh(new THREE.SphereGeometry(1,10,6),shadow);body.name='AnonymousFishBody';body.scale.set(.22,.06,.39);fish.add(body);
+ const tailGeometry=new THREE.ConeGeometry(.20,.32,3);tailGeometry.rotateX(Math.PI/2);
+ const tail=new THREE.Mesh(tailGeometry,shadow);tail.name='AnonymousFishTail';tail.position.z=-.42;tail.scale.y=.18;fish.add(tail);
+ function pose({ready,reducedMotion,time,cycle,beat,float}){
+  const burst=reducedMotion?1:Math.sin(Math.PI*Math.min(1,cycle/.95));
+  rays.visible=ready&&(reducedMotion||cycle<.95);
+  rays.position.set(float.x,(SEA_SURFACE_Y-GROUND_TOP_Y+.40)/ROD_VISUAL_SCALE,float.z);
+  rays.scale.setScalar(reducedMotion?1:.78+.30*burst);
+  fish.visible=ready;
+  const struggle=reducedMotion?0:beat;
+  fish.position.set(float.x+Math.sin(time*6.2)*.23*struggle,(SEA_SURFACE_Y-GROUND_TOP_Y-.22)/ROD_VISUAL_SCALE-.025*struggle,float.z+Math.cos(time*5.3)*.18*struggle);
+  fish.rotation.set(.10*struggle*Math.sin(time*5.3),-.45+.55*struggle*Math.sin(time*6.2),0);
+  tail.rotation.y=.35*struggle*Math.sin(time*7.4);
+ }
+ return {pose};
+}
 
 /** Local root, topY=0, place at groundY and rotate +Z toward the sea. */
 export function createDockArt({cellSize=SHARED_CELL_SIZE}={}){
@@ -27,7 +58,7 @@ export function createDockArt({cellSize=SHARED_CELL_SIZE}={}){
  for(const x of [-cellSize/2+.12,cellSize/2-.12]){
   box(root,'UndersideRail',.16,.24,cellSize-.02,v(x,-.25,0),edge,.025);
   for(const z of [-cellSize/2+.25,cellSize/2-.25]){
-   const post=new THREE.Mesh(new THREE.CylinderGeometry(.12,.105,.80,12),edge);post.position.set(x,-.35,z);post.castShadow=true;root.add(post);
+   const pileTop=.05,pileBottom=SEA_SURFACE_Y-GROUND_TOP_Y-.10;const post=new THREE.Mesh(new THREE.CylinderGeometry(.12,.105,pileTop-pileBottom,12),edge);post.name='SubmergedDockPile';post.position.set(x,(pileTop+pileBottom)/2,z);post.castShadow=true;root.add(post);
    const cap=new THREE.Mesh(new THREE.CylinderGeometry(.133,.133,.055,16),lightWood);cap.position.set(x,.07,z);cap.castShadow=true;root.add(cap);
    const wrap=loopMesh(.126,.018,rope);wrap.position.set(x,.015,z);root.add(wrap);
   }
@@ -44,7 +75,7 @@ export function createRodStationArt(){
  const charcoal=new THREE.MeshStandardMaterial({color:'#31504A',roughness:.38});
  const metal=new THREE.MeshStandardMaterial({color:'#8D998D',roughness:.32,metalness:.45});
  const lineMat=new THREE.MeshBasicMaterial({color:'#DAD9B9',transparent:true,opacity:.88});
- const ropeMat=new THREE.MeshStandardMaterial({color:'#52796A',roughness:.8});
+ const ropeMat=new THREE.MeshBasicMaterial({color:ROD_RING_COLORS.idle,toneMapped:false});
  const accentMat=new THREE.MeshStandardMaterial({color:'#D5B260',roughness:.4,metalness:.28});
  const floatMat=new THREE.MeshStandardMaterial({color:'#BD664B',roughness:.45});
  const creamMat=new THREE.MeshStandardMaterial({color:'#EBDEBC',roughness:.48});
@@ -52,11 +83,11 @@ export function createRodStationArt(){
  const rest=segment(root,'RodRestPeg',.047,warmWood);setSegment(rest,v(0,.10,1.36),v(0,.58,1.36));
  const collar=new THREE.Mesh(new THREE.TorusGeometry(.08,.018,5,12),metal);collar.position.set(0,.58,1.36);root.add(collar);
  const ring=loopMesh(.43,.025,ropeMat);ring.name='IdleStationRope';ring.position.set(0,.04,1.24);root.add(ring);
- const matureRing=loopMesh(.47,.027,accentMat);matureRing.name='PersistentMatureRing';matureRing.position.set(0,.055,1.24);root.add(matureRing);
+ const matureRing=loopMesh(.47,.027,new THREE.MeshBasicMaterial({color:ALERT_GOLD,toneMapped:false}));matureRing.name='PersistentMatureRing';matureRing.position.set(0,.055,1.24);root.add(matureRing);
  const rods=Array.from({length:9},(_,i)=>segment(root,'FlexibleRod_'+i,.028*(1-i*.055),charcoal));
  const reel=new THREE.Mesh(new THREE.CylinderGeometry(.105,.105,.075,16),metal);reel.rotation.z=Math.PI/2;reel.position.set(.08,.72,1.53);root.add(reel);
  const castGroup=new THREE.Group();castGroup.name='VisibleCastAndFloat';root.add(castGroup);
- const fishingLine=segment(castGroup,'FishingLine',.008,lineMat);
+ const fishingLine=segment(castGroup,'FishingLine',.008,lineMat);const elevatedLines=[segment(castGroup,'FishingLineOverflight1',.008,lineMat),segment(castGroup,'FishingLineOverflight2',.008,lineMat)];
  const float=new THREE.Group();float.name='RespondingFloat';castGroup.add(float);
  const body=new THREE.Mesh(new THREE.SphereGeometry(.1,14,8),floatMat);body.scale.set(.85,1.6,.85);float.add(body);
  const cap=new THREE.Mesh(new THREE.SphereGeometry(.077,12,8),creamMat);cap.position.y=.11;cap.scale.y=.5;float.add(cap);
@@ -64,20 +95,25 @@ export function createRodStationArt(){
  const splashMat=new THREE.MeshBasicMaterial({color:'#e9ffff',transparent:true,opacity:.8,depthWrite:false});
  const splashPool=new THREE.Group();splashPool.name='HookedWaterSplashes';castGroup.add(splashPool);const dropGeo=new THREE.SphereGeometry(.036,5,4);for(let i=0;i<12;i++){const p=new THREE.Mesh(dropGeo,splashMat);p.scale.set(.65,1.9,.65);splashPool.add(p);}
  const waterRing=loopMesh(.30,.017,splashMat);waterRing.name='MatureSurfacePulse';castGroup.add(waterRing);
+ const attention=createHookedAttention(castGroup);
  const curve=new THREE.CubicBezierCurve3();
  const base=v(0,.59,1.36),p1=v(.035,1.55,1.9),p2=v(.17,1.95,2.65),tip=v(.25,1.62,3.44);
  let lastState='idle';
- function pose({state='idle',time=0,readyAge=Infinity,reducedMotion=false}={}){
+ function pose({state='idle',time=0,readyAge=Infinity,reducedMotion=false,reach=1,overflight=null}={}){
   const ready=state==='ready',active=ready||state==='working';lastState=state;
-  castGroup.visible=active;matureRing.visible=ready;ring.visible=!ready;
+  castGroup.visible=active;matureRing.visible=ready;ring.visible=!ready;ropeMat.color.set(active?ROD_RING_COLORS.working:ROD_RING_COLORS.idle);
   // Continual low-frequency tug, not an attention loop that stops after a timer.
   const cycle=((time%2.8)+2.8)%2.8;const beat=reducedMotion?0:cycle<1.05?Math.sin(Math.PI*cycle/1.05):0;
   const pull=ready?(reducedMotion?.25:.24+.91*beat*beat):(active&&!reducedMotion?.025*Math.sin(time*1.7):0);
   const arrival=ready&&!reducedMotion&&readyAge>=0&&readyAge<1.2?Math.sin(Math.PI*readyAge/1.2)**2:0;
   curve.v0.copy(base);curve.v1.copy(p1);curve.v2.copy(p2).add(v(0,-pull*.45,arrival*.04));curve.v3.copy(tip).add(v(ready&&!reducedMotion?Math.sin(time*14)*beat*.085:0,-pull-arrival*.26,.12*pull));
+  if(reach<1){curve.v1.z=base.z+(curve.v1.z-base.z)*reach;curve.v2.z=base.z+(curve.v2.z-base.z)*reach;curve.v3.z=base.z+(curve.v3.z-base.z)*reach;}
+  if(overflight){curve.v1.set(.035,1.6,base.z);curve.v2.set(.10,2.4,base.z+.02);curve.v3.set(.16,2.85-pull*.20,base.z);}
   for(let i=0;i<rods.length;i++)setSegment(rods[i],curve.getPoint(i/rods.length),curve.getPoint((i+1)/rods.length));
-  float.position.set(.25+(reducedMotion?0:Math.sin(time*1.1)*.035),(SEA_SURFACE_Y-GROUND_TOP_Y+.035)/ROD_VISUAL_SCALE-pull*.32-arrival*.14,3.88);
-  setSegment(fishingLine,curve.v3,float.position.clone().add(v(0,.2,0)));
+  float.position.set(.25+(reducedMotion?0:Math.sin(time*1.1)*.035),(SEA_SURFACE_Y-GROUND_TOP_Y+.035)/ROD_VISUAL_SCALE-pull*.32-arrival*.14,base.z+(3.88-base.z)*reach);
+  elevatedLines.forEach(n=>n.visible=!!overflight);
+  if(overflight){float.position.z=(overflight.distance-root.position.z)/ROD_VISUAL_SCALE;const highY=overflight.height/ROD_VISUAL_SCALE,a=v(curve.v3.x,highY,curve.v3.z),b=v(float.position.x,highY,float.position.z);setSegment(fishingLine,curve.v3,a);setSegment(elevatedLines[0],a,b);setSegment(elevatedLines[1],b,float.position.clone().add(v(0,.2,0)));}else setSegment(fishingLine,curve.v3,float.position.clone().add(v(0,.2,0)));
+  attention.pose({ready,reducedMotion,time,cycle,beat,float:float.position});
   body.material=ready?accentMat:floatMat;
   waterRing.visible=ready;waterRing.position.set(float.position.x,(SEA_SURFACE_Y-GROUND_TOP_Y+.025)/ROD_VISUAL_SCALE,float.position.z);
   splashPool.visible=ready&&!reducedMotion;const waterY=(SEA_SURFACE_Y-GROUND_TOP_Y+.03)/ROD_VISUAL_SCALE;for(let i=0;i<splashPool.children.length;i++){const p=splashPool.children[i],age=cycle-(i%4)*.065;const life=.56+(i%3)*.035;p.visible=splashPool.visible&&age>=0&&age<life;if(p.visible){const angle=i*2.39996,speed=.45+(i%3)*.17;p.position.set(float.position.x+Math.cos(angle)*speed*age,waterY+1.75*age-2.8*age*age,float.position.z+Math.sin(angle)*speed*age);}}

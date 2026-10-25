@@ -9,5 +9,5 @@ test('initial entry and recovery keep the panel closed while the bag shortcut ex
  assert.match(init,/createManorScene/);
  assert.doesNotMatch(init,/setCollapsed\(false\)/);
  assert.match(source,/hidden=\{chatOpen\|\|\(collapsed&&!mode\)\}/);
- assert.match(source,/className="bag-shortcut"[^>]+onClick=\{\(\)=>\{[^}]*setCollapsed\(false\)/);
+ assert.match(source,/className="bag-shortcut"[^>]+onClick=\{\(\)=>toggleShortcut\('bag'\)\}/);assert.match(source,/function toggleShortcut[\s\S]*?setCollapsed\(false\)/);
 });

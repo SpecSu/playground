@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./item-galleries.css";
 
-export const viewport = {width:'device-width',initialScale:1,viewportFit:'cover',themeColor:'#72A8AA'};
+export const viewport = {width:'device-width',initialScale:1,viewportFit:'cover',themeColor:'#141414'};
 
 export const metadata: Metadata = {
   title: "即梦庄园",

@@ -1,6 +1,6 @@
 import {migrateFishHousing} from '../game/fish-housing.js';
 import {isDemoUid} from '../game/demo-catalogue.js';
-import {createDemoGame,createDemoGameV2,DEMO_LAYOUT_VERSION} from './demo-games.js';
+import {createDemoGame,createDemoGameV3,DEMO_LAYOUT_VERSION} from './demo-games.js';
 import {createGame,GameError} from '../game/state.js';
 /** Same UID is deliberately a demo identity, not a credential or secure account. */
 export class GameStore{
@@ -9,8 +9,8 @@ export class GameStore{
  async migrateDemo(game,now){
   for(let attempt=0;attempt<6;attempt++){
    if(!isDemoUid(game.ownerUid)||game.demo!==true||(game.demoLayoutVersion??1)>=DEMO_LAYOUT_VERSION)return game;
-   const next={...createDemoGameV2(game.ownerUid,now),revision:game.revision+1,createdAt:game.createdAt,activity:structuredClone(game.activity??[])};
-   if(await this.commit(game.ownerUid,game.revision,next,'demo-layout-v2','demo-layout-v2',{type:'demo-layout-v2',previous:game},now))return next;
+   const next={...createDemoGameV3(game.ownerUid,now),revision:game.revision+1,createdAt:game.createdAt,activity:structuredClone(game.activity??[])};
+   if(await this.commit(game.ownerUid,game.revision,next,'demo-layout-v3','demo-layout-v3',{type:'demo-layout-v3',previous:game},now))return next;
    game=await this.read(game.ownerUid);
   }throw new GameError('BUSY','正在更新小岛，再试一下');
  }
@@ -28,6 +28,7 @@ export class GameStore{
   const mutation=crypto.randomUUID();const results=await this.db.batch([
    this.db.prepare('UPDATE manor_games SET revision=?,state_json=?,mutation_id=?,updated_at=? WHERE uid=? AND revision=? AND NOT EXISTS(SELECT 1 FROM manor_operations WHERE uid=? AND op_id=?)').bind(next.revision,JSON.stringify(next),mutation,now,uid,expected,uid,opId),
    this.db.prepare('INSERT INTO manor_operations(uid,op_id,request_hash,receipt_json,created_at) SELECT ?,?,?,?,? WHERE EXISTS(SELECT 1 FROM manor_games WHERE uid=? AND mutation_id=?)').bind(uid,opId,hash,JSON.stringify(receipt),now,uid,mutation),
+   ...(receipt.type==='sell'&&receipt.status!=='rejected'&&Number.isSafeInteger(receipt.value)&&receipt.value>0?[this.db.prepare('INSERT INTO manor_income(uid,op_id,amount,earned_at) SELECT ?,?,?,? WHERE EXISTS(SELECT 1 FROM manor_games WHERE uid=? AND mutation_id=?)').bind(uid,opId,receipt.value,now,uid,mutation)]:[]),
   ]);return results[0].meta.changes===1&&results[1].meta.changes===1;
  }
  async recoveryReceipts(uid,ids){const result=await this.db.prepare("SELECT op_id,request_hash,receipt_json FROM manor_operations WHERE uid=? AND op_id IN (SELECT value FROM json_each(?))").bind(uid,JSON.stringify(ids)).all();return new Map((result.results??[]).map(r=>[r.op_id,{hash:r.request_hash,receipt:JSON.parse(r.receipt_json)}]));}

@@ -100,6 +100,16 @@ export function applyCommand(original,command,context={}){
   }
   s.position={...p.path.at(-1)};s.pending=null;break;
  }
+ case 'harvest-batch':{
+  if(!Array.isArray(c.targets)||!c.targets.length||c.targets.length>256)fail('BAD_GATHER','重新选一下要收的东西',400);
+  const seen=new Set(),accepted=[],skipped=[];
+  for(const t of c.targets){validateTarget(t?.target);if(typeof t.jobId!=='string'||!t.jobId||seen.has(t.jobId))fail('BAD_GATHER','重新选一下要收的东西',400);seen.add(t.jobId);
+   const job=s.jobs.find(j=>j.id===t.jobId);if(!job){skipped.push(t.jobId);continue;}
+   if(targetKey(job.target)!==targetKey(t.target))fail('TARGET_CHANGED','这里已经变了，重新收一次吧');if(now<job.readyAt)fail('NOT_READY','还有东西没长好');accepted.push(job);
+  }
+  const ids=new Set(accepted.map(j=>j.id));s.jobs=s.jobs.filter(j=>!ids.has(j.id));
+  const items=accepted.map(j=>({...j.product,harvestedAt:now,location:{kind:'bag'}}));for(const item of items){s.items.push(item);recordDiscovery(s,item);}receipt={...receipt,items,skipped};break;
+ }
  case 'hold':{
   const item=itemById(s,c.itemId);if(!['bag','hand'].includes(item.location.kind))fail('WALK_TO_ITEM','先走过去拿起它吧');hold(s,item);receipt={...receipt,itemId:item.id};break;
  }

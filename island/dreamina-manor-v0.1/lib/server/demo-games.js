@@ -1,3 +1,4 @@
+import{NPC_ISLAND_LAYOUTS}from'../art/npc-island-layouts.js';
 import {recordDiscovery} from '../game/collection.js';
 import {createGame,assertGame}from'../game/state.js';
 import {SPECIES_BY_ID}from'../game/catalogue.js';
@@ -12,11 +13,11 @@ export function createDemoGame(uid,now){const d=DEMO_ISLANDS.find(d=>d.uid===uid
  for(const [spec,target]of [[plant,{kind:'land',cell:uid==='demo-kelly'?{x:3,z:1}:{x:1,z:2}}],[fish,{kind:'dock',cell:s.docks.at(-1)}]]){const product={id:`${uid}-v1-production-${spec.id}`,kind:spec.kind,speciesId:spec.id,tier:spec.tier,mutation:'normal',standardSize:spec.standardSize,finalSize:spec.standardSize,value:priceItem(spec,spec.standardSize,'normal'),createdAt:now};s.jobs.push({id:`${uid}-v1-job-${spec.id}`,target,inputTier:spec.tier,startedAt:now,readyAt:now+10000,product});}
  assertGame(s);return s;}
 
-export const DEMO_LAYOUT_VERSION=2;
+export const DEMO_LAYOUT_VERSION=3;
 /** Deterministic themed exhibits. Versioned IDs are never recycled or reseeded. */
 export function createDemoGameV2(uid,now){
  if(!DEMO_ISLANDS.some(d=>d.uid===uid))throw new Error('Unknown exhibition');
- const s=createDemoGame(uid,now);s.demoLayoutVersion=DEMO_LAYOUT_VERSION;s.fishHousingVersion=2;s.items=[];s.jobs=[];s.discovered={};s.discoveredVariants={};
+ const s=createDemoGame(uid,now);s.demoLayoutVersion=2;s.fishHousingVersion=2;s.items=[];s.jobs=[];s.discovered={};s.discoveredVariants={};
  let seed=[...uid].reduce((n,c)=>Math.imul(n^c.charCodeAt(0),16777619)>>>0,2166136261);const random=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return(seed>>>0)/4294967296;};
  if(uid==='demo-kelly'){s.land=Array.from({length:12},(_,i)=>({x:i%4,z:Math.floor(i/4)})).concat([{x:4,z:2}]);s.tank=[{x:0,z:0},{x:1,z:0},{x:0,z:1},{x:1,z:1}];s.docks=[{x:5,z:2},{x:6,z:2}];s.position={x:2,z:1};}
  else{s.land=Array.from({length:15},(_,i)=>({x:i%5,z:Math.floor(i/5)})).filter(c=>c.x<4||c.z===2);s.land.push({x:0,z:3},{x:1,z:3});s.tank=[{x:2,z:0},{x:3,z:0},{x:2,z:1},{x:3,z:1}];s.docks=[{x:-1,z:2},{x:-2,z:2},{x:-3,z:2}];s.position={x:1,z:1};}
@@ -26,4 +27,13 @@ export function createDemoGameV2(uid,now){
  const fishes=uid==='demo-kelly'?['clownfish','blue-tang','oarfish']:['manta-ray','hammerhead','king-crab'];fishes.forEach((id,i)=>add(id,{kind:'tank'},i===0?'gold':'normal'));
  const plant=SPECIES_BY_ID[uid==='demo-kelly'?'lithops':'mimosa'],fish=SPECIES_BY_ID[uid==='demo-kelly'?'sardine':'salmon'];for(const[p,target]of[[plant,{kind:'land',cell:free[4]}],[fish,{kind:'dock',cell:s.docks.at(-1)}]]){const product={id:`${uid}-v2-production-${p.id}`,kind:p.kind,speciesId:p.id,tier:p.tier,mutation:'normal',standardSize:p.standardSize,finalSize:p.standardSize,value:priceItem(p,p.standardSize,'normal'),createdAt:now};s.jobs.push({id:`${uid}-v2-job-${p.id}`,target,inputTier:p.tier,startedAt:now,readyAt:now+10000,product});}
  assertGame(s);return s;
+}
+
+/** New IDs and a complete prior-state receipt make this a one-time exhibition refresh. */
+export function createDemoGameV3(uid,now){
+ const layout=NPC_ISLAND_LAYOUTS.find(d=>d.uid===uid);if(!layout)throw new Error('Unknown exhibition');
+ const s=createGame(uid,now);Object.assign(s,{demo:true,demoLayoutVersion:3,profile:structuredClone(layout.profile),coins:0,seeds:[0,0,0,0,0],firstPlantStarted:true,land:structuredClone(layout.land),docks:structuredClone(layout.docks),tank:structuredClone(layout.tank),position:structuredClone(layout.position)});
+ const product=(a,id)=>{const spec=SPECIES_BY_ID[a.speciesId],size=spec.standardSize*(a.scale??1),mutation=a.mutation??'normal';return{id,kind:spec.kind,speciesId:spec.id,tier:spec.tier,mutation,standardSize:spec.standardSize,finalSize:size,value:priceItem(spec,size,mutation),createdAt:now};};
+ [...layout.displayPlants,...layout.displayFish].forEach((a,i)=>{const item={...product(a,`${uid}-v3-display-${i}-${a.speciesId}`),harvestedAt:now,location:a.cell?{kind:'land',cell:structuredClone(a.cell)}:{kind:'tank'}};s.items.push(item);recordDiscovery(s,item);});
+ layout.production.forEach((a,i)=>s.jobs.push({id:`${uid}-v3-job-${i}`,target:{kind:a.kind==='plant'?'land':'dock',cell:structuredClone(a.cell)},inputTier:a.tier,startedAt:now,readyAt:now+10000,product:product(a,`${uid}-v3-product-${i}`)}));assertGame(s);return s;
 }

@@ -54,13 +54,36 @@ class Botanical {
 }
 
 function lithops(b){
- const body=b.organ('Lithops_split_body',[0,.018,0],.05,.94,b.root,{minimum:.13});
- for(const sign of [-1,1]){
-  const g=profileGeometry([[0,0],[.10,.012],[.17,.045],[.205,.12],[.205,.26],[.18,.36],[.14,.395],[.08,.417],[0,.426]],36);g.scale(1,1,1.30);const l=b.mesh(`Lithops_lobe_${sign}`,g,sign<0?'#94A899':'#A7B3A1',body,'stone foliage light');l.position.x=sign*.218;
-  const spots=[];for(let i=0;i<19;i++){const a=i*2.399,r=.105*Math.sqrt((i+1)/19);spots.push({p:[sign*.218+r*Math.cos(a),.430-.03*Math.pow(r/.18,1.5),r*Math.sin(a)*1.30],s:[.010,.0025,.013]});}
-  b.balls(`Lithops_window_marbling_${sign}`,spots,'#6C8B7F',body);
+ // Keep the saved species key, but author an entirely new strawberry anatomy.
+ // Leaf sprays and pendant fruit unfold from their own attached petioles.
+ for(let i=0;i<3;i++){
+  const angle=[-.95,1.05,3.0][i],stem=b.organ(`Strawberry_leaf_stem_${i}`,[0,.014,0],.01,.64,b.root,{minimum:.13});stem.rotation.y=angle;
+  b.tube('Strawberry_leaf_petiole',[[0,0,0],[0,.13,.055],[0,.25,.13]],.012,'#66855B',stem,20,7,'stem');
+  const spray=b.organ(`Strawberry_trifoliate_${i}`,[0,.25,.13],.07+i*.045,.74+i*.035,stem,{minimum:.06});
+  for(const side of [-1,0,1]){
+   const leaf=new THREE.Group();leaf.rotation.y=side*.98;leaf.position.z=side===0?.025:0;spray.add(leaf);
+   const length=side===0?.30:.245,width=side===0?.105:.09,g=bladeGeometry(length,width,.065,-.055,{thickness:.009,ridge:.022,tipPower:.62}),p=g.attributes.position;
+   // Alternating edge notches, shallow in the centre, make genuine serrations.
+   for(let n=0;n<p.count;n++){const row=Math.floor((n%153)/9),tooth=row%2?1:.84;p.setX(n,p.getX(n)*tooth);}p.needsUpdate=true;g.computeVertexNormals();
+   b.mesh('Strawberry_serrated_leaf',g,['#6D9768','#7EA574','#5F8B63'][i],leaf,'strawberry foliage');
+   b.tube('Strawberry_leaf_midvein',[[0,.009,0],[0,.043,length*.5],[0,.018,length]],.0035,'#B0BE86',leaf,12,5,'leaf vein');
+  }
+  b.sway(stem,'z',.018,.62,i*1.7);
  }
- b.sway(body,'z',.005,.7);
+ const profile=[[0,-.30],[.030,-.28],[.064,-.235],[.101,-.17],[.127,-.10],[.139,-.045],[.128,.002],[.092,.024],[.040,.018],[0,.014]];
+ for(const [i,x,y,z,scale] of [[0,-.22,.36,.22,1],[1,.20,.32,.24,.83],[2,.03,.44,-.12,.65]]){
+  const stalk=b.organ(`Strawberry_fruit_stalk_${i}`,[0,.008,0],.03+i*.035,.63+i*.025,b.root,{minimum:.12});
+  b.tube('Strawberry_fruit_pedicel',[[0,0,0],[x*.5,y*.83,z*.35],[x,y+.035,z],[x,y,z]],.010,'#6D8C5B',stalk,24,7,'stem');
+  const fruit=b.organ(`Strawberry_pendant_${i}`,[x,y,z],.30+i*.06,.94+i*.025,stalk,{minimum:.025});fruit.scale.setScalar(scale);b.organs.at(-1).scale.copy(fruit.scale);fruit.rotation.z=i===0?-.13:.12;
+  const body=profileGeometry(profile,40);body.scale(1.06,1,.92);const m=b.mesh('Strawberry_fruit_body',body,['#BC4A4B','#D35F53','#BE514A'][i],fruit,'strawberry fruit');m.material.roughness=.46;
+  const seeds=[];for(let row=0;row<6;row++){
+   const y=-.25+row*.044;let k=1;while(k<profile.length-1&&profile[k][1]<y)k++;const a=profile[k-1],c=profile[k],r=a[0]+(c[0]-a[0])*(y-a[1])/(c[1]-a[1]);
+   const count=7+row;for(let j=0;j<count;j++){const theta=TAU*(j+.5*(row%2))/count;seeds.push({p:[(r+.0018)*Math.sin(theta)*1.06,y,(r+.0018)*Math.cos(theta)*.92],s:[.004,.008,.004]});}
+  }
+  b.balls('Strawberry_pale_seeds',seeds,'#E4CF8F',fruit);
+  const calyx=new THREE.Group();calyx.position.y=.018;fruit.add(calyx);for(let j=0;j<5;j++)b.leaf('Strawberry_green_calyx',calyx,{length:.115,width:.028,rise:.027,curl:-.054,angle:j*TAU/5,color:'#73935B',vein:false,thickness:.007});
+  b.sway(stalk,'z',.012,.55,i*1.4);
+ }
 }
 function corkscrew(b){
  for(let i=0;i<5;i++){
@@ -132,14 +155,52 @@ function palm(b){
  }
 }
 function rafflesia(b){
- const heart=b.organ('Rafflesia_heart',[0,.025,0],.20,.91,b.root,{minimum:.10});
- const cup=profileGeometry([[.12,0],[.21,.035],[.24,.14],[.22,.24],[.18,.285],[.145,.29],[.13,.25],[.13,.17],[.075,.10]],40);b.mesh('Rafflesia_thick_cup',cup,'#AD6056',heart,'petal cup');
- b.blob('Rafflesia_shadow_throat',[0,.113,0],[.12,.018,.12],'#573F3C',heart,24,10,'mouth throat');
- const coreDots=[];for(let i=0;i<18;i++){const a=i*2.4,r=.09*Math.sqrt((i+1)/18);coreDots.push({p:[r*Math.cos(a),.13,r*Math.sin(a)],s:[.011,.025,.011]});}b.balls('Rafflesia_central_columns',coreDots,'#CF9E77',heart);
- for(let i=0;i<5;i++){
-  const petal=b.organ(`Rafflesia_lobe_${i}`,[0,.07,0],.05+i*.025,.91+i*.015,b.root,{minimum:.06});petal.rotation.y=i*TAU/5+.18;
-  b.leaf('Rafflesia_round_petal',petal,{length:.64,width:.27,rise:.07,curl:.01,color:i%2?'#B96D60':'#C07A68',vein:false,thickness:.07,tipPower:.42});
-  const spots=[];for(let j=0;j<14;j++){const t=.24+.7*((j*7)%14)/14,v=Math.sin(j*4.1)*.72,w=.25*Math.pow(Math.sin(Math.PI*t),.72);spots.push({p:[w*v,.07*t+.01*t*t+.035*Math.sin(Math.PI*t)*(1-v*v)+.037,.64*t],s:[.016+(j%3)*.003,.005,.013]});}b.balls('Rafflesia_cream_islands',spots,'#E1C697',petal);b.sway(petal,'x',.008,.43,i*.7);
+ // The save identity is retained; the sculpture is now a mature dragon tree.
+ // Tapered, gently fluted wood carries seven separate sword-leaf umbrellas.
+ function wood(name,points,radii,parent){
+  const steps=28,radial=12,curve=new THREE.CatmullRomCurve3(points.map(V)),g=tubeGeometry(points,1,steps,radial),p=g.attributes.position;
+  for(let i=0;i<=steps;i++){
+   const t=i/steps,q=t*(radii.length-1),k=Math.min(radii.length-2,Math.floor(q)),radius=THREE.MathUtils.lerp(radii[k],radii[k+1],q-k),centre=curve.getPointAt(t);
+   for(let j=0;j<=radial;j++){const n=i*(radial+1)+j,flute=1+.035*Math.cos(j/radial*TAU*5+.35*t),v=new THREE.Vector3().fromBufferAttribute(p,n).sub(centre).multiplyScalar(radius*flute).add(centre);p.setXYZ(n,v.x,v.y,v.z);}
+  }
+  p.needsUpdate=true;g.computeVertexNormals();return b.mesh(name,g,'#8B8B78',parent,'dragon bark');
+ }
+ function sword(length,width,rise,curl){
+  const source=bladeGeometry(length,width,rise,curl,{thickness:.007,ridge:.012,tipPower:.93}),a=source.attributes.position,positions=[],indices=[],row=5,plane=45;
+  // Sword silhouettes need eight length segments, not the petal mesh budget.
+  for(let side=0;side<2;side++)for(let i=0;i<=8;i++)for(let j=0;j<=4;j++){const n=side*153+i*18+j*2;positions.push(a.getX(n),a.getY(n),a.getZ(n));}
+  for(let side=0;side<2;side++)for(let i=0;i<8;i++)for(let j=0;j<4;j++){const n=side*plane+i*row+j,m=n+1,c=n+row,d=c+1;if(side)indices.push(n,c,m,m,c,d);else indices.push(n,m,c,m,d,c);}
+  const edge=[];for(let j=0;j<=4;j++)edge.push(j);for(let i=1;i<=8;i++)edge.push(i*row+4);for(let j=3;j>=0;j--)edge.push(8*row+j);for(let i=7;i>0;i--)edge.push(i*row);
+  for(let i=0;i<edge.length;i++){const n=edge[i],m=edge[(i+1)%edge.length];indices.push(n,n+plane,m,m,n+plane,m+plane);}
+  source.dispose();const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setIndex(indices);g.computeVertexNormals();return g;
+ }
+ const trunk=b.organ('Dragon_tree_trunk',[0,0,0],.01,.73,b.root,{minimum:.10});
+ wood('Dragon_tapered_trunk',[[0,.015,0],[-.025,.28,.01],[.015,.56,-.01],[.02,.79,0],[.015,.87,-.012]],[.135,.107,.077,.034],trunk);
+ for(let i=0;i<4;i++){const a=i*TAU/4+.4;wood('Dragon_root_flare',[[0,.13,0],[Math.cos(a)*.09,.055,Math.sin(a)*.09],[Math.cos(a)*.20,.01,Math.sin(a)*.17]],[.064,.045,.014],trunk);}
+ // Fine bark furrows are restrained accents, never a striped texture wrapper.
+ for(let i=0;i<2;i++){const x=i?-.050:.045;b.tube('Dragon_bark_furrow',[[x,.10,.101],[x-.01,.34,.085],[x+.015,.56,.055]],.0035,'#AAA58D',trunk,20,5,'bark grain');}
+ const branches=[
+  {base:[0,.64,0],fork:[-.12,.29,.015],tips:[[-.35,.58,.02],[-.18,.66,.20],[-.19,.59,-.20]]},
+  {base:[.02,.74,0],fork:[.15,.27,-.015],tips:[[.35,.58,.10],[.34,.64,-.16]]},
+  {base:[.02,.82,0],fork:[-.025,.40,-.12],tips:[[-.08,.77,-.13],[.15,.72,-.18]]},
+ ];
+ let crownIndex=0;
+ for(let i=0;i<branches.length;i++){
+  const {base,fork,tips}=branches[i],limb=b.organ(`Dragon_main_fork_${i}`,base,.12+i*.05,.79+i*.035,trunk,{minimum:.04});
+  wood('Dragon_sculpted_main_branch',[[0,0,0],[fork[0]*.55,fork[1]*.48,fork[2]*.5],fork],[.063-i*.008,.047-i*.005,.029],limb);
+  for(const tip of tips){
+   wood('Dragon_natural_secondary_fork',[fork,[(fork[0]+tip[0])*.55,(fork[1]+tip[1])*.49,(fork[2]+tip[2])*.5],tip],[.031,.024,.012],limb);
+   const index=crownIndex++,crown=b.organ(`Dragon_leaf_crown_${index}`,tip,.27+index*.035,.91+index*.012,limb,{minimum:.025}),parts=[[],[]];
+   for(let ring=0;ring<2;ring++){
+    const count=ring?7:12;
+    for(let j=0;j<count;j++){
+     const a=j*TAU/count+index*.47+ring*.29,length=(ring?.17:.235)*(1+.06*Math.sin(j*2.4+index)),g=sword(length,ring?.025:.029,ring?.14:.10,ring?-.03:-.11);
+     g.rotateY(a);g.translate(Math.sin(a)*.012,ring*.025,Math.cos(a)*.012);parts[(j+index)%2].push(g);
+    }
+   }
+   for(let shade=0;shade<2;shade++){const g=mergeGeometries(parts[shade]);parts[shade].forEach(p=>p.dispose());b.mesh('Dragon_merged_sword_leaves',g,shade?'#789A7C':'#4F7968',crown,shade?'dragon foliage light':'dragon foliage deep');}
+   b.sway(crown,'z',.007,.43,index*.9);b.sway(crown,'x',.005,.37,index*.6);
+  }
  }
 }
 function titan(b){

@@ -21,4 +21,5 @@ export const REQUIRED_SWIM_MARGIN=.20;
 // Overall longest-axis shape; model proportions and within-species random/giant ratios stay exact.
 // The shared exhibition ruler is not a centimetre-to-real-world promise or a per-tank shrink.
 
-export const SEA_SURFACE_Y=-.18;
+// Same compact GLB submerged proportion as artdesign: 67.8526% exposed. Ground stays fixed.
+export const SEA_SURFACE_Y=-.4263093063917347;

@@ -1,0 +1,41 @@
+/* Local gallery palette only. Navigation, world, and other trays retain their own theme. */
+.tank-gallery,.harvest-gallery{--gallery-ink:#203a40;--gallery-secondary:#60716b;--gallery-divider:#dee8e3;--gallery-thumb:#eaf4f1;--gallery-display:#d5e9e4;--gallery-retrieve:#eaf3f0;--gallery-action-ink:#285b60;--gallery-sell:#f6f0e6;--gallery-sell-ink:#6c6253;color:var(--gallery-ink)}
+.tank-gallery{gap:0;padding-bottom:16px}
+.tank-gallery .tank-group-label{display:flex;gap:5px;align-items:center;min-height:24px;padding:5px 0 2px;font-size:11px;line-height:17px;color:var(--gallery-secondary)}
+.tank-gallery .tank-row{display:flex;align-items:center;gap:10px;min-height:108px;height:auto;max-height:none;padding:8px 0;border-bottom:1px solid var(--gallery-divider);border-radius:0;background:transparent}
+.tank-gallery .tank-row-thumb{width:72px;height:80px;min-width:72px;flex:none;padding:0;border-radius:16px;background:var(--gallery-thumb);overflow:hidden}
+.tank-gallery .tank-row-thumb>.item-thumb{width:100%;height:100%;margin:0;background:transparent;border-radius:0}
+.tank-gallery .tank-row-thumb img{width:100%;height:100%;object-fit:contain}
+.tank-gallery .tank-row-copy{flex:1;min-width:0;overflow:visible}
+.tank-gallery .tank-row-copy b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:18px;font-weight:600;overflow-wrap:anywhere;color:var(--gallery-ink)}
+.tank-gallery .tank-row-copy small{display:block;margin-top:3px;font-size:11px;line-height:15px;white-space:normal;overflow-wrap:anywhere;color:var(--gallery-secondary);font-variant-numeric:tabular-nums}
+.tank-gallery .tank-row-copy .tank-row-state{margin-top:1px;font-size:10px}
+.tank-gallery .tank-row-actions{display:flex;flex-direction:column;align-items:stretch;gap:4px;flex:0 0 80px;min-width:0}
+.tank-gallery .tank-row-actions>button{width:100%;min-width:0;min-height:44px;height:auto;padding:5px 3px;border-radius:12px;font-size:12px;line-height:16px;border:1px solid transparent;white-space:normal}
+.tank-gallery .tank-row-actions>button.tank-display{background:var(--gallery-display);color:var(--gallery-action-ink);font-weight:600}
+.tank-gallery .tank-row-actions>button.tank-retrieve{background:var(--gallery-retrieve);color:var(--gallery-action-ink);border-color:#d7e8e2;font-weight:600}
+.tank-gallery .tank-row-actions>button.tank-row-sell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:var(--gallery-sell);color:var(--gallery-sell-ink);font-weight:400}
+.tank-gallery .tank-row-actions .money-value{display:inline;max-width:100%;white-space:normal;font-size:10px;line-height:15px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.tank-gallery .tank-row-actions .money-value svg{display:inline-block;width:12px;height:12px;margin-left:2px;vertical-align:-2px}
+.tank-gallery .tank-row-actions>button:active:not(:disabled){filter:brightness(.95)}
+.tank-gallery .tank-row-actions>button:disabled{opacity:.5;cursor:default}
+.tank-gallery button:focus-visible{outline:2px solid var(--gallery-action-ink);outline-offset:2px}
+@media(min-width:390px){.tank-gallery .tank-row-thumb{width:80px;min-width:80px}}
+
+.harvest-gallery{column-gap:9px;row-gap:12px;padding-bottom:16px}
+.harvest-gallery .harvest-row{min-height:0;padding:8px 3px 6px;gap:3px;background:transparent;border-radius:0}
+.harvest-gallery .harvest-row>.item-thumb{width:100%;height:90px;flex:none;margin:0}
+.harvest-gallery .harvest-summary{width:100%;min-height:44px;height:auto;padding:0;text-align:center;display:flex;flex-direction:column;justify-content:flex-start;gap:1px;background:transparent;color:var(--gallery-ink)}
+.harvest-gallery .harvest-title{display:flex;align-items:flex-start;justify-content:center;gap:3px;width:100%;min-width:0}
+.harvest-gallery .harvest-title b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:0;min-width:0;flex:0 1 auto;font-size:12px;line-height:16px;font-weight:600;overflow-wrap:anywhere}
+.harvest-gallery .harvest-title .stack-count{position:static;flex:none;max-width:100%;margin:0;padding:0 3px;font-size:10px;line-height:16px;border-radius:5px;background:#e5ede8;color:var(--gallery-action-ink);font-weight:500;font-variant-numeric:tabular-nums}
+.harvest-gallery .harvest-summary small{display:block;min-height:0;margin:0;font-size:10px;line-height:13px;color:var(--gallery-secondary);white-space:normal;overflow-wrap:anywhere}
+.harvest-gallery .held-label{margin:0;padding:0;font-size:inherit;color:inherit;background:transparent}
+.harvest-gallery .sell-direct{display:flex;flex-wrap:wrap;flex-direction:row;align-items:center;justify-content:center;gap:2px 4px;width:100%;min-height:44px;padding:5px 3px;background:var(--gallery-sell);color:var(--gallery-sell-ink);border-radius:11px;font-size:11px;line-height:15px;border:1px solid transparent}
+.harvest-gallery .sell-direct small{min-width:0;max-width:100%;font-size:10px;line-height:14px;overflow-wrap:anywhere}
+.harvest-gallery .sell-direct .money-value{display:inline;white-space:normal;font-size:inherit;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.harvest-gallery .sell-direct .money-value svg{display:inline-block;width:12px;height:12px;margin-left:2px;vertical-align:-2px}
+.harvest-gallery .sell-direct:active:not(:disabled){filter:brightness(.95)}
+.harvest-gallery .sell-direct:disabled{opacity:.5;cursor:default}
+.harvest-gallery .harvest-summary:focus-visible,.harvest-gallery .sell-direct:focus-visible{outline:2px solid var(--gallery-action-ink);outline-offset:2px}
+/* The existing transparent 44px overflow trigger and its keyboard-focus rules are untouched. */

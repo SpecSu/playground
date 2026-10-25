@@ -15,6 +15,13 @@
       "when": 1792747929659,
       "tag": "0001_dizzy_jack_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792823220000,
+      "tag": "0002_income_ledger",
+      "breakpoints": true
     }
   ]
 }
