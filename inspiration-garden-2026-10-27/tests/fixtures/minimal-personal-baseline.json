@@ -1,0 +1,810 @@
+{
+  "activePersonalIDs": [
+    "fluffy_cat_cottage",
+    "lamy_memory_column",
+    "airforce_memory_house",
+    "xt50_memory_camera",
+    "scallop_shell_house",
+    "camping_tarp_pavilion"
+  ],
+  "retireFromDiscoveryOnly": "necklace_memory_monument",
+  "sprites": {
+    "fluffy_cat_cottage": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.5263157894736842,
+        0.7392344497607656
+      ],
+      "width": 214,
+      "alphaBounds": {
+        "x": 35,
+        "y": 90,
+        "w": 1206,
+        "h": 1070
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "image": "assets/heroes/fluffy-cat-cottage-sculptural-v2.webp",
+      "kind": "building",
+      "displayName": "绒云曲廊",
+      "interaction": "meow",
+      "preload": false,
+      "catFeeding": {
+        "referenceSize": [
+          1254,
+          1254
+        ],
+        "faceCenter": [
+          380,
+          522.5
+        ],
+        "faceWidth": 290,
+        "fishStart": [
+          1320,
+          980
+        ],
+        "fishControl": [
+          850,
+          -70
+        ],
+        "fishMouth": [
+          352,
+          575
+        ]
+      }
+    },
+    "lamy_memory_column": {
+      "image": "assets/heroes/lamy-memory-column-yellow-v2.webp",
+      "frame": {
+        "x": 385,
+        "y": 20,
+        "w": 275,
+        "h": 1450
+      },
+      "anchor": [
+        0.490909,
+        0.935172
+      ],
+      "width": 50,
+      "kind": "building",
+      "displayName": "字里灯塔",
+      "alphaBounds": {
+        "x": 32,
+        "y": 44,
+        "w": 200,
+        "h": 1357
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0,
+        0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "preload": false
+    },
+    "airforce_memory_house": {
+      "image": "assets/heroes/tesla-roadster-hover-v1-runtime.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 832,
+        "h": 416
+      },
+      "anchor": [
+        0.4368658399098083,
+        0.7102593010146562
+      ],
+      "width": 180,
+      "kind": "building",
+      "alphaBounds": {
+        "x": 46,
+        "y": 42,
+        "w": 728,
+        "h": 329
+      },
+      "footprint": [
+        2,
+        1
+      ],
+      "renderPivotCell": [
+        0.5,
+        0
+      ],
+      "depthPivotCell": [
+        1,
+        0
+      ],
+      "jetAnchors": [
+        [
+          0.21702367531003383,
+          0.5997745208568207
+        ],
+        [
+          0.6031567080045096,
+          0.8714768883878241
+        ],
+        [
+          0.8511837655016911,
+          0.8241262683201804
+        ]
+      ],
+      "interaction": "hover",
+      "preload": false,
+      "displayName": "离地一瞬"
+    },
+    "xt50_memory_camera": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 512,
+        "h": 483
+      },
+      "anchor": [
+        0.50272975,
+        0.8011583
+      ],
+      "width": 89,
+      "kind": "building",
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0,
+        0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "preload": false,
+      "lensAnchor": [
+        0.34303913,
+        0.60521236
+      ],
+      "image": "assets/heroes/camera-sculptural-v1-runtime.webp",
+      "displayName": "瞬间镜馆",
+      "interaction": "shutter",
+      "alphaBounds": {
+        "x": 1,
+        "y": 2,
+        "w": 510,
+        "h": 479
+      }
+    },
+    "scallop_shell_house": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 896,
+        "h": 726
+      },
+      "anchor": [
+        0.40207075,
+        0.73801917
+      ],
+      "width": 200,
+      "kind": "building",
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "preload": false,
+      "ribGlowAnchors": [
+        [
+          0.07937877,
+          0.36954207
+        ],
+        [
+          0.18723037,
+          0.26730564
+        ],
+        [
+          0.30974978,
+          0.20021299
+        ],
+        [
+          0.45815358,
+          0.12247071
+        ],
+        [
+          0.63157895,
+          0.15867945
+        ],
+        [
+          0.77480587,
+          0.26091587
+        ],
+        [
+          0.89042278,
+          0.38551651
+        ]
+      ],
+      "image": "assets/heroes/shell-sculptural-v1-runtime.webp",
+      "displayName": "潮汐扇屋",
+      "interaction": "shell-glow",
+      "alphaBounds": {
+        "x": 3,
+        "y": 3,
+        "w": 890,
+        "h": 720
+      }
+    },
+    "camping_tarp_pavilion": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 704,
+        "h": 516
+      },
+      "anchor": [
+        0.60251124,
+        0.74092536
+      ],
+      "width": 155,
+      "kind": "building",
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "preload": false,
+      "lanternAnchor": [
+        0.11694153,
+        0.54805726
+      ],
+      "clothEdge": [
+        [
+          0.06746627,
+          0.3793456
+        ],
+        [
+          0.18365817,
+          0.4406953
+        ],
+        [
+          0.34707646,
+          0.48670757
+        ],
+        [
+          0.51124438,
+          0.5
+        ],
+        [
+          0.66416792,
+          0.50306748
+        ],
+        [
+          0.77736132,
+          0.54498978
+        ],
+        [
+          0.95052474,
+          0.62167689
+        ]
+      ],
+      "image": "assets/heroes/canopy-sculptural-v2-runtime.webp",
+      "displayName": "风停营地",
+      "interaction": "canopy",
+      "alphaBounds": {
+        "x": 2,
+        "y": 2,
+        "w": 700,
+        "h": 512
+      }
+    },
+    "necklace_memory_monument": {
+      "image": "assets/heroes/necklace-sculptural-courtyard-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 836,
+        "h": 836
+      },
+      "anchor": [
+        0.5003987240829346,
+        0.7360446570972887
+      ],
+      "width": 188,
+      "kind": "building",
+      "alphaBounds": {
+        "x": 22,
+        "y": 40,
+        "w": 793,
+        "h": 761
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "interaction": "chime",
+      "preload": false,
+      "displayName": "银弧纪念庭",
+      "pendantAnchor": [
+        0.5741626794258373,
+        0.5007974481658692
+      ]
+    }
+  },
+  "samples": {
+    "fluffy_cat_cottage": {
+      "id": "fluffy_cat_cottage",
+      "name": "绒云曲廊",
+      "artKey": "fluffy_cat_cottage",
+      "interaction": "meow",
+      "sourceType": "user-provided-photo",
+      "sourceFrameId": "fluffy-cat-real-photo",
+      "sourceDate": "2026-10-26",
+      "sourceDateLabel": "提供于",
+      "sourceDisclosure": "我的猫咪",
+      "sourceStory": "熟悉的暖白长毛、灰卡其耳朵和蓬松尾巴，化成一座舒展的曲面小馆。轻碰一次，抛一条小鱼，等它吃完开心一下。",
+      "keywords": [
+        "毛茸茸",
+        "长毛",
+        "暖白",
+        "卡其",
+        "猫咪小屋",
+        "绒云",
+        "曲廊"
+      ],
+      "authorId": "garden-originals",
+      "authorName": "花园灵感工坊"
+    },
+    "lamy_memory_column": {
+      "id": "lamy_memory_column",
+      "name": "字里灯塔",
+      "artKey": "lamy_memory_column",
+      "interaction": "ink",
+      "footprint": [
+        1,
+        1
+      ],
+      "sourceType": "memory",
+      "sourceFrameId": "lamy-pen-memory-photo",
+      "sourceTitle": "女友送的 LAMY 钢笔",
+      "sourceStory": "收到的那支钢笔，把没说完的温柔写成了一盏灯。细长的笔身立在小岛一角，像一座只为一句话亮着的灯塔。",
+      "keywords": [
+        "LAMY",
+        "lamy",
+        "钢笔",
+        "笔尖",
+        "灯塔"
+      ],
+      "authorId": "garden-memories",
+      "authorName": "苏贝壳"
+    },
+    "airforce_memory_house": {
+      "id": "airforce_memory_house",
+      "name": "离地一瞬",
+      "artKey": "airforce_memory_house",
+      "interaction": "hover",
+      "footprint": [
+        2,
+        1
+      ],
+      "sourceType": "memory",
+      "sourceFrameId": "roadster-rocket-memory-photo",
+      "sourceTitle": "Roadster Rocket 的贴地飞行想象",
+      "sourceDisclosure": "概念灵感示意 · 非用户实拍",
+      "sourceStory": "把未来跑车的想象停在小岛上。轻碰车身，短促气流把它托离地面一点，再轻轻落回原处。",
+      "keywords": [
+        "Tesla",
+        "Roadster",
+        "Rocket",
+        "特斯拉",
+        "飞行汽车",
+        "跑车",
+        "贴地",
+        "离地一瞬"
+      ],
+      "authorId": "garden-memories",
+      "authorName": "苏贝壳"
+    },
+    "xt50_memory_camera": {
+      "id": "xt50_memory_camera",
+      "name": "瞬间镜馆",
+      "artKey": "xt50_memory_camera",
+      "interaction": "shutter",
+      "footprint": [
+        1,
+        1
+      ],
+      "sourceType": "memory",
+      "sourceFrameId": "xt50-memory-photo",
+      "sourceTitle": "Fujifilm X-T50 的镜头灵感",
+      "sourceDisclosure": "物件灵感示意 · 非用户实拍",
+      "sourceStory": "银黑机身、细密转盘和圆形镜头，折成一座收藏光线的小馆。轻碰镜头，一声轻快的快门，让此刻亮一下。",
+      "keywords": [
+        "Fujifilm",
+        "X-T50",
+        "XT50",
+        "富士",
+        "相机",
+        "镜头",
+        "瞬间镜馆"
+      ],
+      "authorId": "garden-memories",
+      "authorName": "苏贝壳"
+    },
+    "scallop_shell_house": {
+      "id": "scallop_shell_house",
+      "name": "潮汐扇屋",
+      "artKey": "scallop_shell_house",
+      "interaction": "shell-glow",
+      "footprint": [
+        2,
+        2
+      ],
+      "sourceType": "memory",
+      "sourceFrameId": "scallop-shell-memory-photo",
+      "sourceTitle": "一枚扇贝的海边想象",
+      "sourceDisclosure": "自然灵感示意 · 非用户实拍",
+      "sourceStory": "扇贝的放射纹舒展成轻薄壳片，暖白外缘包着一点浅珊瑚色。轻碰小屋，一缕柔光沿着纹路走过，像海面慢慢亮起来。",
+      "keywords": [
+        "扇贝",
+        "贝壳",
+        "潮汐",
+        "扇屋"
+      ],
+      "authorId": "garden-memories",
+      "authorName": "苏贝壳"
+    },
+    "camping_tarp_pavilion": {
+      "id": "camping_tarp_pavilion",
+      "name": "风停营地",
+      "artKey": "camping_tarp_pavilion",
+      "interaction": "canopy",
+      "footprint": [
+        2,
+        2
+      ],
+      "preferredApproachCellOffset": [
+        1,
+        2
+      ],
+      "sourceType": "memory",
+      "sourceFrameId": "camping-tarp-memory-photo",
+      "sourceTitle": "露营天幕下的一小片阴凉",
+      "sourceDisclosure": "露营灵感示意 · 非用户实拍",
+      "sourceStory": "轻薄天幕撑起一角阴凉，小椅子和营灯留在风里。走到可达的外沿，轻碰一次，布面微微回应，营灯暖暖亮一下。",
+      "keywords": [
+        "天幕",
+        "营地",
+        "露营天幕",
+        "遮阳篷",
+        "风停"
+      ],
+      "authorId": "garden-memories",
+      "authorName": "苏贝壳"
+    },
+    "necklace_memory_monument": {
+      "id": "necklace_memory_monument",
+      "name": "银弧纪念庭",
+      "artKey": "necklace_memory_monument",
+      "interaction": "chime",
+      "footprint": [
+        2,
+        2
+      ],
+      "sourceType": "memory",
+      "sourceFrameId": "necklace-memory-photo",
+      "sourceTitle": "一条简洁的银色纪念项链",
+      "sourceStory": "细银链与一枚不对称的银色吊坠，化成留着光与风的纪念庭。轻碰吊坠，让安静的曲面响起一声清亮回音。",
+      "keywords": [
+        "项链",
+        "吊坠",
+        "银弧",
+        "细银链",
+        "银色",
+        "纪念庭"
+      ],
+      "authorId": "garden-memories",
+      "authorName": "苏贝壳"
+    }
+  },
+  "sourceFrames": {
+    "fluffy-cat-real-photo": {
+      "label": "我的猫咪 · 毛茸茸小屋的灵感",
+      "sourceStory": "暖白色长毛铺成柔软屋顶，卡其色花纹围成小门廊；原照片里的大眼睛、粉鼻子和蓬松尾巴，都留在这座会吃小鱼的小屋里。",
+      "sourceType": "user-provided-photo",
+      "displayDate": "2026-10-26",
+      "dateLabel": "提供于",
+      "alt": "暖白色长毛猫趴在浅色毯子上，灰卡其色耳朵和蓬松尾巴是猫咪小屋的灵感来源。",
+      "image": "assets/album/fluffy-cat-source-photo-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 960,
+        "h": 1280
+      }
+    },
+    "lamy-pen-memory-photo": {
+      "image": "assets/album/personal-lamy-yellow-source-v2.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1536,
+        "h": 1024
+      },
+      "size": [
+        1536,
+        1024
+      ],
+      "cardDisplaySize": [
+        600,
+        400
+      ],
+      "label": "礼物 · 一支黄色钢笔",
+      "buildingArtKey": "lamy_memory_column",
+      "sourceType": "ai_generated_demo_photographic_example",
+      "sourceStory": "收到的那支黄色钢笔，把没说完的温柔写成了一盏灯。简单的笔身和银色笔夹立在小岛一角，像一座只为一句话亮着的灯塔。",
+      "transformCues": [
+        "明黄色笔身 → 细长立柱",
+        "银色回形针笔夹 → 轻巧的银色线条",
+        "简洁笔帽 → 现代平顶轮廓"
+      ],
+      "preload": false
+    },
+    "roadster-rocket-memory-photo": {
+      "image": "assets/album/tesla-roadster-inspiration-v2.webp",
+      "label": "Roadster 灵感参考",
+      "disclosure": "生成的设计灵感样片；非用户实车照片",
+      "sourceType": "generated-reference-inspiration",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1200,
+        "h": 800
+      },
+      "size": [
+        1200,
+        800
+      ],
+      "cardDisplaySize": [
+        600,
+        400
+      ],
+      "buildingArtKey": "airforce_memory_house",
+      "preload": false,
+      "sourceStory": "把未来跑车的想象停在小岛上。轻碰车身，短促气流把它托离地面一点，再轻轻落回原处。",
+      "transformCues": [
+        "低伏跑车轮廓 → 两格贴地车身",
+        "银白曲面与深色座舱 → 折曲雕塑体量",
+        "未来飞行想象 → 短暂冷气悬浮互动"
+      ]
+    },
+    "xt50-memory-photo": {
+      "image": "assets/album/camera-sourcecard-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1200,
+        "h": 800
+      },
+      "size": [
+        1200,
+        800
+      ],
+      "cardDisplaySize": [
+        600,
+        400
+      ],
+      "label": "相机 · 取景的小屋",
+      "buildingArtKey": "xt50_memory_camera",
+      "sourceType": "ai_generated_fictional_illustration",
+      "sourceStory": "银色折面和黑色机身围出一座小小的取景屋，圆镜头里留着温暖的灯光。",
+      "transformCues": [
+        "银色机顶 → 折面屋顶",
+        "圆形镜头 → 玻璃观景厅",
+        "黑色握柄 → 深色立面"
+      ],
+      "preload": false,
+      "disclosure": "生成的灵感示意 · 非用户实拍"
+    },
+    "scallop-shell-memory-photo": {
+      "image": "assets/album/shell-sourcecard-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1200,
+        "h": 800
+      },
+      "size": [
+        1200,
+        800
+      ],
+      "cardDisplaySize": [
+        600,
+        400
+      ],
+      "label": "海边 · 一枚扇贝",
+      "buildingArtKey": "scallop_shell_house",
+      "sourceType": "ai_generated_fictional_illustration",
+      "sourceStory": "扇贝的放射纹理撑起一片轻薄屋顶，把海边的柔和颜色收进屋里。",
+      "transformCues": [
+        "放射贝纹 → 扇形折肋屋顶",
+        "象牙白外壳 → 薄壳曲面",
+        "浅粉内面 → 温暖阅读角"
+      ],
+      "preload": false,
+      "disclosure": "生成的灵感示意 · 非用户实拍"
+    },
+    "camping-tarp-memory-photo": {
+      "image": "assets/album/canopy-sourcecard-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1200,
+        "h": 800
+      },
+      "size": [
+        1200,
+        800
+      ],
+      "cardDisplaySize": [
+        600,
+        400
+      ],
+      "label": "露营 · 一片天幕",
+      "buildingArtKey": "camping_tarp_pavilion",
+      "sourceType": "ai_generated_fictional_illustration",
+      "sourceStory": "一片轻轻张开的天幕、一把营椅和一盏灯，给花园留下一处透风的阴凉。",
+      "transformCues": [
+        "轻薄天幕 → 张拉帆布曲面",
+        "纤细营杆 → 倾斜支撑",
+        "小营灯 → 暖光回应"
+      ],
+      "preload": false,
+      "disclosure": "生成的灵感示意 · 非用户实拍"
+    },
+    "necklace-memory-photo": {
+      "image": "assets/album/modern-silver-necklace-photo-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1200,
+        "h": 800
+      },
+      "size": [
+        1200,
+        800
+      ],
+      "cardDisplaySize": [
+        600,
+        400
+      ],
+      "label": "纪念 · 细银链与非对称吊坠",
+      "buildingArtKey": "necklace_memory_monument",
+      "sourceType": "ai_generated_demo_photographic_example",
+      "sourceStory": "细银链与一枚不对称的银色吊坠，化成留着光与风的纪念庭。轻碰吊坠，让安静的曲面响起一声清亮回音。",
+      "transformCues": [
+        "细银链 → 轻盈的悬索曲线",
+        "光滑银水滴 → 偏心悬挂的纪念物",
+        "银色曲面与留白 → 开放的折曲庭院"
+      ],
+      "preload": false
+    }
+  },
+  "sourceFileSHA256": {
+    "assets/album/fluffy-cat-source-photo-v1.webp": "a8bb31a5a066a164454b488957c54ae9be0bb2c06779e18e32ca85b520f4a69f",
+    "assets/album/personal-lamy-yellow-source-v2.webp": "274d4574d9524a98da24acd0be4f6a310e2e1300e52ee512a99eb1e04c33057a",
+    "assets/album/tesla-roadster-inspiration-v2.webp": "1833e569da19a7b44e4344aacf450f41c1ebf214ef9e5afcaa1f1802eb0528a4",
+    "assets/album/camera-sourcecard-v1.webp": "36fd0d046fb927a080bc948eb3be79b3472e875125ac3bbaf2b6797e71f31227",
+    "assets/album/shell-sourcecard-v1.webp": "5710d6fd0dfa67a1c7c0d6f8acc9d2360d6fa399eed09fbb83a2048435f18ed7",
+    "assets/album/canopy-sourcecard-v1.webp": "dd5244159feee6210ced98d715506519ae9d86a6822a6566aa7a035e72b3b7d7",
+    "assets/album/modern-silver-necklace-photo-v1.webp": "67fb5e8c7601ee4d89cb67d1d8ea38c7d186e88fac77372e0f9abcd73a51bd58"
+  },
+  "preserveFileSHA256": {
+    "src/estate-content.js": "7e565e71283cf9e9895113f989b3133dc47e0e86a87eeae3f5a928494357175f",
+    "src/cat-feeding.js": "e0956c008d597823c11b13a67c0a621c61879622b6929b310441326e910bbebe",
+    "src/cat-feeding-queue.js": "b552343bbb5b7d0fb04c18227f90b053d23ec1122fa4e0dab4353249bc00a3b3",
+    "src/exhibit-controls.js": "ea27b5d86a0dcd92cf7c8a01f19e3d4c3dd9f095d3d9bdab470cc9d71f6ab106",
+    "src/roadster-hover.js": "e9cb9c68337e664019d052e4dfb1b2a5e07c5e875f28dfd8a784e10cfe90586b",
+    "src/personal-exhibit-reactions.js": "db0b4e96fcc6174f16e437ad97e5caf45dbe45f194aae8663442d0ecdd40b5ab",
+    "src/assets.js": "db102d8bdb67e3d24b565cdbe79f233faec726794909ad284b7ac54ce88030da",
+    "assets/avatar-manifest.json": "ca95f5fee80d6cc5eaaec798b8ac50c6c25e4910d9d25ad84fd4dd0bf41cefa4",
+    "assets/wardrobe-manifest.json": "cc4daffa0cf756b6df9e75fa32e227ab9426d476b0312107a1baf5b16262217e",
+    "assets/photo-samples-manifest.json": "cc45eac66cb4bd1ba4f6ca3b6d1b492eef2ae66abf2aa78fdf9f49e071926c3b",
+    "assets/garden-compositions.json": "4ed758185d40131fc32f6f8d297b5fe277ac6b24355bbd54bbef173eef3d6643"
+  },
+  "allTrustedSampleIDs": [
+    "jiji_nocturne_manor",
+    "black_silk_spider",
+    "bear_fold_gallery",
+    "bear_loop_rest",
+    "lx_titanium_courtyard",
+    "lx_silent_wing",
+    "lx_nanofabricator",
+    "portrait_rehearsal_pavilion",
+    "calico_reading_den",
+    "camping_dog_workshop",
+    "fluffy_cat_cottage",
+    "anime_collectors_cottage",
+    "plush_designer_workshop",
+    "lx_command_workshop",
+    "lx_circuit_gym",
+    "lamy_memory_column",
+    "airforce_memory_house",
+    "necklace_memory_monument",
+    "xt50_memory_camera",
+    "scallop_shell_house",
+    "camping_tarp_pavilion"
+  ],
+  "necklaceDemoRecord": {
+    "id": "demo-blueprint-necklace_memory_monument",
+    "sampleId": "necklace_memory_monument",
+    "authorId": "garden-memories",
+    "authorName": "苏贝壳",
+    "parentId": null,
+    "rootId": "demo-blueprint-necklace_memory_monument",
+    "parentAuthorName": null
+  },
+  "unrelatedArtManifestSHA256": "bda44e256ebd0bc0e2deb47aeefc11d6a6eb936e36e152a1fdb907b212e628bd",
+  "allowedSpriteKeys": [
+    "fluffy_cat_cottage",
+    "lamy_memory_column",
+    "airforce_memory_house",
+    "xt50_memory_camera",
+    "scallop_shell_house",
+    "camping_tarp_pavilion",
+    "cat_feed_anticipation",
+    "cat_feed_bite",
+    "cat_feed_chew",
+    "cat_feed_chew-b",
+    "cat_feed_lick",
+    "cat_feed_settled"
+  ],
+  "allowedAtlasKeys": [
+    "fluffy_cat_cottage-current",
+    "lamy_memory_column-current",
+    "airforce_memory_house-current",
+    "xt50_memory_camera-current",
+    "scallop_shell_house-current",
+    "camping_tarp_pavilion-current",
+    "cat_feeding_atlas"
+  ]
+}

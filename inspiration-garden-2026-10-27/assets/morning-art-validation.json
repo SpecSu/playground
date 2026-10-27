@@ -1,0 +1,205 @@
+{
+  "manifestVersion": 6,
+  "compositionVersion": 7,
+  "checks": [
+    "All40sprite frames fit RGBA originals; normalized anchors; zero paintedalpha>=64 onframeborders; sixnew immutable2x2keys.",
+    "All3layouts: nooccupiedoverlap, giants4land cells, buildings4platform cells, clearspawn/owner/entry, everyemptycell connectedtospawn.",
+    "Threephotographic sourcecrops fitstrip and disclosefictional AIexample provenance."
+  ],
+  "warnings": [],
+  "heroImages": {
+    "giant_piano_sunflower": {
+      "size": [
+        1254,
+        1254
+      ],
+      "bytes": 1917644,
+      "decodedRGBABytes": 6290064,
+      "sha256": "3824bd1d74715c7f89880d227251a0a1cc9083af706e5bf128ed3084604d1d05",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.5,
+        0.805
+      ],
+      "width": 224,
+      "footprint": [
+        2,
+        2
+      ]
+    },
+    "giant_moon_mushroom": {
+      "size": [
+        1254,
+        1254
+      ],
+      "bytes": 1755562,
+      "decodedRGBABytes": 6290064,
+      "sha256": "64a90f731715e14caeafe29fe059edd1fb8d4038044ae453932da4b507264682",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.515,
+        0.815
+      ],
+      "width": 228,
+      "footprint": [
+        2,
+        2
+      ]
+    },
+    "giant_bubble_lotus": {
+      "size": [
+        1254,
+        1254
+      ],
+      "bytes": 1828125,
+      "decodedRGBABytes": 6290064,
+      "sha256": "21e2202f4440e3e2f7d07975886c9ccd2e819458abe0eaea5257ce74d786cc09",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.5,
+        0.8
+      ],
+      "width": 226,
+      "footprint": [
+        2,
+        2
+      ]
+    },
+    "portrait_rehearsal_pavilion": {
+      "size": [
+        1254,
+        1254
+      ],
+      "bytes": 2035017,
+      "decodedRGBABytes": 6290064,
+      "sha256": "db8940f7d564f3ec685e01ededfdf7c0d6ebcd0b6715e987059436dfd5b6672f",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.51,
+        0.8
+      ],
+      "width": 214,
+      "footprint": [
+        2,
+        2
+      ]
+    },
+    "calico_reading_den": {
+      "size": [
+        1254,
+        1254
+      ],
+      "bytes": 1990865,
+      "decodedRGBABytes": 6290064,
+      "sha256": "c5b78210942d54fbb67693b2fe9241f2c725ef3fcf4aa7b380b8caaf67574470",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.515,
+        0.82
+      ],
+      "width": 214,
+      "footprint": [
+        2,
+        2
+      ]
+    },
+    "camping_dog_workshop": {
+      "size": [
+        1254,
+        1254
+      ],
+      "bytes": 1767005,
+      "decodedRGBABytes": 6290064,
+      "sha256": "09d2200c9e755c6f6577bc4f309d59d1f05030a97cb622ba2cdfd0cfbe517c12",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.515,
+        0.8
+      ],
+      "width": 214,
+      "footprint": [
+        2,
+        2
+      ]
+    }
+  },
+  "layouts": {
+    "demo-kelly-music": {
+      "tiles": 25,
+      "plants": 7,
+      "buildings": 1,
+      "occupiedCells": 14,
+      "clearConnectedWalkableCells": 11,
+      "spawn": [
+        3,
+        5
+      ],
+      "owner": [
+        3,
+        3
+      ]
+    },
+    "demo-bear-moon": {
+      "tiles": 25,
+      "plants": 5,
+      "buildings": 1,
+      "occupiedCells": 12,
+      "clearConnectedWalkableCells": 13,
+      "spawn": [
+        3,
+        5
+      ],
+      "owner": [
+        1,
+        5
+      ]
+    },
+    "demo-frog-sea": {
+      "tiles": 29,
+      "plants": 6,
+      "buildings": 1,
+      "occupiedCells": 13,
+      "clearConnectedWalkableCells": 16,
+      "spawn": [
+        6,
+        5
+      ],
+      "owner": [
+        3,
+        3
+      ]
+    }
+  },
+  "result": "PASS",
+  "scope": "Static image/metadata/layout validation; live integratedmobile pixelreview pending."
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+ <meta name="theme-color" content="#b8dcda"><meta name="description" content="一颗种子，一点奇思妙想。一个可以种植、创造、串门的本地灵感花园 Demo。">
+ <title>灵感花园 · 每颗种子都有小脾气</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23b9dfd2'/%3E%3Cpath d='M32 52V26M31 35C15 37 12 22 15 13c13 0 21 7 17 19m0-7c1-12 8-17 19-15 1 13-6 21-19 20' fill='none' stroke='%23547754' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E"><link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+ <main id="garden" class="garden-shell" aria-label="灵感花园">
+  <canvas id="world" aria-label="花园场景，可拖动画面或双指缩放。轻点土地种植，轻点植物互动。"></canvas>
+  <div id="hud"></div><div id="garden-label"></div><div id="view-tools"></div>
+  <div id="thought" class="thought" role="status" hidden></div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <div id="navigation-note" class="navigation-note" role="status" hidden></div>
+  <div id="storage-note" class="storage-note" hidden></div>
+  <section id="tray" class="tray" aria-label="花园操作" hidden></section>
+  <section id="context" class="context-tray" aria-label="当前选择" hidden></section>
+  <div id="mode-bar" class="mode-bar" hidden></div>
+  <nav id="dock" class="dock" aria-label="花园工具"></nav>
+  <div id="loading" class="loading"><div class="loading-mark"><i></i><i></i><i></i></div><h1>灵感花园</h1><p>让小小的奇思妙想，慢慢长大。</p></div>
+  <div id="cloud-travel" class="cloud-travel" data-phase="idle" aria-label="穿过云朵，前往花园" aria-live="off" hidden><svg class="cloud-bank cloud-left" viewBox="0 0 720 1000" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="cloud-wash" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#f9f8e9"/><stop offset=".72" stop-color="#fffdf3"/><stop offset="1" stop-color="#eff0df"/></linearGradient></defs><path class="cloud-rim" d="M-40-80H535C624-62 646-1 611 62C708 47 747 119 687 183C742 220 741 290 671 324C742 370 724 441 658 466C729 507 729 578 666 611C729 657 710 735 642 749C713 809 685 876 624 890C662 956 615 1052 520 1080H-40Z"/><path class="cloud-glow" d="M-30-80H479C577-59 605-7 575 61C654 70 680 131 630 190C686 224 680 281 626 314C682 365 667 414 604 450C677 502 671 553 609 594C675 646 656 704 590 727C651 789 628 840 570 868C608 935 578 1036 473 1080H-30Z"/><path class="cloud-fold" d="M521 63C555 88 569 124 550 160M591 322C617 350 621 386 601 413M584 614C610 641 611 671 589 696M539 887C565 920 566 948 544 976"/></svg><svg class="cloud-bank cloud-right" viewBox="0 0 720 1000" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="cloud-wash-right" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#f9f8e9"/><stop offset=".72" stop-color="#fffdf3"/><stop offset="1" stop-color="#eff0df"/></linearGradient></defs><path class="cloud-rim" d="M-40-80H535C624-62 646-1 611 62C708 47 747 119 687 183C742 220 741 290 671 324C742 370 724 441 658 466C729 507 729 578 666 611C729 657 710 735 642 749C713 809 685 876 624 890C662 956 615 1052 520 1080H-40Z"/><path class="cloud-glow" d="M-30-80H479C577-59 605-7 575 61C654 70 680 131 630 190C686 224 680 281 626 314C682 365 667 414 604 450C677 502 671 553 609 594C675 646 656 704 590 727C651 789 628 840 570 868C608 935 578 1036 473 1080H-30Z"/><path class="cloud-fold" d="M521 63C555 88 569 124 550 160M591 322C617 350 621 386 601 413M584 614C610 641 611 671 589 696M539 887C565 920 566 948 544 976"/></svg><span class="cloud-caption">正在穿梭...</span></div>
+  <input id="creation-photo-input" type="file" accept="image/jpeg,image/png,image/webp" hidden aria-label="选择创作参考照片">
+  <noscript>灵感花园需要开启 JavaScript 才能体验。</noscript>
+ </main>
+ <script type="module" src="./src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+{
+  "manifestVersion": 10,
+  "checks": [
+    "All four trees were generated using actual basic-plants-illustrated-v3 and creative-plants-illustrated-v2 raster references.",
+    "Root and independent reviewer accepted mixed original/new game-scale contact sheet; root also accepted static 2x2 projected-ground pivot sheet.",
+    "RGBA alpha preserved byte-for-byte by lossless WebP encoding. Painted alpha>16 stays inside recorded bounds; maximum border alpha is 10/255 on ginkgo, <=1/255 on other trees.",
+    "Published catalogue IDs, footprints, render/depth pivots and economy unchanged. Old v1 image paths removed from runtime manifest whitelist; v2 remains lazy.",
+    "Native integrated scene QA remains separate from static art inspection."
+  ],
+  "warnings": [],
+  "sprites": {
+    "weeping_willow_tree": {
+      "image": "assets/heroes/weeping-willow-tree-v2.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1312,
+        "h": 1199
+      },
+      "anchor": [
+        0.54,
+        0.895
+      ],
+      "width": 248,
+      "kind": "plant",
+      "displayName": "柳树",
+      "alphaBounds": {
+        "x": 48,
+        "y": 57,
+        "w": 1219,
+        "h": 1090
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "styleStatus": "original-plant-reference-matched-cartoon-v2",
+      "generation": "giant",
+      "sourceSHA256": "cf040626cb54dc67fd1730aaeaabb1e341c55fce78096c88b14b269fafd6bac0",
+      "runtimeSHA256": "4a891ebf1e895f1cd18da4060733d103e18c08c11114cbebe0bdc27387e72ea1",
+      "borderAlphaMax": 1,
+      "alphaPreservedExactly": true
+    },
+    "golden_ginkgo_tree": {
+      "image": "assets/heroes/golden-ginkgo-tree-v2.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1272,
+        "h": 1236
+      },
+      "anchor": [
+        0.53,
+        0.91
+      ],
+      "width": 252,
+      "kind": "plant",
+      "displayName": "金叶银杏",
+      "alphaBounds": {
+        "x": 29,
+        "y": 31,
+        "w": 1224,
+        "h": 1167
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "styleStatus": "original-plant-reference-matched-cartoon-v2",
+      "generation": "giant",
+      "sourceSHA256": "7ef64872da84287e1a380e0ce70770b8174e31ce8cd8bcf2be544bc5b2286bd2",
+      "runtimeSHA256": "8f5088dae9cd9a790f4b3dc21877ab76381612fe1b42ee74efcb69278f85bce7",
+      "borderAlphaMax": 10,
+      "alphaPreservedExactly": true
+    },
+    "evergreen_fir_tree": {
+      "image": "assets/heroes/evergreen-fir-tree-v2.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1262,
+        "h": 1246
+      },
+      "anchor": [
+        0.5,
+        0.915
+      ],
+      "width": 240,
+      "kind": "plant",
+      "displayName": "杉树",
+      "alphaBounds": {
+        "x": 151,
+        "y": 50,
+        "w": 958,
+        "h": 1152
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "styleStatus": "original-plant-reference-matched-cartoon-v2",
+      "generation": "giant",
+      "sourceSHA256": "e2d8e8ee95836df29f22315a22a37959f07e2e72ba66afcaa976d73ec9d03977",
+      "runtimeSHA256": "1fc8543a6f7b2306e1ed14f95be821aa8e1c6a6ffc9ef82bfad3b8f5d032ddf2",
+      "borderAlphaMax": 1,
+      "alphaPreservedExactly": true
+    },
+    "ancient_star_tree": {
+      "image": "assets/heroes/ancient-star-tree-v2.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1319,
+        "h": 1192
+      },
+      "anchor": [
+        0.52,
+        0.895
+      ],
+      "width": 286,
+      "kind": "plant",
+      "displayName": "星辉古树",
+      "alphaBounds": {
+        "x": 48,
+        "y": 44,
+        "w": 1224,
+        "h": 1116
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "styleStatus": "original-plant-reference-matched-cartoon-v2",
+      "generation": "giant",
+      "sourceSHA256": "8726f154b5f5b7a8ff44e15e8cac489c74913c84ce2c5273e416eb5f6f681e23",
+      "runtimeSHA256": "e7fb0467f382b58c086277e58ce497cf928536c5c360c5e227cd2ebeb0b59519",
+      "borderAlphaMax": 1,
+      "alphaPreservedExactly": true
+    }
+  }
+}

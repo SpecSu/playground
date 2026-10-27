@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "approved": true,
+  "ownerAvatarKey": "human-subeike",
+  "disclosure": "离线插画样片 · 固定主角苏贝壳 · 未接实时生成",
+  "photos": {
+    "demo-frog-sea": {
+      "image": "assets/photos/subeike-jiji-selfie-v3.png",
+      "friendId": "demo-jiji",
+      "friendName": "吉吉",
+      "width": 1122,
+      "height": 1402,
+      "sha256": "1737238b9c231201921b8817a002131ad46f4fced0549670a1005f4efc9f93ea",
+      "description": "苏贝壳与吉吉在红黑哥特宅前自拍，黑蜘蛛雕塑与垂铃花。",
+      "bytes": 2352423
+    },
+    "demo-kelly-music": {
+      "image": "assets/photos/subeike-kelly-selfie-v2.png",
+      "friendId": "demo-kelly",
+      "friendName": "Kelly",
+      "width": 1122,
+      "height": 1402,
+      "sha256": "407aac29b5accc52bb6b213ef93b9d11d84bac2fd6523942dcc54cd17af2d710",
+      "description": "苏贝壳与Kelly排练休息自拍，鼓槌、琴冠向日葵与排练亭。",
+      "bytes": 2242579
+    },
+    "demo-bear-moon": {
+      "image": "assets/photos/subeike-bear-selfie-v3.png",
+      "friendId": "demo-bear",
+      "friendName": "Bear熊",
+      "width": 1121,
+      "height": 1403,
+      "sha256": "7493941239e23beadd522c3e0e0c0d6e170342ae83743bcf47812bcf60d0e561",
+      "description": "苏贝壳与Bear抱新折耳潮玩自拍，毛绒折环展馆。",
+      "bytes": 2199318
+    },
+    "demo-lx-tech": {
+      "image": "assets/photos/subeike-lx-selfie-v3.png",
+      "friendId": "demo-lx",
+      "friendName": "LX",
+      "width": 1122,
+      "height": 1402,
+      "sha256": "ebc1754816c8cfa5452937fe4450ffe929007f4ea7c76e597f694651dc8727ef",
+      "description": "苏贝壳与LX展示纳米装置自拍，钛金属曲面豪宅与银翼艇。",
+      "bytes": 2270247
+    }
+  }
+}

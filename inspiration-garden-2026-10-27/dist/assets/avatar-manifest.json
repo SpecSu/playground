@@ -1,0 +1,632 @@
+{
+  "version": 2,
+  "source": "Identity-preserving handdrawn 2D illustrations; original published cast renders used only as visual references",
+  "default": "niulai",
+  "avatars": {
+    "milk-frog": {
+      "id": "milk-frog",
+      "name": "奶蛙",
+      "heightMetres": 1.2499999707464848,
+      "displayHeight": 65,
+      "portrait": {
+        "image": "assets/avatars-illustrated/milk-frog-v1.png",
+        "frame": {
+          "x": 1089,
+          "y": 307,
+          "w": 447,
+          "h": 416
+        }
+      },
+      "front": {
+        "image": "assets/avatars-illustrated/milk-frog-v1.png",
+        "frame": {
+          "x": 10,
+          "y": 178,
+          "w": 529,
+          "h": 713
+        },
+        "anchor": {
+          "x": 0.491493,
+          "y": 0.987377
+        }
+      },
+      "back": {
+        "image": "assets/avatars-illustrated/milk-frog-v1.png",
+        "frame": {
+          "x": 549,
+          "y": 155,
+          "w": 522,
+          "h": 713
+        },
+        "anchor": {
+          "x": 0.519157,
+          "y": 0.987377
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      }
+    },
+    "niulai": {
+      "id": "niulai",
+      "name": "牛来",
+      "heightMetres": 1.499999875710769,
+      "displayHeight": 78,
+      "portrait": {
+        "image": "assets/avatars-illustrated/niulai-v1.png",
+        "frame": {
+          "x": 1064,
+          "y": 278,
+          "w": 456,
+          "h": 464
+        }
+      },
+      "front": {
+        "image": "assets/avatars-illustrated/niulai-v1.png",
+        "frame": {
+          "x": 34,
+          "y": 131,
+          "w": 478,
+          "h": 782
+        },
+        "anchor": {
+          "x": 0.462343,
+          "y": 0.988491
+        }
+      },
+      "back": {
+        "image": "assets/avatars-illustrated/niulai-v1.png",
+        "frame": {
+          "x": 559,
+          "y": 115,
+          "w": 453,
+          "h": 782
+        },
+        "anchor": {
+          "x": 0.532009,
+          "y": 0.988491
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      }
+    },
+    "feidudu": {
+      "id": "feidudu",
+      "name": "肥嘟嘟",
+      "heightMetres": 1.2499998956918716,
+      "displayHeight": 65,
+      "portrait": {
+        "image": "assets/avatars-illustrated/feidudu-v1.png",
+        "frame": {
+          "x": 1130,
+          "y": 222,
+          "w": 397,
+          "h": 628
+        }
+      },
+      "front": {
+        "image": "assets/avatars-illustrated/feidudu-v1.png",
+        "frame": {
+          "x": 91,
+          "y": 233,
+          "w": 457,
+          "h": 607
+        },
+        "anchor": {
+          "x": 0.347921,
+          "y": 0.985173
+        }
+      },
+      "back": {
+        "image": "assets/avatars-illustrated/feidudu-v1.png",
+        "frame": {
+          "x": 602,
+          "y": 216,
+          "w": 420,
+          "h": 607
+        },
+        "anchor": {
+          "x": 0.661905,
+          "y": 0.985173
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      }
+    },
+    "miaocuijiao": {
+      "id": "miaocuijiao",
+      "name": "喵脆角",
+      "heightMetres": 1.1250000074505806,
+      "displayHeight": 59,
+      "portrait": {
+        "image": "assets/avatars-illustrated/miaocuijiao-v1.png",
+        "frame": {
+          "x": 1120,
+          "y": 290,
+          "w": 398,
+          "h": 419
+        }
+      },
+      "front": {
+        "image": "assets/avatars-illustrated/miaocuijiao-v1.png",
+        "frame": {
+          "x": 69,
+          "y": 260,
+          "w": 471,
+          "h": 472
+        },
+        "anchor": {
+          "x": 0.352442,
+          "y": 0.980932
+        }
+      },
+      "back": {
+        "image": "assets/avatars-illustrated/miaocuijiao-v1.png",
+        "frame": {
+          "x": 635,
+          "y": 255,
+          "w": 385,
+          "h": 472
+        },
+        "anchor": {
+          "x": 0.662338,
+          "y": 0.980932
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      }
+    },
+    "banana-cat": {
+      "id": "banana-cat",
+      "name": "香蕉猫",
+      "heightMetres": 1.4999999968822988,
+      "displayHeight": 78,
+      "portrait": {
+        "image": "assets/avatars-illustrated/banana-cat-v1.png",
+        "frame": {
+          "x": 1072,
+          "y": 205,
+          "w": 436,
+          "h": 610
+        }
+      },
+      "front": {
+        "image": "assets/avatars-illustrated/banana-cat-v1.png",
+        "frame": {
+          "x": 38,
+          "y": 111,
+          "w": 457,
+          "h": 799
+        },
+        "anchor": {
+          "x": 0.507659,
+          "y": 0.988736
+        }
+      },
+      "back": {
+        "image": "assets/avatars-illustrated/banana-cat-v1.png",
+        "frame": {
+          "x": 573,
+          "y": 109,
+          "w": 445,
+          "h": 799
+        },
+        "anchor": {
+          "x": 0.510112,
+          "y": 0.988736
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      }
+    },
+    "sword-shield-dog": {
+      "id": "sword-shield-dog",
+      "name": "刀盾狗",
+      "heightMetres": 0.9499999731779099,
+      "displayHeight": 49,
+      "portrait": {
+        "image": "assets/avatars-illustrated/sword-shield-dog-v1.png",
+        "frame": {
+          "x": 1049,
+          "y": 352,
+          "w": 477,
+          "h": 350
+        }
+      },
+      "front": {
+        "image": "assets/avatars-illustrated/sword-shield-dog-v1.png",
+        "frame": {
+          "x": 25,
+          "y": 335,
+          "w": 488,
+          "h": 358
+        },
+        "anchor": {
+          "x": 0.481557,
+          "y": 0.952514
+        }
+      },
+      "back": {
+        "image": "assets/avatars-illustrated/sword-shield-dog-v1.png",
+        "frame": {
+          "x": 550,
+          "y": 345,
+          "w": 483,
+          "h": 358
+        },
+        "anchor": {
+          "x": 0.496894,
+          "y": 0.949721
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      }
+    },
+    "human-lx": {
+      "id": "human-lx",
+      "name": "LX",
+      "heightMetres": 1.4500000164670688,
+      "displayHeight": 75,
+      "portrait": {
+        "image": "assets/avatars-illustrated/human-lx-v1.png",
+        "frame": {
+          "x": 978,
+          "y": 187,
+          "w": 542,
+          "h": 730
+        }
+      },
+      "front": {
+        "image": "assets/avatars-illustrated/human-lx-v1.png",
+        "frame": {
+          "x": 46,
+          "y": 76,
+          "w": 458,
+          "h": 903
+        },
+        "anchor": {
+          "x": 0.467249,
+          "y": 0.990033
+        }
+      },
+      "back": {
+        "image": "assets/avatars-illustrated/human-lx-v1.png",
+        "frame": {
+          "x": 540,
+          "y": 66,
+          "w": 418,
+          "h": 903
+        },
+        "anchor": {
+          "x": 0.538278,
+          "y": 0.990033
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      },
+      "portraitPreview": {
+        "image": "assets/portraits/human-lx-light.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 112,
+          "h": 112
+        }
+      }
+    },
+    "human-kelly": {
+      "id": "human-kelly",
+      "name": "Kelly",
+      "heightMetres": 1.450000037994629,
+      "displayHeight": 75,
+      "portrait": {
+        "image": "assets/avatars-illustrated/human-kelly-v1.png",
+        "frame": {
+          "x": 1008,
+          "y": 222,
+          "w": 509,
+          "h": 639
+        }
+      },
+      "front": {
+        "image": "assets/avatars-illustrated/human-kelly-v1.png",
+        "frame": {
+          "x": 32,
+          "y": 103,
+          "w": 463,
+          "h": 877
+        },
+        "anchor": {
+          "x": 0.492441,
+          "y": 0.989738
+        }
+      },
+      "back": {
+        "image": "assets/avatars-illustrated/human-kelly-v1.png",
+        "frame": {
+          "x": 542,
+          "y": 86,
+          "w": 422,
+          "h": 877
+        },
+        "anchor": {
+          "x": 0.563981,
+          "y": 0.989738
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      },
+      "portraitPreview": {
+        "image": "assets/portraits/human-kelly-light.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 112,
+          "h": 112
+        }
+      }
+    },
+    "human-bear": {
+      "id": "human-bear",
+      "name": "Bear熊",
+      "heightMetres": 1.4500001696290379,
+      "displayHeight": 75,
+      "portrait": {
+        "image": "assets/avatars-illustrated/human-bear-v1.png",
+        "frame": {
+          "x": 1018,
+          "y": 206,
+          "w": 506,
+          "h": 681
+        }
+      },
+      "front": {
+        "image": "assets/avatars-illustrated/human-bear-v1.png",
+        "frame": {
+          "x": 47,
+          "y": 120,
+          "w": 418,
+          "h": 860
+        },
+        "anchor": {
+          "x": 0.497608,
+          "y": 0.989535
+        }
+      },
+      "back": {
+        "image": "assets/avatars-illustrated/human-bear-v1.png",
+        "frame": {
+          "x": 572,
+          "y": 108,
+          "w": 405,
+          "h": 860
+        },
+        "anchor": {
+          "x": 0.501235,
+          "y": 0.989535
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      },
+      "portraitPreview": {
+        "image": "assets/portraits/human-bear-light.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 112,
+          "h": 112
+        }
+      }
+    },
+    "human-subeike": {
+      "id": "human-subeike",
+      "name": "苏贝壳",
+      "heightMetres": 1.450000048484926,
+      "displayHeight": 75,
+      "portrait": {
+        "image": "assets/avatars-illustrated/human-subeike-v1.png",
+        "frame": {
+          "x": 967,
+          "y": 179,
+          "w": 565,
+          "h": 750
+        }
+      },
+      "front": {
+        "image": "assets/avatars-illustrated/human-subeike-v1.png",
+        "frame": {
+          "x": 56,
+          "y": 100,
+          "w": 428,
+          "h": 854
+        },
+        "anchor": {
+          "x": 0.5,
+          "y": 0.989461
+        }
+      },
+      "back": {
+        "image": "assets/avatars-illustrated/human-subeike-v1.png",
+        "frame": {
+          "x": 542,
+          "y": 91,
+          "w": 398,
+          "h": 854
+        },
+        "anchor": {
+          "x": 0.560302,
+          "y": 0.989461
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      }
+    },
+    "human-jiji": {
+      "id": "human-jiji",
+      "name": "吉吉",
+      "heightMetres": 1.4500000486054665,
+      "displayHeight": 75,
+      "portrait": {
+        "image": "assets/avatars-illustrated/human-jiji-v1.png",
+        "frame": {
+          "x": 1005,
+          "y": 212,
+          "w": 531,
+          "h": 643
+        }
+      },
+      "front": {
+        "image": "assets/avatars-illustrated/human-jiji-v1.png",
+        "frame": {
+          "x": 33,
+          "y": 120,
+          "w": 506,
+          "h": 821
+        },
+        "anchor": {
+          "x": 0.448617,
+          "y": 0.989038
+        }
+      },
+      "back": {
+        "image": "assets/avatars-illustrated/human-jiji-v1.png",
+        "frame": {
+          "x": 540,
+          "y": 115,
+          "w": 456,
+          "h": 821
+        },
+        "anchor": {
+          "x": 0.537281,
+          "y": 0.989038
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      },
+      "portraitPreview": {
+        "image": "assets/portraits/human-jiji-light.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 112,
+          "h": 112
+        }
+      }
+    },
+    "human-jiaxin": {
+      "id": "human-jiaxin",
+      "name": "Jiaxin",
+      "heightMetres": 1.4500000209452928,
+      "displayHeight": 75,
+      "portrait": {
+        "image": "assets/avatars-illustrated/human-jiaxin-v1.png",
+        "frame": {
+          "x": 989,
+          "y": 283,
+          "w": 526,
+          "h": 655
+        }
+      },
+      "front": {
+        "image": "assets/avatars-illustrated/human-jiaxin-v1.png",
+        "frame": {
+          "x": 62,
+          "y": 91,
+          "w": 438,
+          "h": 882
+        },
+        "anchor": {
+          "x": 0.452055,
+          "y": 0.989796
+        }
+      },
+      "back": {
+        "image": "assets/avatars-illustrated/human-jiaxin-v1.png",
+        "frame": {
+          "x": 554,
+          "y": 78,
+          "w": 405,
+          "h": 882
+        },
+        "anchor": {
+          "x": 0.533333,
+          "y": 0.989796
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      }
+    }
+  },
+  "style": {
+    "medium": "handdrawn2d",
+    "contour": "warm dark olive-brown",
+    "shading": "restrained painted cel",
+    "identityPolicy": "Published 12 IDs, names, outfits and display heights preserved; 3D renders reference only"
+  },
+  "status": "approved-illustrated-2d-avatar-set",
+  "memoryBudget": {
+    "perCharacterDecodedRGBABytes": 6291456,
+    "allTwelveDecodedRGBABytes": 75497472,
+    "allTwelveCompressedBytes": 20393614,
+    "loadingPolicy": "One shared image per identity for front, back and portrait; selected avatar awaited; nonselected sheets lazy. Do not preload all 12 at home boot."
+  }
+}

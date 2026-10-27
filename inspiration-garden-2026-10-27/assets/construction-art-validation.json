@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "status": "static-pass-live-integration-pending",
+  "image": "assets/heroes/construction-site-v1.png",
+  "sha256": "4b413fd05a5f5113252100849903f729ebe696679aab742d43943e652d673344",
+  "size": [
+    1254,
+    1254
+  ],
+  "bytes": 1229533,
+  "decodedRGBABytes": 6290064,
+  "paintedBoundsAlpha16": {
+    "x": 56,
+    "y": 273,
+    "w": 1144,
+    "h": 862
+  },
+  "outerBorderMaxAlpha": 0,
+  "alphaZeroFraction": 0.644719,
+  "anchor": [
+    0.5,
+    0.65
+  ],
+  "anchorMeaning": "Center of the square ground footprint, approximately pixel(627,815); not the foremost post or bounding-box bottom",
+  "footprint": [
+    2,
+    2
+  ],
+  "drawWidthCSS": 214,
+  "legacyArtUnchanged": true,
+  "avatarRasterAndFramesUnchanged": true,
+  "nativeFacingAudit": {
+    "all12Fronts": "down-left",
+    "all12Backs": "up-right",
+    "mapping": {
+      "down-left": [
+        "front",
+        false
+      ],
+      "down-right": [
+        "front",
+        true
+      ],
+      "up-right": [
+        "back",
+        false
+      ],
+      "up-left": [
+        "back",
+        true
+      ]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+dist/
+node_modules/
+work/
+assets/*-prompt.json
+assets/generation-prompts.json
+assets/reference-driven-prompts.json
+
+assets/morning-expansion-prompts.json

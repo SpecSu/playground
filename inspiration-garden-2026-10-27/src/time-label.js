@@ -1,0 +1,1 @@
+export function durationLabel(ms){const seconds=Math.max(0,Math.ceil(ms/1000));if(seconds<120)return `${seconds}秒`;const minutes=Math.ceil(seconds/60);if(minutes<60)return `${minutes}分钟`;const hours=Math.floor(minutes/60),rest=minutes%60;return `${hours}小时${rest?`${rest}分`:''}`;}

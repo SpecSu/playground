@@ -1,0 +1,101 @@
+{
+  "manifestVersion": 5,
+  "compositionVersion": 6,
+  "interactionManifestVersion": 1,
+  "checks": [
+    "basic-plants-illustrated-v3.png: real RGBA; transparent background; nonempty painted content",
+    "botanical-wonders-illustrated-v2.png: real RGBA; transparent background; nonempty painted content",
+    "construction-illustrated-v1.png: real RGBA; transparent background; nonempty painted content",
+    "creative-plants-illustrated-v2.png: real RGBA; transparent background; nonempty painted content",
+    "interaction-states-v1.png: real RGBA; transparent background; nonempty painted content",
+    "pumpkin-descendants-v1.png: real RGBA; transparent background; nonempty painted content",
+    "scenery-illustrated-v1.png: real RGBA; transparent background; nonempty painted content",
+    "34 main source rectangles and 6 optional state frames fit original images; normalized anchors; zero alpha>=64 painted pixels on frame borders; widths <=110 CSS px",
+    "demo-kelly-music: connected; six unique land-only plants; clear spawn/owner; valid authored scenery",
+    "demo-bear-moon: connected; six unique land-only plants; clear spawn/owner; valid authored scenery",
+    "demo-frog-sea: connected; six unique land-only plants; clear spawn/owner; valid authored scenery"
+  ],
+  "warnings": [],
+  "atlases": {
+    "basic-plants-illustrated-v3.png": {
+      "size": [
+        1774,
+        887
+      ],
+      "mode": "RGBA",
+      "sha256": "b00bb219b966abe3455688f42b036f613131438742e6d5510450b8ee45934146",
+      "bytes": 1399224,
+      "fullyTransparentPixelPercent": 57.45
+    },
+    "botanical-wonders-illustrated-v2.png": {
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "sha256": "24d39a9a81afdcb4c7d61dcb863197ff8482f268be5acc72023bc7fdf5dc63a1",
+      "bytes": 1750202,
+      "fullyTransparentPixelPercent": 51.5
+    },
+    "construction-illustrated-v1.png": {
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "sha256": "019e41ebe06b4221967c08ad3fe6c9d95967ebd90d45f311f7005c088c158f2c",
+      "bytes": 1006709,
+      "fullyTransparentPixelPercent": 66.03
+    },
+    "creative-plants-illustrated-v2.png": {
+      "size": [
+        1774,
+        887
+      ],
+      "mode": "RGBA",
+      "sha256": "ccb8d337ef0451280f1fd10fe78c8bd3288a1a9cbe16f9bef80e3671af3bca0a",
+      "bytes": 1849085,
+      "fullyTransparentPixelPercent": 47.21
+    },
+    "interaction-states-v1.png": {
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "bd7d0072f8b2d1542b9301b763ca6f5fb1da97bb2343c893f9a0f93b5df8645b",
+      "bytes": 2053240,
+      "fullyTransparentPixelPercent": 53.86
+    },
+    "pumpkin-descendants-v1.png": {
+      "size": [
+        1774,
+        887
+      ],
+      "mode": "RGBA",
+      "sha256": "8b49b82a169f840c872d3dfda4441b14e26f46ea3403a13e11b29f43ee39d099",
+      "bytes": 1225370,
+      "fullyTransparentPixelPercent": 58.66
+    },
+    "scenery-illustrated-v1.png": {
+      "size": [
+        1774,
+        887
+      ],
+      "mode": "RGBA",
+      "sha256": "bb9a3ddc4c3c4b7c44e67bb752dfa05c5b4615390a5b7c513cd49114d6b4a487",
+      "bytes": 1340992,
+      "fullyTransparentPixelPercent": 62.48
+    }
+  },
+  "scope": "Static image/metadata validation only. Actual v3 supported-CUA review separately verified all three palettes and readable compositions, Moon arrival cloud opacity, Music pennant clearance, clean puffer/sunflower expression alpha and grounded silhouettes. Screenshot-only review does not certify temporal blend smoothness or during-hold camera timing.",
+  "result": "PASS",
+  "finalLiveCheck": {
+    "build": "native4 / ad9e3482",
+    "observedAtUTC": "2026-10-25T17:45:50Z",
+    "method": "Supported CUA; read-only shared QA garden after reload",
+    "pianoPumpkin": "Recognizable inherited pumpkin family, legible ivory/cocoa keys, clean alpha, grounded root leaves, original cow avatar clear beside it",
+    "economy": "Observed shared106coins/2crystals; no art-tab mutation",
+    "limitations": "Screenshot evidence does not establish frame-to-frame temporal smoothness; runtime logic/tests are outside art ownership."
+  }
+}

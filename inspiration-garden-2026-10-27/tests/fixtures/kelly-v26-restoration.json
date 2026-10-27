@@ -1,0 +1,40 @@
+{
+  "commit": "0d189dab71a41a5ccfbf17996db6922427bc87fa",
+  "photo": {
+    "image": "assets/photos/subeike-kelly-selfie-v2.png",
+    "friendId": "demo-kelly",
+    "friendName": "Kelly",
+    "width": 1122,
+    "height": 1402,
+    "sha256": "407aac29b5accc52bb6b213ef93b9d11d84bac2fd6523942dcc54cd17af2d710",
+    "description": "苏贝壳与Kelly排练休息自拍，鼓槌、琴冠向日葵与排练亭。",
+    "bytes": 2242579
+  },
+  "source": {
+    "frame": {
+      "x": 40,
+      "y": 153,
+      "w": 474,
+      "h": 706
+    },
+    "label": "示例好友 · 午后练琴",
+    "disclosure": "虚构人物与照片，仅为示例素材",
+    "buildingArtKey": "portrait_rehearsal_pavilion",
+    "sourceStory": "圆框眼镜变成一对窗，栗色卷发铺成屋顶，珊瑚围巾成了会招手的门帘。",
+    "transformCues": [
+      "栗色短发 → 波浪屋顶",
+      "圆框眼镜 → 双圆窗",
+      "珊瑚围巾 → 门口长帘",
+      "练琴时光 → 开放钢琴小厅"
+    ]
+  },
+  "sourceImage": "assets/album/fictional-memory-sources-v1.png",
+  "imageHashes": {
+    "assets/album/fictional-memory-sources-v1.png": "2c7ef2ff98b365379aea91a4c2fda69b3f611650489ebdf3da340eafa220ea8d",
+    "assets/atlases/botanical-wonders-illustrated-v2.png": "24d39a9a81afdcb4c7d61dcb863197ff8482f268be5acc72023bc7fdf5dc63a1",
+    "assets/atlases/creative-plants-illustrated-v2.png": "ccb8d337ef0451280f1fd10fe78c8bd3288a1a9cbe16f9bef80e3671af3bca0a",
+    "assets/heroes/giant-piano-sunflower-v1.png": "3824bd1d74715c7f89880d227251a0a1cc9083af706e5bf128ed3084604d1d05",
+    "assets/heroes/portrait-rehearsal-pavilion-v1.png": "db8940f7d564f3ec685e01ededfdf7c0d6ebcd0b6715e987059436dfd5b6672f",
+    "assets/photos/subeike-kelly-selfie-v2.png": "407aac29b5accc52bb6b213ef93b9d11d84bac2fd6523942dcc54cd17af2d710"
+  }
+}

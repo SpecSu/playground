@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "status": "approved-by-parent-ready-for-optional-integration",
+  "image": "assets/atlases/interaction-states-v1.png",
+  "size": [
+    1536,
+    1024
+  ],
+  "bytes": 2053240,
+  "decodedRGBABytes": 6291456,
+  "notes": [
+    "Two3-frame strips packed together to bound memory at6MiB; lazy-load only for interacting with these species.",
+    "Parent approved the optional atlas; existing base art stays authoritative for idle and catalogue.",
+    "Dark colored RGB can exist underneath alpha0 in raw image viewers; actual transparent gutter alpha verified0. Preserve RGBA; do not flatten.",
+    "Use fixed512×512 source frames with per-strip stable anchor and widthScale calibrated against base visible silhouette height.",
+    "No economy, asset identity or species changes."
+  ],
+  "animations": {
+    "puffer_tomato": {
+      "baseKey": "puffer_tomato",
+      "stateOrder": [
+        "neutral",
+        "inflated",
+        "exhale"
+      ],
+      "frames": {
+        "neutral": {
+          "image": "assets/atlases/interaction-states-v1.png",
+          "frame": {
+            "x": 0,
+            "y": 0,
+            "w": 512,
+            "h": 512
+          },
+          "anchor": [
+            0.515625,
+            0.9609375
+          ],
+          "widthScale": 1.075,
+          "alphaBounds": {
+            "x": 52,
+            "y": 83,
+            "w": 450,
+            "h": 411
+          }
+        },
+        "inflated": {
+          "image": "assets/atlases/interaction-states-v1.png",
+          "frame": {
+            "x": 512,
+            "y": 0,
+            "w": 512,
+            "h": 512
+          },
+          "anchor": [
+            0.515625,
+            0.9609375
+          ],
+          "widthScale": 1.075,
+          "alphaBounds": {
+            "x": 43,
+            "y": 83,
+            "w": 463,
+            "h": 411
+          }
+        },
+        "exhale": {
+          "image": "assets/atlases/interaction-states-v1.png",
+          "frame": {
+            "x": 1024,
+            "y": 0,
+            "w": 512,
+            "h": 512
+          },
+          "anchor": [
+            0.515625,
+            0.9609375
+          ],
+          "widthScale": 1.075,
+          "alphaBounds": {
+            "x": 54,
+            "y": 86,
+            "w": 419,
+            "h": 408
+          }
+        }
+      },
+      "defaultState": "neutral",
+      "fallback": "existing base art",
+      "role": "optional-interaction-only"
+    },
+    "sleepy_sunflower": {
+      "baseKey": "sleepy_sunflower",
+      "stateOrder": [
+        "asleep",
+        "awake",
+        "grumpy"
+      ],
+      "frames": {
+        "asleep": {
+          "image": "assets/atlases/interaction-states-v1.png",
+          "frame": {
+            "x": 0,
+            "y": 512,
+            "w": 512,
+            "h": 512
+          },
+          "anchor": [
+            0.47265625,
+            0.84375
+          ],
+          "widthScale": 1.045,
+          "alphaBounds": {
+            "x": 54,
+            "y": 30,
+            "w": 452,
+            "h": 404
+          }
+        },
+        "awake": {
+          "image": "assets/atlases/interaction-states-v1.png",
+          "frame": {
+            "x": 512,
+            "y": 512,
+            "w": 512,
+            "h": 512
+          },
+          "anchor": [
+            0.47265625,
+            0.84375
+          ],
+          "widthScale": 1.045,
+          "alphaBounds": {
+            "x": 51,
+            "y": 34,
+            "w": 438,
+            "h": 400
+          }
+        },
+        "grumpy": {
+          "image": "assets/atlases/interaction-states-v1.png",
+          "frame": {
+            "x": 1024,
+            "y": 512,
+            "w": 512,
+            "h": 512
+          },
+          "anchor": [
+            0.47265625,
+            0.84375
+          ],
+          "widthScale": 1.045,
+          "alphaBounds": {
+            "x": 46,
+            "y": 41,
+            "w": 436,
+            "h": 393
+          }
+        }
+      },
+      "defaultState": "asleep",
+      "fallback": "existing base art",
+      "role": "optional-interaction-only"
+    }
+  },
+  "approved": true,
+  "approvalNote": "Parent visually inspected and approved both3-frame identities/expressions on2026-10-25; verify actual garden alpha compositing and transitions before finalrelease.",
+  "integration": {
+    "loading": "Lazyload on interaction with puffer_tomato orsleepy_sunflower only. Never mandatoryscene-widepreload.",
+    "catalogue": "Keep existingbaseart; this optionalatlas is interaction-only.",
+    "transition": "Keep rootworldposition fixed; apply perstripwidthScale to existing basewidth including plant.scale and camerazoom. Blend/switch over90–140ms; returntobase over140–200ms. Do notstack exaggerated inflation scaling ontoinflatedframe.",
+    "alpha": "RGBA alpha0gutter verified. Do notflatten or useJPEG."
+  }
+}

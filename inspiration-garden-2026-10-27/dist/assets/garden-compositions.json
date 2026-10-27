@@ -1,0 +1,1995 @@
+{
+  "version": 14,
+  "coordinateSystem": "integer grid x,z; N=(0,-1),E=(1,0),S=(0,1),W=(-1,0); parent renderer decides projection",
+  "status": "LX upright aloe and ordered beds; other gardens unchanged",
+  "gardens": [
+    {
+      "id": "demo-kelly-music",
+      "title": "午后排练场",
+      "owner": {
+        "id": "demo-kelly",
+        "name": "Kelly",
+        "avatar": "human-kelly"
+      },
+      "theme": "music",
+      "tagline": "把排练，慢慢种成一个小舞台",
+      "intro": "二十八格午后排练场：保留肖像排练亭和琴冠向日葵，成排的小萝卜与低矮番茄填满步道旁的种植角；沿窄木步道依次试听鼓点、琴键和留声机。",
+      "palette": {
+        "water": "#b9dfdc",
+        "land": "#b9d1a0",
+        "side": "#b7a17d",
+        "sideDark": "#957f60",
+        "wood": "#e6d4ad",
+        "woodSide": "#c4b08a",
+        "woodDark": "#a18d6b",
+        "accent": "#dfa271",
+        "secondary": "#95af81",
+        "light": "#fff0c4",
+        "ambientWash": "#ffe9b82b",
+        "glintColor": "#fff4d4",
+        "mood": "soft-green afternoon rehearsal courtyard"
+      },
+      "rows": [
+        "PPLLLL",
+        "PPLLLL",
+        "PPPLPL",
+        "LLPPPL",
+        ".LPLL."
+      ],
+      "spawn": [
+        2,
+        4
+      ],
+      "ownerPosition": [
+        3,
+        3
+      ],
+      "focalPlant": "music-giant-canopy",
+      "focalCamera": [
+        2.5,
+        2
+      ],
+      "plants": [
+        {
+          "id": "music-keyboard",
+          "art": "keyboard_corn",
+          "x": 1,
+          "z": 4,
+          "scale": 0.96
+        },
+        {
+          "id": "music-drum",
+          "art": "drum_pumpkin",
+          "x": 0,
+          "z": 3,
+          "scale": 1.04
+        },
+        {
+          "id": "music-gramophone",
+          "art": "gramophone_flower",
+          "x": 5,
+          "z": 3,
+          "scale": 0.9
+        },
+        {
+          "id": "music-giant-canopy",
+          "art": "giant_piano_sunflower",
+          "x": 4,
+          "z": 0,
+          "footprint": [
+            2,
+            2
+          ],
+          "scale": 0.92
+        },
+        {
+          "id": "music-low-bed-fill-1",
+          "art": "radish",
+          "x": 3,
+          "z": 0,
+          "scale": 0.78
+        },
+        {
+          "id": "music-low-bed-fill-2",
+          "art": "radish",
+          "x": 3,
+          "z": 1,
+          "scale": 0.78
+        },
+        {
+          "id": "music-low-bed-fill-3",
+          "art": "radish",
+          "x": 3,
+          "z": 2,
+          "scale": 0.78
+        },
+        {
+          "id": "music-low-bed-fill-4",
+          "art": "tomato",
+          "x": 1,
+          "z": 3,
+          "scale": 0.72
+        },
+        {
+          "id": "music-low-bed-fill-5",
+          "art": "tomato",
+          "x": 3,
+          "z": 4,
+          "scale": 0.72
+        },
+        {
+          "id": "music-low-bed-fill-6",
+          "art": "tomato",
+          "x": 4,
+          "z": 4,
+          "scale": 0.72
+        },
+        {
+          "id": "music-low-bed-fill-7",
+          "art": "tomato",
+          "x": 5,
+          "z": 2,
+          "scale": 0.72
+        }
+      ],
+      "edges": [
+        {
+          "x": 0,
+          "z": 0,
+          "side": "N",
+          "kind": "fence"
+        },
+        {
+          "x": 1,
+          "z": 0,
+          "side": "N",
+          "kind": "fence"
+        },
+        {
+          "x": 4,
+          "z": 0,
+          "side": "N",
+          "kind": "fence"
+        },
+        {
+          "x": 5,
+          "z": 0,
+          "side": "N",
+          "kind": "fence"
+        },
+        {
+          "x": 0,
+          "z": 3,
+          "side": "W",
+          "kind": "fence"
+        },
+        {
+          "x": 1,
+          "z": 4,
+          "side": "W",
+          "kind": "fence"
+        },
+        {
+          "x": 5,
+          "z": 1,
+          "side": "E",
+          "kind": "wall"
+        },
+        {
+          "x": 5,
+          "z": 3,
+          "side": "E",
+          "kind": "fence"
+        },
+        {
+          "x": 5,
+          "z": 3,
+          "side": "S",
+          "kind": "wall"
+        },
+        {
+          "x": 5,
+          "z": 0,
+          "side": "E",
+          "kind": "wall"
+        }
+      ],
+      "composition": "Existing landmarks and all original plant instances remain fixed. Repeated low planting extends the established beds into redundant paved cells. A connected narrow branching walkway replaces the empty plaza; every plant has a reachable unplanted exterior stance.",
+      "interactionTour": [
+        "music-memory-pavilion",
+        "music-giant-canopy",
+        "music-drum",
+        "music-keyboard",
+        "music-gramophone"
+      ],
+      "ambient": "Quiet afternoon; sparse slow dust motes only. No automatic music or multi-plant ensemble.",
+      "cells": [
+        {
+          "x": 0,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 1,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 2,
+          "z": 0,
+          "kind": "land"
+        },
+        {
+          "x": 3,
+          "z": 0,
+          "kind": "land"
+        },
+        {
+          "x": 4,
+          "z": 0,
+          "kind": "land"
+        },
+        {
+          "x": 5,
+          "z": 0,
+          "kind": "land"
+        },
+        {
+          "x": 0,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 1,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 2,
+          "z": 1,
+          "kind": "land"
+        },
+        {
+          "x": 3,
+          "z": 1,
+          "kind": "land"
+        },
+        {
+          "x": 4,
+          "z": 1,
+          "kind": "land"
+        },
+        {
+          "x": 5,
+          "z": 1,
+          "kind": "land"
+        },
+        {
+          "x": 0,
+          "z": 2,
+          "kind": "platform"
+        },
+        {
+          "x": 1,
+          "z": 2,
+          "kind": "platform"
+        },
+        {
+          "x": 2,
+          "z": 2,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 2,
+          "kind": "land"
+        },
+        {
+          "x": 4,
+          "z": 2,
+          "kind": "platform"
+        },
+        {
+          "x": 5,
+          "z": 2,
+          "kind": "land"
+        },
+        {
+          "x": 0,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 3,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 3,
+          "kind": "platform"
+        },
+        {
+          "x": 4,
+          "z": 3,
+          "kind": "platform"
+        },
+        {
+          "x": 5,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 4,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 4,
+          "z": 4,
+          "kind": "land"
+        }
+      ],
+      "disclosure": "本地示范花园 · 非实时玩家",
+      "styleStatus": "existing-art-dense-low-beds-narrow-connected-walkways",
+      "scenery": [
+        {
+          "art": "music_notebook",
+          "x": 1,
+          "z": 2,
+          "scale": 0.62,
+          "blocking": false,
+          "interaction": "none",
+          "purchasable": false,
+          "offsetX": 0.1,
+          "offsetZ": -0.15
+        }
+      ],
+      "sceneryNote": "Original scenery and decorative outer edges remain unchanged. Existing low plant art is repeated in grouped beds, never on the connected walkway or any building footprint.",
+      "buildings": [
+        {
+          "id": "music-memory-pavilion",
+          "artKey": "portrait_rehearsal_pavilion",
+          "x": 0,
+          "z": 0,
+          "footprint": [
+            2,
+            2
+          ],
+          "renderPivotCell": [
+            0.5,
+            0.5
+          ],
+          "depthPivotCell": [
+            1,
+            1
+          ],
+          "scale": 1,
+          "displayName": "朋友肖像排练亭",
+          "label": "朋友肖像排练亭",
+          "interaction": "rehearsal",
+          "sourceFrameId": "kelly-friend-photo",
+          "sourceStory": "圆框眼镜变成一对窗，栗色卷发铺成屋顶，珊瑚围巾成了会招手的门帘。",
+          "sourceDisclosure": "示例相册 · AI生成的虚构素材，非用户上传照片",
+          "entranceCell": [
+            2,
+            1
+          ],
+          "purchasable": false,
+          "economy": "none",
+          "kind": "memory-building"
+        }
+      ],
+      "heroFootprintContract": "Northwest min-cell anchor; canonical 2x2 canopies and signature houses reserve all four cells and render at center[.5,.5]. Small specimens use their canonical 1x1 footprint. No overlap or unsupported occupancy.",
+      "albumDisclosure": "示例相册 · AI生成的虚构素材，非用户上传照片",
+      "arrivalNote": "Original spawn, host position and building entrances remain clear. Every empty support is connected with all plant and building footprints treated as occupied; no empty 2x2 plaza remains. Only necessary approach and standing cells stay unplanted.",
+      "progression": {
+        "level": 12,
+        "tierLabel": "主题庄园",
+        "disclosure": "示范等级 · 非实时玩家进度"
+      },
+      "animalVisitorSpawns": [
+        [
+          4,
+          3
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          0,
+          2
+        ]
+      ]
+    },
+    {
+      "id": "demo-bear-moon",
+      "title": "折环潮玩庭",
+      "owner": {
+        "id": "demo-bear",
+        "name": "Bear熊",
+        "avatar": "human-bear"
+      },
+      "theme": "toy",
+      "tagline": "让每一种表情，都找到自己的软着陆",
+      "intro": "三十六格当代潮玩庭院：折环潮玩馆与回环绒座的位置不变，新增成组泡叶绒果与低矮绒瓣花，收窄后的木步道连接入口、主人与每一处作品。",
+      "palette": {
+        "water": "#b9dfdc",
+        "land": "#ddc4bf",
+        "side": "#bba28f",
+        "sideDark": "#9b8373",
+        "wood": "#e8e3da",
+        "woodSide": "#c6bfb5",
+        "woodDark": "#a49d93",
+        "accent": "#ce8a58",
+        "secondary": "#a4aaa1",
+        "light": "#fff3d7",
+        "ambientWash": "#eee7df15",
+        "glintColor": "#fff3d7",
+        "mood": "ivory-and-fog-grey contemporary toy sculpture court",
+        "woodGrain": false
+      },
+      "rows": [
+        "LLLLPP.",
+        "LLPPPPL",
+        "PPPLLLL",
+        "LLPPPLL",
+        ".LLPLL.",
+        "..PPPL."
+      ],
+      "spawn": [
+        2,
+        5
+      ],
+      "ownerPosition": [
+        3,
+        4
+      ],
+      "focalPlant": "bear-foldbud-exhibit",
+      "focalCamera": [
+        3,
+        2.5
+      ],
+      "plants": [
+        {
+          "id": "bear-foldbud-exhibit",
+          "art": "bear_foldbud",
+          "x": 0,
+          "z": 0,
+          "scale": 1,
+          "footprint": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": "bear-bubble-leaf-exhibit",
+          "art": "bear_bubble_leaf",
+          "x": 5,
+          "z": 4,
+          "scale": 1,
+          "footprint": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": "bear-bubble-leaf-rear",
+          "art": "bear_bubble_leaf",
+          "x": 0,
+          "z": 1,
+          "scale": 0.9
+        },
+        {
+          "id": "bear-bubble-leaf-east-back",
+          "art": "bear_bubble_leaf",
+          "x": 6,
+          "z": 1,
+          "scale": 0.92
+        },
+        {
+          "id": "bear-bubble-leaf-east",
+          "art": "bear_bubble_leaf",
+          "x": 6,
+          "z": 3,
+          "scale": 0.92
+        },
+        {
+          "id": "bear-plush-bed-1",
+          "art": "bear_plush_bloom",
+          "x": 0,
+          "z": 3,
+          "scale": 1
+        },
+        {
+          "id": "bear-plush-bed-2",
+          "art": "bear_plush_bloom",
+          "x": 1,
+          "z": 4,
+          "scale": 0.94
+        },
+        {
+          "id": "bear-plush-bed-3",
+          "art": "bear_plush_bloom",
+          "x": 5,
+          "z": 5,
+          "scale": 0.94
+        },
+        {
+          "id": "toy-low-bed-fill-1",
+          "art": "bear_bubble_leaf",
+          "x": 2,
+          "z": 0,
+          "scale": 0.84
+        },
+        {
+          "id": "toy-low-bed-fill-2",
+          "art": "bear_bubble_leaf",
+          "x": 3,
+          "z": 0,
+          "scale": 0.84
+        },
+        {
+          "id": "toy-low-bed-fill-3",
+          "art": "bear_bubble_leaf",
+          "x": 3,
+          "z": 2,
+          "scale": 0.84
+        },
+        {
+          "id": "toy-low-bed-fill-4",
+          "art": "bear_bubble_leaf",
+          "x": 4,
+          "z": 2,
+          "scale": 0.84
+        },
+        {
+          "id": "toy-low-bed-fill-5",
+          "art": "bear_plush_bloom",
+          "x": 2,
+          "z": 4,
+          "scale": 0.78
+        },
+        {
+          "id": "toy-low-bed-fill-6",
+          "art": "bear_plush_bloom",
+          "x": 4,
+          "z": 4,
+          "scale": 0.78
+        }
+      ],
+      "edges": [
+        {
+          "x": 0,
+          "z": 0,
+          "side": "N",
+          "kind": "fence"
+        },
+        {
+          "x": 1,
+          "z": 0,
+          "side": "N",
+          "kind": "fence"
+        },
+        {
+          "x": 0,
+          "z": 0,
+          "side": "W",
+          "kind": "fence"
+        },
+        {
+          "x": 0,
+          "z": 1,
+          "side": "W",
+          "kind": "fence"
+        },
+        {
+          "x": 0,
+          "z": 3,
+          "side": "W",
+          "kind": "fence"
+        },
+        {
+          "x": 1,
+          "z": 4,
+          "side": "W",
+          "kind": "fence"
+        },
+        {
+          "x": 6,
+          "z": 1,
+          "side": "E",
+          "kind": "fence"
+        },
+        {
+          "x": 6,
+          "z": 2,
+          "side": "E",
+          "kind": "fence"
+        },
+        {
+          "x": 6,
+          "z": 3,
+          "side": "E",
+          "kind": "fence"
+        },
+        {
+          "x": 5,
+          "z": 5,
+          "side": "E",
+          "kind": "fence"
+        },
+        {
+          "x": 5,
+          "z": 5,
+          "side": "S",
+          "kind": "fence"
+        }
+      ],
+      "composition": "Existing landmarks and all original plant instances remain fixed. Repeated low planting extends the established beds into redundant paved cells. A connected narrow branching walkway replaces the empty plaza; every plant has a reachable unplanted exterior stance.",
+      "interactionTour": [
+        "bear-fold-gallery-exhibit",
+        "bear-foldbud-exhibit",
+        "bear-loop-rest-exhibit",
+        "bear-bubble-leaf-exhibit",
+        "bear-plush-bed-1"
+      ],
+      "ambient": "当代潮玩与短绒材质，安静留白。",
+      "cells": [
+        {
+          "x": 0,
+          "z": 0,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 0,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 0,
+          "kind": "land"
+        },
+        {
+          "x": 3,
+          "z": 0,
+          "kind": "land"
+        },
+        {
+          "x": 4,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 5,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 0,
+          "z": 1,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 1,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 4,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 5,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 6,
+          "z": 1,
+          "kind": "land"
+        },
+        {
+          "x": 0,
+          "z": 2,
+          "kind": "platform"
+        },
+        {
+          "x": 1,
+          "z": 2,
+          "kind": "platform"
+        },
+        {
+          "x": 2,
+          "z": 2,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 2,
+          "kind": "land"
+        },
+        {
+          "x": 4,
+          "z": 2,
+          "kind": "land"
+        },
+        {
+          "x": 5,
+          "z": 2,
+          "kind": "land"
+        },
+        {
+          "x": 6,
+          "z": 2,
+          "kind": "land"
+        },
+        {
+          "x": 0,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 3,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 3,
+          "kind": "platform"
+        },
+        {
+          "x": 4,
+          "z": 3,
+          "kind": "platform"
+        },
+        {
+          "x": 5,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 6,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 3,
+          "z": 4,
+          "kind": "platform"
+        },
+        {
+          "x": 4,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 5,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 5,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 5,
+          "kind": "platform"
+        },
+        {
+          "x": 4,
+          "z": 5,
+          "kind": "platform"
+        },
+        {
+          "x": 5,
+          "z": 5,
+          "kind": "land"
+        }
+      ],
+      "disclosure": "本地示范花园",
+      "scenery": [],
+      "arrivalNote": "Original spawn, host position and building entrances remain clear. Every empty support is connected with all plant and building footprints treated as occupied; no empty 2x2 plaza remains. Only necessary approach and standing cells stay unplanted.",
+      "buildings": [
+        {
+          "id": "bear-fold-gallery-exhibit",
+          "artKey": "bear_fold_gallery",
+          "x": 4,
+          "z": 0,
+          "footprint": [
+            2,
+            2
+          ],
+          "renderPivotCell": [
+            0.5,
+            0.5
+          ],
+          "depthPivotCell": [
+            1,
+            1
+          ],
+          "scale": 1,
+          "displayName": "折环潮玩馆",
+          "label": "折环潮玩馆",
+          "interaction": "stitch",
+          "sourceType": "hobby",
+          "sourceFrameId": null,
+          "sourceStory": "折环建筑收起一片绒面屋顶，半面罩角色与可替换的表情片在这里慢慢成形。",
+          "sourceDisclosure": "兴趣灵感 · 离线创作样例",
+          "entranceCell": [
+            3,
+            1
+          ],
+          "purchasable": false,
+          "kind": "hobby-building",
+          "authorId": "demo-bear",
+          "authorName": "Bear熊",
+          "economy": "none"
+        },
+        {
+          "id": "bear-loop-rest-exhibit",
+          "artKey": "bear_loop_rest",
+          "x": 0,
+          "z": 2,
+          "footprint": [
+            2,
+            1
+          ],
+          "renderPivotCell": [
+            0.5,
+            0
+          ],
+          "depthPivotCell": [
+            1,
+            0
+          ],
+          "scale": 1,
+          "displayName": "回环绒座",
+          "label": "回环绒座",
+          "interaction": "chime",
+          "sourceType": "hobby",
+          "sourceFrameId": null,
+          "sourceStory": "把哑光软胶的轮廓、短绒的触感与透光亚克力合在一起，让雕塑也能成为会客的座位。",
+          "sourceDisclosure": "兴趣灵感 · 离线创作样例",
+          "entranceCell": [
+            2,
+            2
+          ],
+          "purchasable": false,
+          "kind": "hobby-building",
+          "authorId": "demo-bear",
+          "authorName": "Bear熊",
+          "economy": "none"
+        }
+      ],
+      "progression": {
+        "level": 28,
+        "tierLabel": "玩偶设计师花园",
+        "disclosure": "示范等级 · 非实时玩家进度"
+      },
+      "sceneryNote": "Original scenery and decorative outer edges remain unchanged. Existing low plant art is repeated in grouped beds, never on the connected walkway or any building footprint.",
+      "animalVisitorSpawns": [
+        [
+          3,
+          5
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          1,
+          3
+        ]
+      ],
+      "styleStatus": "existing-art-dense-low-beds-narrow-connected-walkways"
+    },
+    {
+      "id": "demo-frog-sea",
+      "title": "绯窗夜庭",
+      "owner": {
+        "id": "demo-frog",
+        "name": "奶蛙",
+        "avatar": "milk-frog"
+      },
+      "theme": "anime",
+      "tagline": "把安静和锋芒，留在同一扇红窗里",
+      "intro": "三十六格红黑哥特花园：夜曲宅邸、黑丝蜘蛛和银幕柳保持原位，低矮铃花与深红玫瑰延续原有花床；窄步道串起所有可停步欣赏的位置。",
+      "palette": {
+        "water": "#b9dfdc",
+        "land": "#b9ccd3",
+        "side": "#a69b95",
+        "sideDark": "#877d79",
+        "wood": "#c3bfc5",
+        "woodSide": "#9895a0",
+        "woodDark": "#73717d",
+        "accent": "#922f47",
+        "secondary": "#7e879e",
+        "light": "#e4dee9",
+        "ambientWash": "#65588118",
+        "glintColor": "#ddd8e9",
+        "mood": "moonstone and charcoal courtyard under muted oxblood glass",
+        "woodGrain": false
+      },
+      "rows": [
+        "PPPLPP",
+        "PPPLPL",
+        "LPPPPL",
+        "LLPLLL",
+        "LLPPPP",
+        "LPPLLL"
+      ],
+      "spawn": [
+        2,
+        3
+      ],
+      "ownerPosition": [
+        3,
+        2
+      ],
+      "focalPlant": "jiji-silver-veil",
+      "focalCamera": [
+        2.5,
+        1.5
+      ],
+      "plants": [
+        {
+          "id": "jiji-silver-veil",
+          "art": "silver_veil_willow",
+          "x": 0,
+          "z": 3,
+          "scale": 1
+        },
+        {
+          "id": "jiji-oxblood-bells",
+          "art": "oxblood_bellflower",
+          "x": 5,
+          "z": 3,
+          "scale": 1
+        },
+        {
+          "id": "jiji-oxblood-bells-rear",
+          "art": "oxblood_bellflower",
+          "x": 5,
+          "z": 1,
+          "scale": 0.88
+        },
+        {
+          "id": "jiji-rose-bed-1",
+          "art": "jiji_crimson_rose_bush",
+          "x": 4,
+          "z": 3,
+          "scale": 0.92
+        },
+        {
+          "id": "jiji-rose-bed-2",
+          "art": "jiji_crimson_rose_bush",
+          "x": 0,
+          "z": 4,
+          "scale": 1
+        },
+        {
+          "id": "jiji-rose-bed-3",
+          "art": "jiji_crimson_rose_bush",
+          "x": 5,
+          "z": 2,
+          "scale": 0.94
+        },
+        {
+          "id": "jiji-rose-bed-4",
+          "art": "jiji_crimson_rose_bush",
+          "x": 4,
+          "z": 5,
+          "scale": 1
+        },
+        {
+          "id": "jiji-rose-bed-5",
+          "art": "jiji_crimson_rose_bush",
+          "x": 5,
+          "z": 5,
+          "scale": 0.92
+        },
+        {
+          "id": "jiji-rose-inset-1",
+          "art": "jiji_crimson_rose_bush",
+          "x": 1,
+          "z": 3,
+          "scale": 0.94
+        },
+        {
+          "id": "jiji-rose-inset-2",
+          "art": "jiji_crimson_rose_bush",
+          "x": 1,
+          "z": 4,
+          "scale": 0.94
+        },
+        {
+          "id": "anime-low-bed-fill-1",
+          "art": "oxblood_bellflower",
+          "x": 3,
+          "z": 0,
+          "scale": 0.82
+        },
+        {
+          "id": "anime-low-bed-fill-2",
+          "art": "oxblood_bellflower",
+          "x": 3,
+          "z": 1,
+          "scale": 0.82
+        },
+        {
+          "id": "anime-low-bed-fill-3",
+          "art": "jiji_crimson_rose_bush",
+          "x": 3,
+          "z": 3,
+          "scale": 0.75
+        },
+        {
+          "id": "anime-low-bed-fill-4",
+          "art": "jiji_crimson_rose_bush",
+          "x": 3,
+          "z": 5,
+          "scale": 0.8
+        }
+      ],
+      "edges": [
+        {
+          "x": 0,
+          "z": 2,
+          "side": "W",
+          "kind": "wall"
+        },
+        {
+          "x": 0,
+          "z": 3,
+          "side": "W",
+          "kind": "wall"
+        },
+        {
+          "x": 0,
+          "z": 4,
+          "side": "W",
+          "kind": "wall"
+        },
+        {
+          "x": 5,
+          "z": 1,
+          "side": "E",
+          "kind": "wall"
+        },
+        {
+          "x": 5,
+          "z": 2,
+          "side": "E",
+          "kind": "wall"
+        },
+        {
+          "x": 5,
+          "z": 3,
+          "side": "E",
+          "kind": "wall"
+        },
+        {
+          "x": 5,
+          "z": 4,
+          "side": "E",
+          "kind": "wall"
+        },
+        {
+          "x": 5,
+          "z": 5,
+          "side": "E",
+          "kind": "wall"
+        },
+        {
+          "x": 0,
+          "z": 5,
+          "side": "S",
+          "kind": "wall"
+        },
+        {
+          "x": 5,
+          "z": 5,
+          "side": "S",
+          "kind": "wall"
+        },
+        {
+          "x": 1,
+          "z": 3,
+          "side": "N",
+          "kind": "wall"
+        },
+        {
+          "x": 1,
+          "z": 3,
+          "side": "W",
+          "kind": "wall"
+        }
+      ],
+      "composition": "Existing landmarks and all original plant instances remain fixed. Repeated low planting extends the established beds into redundant paved cells. A connected narrow branching walkway replaces the empty plaza; every plant has a reachable unplanted exterior stance.",
+      "interactionTour": [
+        "jiji-nocturne-home",
+        "jiji-black-silk-sculpture",
+        "jiji-silver-veil",
+        "jiji-oxblood-bells",
+        "jiji-rose-bed-1"
+      ],
+      "ambient": "红黑夜庭，银影与细丝只在轻触时回应。",
+      "cells": [
+        {
+          "x": 0,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 1,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 2,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 0,
+          "kind": "land"
+        },
+        {
+          "x": 4,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 5,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 0,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 1,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 2,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 1,
+          "kind": "land"
+        },
+        {
+          "x": 4,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 5,
+          "z": 1,
+          "kind": "land"
+        },
+        {
+          "x": 0,
+          "z": 2,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 2,
+          "kind": "platform"
+        },
+        {
+          "x": 2,
+          "z": 2,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 2,
+          "kind": "platform"
+        },
+        {
+          "x": 4,
+          "z": 2,
+          "kind": "platform"
+        },
+        {
+          "x": 5,
+          "z": 2,
+          "kind": "land"
+        },
+        {
+          "x": 0,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 3,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 4,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 5,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 0,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 4,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 4,
+          "kind": "platform"
+        },
+        {
+          "x": 4,
+          "z": 4,
+          "kind": "platform"
+        },
+        {
+          "x": 5,
+          "z": 4,
+          "kind": "platform"
+        },
+        {
+          "x": 0,
+          "z": 5,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 5,
+          "kind": "platform"
+        },
+        {
+          "x": 2,
+          "z": 5,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 5,
+          "kind": "land"
+        },
+        {
+          "x": 4,
+          "z": 5,
+          "kind": "land"
+        },
+        {
+          "x": 5,
+          "z": 5,
+          "kind": "land"
+        }
+      ],
+      "disclosure": "本地示范花园",
+      "scenery": [],
+      "arrivalNote": "Original spawn, host position and building entrances remain clear. Every empty support is connected with all plant and building footprints treated as occupied; no empty 2x2 plaza remains. Only necessary approach and standing cells stay unplanted.",
+      "buildings": [
+        {
+          "id": "jiji-nocturne-home",
+          "artKey": "jiji_nocturne_manor",
+          "x": 0,
+          "z": 0,
+          "footprint": [
+            2,
+            2
+          ],
+          "renderPivotCell": [
+            0.5,
+            0.5
+          ],
+          "depthPivotCell": [
+            1,
+            1
+          ],
+          "scale": 1,
+          "displayName": "绯窗夜邸",
+          "label": "绯窗夜邸",
+          "interaction": "chime",
+          "sourceType": "hobby",
+          "sourceFrameId": null,
+          "sourceStory": "把尖拱、暗红玻璃与冷黑铁艺，叠成一座安静而锋利的夜邸。窗后的一点光，像故事刚刚开场。",
+          "sourceDisclosure": "兴趣灵感 · 离线创作样例",
+          "entranceCell": [
+            1,
+            2
+          ],
+          "purchasable": false,
+          "kind": "hobby-building",
+          "authorId": "demo-jiji",
+          "authorName": "吉吉",
+          "economy": "none"
+        },
+        {
+          "id": "jiji-black-silk-sculpture",
+          "artKey": "black_silk_spider",
+          "x": 4,
+          "z": 0,
+          "footprint": [
+            2,
+            1
+          ],
+          "renderPivotCell": [
+            0.5,
+            0.0
+          ],
+          "depthPivotCell": [
+            1,
+            0
+          ],
+          "scale": 1,
+          "displayName": "黑丝织影雕塑",
+          "label": "黑丝织影雕塑",
+          "interaction": "stitch",
+          "sourceType": "hobby",
+          "sourceFrameId": null,
+          "sourceStory": "八条细长弧线托起一颗黑色宝石，银丝留出轻盈的负空间；它不追逐谁，只把夜庭的个性织在这里。",
+          "sourceDisclosure": "兴趣灵感 · 离线创作样例",
+          "entranceCell": [
+            4,
+            1
+          ],
+          "purchasable": false,
+          "kind": "hobby-building",
+          "authorId": "demo-jiji",
+          "authorName": "吉吉",
+          "economy": "none"
+        }
+      ],
+      "progression": {
+        "level": 3,
+        "tierLabel": "起步花园",
+        "disclosure": "示范等级 · 非实时玩家进度"
+      },
+      "displayHost": {
+        "id": "demo-jiji",
+        "name": "吉吉",
+        "avatar": "human-jiji"
+      },
+      "sceneryNote": "Original scenery and decorative outer edges remain unchanged. Existing low plant art is repeated in grouped beds, never on the connected walkway or any building footprint.",
+      "animalVisitorSpawns": [
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          4
+        ]
+      ],
+      "styleStatus": "existing-art-dense-low-beds-narrow-connected-walkways"
+    },
+    {
+      "id": "demo-lx-tech",
+      "title": "钛庭未来研究庄园",
+      "owner": {
+        "id": "demo-lx",
+        "name": "LX",
+        "avatar": "human-lx"
+      },
+      "theme": "tech",
+      "tagline": "把先进藏进从容的留白",
+      "intro": "三十六格钛色科技庭院：厚叶芦荟沿宅前与步道边缘等距成列，珍珠花集中点缀生物舱旁；建筑、入口和连续步道保持原位。",
+      "palette": {
+        "water": "#b9dfdc",
+        "land": "#e2dcc8",
+        "side": "#c3b297",
+        "sideDark": "#a28e73",
+        "wood": "#dedfdc",
+        "woodSide": "#b7bbb7",
+        "woodDark": "#929b96",
+        "accent": "#819475",
+        "secondary": "#aaa17e",
+        "light": "#fff0c4",
+        "ambientWash": "#ffe9b82b",
+        "glintColor": "#fff4d4",
+        "mood": "sand-white titanium future research courtyard",
+        "woodGrain": false
+      },
+      "spawn": [
+        2,
+        4
+      ],
+      "ownerPosition": [
+        2,
+        3
+      ],
+      "focalPlant": "lx-future-bio_vault",
+      "focalCamera": [
+        2.5,
+        2.5
+      ],
+      "composition": "Compact aloe forms equal-scale straight facade and path-edge rows; pearl blooms gather around the bio-vault with one runway accent. Existing occupied cells, clear routes, buildings and supports are unchanged.",
+      "interactionTour": [
+        "lx-future-titanium_courtyard",
+        "lx-future-silent_wing",
+        "lx-future-bio_vault",
+        "lx-future-nanofabricator",
+        "lx-silver-fern-bed-1",
+        "lx-orbital-bed-east"
+      ],
+      "ambient": "钛金属未来研究庭，无自动背景音乐。",
+      "disclosure": "本地示范花园",
+      "sceneryNote": "Low aloe and pearl-flower beds share a restrained scale and clear planting rhythm; original walls frame the planted borders.",
+      "arrivalNote": "Original spawn, host position and building entrances remain clear. Every empty support is connected with all plant and building footprints treated as occupied; no empty 2x2 plaza remains. Only necessary approach and standing cells stay unplanted.",
+      "progression": {
+        "level": 32,
+        "tierLabel": "机能实验基地",
+        "disclosure": "示范等级 · 非实时玩家进度"
+      },
+      "rows": [
+        ".PPLLPP.",
+        ".PPPPPL.",
+        ".LLLP...",
+        "LLLPPLL.",
+        ".LLPLLL.",
+        ".LLPPLLL"
+      ],
+      "cells": [
+        {
+          "x": 0,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 1,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 2,
+          "z": 0,
+          "kind": "land"
+        },
+        {
+          "x": 3,
+          "z": 0,
+          "kind": "land"
+        },
+        {
+          "x": 4,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 5,
+          "z": 0,
+          "kind": "platform"
+        },
+        {
+          "x": 0,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 1,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 2,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 4,
+          "z": 1,
+          "kind": "platform"
+        },
+        {
+          "x": 5,
+          "z": 1,
+          "kind": "land"
+        },
+        {
+          "x": 0,
+          "z": 2,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 2,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 2,
+          "kind": "land"
+        },
+        {
+          "x": 3,
+          "z": 2,
+          "kind": "platform"
+        },
+        {
+          "x": -1,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 0,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 3,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 3,
+          "kind": "platform"
+        },
+        {
+          "x": 4,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 5,
+          "z": 3,
+          "kind": "land"
+        },
+        {
+          "x": 0,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 4,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 4,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 5,
+          "z": 4,
+          "kind": "land"
+        },
+        {
+          "x": 0,
+          "z": 5,
+          "kind": "land"
+        },
+        {
+          "x": 1,
+          "z": 5,
+          "kind": "land"
+        },
+        {
+          "x": 2,
+          "z": 5,
+          "kind": "platform"
+        },
+        {
+          "x": 3,
+          "z": 5,
+          "kind": "platform"
+        },
+        {
+          "x": 4,
+          "z": 5,
+          "kind": "land"
+        },
+        {
+          "x": 5,
+          "z": 5,
+          "kind": "land"
+        },
+        {
+          "x": 6,
+          "z": 5,
+          "kind": "land"
+        }
+      ],
+      "plants": [
+        {
+          "id": "lx-future-bio_vault",
+          "art": "lx_bio_vault",
+          "x": 0,
+          "z": 4,
+          "scale": 1
+        },
+        {
+          "id": "lx-silver-fern-bed-1",
+          "art": "lx_silver_biofern",
+          "x": 3,
+          "z": 4,
+          "scale": 0.86
+        },
+        {
+          "id": "lx-silver-fern-bed-2",
+          "art": "lx_silver_biofern",
+          "x": 5,
+          "z": 4,
+          "scale": 0.86
+        },
+        {
+          "id": "lx-silver-fern-bed-3",
+          "art": "lx_silver_biofern",
+          "x": 6,
+          "z": 5,
+          "scale": 0.86
+        },
+        {
+          "id": "lx-silver-fern-bed-4",
+          "art": "lx_silver_biofern",
+          "x": 4,
+          "z": 4,
+          "scale": 0.86
+        },
+        {
+          "id": "lx-orbital-bed-west",
+          "art": "lx_orbital_bloom",
+          "x": 0,
+          "z": 5,
+          "scale": 0.86
+        },
+        {
+          "id": "lx-orbital-bed-east",
+          "art": "lx_orbital_bloom",
+          "x": 1,
+          "z": 4,
+          "scale": 0.86
+        },
+        {
+          "id": "lx-silver-fern-inset-1",
+          "art": "lx_silver_biofern",
+          "x": 0,
+          "z": 2,
+          "scale": 0.86
+        },
+        {
+          "id": "lx-silver-fern-inset-2",
+          "art": "lx_silver_biofern",
+          "x": 1,
+          "z": 2,
+          "scale": 0.86
+        },
+        {
+          "id": "tech-low-bed-fill-1",
+          "art": "lx_silver_biofern",
+          "x": 2,
+          "z": 0,
+          "scale": 0.86
+        },
+        {
+          "id": "tech-low-bed-fill-2",
+          "art": "lx_silver_biofern",
+          "x": 3,
+          "z": 0,
+          "scale": 0.86
+        },
+        {
+          "id": "tech-low-bed-fill-3",
+          "art": "lx_silver_biofern",
+          "x": 2,
+          "z": 2,
+          "scale": 0.86
+        },
+        {
+          "id": "tech-low-bed-fill-4",
+          "art": "lx_orbital_bloom",
+          "x": -1,
+          "z": 3,
+          "scale": 0.86
+        },
+        {
+          "id": "tech-low-bed-fill-5",
+          "art": "lx_orbital_bloom",
+          "x": 5,
+          "z": 1,
+          "scale": 0.86
+        }
+      ],
+      "buildings": [
+        {
+          "id": "lx-future-titanium_courtyard",
+          "artKey": "lx_titanium_courtyard",
+          "x": 0,
+          "z": 0,
+          "footprint": [
+            2,
+            2
+          ],
+          "entranceCell": [
+            2,
+            1
+          ],
+          "scale": 1,
+          "interaction": "scan",
+          "sourceType": "hobby",
+          "sourceFrameId": null,
+          "sourceStory": "钛金属曲面包围一座开阔研究庭，精密结构藏在从容的留白里，先进不必喧哗。",
+          "sourceDisclosure": "兴趣灵感 · 离线创作样例",
+          "displayName": "钛庭未来研究宅",
+          "label": "钛庭未来研究宅",
+          "authorId": "demo-lx",
+          "authorName": "LX",
+          "purchasable": false,
+          "economy": "none"
+        },
+        {
+          "id": "lx-future-silent_wing",
+          "artKey": "lx_silent_wing",
+          "x": 4,
+          "z": 0,
+          "footprint": [
+            2,
+            1
+          ],
+          "entranceCell": [
+            4,
+            1
+          ],
+          "scale": 1,
+          "interaction": "lap",
+          "sourceType": "hobby",
+          "sourceFrameId": null,
+          "sourceStory": "纤薄银翼收拢在停机坪，一道轻轻经过的光，留下下一段旅程的方向。",
+          "sourceDisclosure": "兴趣灵感 · 离线创作样例",
+          "displayName": "静翼穿梭艇",
+          "label": "静翼穿梭艇",
+          "authorId": "demo-lx",
+          "authorName": "LX",
+          "purchasable": false,
+          "economy": "none"
+        },
+        {
+          "id": "lx-future-nanofabricator",
+          "artKey": "lx_nanofabricator",
+          "x": 5,
+          "z": 3,
+          "footprint": [
+            1,
+            1
+          ],
+          "entranceCell": [
+            4,
+            3
+          ],
+          "scale": 1,
+          "interaction": "scan",
+          "sourceType": "hobby",
+          "sourceFrameId": null,
+          "sourceStory": "在一方克制的工作台上，微小构件沿轨道排列，像看不见的工匠在写一首结构诗。",
+          "sourceDisclosure": "兴趣灵感 · 离线创作样例",
+          "displayName": "纳米构筑台",
+          "label": "纳米构筑台",
+          "authorId": "demo-lx",
+          "authorName": "LX",
+          "purchasable": false,
+          "economy": "none"
+        }
+      ],
+      "scenery": [],
+      "edges": [
+        {
+          "x": -1,
+          "z": 3,
+          "side": "W",
+          "kind": "wall"
+        },
+        {
+          "x": -1,
+          "z": 3,
+          "side": "N",
+          "kind": "wall"
+        },
+        {
+          "x": 0,
+          "z": 4,
+          "side": "W",
+          "kind": "wall"
+        },
+        {
+          "x": 0,
+          "z": 5,
+          "side": "W",
+          "kind": "wall"
+        },
+        {
+          "x": 0,
+          "z": 5,
+          "side": "S",
+          "kind": "wall"
+        },
+        {
+          "x": 5,
+          "z": 4,
+          "side": "E",
+          "kind": "wall"
+        },
+        {
+          "x": 6,
+          "z": 5,
+          "side": "E",
+          "kind": "wall"
+        },
+        {
+          "x": 6,
+          "z": 5,
+          "side": "S",
+          "kind": "wall"
+        },
+        {
+          "x": 5,
+          "z": 5,
+          "side": "S",
+          "kind": "wall"
+        },
+        {
+          "x": 4,
+          "z": 5,
+          "side": "S",
+          "kind": "wall"
+        },
+        {
+          "x": 0,
+          "z": 2,
+          "side": "W",
+          "kind": "wall"
+        },
+        {
+          "x": 0,
+          "z": 2,
+          "side": "N",
+          "kind": "wall"
+        },
+        {
+          "x": 1,
+          "z": 2,
+          "side": "N",
+          "kind": "wall"
+        }
+      ],
+      "animalVisitorSpawns": [
+        [
+          4,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          1,
+          5
+        ]
+      ],
+      "rowOrigin": [
+        -1,
+        0
+      ],
+      "styleStatus": "ordered-compact-aloe-rows-with-open-walkways"
+    }
+  ],
+  "sceneryContract": "Optional authored accents only: not buildable, not inventory, not extra construction kinds. Anchor at project(x+offsetX,z+offsetZ). Depth-sort decorative objects, ground decals under residents. Avoid covering plant faces; lower opacity or move by<=.15tile if needed. Labels are renderer text, not generated lettering.",
+  "themeContract": "Shared flat sea #b9dfdc. One coherent whole-island palette per garden: mist blue collector court, soft green rehearsal court, pale rose plush atelier, light tan sports/hardware court. Never recolor plant or avatar bitmap pixels; UI retains shared cream/ink.",
+  "heroContract": {
+    "footprint": [
+      2,
+      2
+    ],
+    "origin": "northwest-min-cell",
+    "renderPivotCell": [
+      0.5,
+      0.5
+    ],
+    "depthPivotCell": [
+      1,
+      1
+    ],
+    "plantTerrain": "four land cells",
+    "buildingTerrain": "four platform cells in demo layouts",
+    "legacySpecies": "unchanged; giants are new keys",
+    "albumManifest": "assets/memory-album-manifest.json"
+  }
+}

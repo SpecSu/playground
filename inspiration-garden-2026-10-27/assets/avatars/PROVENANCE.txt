@@ -1,0 +1,1 @@
+Original character assets from manor v37 commit 633f1af5f8f8a6fe30f267abef0f2383c962b4e2. Rendered from cast-v1 GLB models to two directional alpha sprites with Blender. No gameplay, saves or source models modified. Original IDs and names retained.

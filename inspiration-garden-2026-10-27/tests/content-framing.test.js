@@ -1,0 +1,15 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+import {frameAdvancedCanopies} from '../src/content-framing.js';import {ADVANCED_VARIETIES} from '../src/catalogue.js';
+const sprites=JSON.parse(fs.readFileSync(new URL('../assets/art-manifest.json',import.meta.url))).sprites,tiles=[[0,0],[1,0],[0,1],[1,1]].map(([x,y])=>({id:`${x}:${y}`,x,y,kind:'land'}));
+test('all4 approved tall canopies stay below HUD and inside default mobile framing without shrinking to ordinary plants',()=>{
+ for(const v of ADVANCED_VARIETIES)for(const [width,height]of[[360,700],[440,757]]){const world={tiles,plants:[{id:'tree',tileId:'0:0',varietyId:v.id,plantedAt:0,readyAt:0}],exhibits:[]},frame=frameAdvancedCanopies({world,varieties:{[v.id]:v},sprite:key=>sprites[key],width,height,trayHeight:87,zoom:1.35,time:100});assert.ok(frame);const b=frame.bounds;assert.ok(b.left*frame.zoom+frame.x>=15.9);assert.ok(b.right*frame.zoom+frame.x<=width-15.9);assert.ok(b.top*frame.zoom+frame.y>=119.9);assert.ok(b.bottom*frame.zoom+frame.y<=height-87-18+.1);assert.ok(sprites[v.artKey].width*frame.zoom>=180,'spectacular canopy remains larger than ordinary80px residents');}
+});
+test('ordinary or still-growing content keeps old framing; manual zoom is never replaced by auto cap',()=>{
+ const v=ADVANCED_VARIETIES[3],world={tiles,plants:[{id:'tree',tileId:'0:0',varietyId:v.id,plantedAt:0,readyAt:1000}],exhibits:[]},args={world,varieties:{[v.id]:v},sprite:key=>sprites[key],width:440,height:757,trayHeight:87,zoom:1.35,time:999};assert.equal(frameAdvancedCanopies(args),null);assert.equal(frameAdvancedCanopies({...args,time:1000,manual:true,zoom:1.8}).zoom,1.8);
+});
+test('completed slender and airy memorials frame real canonical centers and alpha under HUD without any advanced tree',()=>{for(const key of ['lamy_memory_column','airforce_memory_house','necklace_memory_monument']){const fp=sprites[key].footprint,world={tiles,plants:[],exhibits:[{id:'memory',artKey:key,sampleId:key,x:0,y:0}]},args={world,varieties:{},sprite:k=>sprites[k],width:360,height:700,trayHeight:87,zoom:1.35,time:100},fit=frameAdvancedCanopies(args);assert.ok(fit,key);assert.ok(fit.bounds.top*fit.zoom+fit.y>=119.9);assert.ok(fit.bounds.bottom*fit.zoom+fit.y<=595.1);assert.equal(frameAdvancedCanopies({...args,manual:true,zoom:1.8}).zoom,1.8);const pending={...world,exhibits:[{...world.exhibits[0],startedAt:0,readyAt:15000}]};assert.equal(frameAdvancedCanopies({...args,world:pending}),null);}});
+test('Roadster art reserves 12px hover headroom without moving ground bounds or pen framing',()=>{
+ const sprite={width:180,frame:{w:180,h:300},anchor:[.5,1],alphaBounds:{x:0,y:0,w:180,h:300}},args={world:{tiles,plants:[],exhibits:[{id:'car',artKey:'airforce_memory_house',sampleId:'airforce_memory_house',x:0,y:0}]},varieties:{},sprite:()=>sprite,width:360,height:780,zoom:1,time:100};
+ const car=frameAdvancedCanopies(args);assert.equal(car.bounds.top,19.5-300-12);
+ const pen=frameAdvancedCanopies({...args,world:{...args.world,exhibits:[{id:'pen',artKey:'lamy_memory_column',sampleId:'lamy_memory_column',x:0,y:0}]}});assert.equal(pen.bounds.top,6-300);
+});

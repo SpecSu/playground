@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {createState,reduce} from '../src/state.js';import {renderPanel} from '../src/ui.js';
+const now=100000;function legacy(){let s=createState(now,'old-layout-ui');s=reduce(s,{type:'CREATE_BLUEPRINT',sampleId:'calico_reading_den',requestId:'old'},now).state;s.coins=0;s.buildings=[{id:'old-house',blueprintId:Object.keys(s.blueprints)[0],tileId:'tile-0-0'}];return s;}
+test('only eligible full blocked old layout exposes explicit exceptional recovery confirmation, never normal free demolition',()=>{
+ const s=legacy(),html=renderPanel(s,{panel:'build'},{});assert.match(html,/旧版布局恢复/);assert.match(html,/data-action="legacy-recovery"/);const confirm=renderPanel(s,{panel:'build',recoveryId:'old-house'},{});assert.match(confirm,/data-action="confirm-legacy-recovery"/);assert.match(confirm,/本次免拆除费/);assert.match(confirm,/图纸.*保留/);for(const bad of [{...s,coins:18},{...s,tiles:[...s.tiles,{id:'outside',x:2,y:0,kind:'land'}]}])assert.doesNotMatch(renderPanel(bad,{panel:'build'},{}),/data-action="legacy-recovery"|confirm-legacy-recovery/);
+});

@@ -1,0 +1,250 @@
+{
+  "version": 1,
+  "image": "assets/album/fictional-memory-sources-v1.png",
+  "size": [
+    1536,
+    1024
+  ],
+  "decodedRGBABytes": 6291456,
+  "bytes": 2117108,
+  "preload": false,
+  "sourceType": "ai_generated_fictional_photographic_examples",
+  "disclosure": "示例相册 · AI生成的虚构素材，非用户上传照片",
+  "frames": {
+    "kelly-friend-photo": {
+      "frame": {
+        "x": 40,
+        "y": 153,
+        "w": 474,
+        "h": 706
+      },
+      "label": "示例好友 · 午后练琴",
+      "disclosure": "虚构人物与照片，仅为示例素材",
+      "buildingArtKey": "portrait_rehearsal_pavilion",
+      "sourceStory": "圆框眼镜变成一对窗，栗色卷发铺成屋顶，珊瑚围巾成了会招手的门帘。",
+      "transformCues": [
+        "栗色短发 → 波浪屋顶",
+        "圆框眼镜 → 双圆窗",
+        "珊瑚围巾 → 门口长帘",
+        "练琴时光 → 开放钢琴小厅"
+      ]
+    },
+    "bear-cat-photo": {
+      "frame": {
+        "x": 540,
+        "y": 153,
+        "w": 459,
+        "h": 706
+      },
+      "label": "示例宠物 · 书边打盹",
+      "disclosure": "虚构宠物与照片，仅为示例素材",
+      "buildingArtKey": "calico_reading_den",
+      "sourceStory": "把三花猫睡成一团的样子，变成一座安静书屋；花纹、卷尾巴和紫色小毯子都留下来了。",
+      "transformCues": [
+        "三花斑纹 → 弧形屋顶",
+        "蜷起尾巴 → 阳台围栏",
+        "柔软猫爪 → 门前台阶",
+        "紫毯与书 → 门里的阅读角"
+      ]
+    },
+    "frog-camp-photo": {
+      "frame": {
+        "x": 1024,
+        "y": 153,
+        "w": 473,
+        "h": 705
+      },
+      "label": "示例回忆 · 和狗狗露营",
+      "disclosure": "虚构宠物与露营照片，仅为示例素材",
+      "buildingArtKey": "camping_dog_workshop",
+      "sourceStory": "狗狗的长耳朵变成屋檐，红方巾变成门篷；帐篷、毛毯和那盏营灯，一起住进了小工坊。",
+      "transformCues": [
+        "长耳朵 → 两侧屋檐",
+        "红方巾 → 门口三角篷",
+        "橄榄色帐篷 → 帆布屋顶",
+        "营灯与卷毯 → 工坊里的回忆"
+      ]
+    },
+    "lamy-pen-memory-photo": {
+      "image": "assets/album/personal-lamy-yellow-source-v2.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1536,
+        "h": 1024
+      },
+      "size": [
+        1536,
+        1024
+      ],
+      "cardDisplaySize": [
+        600,
+        400
+      ],
+      "label": "礼物 · 一支黄色钢笔",
+      "buildingArtKey": "lamy_memory_column",
+      "sourceType": "ai_generated_demo_photographic_example",
+      "sourceStory": "收到的那支黄色钢笔，把没说完的温柔写成了一盏灯。简单的笔身和银色笔夹立在小岛一角，像一座只为一句话亮着的灯塔。",
+      "transformCues": [
+        "明黄色笔身 → 细长立柱",
+        "银色回形针笔夹 → 轻巧的银色线条",
+        "简洁笔帽 → 现代平顶轮廓"
+      ],
+      "preload": false
+    },
+    "necklace-memory-photo": {
+      "image": "assets/album/modern-silver-necklace-photo-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1200,
+        "h": 800
+      },
+      "size": [
+        1200,
+        800
+      ],
+      "cardDisplaySize": [
+        600,
+        400
+      ],
+      "label": "纪念 · 细银链与非对称吊坠",
+      "buildingArtKey": "necklace_memory_monument",
+      "sourceType": "ai_generated_demo_photographic_example",
+      "sourceStory": "细银链与一枚不对称的银色吊坠，化成留着光与风的纪念庭。轻碰吊坠，让安静的曲面响起一声清亮回音。",
+      "transformCues": [
+        "细银链 → 轻盈的悬索曲线",
+        "光滑银水滴 → 偏心悬挂的纪念物",
+        "银色曲面与留白 → 开放的折曲庭院"
+      ],
+      "preload": false
+    },
+    "fluffy-cat-real-photo": {
+      "label": "我的猫咪 · 毛茸茸小屋的灵感",
+      "sourceStory": "暖白色长毛铺成柔软屋顶，卡其色花纹围成小门廊；原照片里的大眼睛、粉鼻子和蓬松尾巴，都留在这座会吃小鱼的小屋里。",
+      "sourceType": "user-provided-photo",
+      "displayDate": "2026-10-26",
+      "dateLabel": "提供于",
+      "alt": "暖白色长毛猫趴在浅色毯子上，灰卡其色耳朵和蓬松尾巴是猫咪小屋的灵感来源。",
+      "image": "assets/album/fluffy-cat-source-photo-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 960,
+        "h": 1280
+      }
+    },
+    "roadster-rocket-memory-photo": {
+      "image": "assets/album/tesla-roadster-inspiration-v2.webp",
+      "label": "Roadster 灵感参考",
+      "disclosure": "生成的设计灵感样片；非用户实车照片",
+      "sourceType": "generated-reference-inspiration",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1200,
+        "h": 800
+      },
+      "size": [
+        1200,
+        800
+      ],
+      "cardDisplaySize": [
+        600,
+        400
+      ],
+      "buildingArtKey": "airforce_memory_house",
+      "preload": false,
+      "sourceStory": "把未来跑车的想象停在小岛上。轻碰车身，短促气流把它托离地面一点，再轻轻落回原处。",
+      "transformCues": [
+        "低伏跑车轮廓 → 两格贴地车身",
+        "银白曲面与深色座舱 → 折曲雕塑体量",
+        "未来飞行想象 → 短暂冷气悬浮互动"
+      ]
+    },
+    "xt50-memory-photo": {
+      "image": "assets/album/camera-sourcecard-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1200,
+        "h": 800
+      },
+      "size": [
+        1200,
+        800
+      ],
+      "cardDisplaySize": [
+        600,
+        400
+      ],
+      "label": "相机 · 取景的小屋",
+      "buildingArtKey": "xt50_memory_camera",
+      "sourceType": "ai_generated_fictional_illustration",
+      "sourceStory": "银色折面和黑色机身围出一座小小的取景屋，圆镜头里留着温暖的灯光。",
+      "transformCues": [
+        "银色机顶 → 折面屋顶",
+        "圆形镜头 → 玻璃观景厅",
+        "黑色握柄 → 深色立面"
+      ],
+      "preload": false,
+      "disclosure": "生成的灵感示意 · 非用户实拍"
+    },
+    "scallop-shell-memory-photo": {
+      "image": "assets/album/shell-sourcecard-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1200,
+        "h": 800
+      },
+      "size": [
+        1200,
+        800
+      ],
+      "cardDisplaySize": [
+        600,
+        400
+      ],
+      "label": "海边 · 一枚扇贝",
+      "buildingArtKey": "scallop_shell_house",
+      "sourceType": "ai_generated_fictional_illustration",
+      "sourceStory": "扇贝的放射纹理撑起一片轻薄屋顶，把海边的柔和颜色收进屋里。",
+      "transformCues": [
+        "放射贝纹 → 扇形折肋屋顶",
+        "象牙白外壳 → 薄壳曲面",
+        "浅粉内面 → 温暖阅读角"
+      ],
+      "preload": false,
+      "disclosure": "生成的灵感示意 · 非用户实拍"
+    },
+    "camping-tarp-memory-photo": {
+      "image": "assets/album/canopy-sourcecard-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1200,
+        "h": 800
+      },
+      "size": [
+        1200,
+        800
+      ],
+      "cardDisplaySize": [
+        600,
+        400
+      ],
+      "label": "露营 · 一片天幕",
+      "buildingArtKey": "camping_tarp_pavilion",
+      "sourceType": "ai_generated_fictional_illustration",
+      "sourceStory": "一片轻轻张开的天幕、一把营椅和一盏灯，给花园留下一处透风的阴凉。",
+      "transformCues": [
+        "轻薄天幕 → 张拉帆布曲面",
+        "纤细营杆 → 倾斜支撑",
+        "小营灯 → 暖光回应"
+      ],
+      "preload": false,
+      "disclosure": "生成的灵感示意 · 非用户实拍"
+    }
+  }
+}

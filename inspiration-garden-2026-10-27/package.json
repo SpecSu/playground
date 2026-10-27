@@ -1,0 +1,13 @@
+{
+  "name": "inspiration-garden",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "check": "node scripts/check.mjs",
+    "serve": "python3 -m http.server 4173",
+    "build": "node scripts/build.mjs --sync",
+    "sync-content": "node --input-type=module -e \"import('./scripts/build.mjs').then(m=>m.syncContent())\""
+  }
+}

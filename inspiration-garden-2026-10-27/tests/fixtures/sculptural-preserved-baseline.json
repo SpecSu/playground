@@ -1,0 +1,49 @@
+{
+  "penSource": {
+    "image": "assets/album/personal-lamy-yellow-source-v2.webp",
+    "frame": {
+      "x": 0,
+      "y": 0,
+      "w": 1536,
+      "h": 1024
+    },
+    "size": [
+      1536,
+      1024
+    ],
+    "cardDisplaySize": [
+      600,
+      400
+    ],
+    "label": "礼物 · 一支黄色钢笔",
+    "buildingArtKey": "lamy_memory_column",
+    "sourceType": "ai_generated_demo_photographic_example",
+    "sourceStory": "收到的那支黄色钢笔，把没说完的温柔写成了一盏灯。简单的笔身和银色笔夹立在小岛一角，像一座只为一句话亮着的灯塔。",
+    "transformCues": [
+      "明黄色笔身 → 细长立柱",
+      "银色回形针笔夹 → 轻巧的银色线条",
+      "简洁笔帽 → 现代平顶轮廓"
+    ],
+    "preload": false
+  },
+  "catSource": {
+    "label": "我的猫咪 · 毛茸茸小屋的灵感",
+    "sourceStory": "暖白色长毛铺成柔软屋顶，卡其色花纹围成小门廊；原照片里的大眼睛、粉鼻子和蓬松尾巴，都留在这座会吃小鱼的小屋里。",
+    "sourceType": "user-provided-photo",
+    "displayDate": "2026-10-26",
+    "dateLabel": "提供于",
+    "alt": "暖白色长毛猫趴在浅色毯子上，灰卡其色耳朵和蓬松尾巴是猫咪小屋的灵感来源。",
+    "image": "assets/album/fluffy-cat-source-photo-v1.webp",
+    "frame": {
+      "x": 0,
+      "y": 0,
+      "w": 960,
+      "h": 1280
+    }
+  },
+  "sha256": {
+    "assets/album/fluffy-cat-source-photo-v1.webp": "a8bb31a5a066a164454b488957c54ae9be0bb2c06779e18e32ca85b520f4a69f",
+    "assets/album/personal-lamy-yellow-source-v2.webp": "274d4574d9524a98da24acd0be4f6a310e2e1300e52ee512a99eb1e04c33057a",
+    "src/estate-content.js": "7e565e71283cf9e9895113f989b3133dc47e0e86a87eeae3f5a928494357175f"
+  }
+}

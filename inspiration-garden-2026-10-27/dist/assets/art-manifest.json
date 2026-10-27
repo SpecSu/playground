@@ -1,0 +1,3233 @@
+{
+  "version": 15,
+  "status": "reference-driven-illustrated-art-ready-for-integrated-review",
+  "style": "Warm handdrawn contours, clear natural colors, restrained cel shading. User references IMG_1334/1335/1337 inspired style; no reference screenshots belong in published runtime.",
+  "coordinateSystem": "source pixels; anchor normalized within measured source frame; frame rectangles deliberately unequal where needed to avoid clipping. Image paths relative to project root.",
+  "atlases": {
+    "basic-plants-illustrated-v3.png": {
+      "image": "assets/atlases/basic-plants-illustrated-v3.png",
+      "width": 1774,
+      "height": 887,
+      "bytes": 1399224,
+      "decodedRGBABytes": 6294152,
+      "grid": [
+        4,
+        2
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": true
+    },
+    "creative-plants-illustrated-v2.png": {
+      "image": "assets/atlases/creative-plants-illustrated-v2.png",
+      "width": 1774,
+      "height": 887,
+      "bytes": 1849085,
+      "decodedRGBABytes": 6294152,
+      "grid": [
+        4,
+        2
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": true
+    },
+    "botanical-wonders-illustrated-v2.png": {
+      "image": "assets/atlases/botanical-wonders-illustrated-v2.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1750202,
+      "decodedRGBABytes": 6290064,
+      "grid": [
+        2,
+        2
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": true
+    },
+    "construction-illustrated-v1.png": {
+      "image": "assets/atlases/construction-illustrated-v1.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1006709,
+      "decodedRGBABytes": 6290064,
+      "grid": [
+        2,
+        2
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": false
+    },
+    "scenery-illustrated-v1.png": {
+      "image": "assets/atlases/scenery-illustrated-v1.png",
+      "width": 1774,
+      "height": 887,
+      "bytes": 1340992,
+      "decodedRGBABytes": 6294152,
+      "grid": [
+        4,
+        2
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": false
+    },
+    "pumpkin-descendants-v1.png": {
+      "image": "assets/atlases/pumpkin-descendants-v1.png",
+      "width": 1774,
+      "height": 887,
+      "bytes": 1225370,
+      "decodedRGBABytes": 6294152,
+      "grid": [
+        2,
+        1
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": false
+    },
+    "giant-piano-sunflower-v1.png": {
+      "image": "assets/heroes/giant-piano-sunflower-v1.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1917644,
+      "decodedRGBABytes": 6290064,
+      "grid": [
+        1,
+        1
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": false,
+      "loadPolicy": "current-garden-only; show loading state until ready"
+    },
+    "giant-moon-mushroom-v1.png": {
+      "image": "assets/heroes/giant-moon-mushroom-v1.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1755562,
+      "decodedRGBABytes": 6290064,
+      "grid": [
+        1,
+        1
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": false,
+      "loadPolicy": "current-garden-only; show loading state until ready"
+    },
+    "giant-bubble-lotus-v1.png": {
+      "image": "assets/heroes/giant-bubble-lotus-v1.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1828125,
+      "decodedRGBABytes": 6290064,
+      "grid": [
+        1,
+        1
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": false,
+      "loadPolicy": "current-garden-only; show loading state until ready"
+    },
+    "portrait-rehearsal-pavilion-v1.png": {
+      "image": "assets/heroes/portrait-rehearsal-pavilion-v1.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 2035017,
+      "decodedRGBABytes": 6290064,
+      "grid": [
+        1,
+        1
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": false,
+      "loadPolicy": "current-garden-only; show loading state until ready"
+    },
+    "calico-reading-den-v1.png": {
+      "image": "assets/heroes/calico-reading-den-v1.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1990865,
+      "decodedRGBABytes": 6290064,
+      "grid": [
+        1,
+        1
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": false,
+      "loadPolicy": "current-garden-only; show loading state until ready"
+    },
+    "camping-dog-workshop-v1.png": {
+      "image": "assets/heroes/camping-dog-workshop-v1.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1767005,
+      "decodedRGBABytes": 6290064,
+      "grid": [
+        1,
+        1
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": false,
+      "loadPolicy": "current-garden-only; show loading state until ready"
+    },
+    "construction-site-v1.png": {
+      "image": "assets/heroes/construction-site-v1.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1229533,
+      "decodedRGBABytes": 6290064,
+      "grid": [
+        1,
+        1
+      ],
+      "alphaMode": "RGBA; preserve original alpha",
+      "preload": false,
+      "loadPolicy": "active-construction-only; excluded from fresh-home preload"
+    },
+    "weeping-willow-tree-v2.webp": {
+      "image": "assets/heroes/weeping-willow-tree-v2.webp",
+      "width": 1312,
+      "height": 1199,
+      "bytes": 822036,
+      "decodedRGBABytes": 6292352,
+      "grid": [
+        1,
+        1
+      ],
+      "alphaMode": "RGBA; preserved alpha lossless encoding",
+      "preload": false,
+      "loadPolicy": "current-garden-only; excluded from fresh-home preload"
+    },
+    "golden-ginkgo-tree-v2.webp": {
+      "image": "assets/heroes/golden-ginkgo-tree-v2.webp",
+      "width": 1272,
+      "height": 1236,
+      "bytes": 900600,
+      "decodedRGBABytes": 6288768,
+      "grid": [
+        1,
+        1
+      ],
+      "alphaMode": "RGBA; preserved alpha lossless encoding",
+      "preload": false,
+      "loadPolicy": "current-garden-only; excluded from fresh-home preload"
+    },
+    "evergreen-fir-tree-v2.webp": {
+      "image": "assets/heroes/evergreen-fir-tree-v2.webp",
+      "width": 1262,
+      "height": 1246,
+      "bytes": 552744,
+      "decodedRGBABytes": 6289808,
+      "grid": [
+        1,
+        1
+      ],
+      "alphaMode": "RGBA; preserved alpha lossless encoding",
+      "preload": false,
+      "loadPolicy": "current-garden-only; excluded from fresh-home preload"
+    },
+    "ancient-star-tree-v2.webp": {
+      "image": "assets/heroes/ancient-star-tree-v2.webp",
+      "width": 1319,
+      "height": 1192,
+      "bytes": 970630,
+      "decodedRGBABytes": 6288992,
+      "grid": [
+        1,
+        1
+      ],
+      "alphaMode": "RGBA; preserved alpha lossless encoding",
+      "preload": false,
+      "loadPolicy": "current-garden-only; excluded from fresh-home preload"
+    },
+    "lx-command-workshop-v1.webp": {
+      "image": "assets/heroes/lx-command-workshop-v1.webp",
+      "width": 1312,
+      "height": 1199,
+      "bytes": 222780,
+      "decodedRGBABytes": 6292352,
+      "preload": false
+    },
+    "lx-circuit-gym-v1.webp": {
+      "image": "assets/heroes/lx-circuit-gym-v1.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 244478,
+      "decodedRGBABytes": 6290064,
+      "preload": false
+    },
+    "circuit-bonsai-v1.webp": {
+      "image": "assets/heroes/circuit-bonsai-v1.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 261294,
+      "decodedRGBABytes": 6290064,
+      "preload": false
+    },
+    "radar-succulent-v1.webp": {
+      "image": "assets/heroes/radar-succulent-v1.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 142566,
+      "decodedRGBABytes": 6290064,
+      "preload": false
+    },
+    "pace-meter-bamboo-v1.webp": {
+      "image": "assets/heroes/pace-meter-bamboo-v1.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 190268,
+      "decodedRGBABytes": 6290064,
+      "preload": false
+    },
+    "anime_collectors_cottage-v1.webp": {
+      "image": "assets/heroes/anime_collectors_cottage-v1.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 304606,
+      "decodedRGBABytes": 6290064,
+      "preload": false
+    },
+    "controller_sprout-v1.webp": {
+      "image": "assets/heroes/controller_sprout-v1.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 174000,
+      "decodedRGBABytes": 6290064,
+      "preload": false
+    },
+    "plush_designer_workshop-v1.webp": {
+      "image": "assets/heroes/plush_designer_workshop-v1.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 290878,
+      "decodedRGBABytes": 6290064,
+      "preload": false
+    },
+    "plush_cotton_tree-v1.webp": {
+      "image": "assets/heroes/plush_cotton_tree-v1.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 207490,
+      "decodedRGBABytes": 6290064,
+      "preload": false
+    },
+    "plush_button_sprout-v1.png": {
+      "image": "assets/heroes/plush_button_sprout-v1.png",
+      "width": 1341,
+      "height": 1173,
+      "bytes": 1288062,
+      "decodedRGBABytes": 6291972,
+      "preload": false
+    },
+    "yarn_ball_flower-v1.png": {
+      "image": "assets/heroes/yarn_ball_flower-v1.png",
+      "width": 1121,
+      "height": 1403,
+      "bytes": 1390605,
+      "decodedRGBABytes": 6291052,
+      "preload": false
+    },
+    "cat_feeding_atlas": {
+      "image": "assets/animations/fluffy-cat-feeding-face-atlas-minimal-v1.webp",
+      "width": 888,
+      "height": 430,
+      "bytes": 62558,
+      "decodedRGBABytes": 1527360,
+      "preload": false
+    },
+    "cat_feeding_fish": {
+      "image": "assets/animations/fluffy-cat-fish-treat-v2.webp",
+      "width": 256,
+      "height": 256,
+      "bytes": 27306,
+      "decodedRGBABytes": 262144,
+      "preload": false
+    },
+    "bear_fold_gallery-current": {
+      "image": "assets/heroes/bear-fold-gallery-v1.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 178128,
+      "decodedRGBABytes": 6290064,
+      "preload": false,
+      "alphaMode": "RGBA; preserve visible source pixels"
+    },
+    "bear_foldbud-current": {
+      "image": "assets/heroes/bear-foldbud-v1.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 115082,
+      "decodedRGBABytes": 6290064,
+      "preload": false,
+      "alphaMode": "RGBA; preserve visible source pixels"
+    },
+    "bear_loop_rest-current": {
+      "image": "assets/heroes/bear-loop-rest-v1.webp",
+      "width": 1774,
+      "height": 887,
+      "bytes": 164300,
+      "decodedRGBABytes": 6294152,
+      "preload": false,
+      "alphaMode": "RGBA; preserve visible source pixels"
+    },
+    "bear_bubble_leaf-current": {
+      "image": "assets/heroes/bear-bubble-leaf-v1.webp",
+      "width": 1330,
+      "height": 1182,
+      "bytes": 144416,
+      "decodedRGBABytes": 6288240,
+      "preload": false,
+      "alphaMode": "RGBA; preserve visible source pixels"
+    },
+    "jiji_nocturne_manor-current": {
+      "image": "assets/heroes/jiji-nocturne-manor-ground-v3.webp",
+      "preload": false
+    },
+    "black_silk_spider-current": {
+      "image": "assets/heroes/black-silk-spider-ground-v3.webp",
+      "preload": false
+    },
+    "silver_veil_willow-current": {
+      "image": "assets/heroes/silver-veil-willow-v2.webp",
+      "width": 1024,
+      "height": 1536,
+      "bytes": 262678,
+      "decodedRGBABytes": 6291456,
+      "preload": false,
+      "alphaMode": "RGBA; preserve visible source pixels"
+    },
+    "oxblood_bellflower-current": {
+      "image": "assets/heroes/oxblood-bellflower-v1.webp",
+      "width": 1312,
+      "height": 1199,
+      "bytes": 236384,
+      "decodedRGBABytes": 6292352,
+      "preload": false,
+      "alphaMode": "RGBA; preserve visible source pixels"
+    },
+    "lx_titanium_courtyard-current": {
+      "image": "assets/heroes/lx-titanium-courtyard-v1-runtime.webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 1020880,
+      "decodedRGBABytes": 4194304,
+      "preload": false,
+      "alphaMode": "RGBA; preserve visible source pixels"
+    },
+    "lx_silent_wing-current": {
+      "image": "assets/heroes/lx-silent-wing-v1-runtime.webp",
+      "width": 832,
+      "height": 504,
+      "bytes": 249626,
+      "decodedRGBABytes": 1677312,
+      "preload": false,
+      "alphaMode": "RGBA; preserve visible source pixels"
+    },
+    "lx_bio_vault-current": {
+      "image": "assets/heroes/lx-bio-vault-v1-runtime.webp",
+      "width": 512,
+      "height": 768,
+      "bytes": 236006,
+      "decodedRGBABytes": 1572864,
+      "preload": false,
+      "alphaMode": "RGBA; preserve visible source pixels"
+    },
+    "lx_nanofabricator-current": {
+      "image": "assets/heroes/lx-nanofabricator-v1-runtime.webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 186626,
+      "decodedRGBABytes": 1048576,
+      "preload": false,
+      "alphaMode": "RGBA; preserve visible source pixels"
+    },
+    "lamy_memory_column-current": {
+      "image": "assets/heroes/lamy-minimal-v1-runtime.webp",
+      "width": 275,
+      "height": 1450,
+      "bytes": 183176,
+      "decodedRGBABytes": 1595000,
+      "preload": false
+    },
+    "jiji_crimson_rose_bush-current": {
+      "image": "assets/heroes/jiji-crimson-rose-bush-v1.webp",
+      "preload": false
+    },
+    "lx_silver_biofern-current": {
+      "image": "assets/heroes/lx-aloe-v1.webp",
+      "width": 400,
+      "height": 355,
+      "bytes": 35888,
+      "decodedRGBABytes": 568000,
+      "preload": false
+    },
+    "lx_orbital_bloom-current": {
+      "image": "assets/heroes/lx-orbital-bloom-v1.webp",
+      "preload": false
+    },
+    "bear_plush_bloom-current": {
+      "image": "assets/heroes/bear-plush-bloom-v1.webp",
+      "preload": false
+    },
+    "fluffy_cat_cottage-current": {
+      "image": "assets/heroes/fluffy-cat-cottage-minimal-v1.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 180466,
+      "decodedRGBABytes": 6290064,
+      "preload": false
+    },
+    "necklace_memory_monument-current": {
+      "image": "assets/heroes/necklace-sculptural-courtyard-v1.webp",
+      "width": 836,
+      "height": 836,
+      "bytes": 138798,
+      "decodedRGBABytes": 2795584,
+      "preload": false
+    },
+    "airforce_memory_house-current": {
+      "image": "assets/heroes/tesla-roadster-simplified-v1-runtime.webp",
+      "width": 832,
+      "height": 416,
+      "bytes": 54824,
+      "decodedRGBABytes": 1384448,
+      "preload": false
+    },
+    "xt50_memory_camera-current": {
+      "image": "assets/heroes/camera-minimal-v1-runtime.webp",
+      "width": 512,
+      "height": 450,
+      "bytes": 172472,
+      "decodedRGBABytes": 921600,
+      "preload": false
+    },
+    "scallop_shell_house-current": {
+      "image": "assets/heroes/shell-minimal-v1-runtime.webp",
+      "width": 896,
+      "height": 722,
+      "bytes": 87356,
+      "decodedRGBABytes": 2587648,
+      "preload": false
+    },
+    "camping_tarp_pavilion-current": {
+      "image": "assets/heroes/canopy-minimal-v1-runtime.webp",
+      "width": 704,
+      "height": 473,
+      "bytes": 58162,
+      "decodedRGBABytes": 1331968,
+      "preload": false
+    }
+  },
+  "sprites": {
+    "radish": {
+      "image": "assets/atlases/basic-plants-illustrated-v3.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 446,
+        "h": 450
+      },
+      "anchor": [
+        0.3731,
+        0.9911
+      ],
+      "width": 78,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 69,
+        "y": 28,
+        "w": 364,
+        "h": 420
+      },
+      "styleStatus": "reference-driven",
+      "generation": "basic"
+    },
+    "tomato": {
+      "image": "assets/atlases/basic-plants-illustrated-v3.png",
+      "frame": {
+        "x": 446,
+        "y": 0,
+        "w": 458,
+        "h": 450
+      },
+      "anchor": [
+        0.433,
+        0.9489
+      ],
+      "width": 92,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 67,
+        "y": 49,
+        "w": 324,
+        "h": 380
+      },
+      "styleStatus": "reference-driven",
+      "generation": "basic"
+    },
+    "pumpkin": {
+      "image": "assets/atlases/basic-plants-illustrated-v3.png",
+      "frame": {
+        "x": 904,
+        "y": 0,
+        "w": 448,
+        "h": 450
+      },
+      "anchor": [
+        0.4522,
+        0.9467
+      ],
+      "width": 92,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 21,
+        "y": 111,
+        "w": 397,
+        "h": 317
+      },
+      "styleStatus": "reference-driven",
+      "generation": "basic"
+    },
+    "eggplant": {
+      "image": "assets/atlases/basic-plants-illustrated-v3.png",
+      "frame": {
+        "x": 1352,
+        "y": 0,
+        "w": 422,
+        "h": 450
+      },
+      "anchor": [
+        0.4066,
+        0.9644
+      ],
+      "width": 72,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 62,
+        "y": 64,
+        "w": 300,
+        "h": 372
+      },
+      "styleStatus": "reference-driven",
+      "generation": "basic"
+    },
+    "corn": {
+      "image": "assets/atlases/basic-plants-illustrated-v3.png",
+      "frame": {
+        "x": 0,
+        "y": 450,
+        "w": 446,
+        "h": 437
+      },
+      "anchor": [
+        0.4298,
+        0.9153
+      ],
+      "width": 78,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 83,
+        "y": 17,
+        "w": 306,
+        "h": 385
+      },
+      "styleStatus": "reference-driven",
+      "generation": "basic"
+    },
+    "cabbage": {
+      "image": "assets/atlases/basic-plants-illustrated-v3.png",
+      "frame": {
+        "x": 446,
+        "y": 450,
+        "w": 458,
+        "h": 437
+      },
+      "anchor": [
+        0.5115,
+        0.8787
+      ],
+      "width": 96,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 14,
+        "y": 40,
+        "w": 423,
+        "h": 346
+      },
+      "styleStatus": "reference-driven",
+      "generation": "basic"
+    },
+    "sunflower": {
+      "image": "assets/atlases/basic-plants-illustrated-v3.png",
+      "frame": {
+        "x": 904,
+        "y": 450,
+        "w": 448,
+        "h": 437
+      },
+      "anchor": [
+        0.495,
+        0.9016
+      ],
+      "width": 84,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 44,
+        "y": 3,
+        "w": 337,
+        "h": 393
+      },
+      "styleStatus": "reference-driven",
+      "generation": "basic"
+    },
+    "mushroom": {
+      "image": "assets/atlases/basic-plants-illustrated-v3.png",
+      "frame": {
+        "x": 1352,
+        "y": 450,
+        "w": 422,
+        "h": 437
+      },
+      "anchor": [
+        0.4632,
+        0.8833
+      ],
+      "width": 86,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 30,
+        "y": 66,
+        "w": 335,
+        "h": 322
+      },
+      "styleStatus": "reference-driven",
+      "generation": "basic"
+    },
+    "whisper_radish": {
+      "image": "assets/atlases/creative-plants-illustrated-v2.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 466,
+        "h": 468
+      },
+      "anchor": [
+        0.4253,
+        0.9594
+      ],
+      "width": 84,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 57,
+        "y": 60,
+        "w": 382,
+        "h": 391
+      },
+      "styleStatus": "reference-driven",
+      "generation": "creative"
+    },
+    "puffer_tomato": {
+      "image": "assets/atlases/creative-plants-illustrated-v2.png",
+      "frame": {
+        "x": 466,
+        "y": 0,
+        "w": 435,
+        "h": 439
+      },
+      "anchor": [
+        0.4705,
+        0.9704
+      ],
+      "width": 94,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 17,
+        "y": 53,
+        "w": 399,
+        "h": 375
+      },
+      "styleStatus": "reference-driven",
+      "generation": "creative"
+    },
+    "drum_pumpkin": {
+      "image": "assets/atlases/creative-plants-illustrated-v2.png",
+      "frame": {
+        "x": 901,
+        "y": 0,
+        "w": 439,
+        "h": 459
+      },
+      "anchor": [
+        0.4754,
+        0.9586
+      ],
+      "width": 102,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 26,
+        "y": 65,
+        "w": 404,
+        "h": 377
+      },
+      "styleStatus": "reference-driven",
+      "generation": "creative"
+    },
+    "singing_eggplant": {
+      "image": "assets/atlases/creative-plants-illustrated-v2.png",
+      "frame": {
+        "x": 1340,
+        "y": 0,
+        "w": 434,
+        "h": 459
+      },
+      "anchor": [
+        0.5,
+        0.9608
+      ],
+      "width": 86,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 24,
+        "y": 48,
+        "w": 398,
+        "h": 395
+      },
+      "styleStatus": "reference-driven",
+      "generation": "creative"
+    },
+    "keyboard_corn": {
+      "image": "assets/atlases/creative-plants-illustrated-v2.png",
+      "frame": {
+        "x": 0,
+        "y": 468,
+        "w": 466,
+        "h": 419
+      },
+      "anchor": [
+        0.5175,
+        0.8783
+      ],
+      "width": 100,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 26,
+        "y": 16,
+        "w": 427,
+        "h": 354
+      },
+      "styleStatus": "reference-driven",
+      "generation": "creative"
+    },
+    "wave_cabbage": {
+      "image": "assets/atlases/creative-plants-illustrated-v2.png",
+      "frame": {
+        "x": 466,
+        "y": 439,
+        "w": 435,
+        "h": 448
+      },
+      "anchor": [
+        0.5231,
+        0.9018
+      ],
+      "width": 102,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 14,
+        "y": 12,
+        "w": 401,
+        "h": 394
+      },
+      "styleStatus": "reference-driven",
+      "generation": "creative"
+    },
+    "sleepy_sunflower": {
+      "image": "assets/atlases/creative-plants-illustrated-v2.png",
+      "frame": {
+        "x": 901,
+        "y": 459,
+        "w": 439,
+        "h": 428
+      },
+      "anchor": [
+        0.4093,
+        0.8808
+      ],
+      "width": 94,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 20,
+        "y": 19,
+        "w": 393,
+        "h": 360
+      },
+      "styleStatus": "reference-driven",
+      "generation": "creative"
+    },
+    "glow_mushroom": {
+      "image": "assets/atlases/creative-plants-illustrated-v2.png",
+      "frame": {
+        "x": 1340,
+        "y": 459,
+        "w": 434,
+        "h": 428
+      },
+      "anchor": [
+        0.5998,
+        0.8972
+      ],
+      "width": 96,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 22,
+        "y": 18,
+        "w": 382,
+        "h": 368
+      },
+      "styleStatus": "reference-driven",
+      "generation": "creative"
+    },
+    "painter_tomato": {
+      "image": "assets/atlases/botanical-wonders-illustrated-v2.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 681,
+        "h": 614
+      },
+      "anchor": [
+        0.499,
+        0.9479
+      ],
+      "width": 98,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 84,
+        "y": 68,
+        "w": 595,
+        "h": 516
+      },
+      "styleStatus": "reference-driven",
+      "generation": "creative"
+    },
+    "cloud_lantern": {
+      "image": "assets/atlases/botanical-wonders-illustrated-v2.png",
+      "frame": {
+        "x": 681,
+        "y": 0,
+        "w": 573,
+        "h": 614
+      },
+      "anchor": [
+        0.468,
+        0.9658
+      ],
+      "width": 96,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 26,
+        "y": 42,
+        "w": 519,
+        "h": 553
+      },
+      "styleStatus": "reference-driven",
+      "generation": "invented"
+    },
+    "bubble_teapot": {
+      "image": "assets/atlases/botanical-wonders-illustrated-v2.png",
+      "frame": {
+        "x": 0,
+        "y": 614,
+        "w": 666,
+        "h": 640
+      },
+      "anchor": [
+        0.562,
+        0.9203
+      ],
+      "width": 104,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 100,
+        "y": 26,
+        "w": 549,
+        "h": 565
+      },
+      "styleStatus": "reference-driven",
+      "generation": "invented"
+    },
+    "gramophone_flower": {
+      "image": "assets/atlases/botanical-wonders-illustrated-v2.png",
+      "frame": {
+        "x": 666,
+        "y": 614,
+        "w": 588,
+        "h": 640
+      },
+      "anchor": [
+        0.501,
+        0.9328
+      ],
+      "width": 102,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 55,
+        "y": 18,
+        "w": 491,
+        "h": 581
+      },
+      "styleStatus": "reference-driven",
+      "generation": "invented"
+    },
+    "land": {
+      "image": "assets/atlases/construction-illustrated-v1.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 622,
+        "h": 650
+      },
+      "anchor": [
+        0.5145,
+        0.5292
+      ],
+      "width": 106,
+      "kind": "construction",
+      "alphaBounds": {
+        "x": 41,
+        "y": 168,
+        "w": 557,
+        "h": 436
+      },
+      "styleStatus": "reference-driven",
+      "footprint": {
+        "top": [
+          320,
+          171
+        ],
+        "right": [
+          594,
+          340
+        ],
+        "front": [
+          320,
+          517
+        ],
+        "left": [
+          43,
+          340
+        ]
+      },
+      "renderHints": {
+        "heightScale": 0.802,
+        "footprintWidth": 551,
+        "purpose": "World tile or construction preview. Canvas procedural seamless geometry remains valid when matching palette/contour."
+      }
+    },
+    "platform": {
+      "image": "assets/atlases/construction-illustrated-v1.png",
+      "frame": {
+        "x": 622,
+        "y": 0,
+        "w": 632,
+        "h": 650
+      },
+      "anchor": [
+        0.4968,
+        0.5354
+      ],
+      "width": 105,
+      "kind": "construction",
+      "alphaBounds": {
+        "x": 23,
+        "y": 169,
+        "w": 582,
+        "h": 435
+      },
+      "styleStatus": "reference-driven",
+      "footprint": {
+        "top": [
+          316,
+          171
+        ],
+        "right": [
+          604,
+          347
+        ],
+        "front": [
+          315,
+          535
+        ],
+        "left": [
+          24,
+          348
+        ]
+      },
+      "renderHints": {
+        "heightScale": 0.802,
+        "footprintWidth": 580,
+        "purpose": "World platform or construction preview; never plantable."
+      }
+    },
+    "fence": {
+      "image": "assets/atlases/construction-illustrated-v1.png",
+      "frame": {
+        "x": 0,
+        "y": 650,
+        "w": 622,
+        "h": 604
+      },
+      "anchor": [
+        0.5305,
+        0.6126
+      ],
+      "width": 67,
+      "kind": "construction",
+      "alphaBounds": {
+        "x": 69,
+        "y": 42,
+        "w": 528,
+        "h": 448
+      },
+      "styleStatus": "reference-driven",
+      "edgeBaseline": [
+        [
+          112,
+          476
+        ],
+        [
+          548,
+          264
+        ]
+      ],
+      "renderHints": {
+        "orientation": "left-low to right-high",
+        "mirrorForOtherDiagonal": true,
+        "segmentGroundDX": 436,
+        "segmentGroundDY": -212
+      }
+    },
+    "wall": {
+      "image": "assets/atlases/construction-illustrated-v1.png",
+      "frame": {
+        "x": 622,
+        "y": 650,
+        "w": 632,
+        "h": 604
+      },
+      "anchor": [
+        0.57,
+        0.6258
+      ],
+      "width": 67,
+      "kind": "construction",
+      "alphaBounds": {
+        "x": 82,
+        "y": 50,
+        "w": 533,
+        "h": 430
+      },
+      "styleStatus": "reference-driven",
+      "edgeBaseline": [
+        [
+          116,
+          476
+        ],
+        [
+          585,
+          271
+        ]
+      ],
+      "renderHints": {
+        "orientation": "left-low to right-high",
+        "mirrorForOtherDiagonal": true,
+        "segmentGroundDX": 469,
+        "segmentGroundDY": -205
+      }
+    },
+    "garden_sign": {
+      "image": "assets/atlases/scenery-illustrated-v1.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 427,
+        "h": 467
+      },
+      "anchor": [
+        0.5505,
+        0.9572
+      ],
+      "width": 44,
+      "kind": "scenery",
+      "alphaBounds": {
+        "x": 69,
+        "y": 97,
+        "w": 330,
+        "h": 352
+      },
+      "styleStatus": "reference-driven",
+      "interaction": "none",
+      "blocking": false,
+      "purchasable": false
+    },
+    "music_pennants": {
+      "image": "assets/atlases/scenery-illustrated-v1.png",
+      "frame": {
+        "x": 427,
+        "y": 0,
+        "w": 477,
+        "h": 467
+      },
+      "anchor": [
+        0.5094,
+        0.8073
+      ],
+      "width": 94,
+      "kind": "scenery",
+      "alphaBounds": {
+        "x": 29,
+        "y": 90,
+        "w": 432,
+        "h": 332
+      },
+      "styleStatus": "reference-driven",
+      "interaction": "none",
+      "blocking": false,
+      "purchasable": false
+    },
+    "music_notebook": {
+      "image": "assets/atlases/scenery-illustrated-v1.png",
+      "frame": {
+        "x": 904,
+        "y": 0,
+        "w": 414,
+        "h": 467
+      },
+      "anchor": [
+        0.5672,
+        0.9358
+      ],
+      "width": 38,
+      "kind": "scenery",
+      "alphaBounds": {
+        "x": 16,
+        "y": 123,
+        "w": 382,
+        "h": 316
+      },
+      "styleStatus": "reference-driven",
+      "interaction": "none",
+      "blocking": false,
+      "purchasable": false
+    },
+    "moon_nest": {
+      "image": "assets/atlases/scenery-illustrated-v1.png",
+      "frame": {
+        "x": 1318,
+        "y": 0,
+        "w": 456,
+        "h": 467
+      },
+      "anchor": [
+        0.4691,
+        0.9507
+      ],
+      "width": 52,
+      "kind": "scenery",
+      "alphaBounds": {
+        "x": 15,
+        "y": 126,
+        "w": 406,
+        "h": 320
+      },
+      "styleStatus": "reference-driven",
+      "interaction": "none",
+      "blocking": false,
+      "purchasable": false
+    },
+    "painter_kit": {
+      "image": "assets/atlases/scenery-illustrated-v1.png",
+      "frame": {
+        "x": 0,
+        "y": 467,
+        "w": 477,
+        "h": 420
+      },
+      "anchor": [
+        0.6681,
+        0.8405
+      ],
+      "width": 39,
+      "kind": "scenery",
+      "alphaBounds": {
+        "x": 45,
+        "y": 71,
+        "w": 409,
+        "h": 284
+      },
+      "styleStatus": "reference-driven",
+      "interaction": "none",
+      "blocking": false,
+      "purchasable": false
+    },
+    "seashells": {
+      "image": "assets/atlases/scenery-illustrated-v1.png",
+      "frame": {
+        "x": 477,
+        "y": 467,
+        "w": 437,
+        "h": 420
+      },
+      "anchor": [
+        0.4666,
+        0.819
+      ],
+      "width": 39,
+      "kind": "scenery",
+      "alphaBounds": {
+        "x": 26,
+        "y": 28,
+        "w": 382,
+        "h": 318
+      },
+      "styleStatus": "reference-driven",
+      "interaction": "none",
+      "blocking": false,
+      "purchasable": false
+    },
+    "meadow_corner": {
+      "image": "assets/atlases/scenery-illustrated-v1.png",
+      "frame": {
+        "x": 914,
+        "y": 467,
+        "w": 418,
+        "h": 420
+      },
+      "anchor": [
+        0.4946,
+        0.85
+      ],
+      "width": 31,
+      "kind": "scenery",
+      "alphaBounds": {
+        "x": 29,
+        "y": 19,
+        "w": 368,
+        "h": 340
+      },
+      "styleStatus": "reference-driven",
+      "interaction": "none",
+      "blocking": false,
+      "purchasable": false
+    },
+    "stepping_pebbles": {
+      "image": "assets/atlases/scenery-illustrated-v1.png",
+      "frame": {
+        "x": 1332,
+        "y": 467,
+        "w": 442,
+        "h": 420
+      },
+      "anchor": [
+        0.2888,
+        0.8024
+      ],
+      "width": 43,
+      "kind": "scenery",
+      "alphaBounds": {
+        "x": 22,
+        "y": 53,
+        "w": 383,
+        "h": 286
+      },
+      "styleStatus": "reference-driven",
+      "interaction": "none",
+      "blocking": false,
+      "purchasable": false
+    },
+    "piano_pumpkin": {
+      "image": "assets/atlases/pumpkin-descendants-v1.png",
+      "frame": {
+        "x": 99,
+        "y": 115,
+        "w": 757,
+        "h": 668
+      },
+      "anchor": [
+        0.475,
+        0.979
+      ],
+      "width": 102,
+      "kind": "plant",
+      "generation": "creative",
+      "family": "pumpkin",
+      "parentArtKey": "drum_pumpkin",
+      "interaction": "keyboard",
+      "label": "琴键南瓜",
+      "styleStatus": "reference-driven-family-preserving",
+      "alphaBounds": {
+        "x": 12,
+        "y": 12,
+        "w": 733,
+        "h": 644
+      }
+    },
+    "star_drum_pumpkin": {
+      "image": "assets/atlases/pumpkin-descendants-v1.png",
+      "frame": {
+        "x": 969,
+        "y": 129,
+        "w": 742,
+        "h": 656
+      },
+      "anchor": [
+        0.5,
+        0.9787
+      ],
+      "width": 102,
+      "kind": "plant",
+      "generation": "creative",
+      "family": "pumpkin",
+      "parentArtKey": "drum_pumpkin",
+      "interaction": "drum",
+      "label": "星夜鼓南瓜",
+      "styleStatus": "reference-driven-family-preserving",
+      "alphaBounds": {
+        "x": 12,
+        "y": 12,
+        "w": 718,
+        "h": 632
+      }
+    },
+    "giant_piano_sunflower": {
+      "image": "assets/heroes/giant-piano-sunflower-v1.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.5,
+        0.805
+      ],
+      "width": 224,
+      "kind": "plant",
+      "displayName": "琴冠向日葵",
+      "alphaBounds": {
+        "x": 35,
+        "y": 36,
+        "w": 1184,
+        "h": 1182
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "interaction": "keyboard",
+      "styleStatus": "approved-style-morning-expansion",
+      "sourcePolicy": "new immutable key; does not replace any legacy species",
+      "family": "sunflower",
+      "generation": "giant"
+    },
+    "giant_moon_mushroom": {
+      "image": "assets/heroes/giant-moon-mushroom-v1.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.515,
+        0.815
+      ],
+      "width": 228,
+      "kind": "plant",
+      "displayName": "抱月瞌睡菇",
+      "alphaBounds": {
+        "x": 56,
+        "y": 74,
+        "w": 1178,
+        "h": 1116
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "interaction": "moon",
+      "styleStatus": "approved-style-morning-expansion",
+      "sourcePolicy": "new immutable key; does not replace any legacy species",
+      "family": "mushroom",
+      "generation": "giant"
+    },
+    "giant_bubble_lotus": {
+      "image": "assets/heroes/giant-bubble-lotus-v1.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.5,
+        0.8
+      ],
+      "width": 226,
+      "kind": "plant",
+      "displayName": "泡泡莲台",
+      "alphaBounds": {
+        "x": 12,
+        "y": 52,
+        "w": 1231,
+        "h": 1150
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "interaction": "bubble",
+      "styleStatus": "approved-style-morning-expansion",
+      "sourcePolicy": "new immutable key; does not replace any legacy species",
+      "family": "lotus",
+      "generation": "giant"
+    },
+    "portrait_rehearsal_pavilion": {
+      "image": "assets/heroes/portrait-rehearsal-pavilion-v1.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.51,
+        0.8
+      ],
+      "width": 214,
+      "kind": "building",
+      "displayName": "朋友肖像排练亭",
+      "alphaBounds": {
+        "x": 82,
+        "y": 47,
+        "w": 1137,
+        "h": 1118
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "interaction": "rehearsal",
+      "styleStatus": "approved-style-morning-expansion",
+      "sourcePolicy": "new immutable key; does not replace any legacy species"
+    },
+    "calico_reading_den": {
+      "image": "assets/heroes/calico-reading-den-v1.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.515,
+        0.82
+      ],
+      "width": 214,
+      "kind": "building",
+      "displayName": "团团猫书屋",
+      "alphaBounds": {
+        "x": 43,
+        "y": 70,
+        "w": 1199,
+        "h": 1135
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "interaction": "purr",
+      "styleStatus": "approved-style-morning-expansion",
+      "sourcePolicy": "new immutable key; does not replace any legacy species"
+    },
+    "camping_dog_workshop": {
+      "image": "assets/heroes/camping-dog-workshop-v1.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.515,
+        0.8
+      ],
+      "width": 214,
+      "kind": "building",
+      "displayName": "露营狗狗工坊",
+      "alphaBounds": {
+        "x": 69,
+        "y": 79,
+        "w": 1131,
+        "h": 1107
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "interaction": "camp",
+      "styleStatus": "approved-style-morning-expansion",
+      "sourcePolicy": "new immutable key; does not replace any legacy species"
+    },
+    "construction_site": {
+      "image": "assets/heroes/construction-site-v1.png",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.5,
+        0.65
+      ],
+      "width": 214,
+      "kind": "building",
+      "temporary": true,
+      "usage": "Shared presentation state while a personal 2x2 building is under construction; not a permanent construction type or blueprint",
+      "displayName": "建设中的小工地",
+      "alphaBounds": {
+        "x": 56,
+        "y": 273,
+        "w": 1144,
+        "h": 862
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "interaction": "none",
+      "styleStatus": "approved-world-style-construction-state",
+      "progressBadgeOffsetCSS": [
+        0,
+        -108
+      ]
+    },
+    "golden_ginkgo_tree": {
+      "image": "assets/heroes/golden-ginkgo-tree-v2.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1272,
+        "h": 1236
+      },
+      "anchor": [
+        0.53,
+        0.91
+      ],
+      "width": 252,
+      "kind": "plant",
+      "displayName": "金叶银杏",
+      "alphaBounds": {
+        "x": 29,
+        "y": 31,
+        "w": 1224,
+        "h": 1167
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "styleStatus": "original-plant-reference-matched-cartoon-v2",
+      "generation": "giant"
+    },
+    "ancient_star_tree": {
+      "image": "assets/heroes/ancient-star-tree-v2.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1319,
+        "h": 1192
+      },
+      "anchor": [
+        0.52,
+        0.895
+      ],
+      "width": 286,
+      "kind": "plant",
+      "displayName": "星辉古树",
+      "alphaBounds": {
+        "x": 48,
+        "y": 44,
+        "w": 1224,
+        "h": 1116
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "styleStatus": "original-plant-reference-matched-cartoon-v2",
+      "generation": "giant"
+    },
+    "weeping_willow_tree": {
+      "image": "assets/heroes/weeping-willow-tree-v2.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1312,
+        "h": 1199
+      },
+      "anchor": [
+        0.54,
+        0.895
+      ],
+      "width": 248,
+      "kind": "plant",
+      "displayName": "柳树",
+      "alphaBounds": {
+        "x": 48,
+        "y": 57,
+        "w": 1219,
+        "h": 1090
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "styleStatus": "original-plant-reference-matched-cartoon-v2",
+      "generation": "giant"
+    },
+    "evergreen_fir_tree": {
+      "image": "assets/heroes/evergreen-fir-tree-v2.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1262,
+        "h": 1246
+      },
+      "anchor": [
+        0.5,
+        0.915
+      ],
+      "width": 240,
+      "kind": "plant",
+      "displayName": "杉树",
+      "alphaBounds": {
+        "x": 151,
+        "y": 50,
+        "w": 958,
+        "h": 1152
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "styleStatus": "original-plant-reference-matched-cartoon-v2",
+      "generation": "giant"
+    },
+    "lx_command_workshop": {
+      "image": "assets/heroes/lx-command-workshop-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1312,
+        "h": 1199
+      },
+      "anchor": [
+        0.5,
+        0.85
+      ],
+      "width": 214,
+      "kind": "building",
+      "alphaBounds": {
+        "x": 90,
+        "y": 12,
+        "w": 1131,
+        "h": 1172
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ]
+    },
+    "lx_circuit_gym": {
+      "image": "assets/heroes/lx-circuit-gym-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.52,
+        0.85
+      ],
+      "width": 214,
+      "kind": "building",
+      "alphaBounds": {
+        "x": 78,
+        "y": 69,
+        "w": 1150,
+        "h": 1141
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ]
+    },
+    "circuit_bonsai": {
+      "image": "assets/heroes/circuit-bonsai-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.5,
+        0.89
+      ],
+      "width": 224,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 59,
+        "y": 55,
+        "w": 1161,
+        "h": 1166
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ]
+    },
+    "radar_succulent": {
+      "image": "assets/heroes/radar-succulent-v1.webp",
+      "frame": {
+        "x": 196,
+        "y": 91,
+        "w": 862,
+        "h": 1068
+      },
+      "anchor": [
+        0.5,
+        0.9598
+      ],
+      "width": 90,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 12,
+        "y": 12,
+        "w": 838,
+        "h": 1044
+      },
+      "footprint": [
+        1,
+        1
+      ]
+    },
+    "pace_meter_bamboo": {
+      "image": "assets/heroes/pace-meter-bamboo-v1.webp",
+      "frame": {
+        "x": 163,
+        "y": 69,
+        "w": 981,
+        "h": 1119
+      },
+      "anchor": [
+        0.4986,
+        0.9469
+      ],
+      "width": 90,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 12,
+        "y": 12,
+        "w": 957,
+        "h": 1095
+      },
+      "footprint": [
+        1,
+        1
+      ]
+    },
+    "anime_collectors_cottage": {
+      "image": "assets/heroes/anime_collectors_cottage-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.52,
+        0.82
+      ],
+      "width": 214,
+      "kind": "building",
+      "displayName": "漫画收藏小屋",
+      "alphaBounds": {
+        "x": 64,
+        "y": 52,
+        "w": 1172,
+        "h": 1202
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ]
+    },
+    "controller_sprout": {
+      "image": "assets/heroes/controller_sprout-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.51,
+        0.94
+      ],
+      "width": 90,
+      "kind": "plant",
+      "displayName": "手柄芽",
+      "alphaBounds": {
+        "x": 61,
+        "y": 39,
+        "w": 1168,
+        "h": 1175
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0,
+        0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ]
+    },
+    "plush_designer_workshop": {
+      "image": "assets/heroes/plush_designer_workshop-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.52,
+        0.82
+      ],
+      "width": 230,
+      "kind": "building",
+      "displayName": "玩偶设计工坊",
+      "alphaBounds": {
+        "x": 0,
+        "y": 50,
+        "w": 1254,
+        "h": 1180
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ]
+    },
+    "plush_cotton_tree": {
+      "image": "assets/heroes/plush_cotton_tree-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.52,
+        0.94
+      ],
+      "width": 238,
+      "kind": "plant",
+      "displayName": "毛绒棉花树",
+      "alphaBounds": {
+        "x": 12,
+        "y": 19,
+        "w": 1237,
+        "h": 1235
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ]
+    },
+    "fluffy_cat_cottage": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254
+      },
+      "anchor": [
+        0.4944178628389155,
+        0.7752463145970279
+      ],
+      "width": 214,
+      "alphaBounds": {
+        "x": 9,
+        "y": 150,
+        "w": 1244,
+        "h": 1045
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "image": "assets/heroes/fluffy-cat-cottage-minimal-v1.webp",
+      "kind": "building",
+      "displayName": "绒云曲廊",
+      "interaction": "meow",
+      "preload": false,
+      "catFeeding": {
+        "referenceSize": [
+          1254,
+          1254
+        ],
+        "faceCenter": [
+          405,
+          435
+        ],
+        "faceWidth": 320,
+        "fishStart": [
+          1320,
+          980
+        ],
+        "fishControl": [
+          850,
+          -70
+        ],
+        "fishMouth": [
+          360,
+          489
+        ]
+      },
+      "alphaBoundsThreshold": 8
+    },
+    "lamy_memory_column": {
+      "image": "assets/heroes/lamy-minimal-v1-runtime.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 275,
+        "h": 1450
+      },
+      "anchor": [
+        0.49818181818181817,
+        0.9772413793103448
+      ],
+      "width": 50,
+      "kind": "building",
+      "displayName": "字里灯塔",
+      "alphaBounds": {
+        "x": 18,
+        "y": 7,
+        "w": 241,
+        "h": 1435
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0,
+        0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "preload": false,
+      "visibleAlphaBounds": {
+        "x": 21,
+        "y": 9,
+        "w": 235,
+        "h": 1431
+      },
+      "visibleAlphaThreshold": 8,
+      "inkAnchor": [
+        0.4727272727272727,
+        0.028275862068965516
+      ]
+    },
+    "airforce_memory_house": {
+      "image": "assets/heroes/tesla-roadster-simplified-v1-runtime.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 832,
+        "h": 416
+      },
+      "anchor": [
+        0.4458850056369786,
+        0.7102593010146562
+      ],
+      "width": 180,
+      "kind": "building",
+      "alphaBounds": {
+        "x": 36,
+        "y": 32,
+        "w": 787,
+        "h": 365
+      },
+      "visibleAlphaBounds": {
+        "x": 38,
+        "y": 38,
+        "w": 758,
+        "h": 345
+      },
+      "visibleAlphaThreshold": 8,
+      "footprint": [
+        2,
+        1
+      ],
+      "renderPivotCell": [
+        0.5,
+        0
+      ],
+      "depthPivotCell": [
+        1,
+        0
+      ],
+      "jetAnchors": [
+        [
+          0.21702367531003383,
+          0.6144306651634723
+        ],
+        [
+          0.6144306651634723,
+          0.8883878241262683
+        ],
+        [
+          0.8511837655016911,
+          0.8500563697857948
+        ]
+      ],
+      "interaction": "hover",
+      "preload": false,
+      "displayName": "离地一瞬"
+    },
+    "necklace_memory_monument": {
+      "image": "assets/heroes/necklace-sculptural-courtyard-v1.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 836,
+        "h": 836
+      },
+      "anchor": [
+        0.5003987240829346,
+        0.7360446570972887
+      ],
+      "width": 188,
+      "kind": "building",
+      "alphaBounds": {
+        "x": 22,
+        "y": 40,
+        "w": 793,
+        "h": 761
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "interaction": "chime",
+      "preload": false,
+      "displayName": "银弧纪念庭",
+      "pendantAnchor": [
+        0.5741626794258373,
+        0.5007974481658692
+      ]
+    },
+    "plush_button_sprout": {
+      "image": "assets/heroes/plush_button_sprout-v1.png",
+      "frame": {
+        "x": 45,
+        "y": 33,
+        "w": 1268,
+        "h": 1134
+      },
+      "anchor": [
+        0.50867508,
+        0.89506173
+      ],
+      "width": 88,
+      "kind": "plant",
+      "displayName": "纽扣绒芽",
+      "alphaBounds": {
+        "x": 12,
+        "y": 12,
+        "w": 1244,
+        "h": 1110
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0,
+        0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ]
+    },
+    "yarn_ball_flower": {
+      "image": "assets/heroes/yarn_ball_flower-v1.png",
+      "frame": {
+        "x": 84,
+        "y": 21,
+        "w": 1017,
+        "h": 1371
+      },
+      "anchor": [
+        0.47000983,
+        0.90736689
+      ],
+      "width": 84,
+      "kind": "plant",
+      "displayName": "毛线团花",
+      "alphaBounds": {
+        "x": 12,
+        "y": 12,
+        "w": 993,
+        "h": 1347
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0,
+        0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ]
+    },
+    "cat_feed_anticipation": {
+      "image": "assets/animations/fluffy-cat-feeding-face-atlas-minimal-v1.webp",
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 288,
+        "h": 207
+      },
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "width": 288,
+      "kind": "interaction",
+      "preload": false
+    },
+    "cat_feed_bite": {
+      "image": "assets/animations/fluffy-cat-feeding-face-atlas-minimal-v1.webp",
+      "frame": {
+        "x": 300,
+        "y": 4,
+        "w": 288,
+        "h": 207
+      },
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "width": 288,
+      "kind": "interaction",
+      "preload": false
+    },
+    "cat_feed_chew": {
+      "image": "assets/animations/fluffy-cat-feeding-face-atlas-minimal-v1.webp",
+      "frame": {
+        "x": 596,
+        "y": 4,
+        "w": 288,
+        "h": 207
+      },
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "width": 288,
+      "kind": "interaction",
+      "preload": false
+    },
+    "cat_feed_chew-b": {
+      "image": "assets/animations/fluffy-cat-feeding-face-atlas-minimal-v1.webp",
+      "frame": {
+        "x": 4,
+        "y": 219,
+        "w": 288,
+        "h": 207
+      },
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "width": 288,
+      "kind": "interaction",
+      "preload": false
+    },
+    "cat_feed_lick": {
+      "image": "assets/animations/fluffy-cat-feeding-face-atlas-minimal-v1.webp",
+      "frame": {
+        "x": 300,
+        "y": 219,
+        "w": 288,
+        "h": 207
+      },
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "width": 288,
+      "kind": "interaction",
+      "preload": false
+    },
+    "cat_feed_settled": {
+      "image": "assets/animations/fluffy-cat-feeding-face-atlas-minimal-v1.webp",
+      "frame": {
+        "x": 596,
+        "y": 219,
+        "w": 288,
+        "h": 207
+      },
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "width": 288,
+      "kind": "interaction",
+      "preload": false
+    },
+    "cat_feed_fish": {
+      "image": "assets/animations/fluffy-cat-fish-treat-v2.webp",
+      "frame": {
+        "x": 26,
+        "y": 70,
+        "w": 208,
+        "h": 122
+      },
+      "anchor": [
+        0.14,
+        0.52
+      ],
+      "width": 29,
+      "kind": "interaction",
+      "preload": false
+    },
+    "bear_fold_gallery": {
+      "image": "assets/heroes/bear-fold-gallery-v1.webp",
+      "frame": {
+        "x": 13,
+        "y": 94,
+        "w": 1234,
+        "h": 1014
+      },
+      "anchor": [
+        0.50486224,
+        0.84418146
+      ],
+      "width": 230,
+      "kind": "building",
+      "displayName": "折环潮玩馆",
+      "alphaBounds": {
+        "x": 20,
+        "y": 20,
+        "w": 1194,
+        "h": 974
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "preload": false
+    },
+    "bear_foldbud": {
+      "image": "assets/heroes/bear-foldbud-v1.webp",
+      "frame": {
+        "x": 336,
+        "y": 50,
+        "w": 600,
+        "h": 1138
+      },
+      "anchor": [
+        0.49833333,
+        0.9340949
+      ],
+      "width": 104,
+      "kind": "plant",
+      "displayName": "偏心绒芽",
+      "alphaBounds": {
+        "x": 20,
+        "y": 20,
+        "w": 560,
+        "h": 1098
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0.0,
+        0.0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "preload": false
+    },
+    "bear_loop_rest": {
+      "image": "assets/heroes/bear-loop-rest-v1.webp",
+      "frame": {
+        "x": 108,
+        "y": 30,
+        "w": 1590,
+        "h": 807
+      },
+      "anchor": [
+        0.49496855,
+        0.81784387
+      ],
+      "width": 175,
+      "kind": "building",
+      "displayName": "回环绒座",
+      "alphaBounds": {
+        "x": 20,
+        "y": 20,
+        "w": 1550,
+        "h": 767
+      },
+      "footprint": [
+        2,
+        1
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.0
+      ],
+      "depthPivotCell": [
+        1,
+        0
+      ],
+      "preload": false
+    },
+    "bear_bubble_leaf": {
+      "image": "assets/heroes/bear-bubble-leaf-v1.webp",
+      "frame": {
+        "x": 179,
+        "y": 65,
+        "w": 1077,
+        "h": 999
+      },
+      "anchor": [
+        0.50232126,
+        0.92292292
+      ],
+      "width": 78,
+      "kind": "plant",
+      "displayName": "泡叶绒果",
+      "alphaBounds": {
+        "x": 20,
+        "y": 20,
+        "w": 1037,
+        "h": 959
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0.0,
+        0.0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "preload": false
+    },
+    "jiji_nocturne_manor": {
+      "frame": {
+        "x": 499,
+        "y": 0,
+        "w": 793,
+        "h": 884
+      },
+      "anchor": [
+        0.5104035308953342,
+        0.8348822167755992
+      ],
+      "width": 196.92991616766466,
+      "kind": "building",
+      "displayName": "绯窗夜邸",
+      "alphaBounds": {
+        "x": 24,
+        "y": 10,
+        "w": 745,
+        "h": 850
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "image": "assets/heroes/jiji-nocturne-manor-ground-v3.webp",
+      "preload": false
+    },
+    "black_silk_spider": {
+      "frame": {
+        "x": 43,
+        "y": 0,
+        "w": 1545,
+        "h": 972
+      },
+      "anchor": [
+        0.4899676375404531,
+        0.7475696825941168
+      ],
+      "width": 153.50800191662674,
+      "kind": "building",
+      "displayName": "黑丝织影雕塑",
+      "alphaBounds": {
+        "x": 24,
+        "y": 22,
+        "w": 1497,
+        "h": 927
+      },
+      "footprint": [
+        2,
+        1
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.0
+      ],
+      "depthPivotCell": [
+        1,
+        0
+      ],
+      "image": "assets/heroes/black-silk-spider-ground-v3.webp",
+      "preload": false
+    },
+    "silver_veil_willow": {
+      "image": "assets/heroes/silver-veil-willow-v2.webp",
+      "frame": {
+        "x": 22,
+        "y": 18,
+        "w": 993,
+        "h": 1493
+      },
+      "anchor": [
+        0.6223565,
+        0.93235097
+      ],
+      "width": 112,
+      "kind": "plant",
+      "displayName": "银幕垂柳",
+      "alphaBounds": {
+        "x": 24,
+        "y": 24,
+        "w": 945,
+        "h": 1445
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0.0,
+        0.0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "preload": false
+    },
+    "oxblood_bellflower": {
+      "image": "assets/heroes/oxblood-bellflower-v1.webp",
+      "frame": {
+        "x": 63,
+        "y": 40,
+        "w": 1206,
+        "h": 1114
+      },
+      "anchor": [
+        0.51658375,
+        0.86175943
+      ],
+      "width": 88,
+      "kind": "plant",
+      "displayName": "绛暮垂铃",
+      "alphaBounds": {
+        "x": 24,
+        "y": 24,
+        "w": 1158,
+        "h": 1066
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0.0,
+        0.0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "preload": false
+    },
+    "lx_titanium_courtyard": {
+      "image": "assets/heroes/lx-titanium-courtyard-v1-runtime.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 1024,
+        "h": 1024
+      },
+      "anchor": [
+        0.50877193,
+        0.81339713
+      ],
+      "width": 220,
+      "kind": "building",
+      "displayName": "钛庭未来研究宅",
+      "alphaBounds": {
+        "x": 0,
+        "y": 20,
+        "w": 1024,
+        "h": 1004
+      },
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "preload": false
+    },
+    "lx_silent_wing": {
+      "image": "assets/heroes/lx-silent-wing-v1-runtime.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 832,
+        "h": 504
+      },
+      "anchor": [
+        0.53817505,
+        0.79918033
+      ],
+      "width": 175,
+      "kind": "building",
+      "displayName": "静翼私人飞行器",
+      "alphaBounds": {
+        "x": 13,
+        "y": 11,
+        "w": 808,
+        "h": 478
+      },
+      "footprint": [
+        2,
+        1
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.0
+      ],
+      "depthPivotCell": [
+        1,
+        0
+      ],
+      "preload": false
+    },
+    "lx_bio_vault": {
+      "image": "assets/heroes/lx-bio-vault-v1-runtime.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 512,
+        "h": 768
+      },
+      "anchor": [
+        0.51757812,
+        0.88216146
+      ],
+      "width": 96,
+      "kind": "plant",
+      "displayName": "生命光谱培育罐",
+      "alphaBounds": {
+        "x": 100,
+        "y": 32,
+        "w": 346,
+        "h": 692
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0.0,
+        0.0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "preload": false
+    },
+    "lx_nanofabricator": {
+      "image": "assets/heroes/lx-nanofabricator-v1-runtime.webp",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 512,
+        "h": 512
+      },
+      "anchor": [
+        0.5,
+        0.84130781
+      ],
+      "width": 94,
+      "kind": "building",
+      "displayName": "纳米精密实验台",
+      "alphaBounds": {
+        "x": 0,
+        "y": 9,
+        "w": 507,
+        "h": 496
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0.0,
+        0.0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "preload": false
+    },
+    "jiji_crimson_rose_bush": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 343,
+        "h": 229
+      },
+      "anchor": [
+        0.5,
+        0.88555858
+      ],
+      "width": 78,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 9,
+        "y": 8,
+        "w": 326,
+        "h": 213
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0,
+        0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "image": "assets/heroes/jiji-crimson-rose-bush-v1.webp",
+      "displayName": "绯夜玫瑰丛",
+      "preload": false
+    },
+    "lx_silver_biofern": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 400,
+        "h": 355
+      },
+      "anchor": [
+        0.5123404,
+        0.9606903
+      ],
+      "width": 60,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 8,
+        "y": 8,
+        "w": 384,
+        "h": 339
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0,
+        0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "image": "assets/heroes/lx-aloe-v1.webp",
+      "displayName": "银序芦荟",
+      "preload": false
+    },
+    "lx_orbital_bloom": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 282,
+        "h": 241
+      },
+      "anchor": [
+        0.51331203,
+        0.82397004
+      ],
+      "width": 64,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 8,
+        "y": 8,
+        "w": 266,
+        "h": 225
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0,
+        0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "image": "assets/heroes/lx-orbital-bloom-v1.webp",
+      "displayName": "环轨珍珠花",
+      "preload": false
+    },
+    "bear_plush_bloom": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 290,
+        "h": 259
+      },
+      "anchor": [
+        0.48685714,
+        0.88107417
+      ],
+      "width": 66,
+      "kind": "plant",
+      "alphaBounds": {
+        "x": 8,
+        "y": 8,
+        "w": 274,
+        "h": 243
+      },
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0,
+        0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "image": "assets/heroes/bear-plush-bloom-v1.webp",
+      "displayName": "绒瓣小花",
+      "preload": false
+    },
+    "xt50_memory_camera": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 512,
+        "h": 450
+      },
+      "anchor": [
+        0.46390374331550804,
+        0.8680430521685621
+      ],
+      "width": 89,
+      "kind": "building",
+      "footprint": [
+        1,
+        1
+      ],
+      "renderPivotCell": [
+        0,
+        0
+      ],
+      "depthPivotCell": [
+        0,
+        0
+      ],
+      "preload": false,
+      "lensAnchor": [
+        0.2736185383244207,
+        0.6987829614604463
+      ],
+      "image": "assets/heroes/camera-minimal-v1-runtime.webp",
+      "displayName": "瞬间镜馆",
+      "interaction": "shutter",
+      "alphaBounds": {
+        "x": 6,
+        "y": 0,
+        "w": 502,
+        "h": 450
+      },
+      "visibleAlphaBounds": {
+        "x": 8,
+        "y": 8,
+        "w": 496,
+        "h": 434
+      },
+      "visibleAlphaThreshold": 8
+    },
+    "scallop_shell_house": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 896,
+        "h": 722
+      },
+      "anchor": [
+        0.49981132,
+        0.78151359
+      ],
+      "width": 200,
+      "kind": "building",
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "preload": false,
+      "ribGlowAnchors": [
+        [
+          0.06641509,
+          0.32708529
+        ],
+        [
+          0.1909434,
+          0.2108716
+        ],
+        [
+          0.39773585,
+          0.07403936
+        ],
+        [
+          0.63169811,
+          0.13776945
+        ],
+        [
+          0.86716981,
+          0.27179007
+        ]
+      ],
+      "image": "assets/heroes/shell-minimal-v1-runtime.webp",
+      "displayName": "潮汐扇屋",
+      "interaction": "shell-glow",
+      "alphaBounds": {
+        "x": 1,
+        "y": 0,
+        "w": 895,
+        "h": 722
+      }
+    },
+    "camping_tarp_pavilion": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 704,
+        "h": 473
+      },
+      "anchor": [
+        0.59110593,
+        0.74590774
+      ],
+      "width": 155,
+      "kind": "building",
+      "footprint": [
+        2,
+        2
+      ],
+      "renderPivotCell": [
+        0.5,
+        0.5
+      ],
+      "depthPivotCell": [
+        1,
+        1
+      ],
+      "preload": false,
+      "lanternAnchor": [
+        0.10992672,
+        0.54166667
+      ],
+      "clothEdge": [
+        [
+          0.05996003,
+          0.38194444
+        ],
+        [
+          0.18720853,
+          0.44742063
+        ],
+        [
+          0.31978681,
+          0.4890873
+        ],
+        [
+          0.48700866,
+          0.50099206
+        ],
+        [
+          0.64023984,
+          0.51785714
+        ],
+        [
+          0.78147901,
+          0.55257937
+        ],
+        [
+          0.91872085,
+          0.61904762
+        ]
+      ],
+      "image": "assets/heroes/canopy-minimal-v1-runtime.webp",
+      "displayName": "风停营地",
+      "interaction": "canopy",
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 704,
+        "h": 473
+      }
+    }
+  },
+  "runtimeBudget": {
+    "atlasCount": 46,
+    "compressedAtlasBytes": 33678630,
+    "rgbaAtlasBytes": 262767672,
+    "corePlantDecodedBytes": 18878368,
+    "maxRecommendedPlantDrawCSSWidth": 110,
+    "recommendation": "Initial home keeps3 essential plant atlases (~19MB RGBA). Six new hero images are NOT boot-preloaded: load only current garden pair (~12.6MB RGBA), with an explicit loading state. Memory source strip loads only when detail opens (6MiB). Evict unused garden hero images when practical; existing construction/scenery/expressions remain lazy. Source rectangles only; never per-instance data URLs. Four advanced tree heroes stay lazy (25.17 MB RGBA if all four are visible); do not add them to boot preload. Their root anchors are measured independently; canopy overhang is visual only and does not enlarge the 2x2 land footprint.",
+    "maxRecommendedHeroDrawCSSWidth": 286,
+    "perGardenNewHeroDecodedBytes": 12580128,
+    "constructionSiteDecodedBytes": 6290064,
+    "advancedTreeDecodedBytes": 25159920,
+    "catFeedingDecodedBytes": 2644480,
+    "estateNewHeroCompressedBytes": 3228178,
+    "estateLoading": "New estate art is lazy by current destination; no boot/preload. All footprints use canonical building samples, not image bounding boxes.",
+    "lxEstateNewHeroCompressedBytes": 1693138
+  }
+}

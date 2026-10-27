@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createState} from '../src/state.js';
+import {DEMO_GARDENS,DEMO_VARIETIES} from '../src/catalogue.js';
+import {renderContext} from '../src/ui.js';
+import {controlHint,createPlantControl} from '../src/plant-controls.js';
+const context=art=>{const g=DEMO_GARDENS.find(g=>g.plants.some(p=>p.varietyId===`demo-${art}`)),p=g.plants.find(p=>p.varietyId===`demo-${art}`);return renderContext(createState(1000),{visitId:g.id,selection:{kind:'plant',id:p.id}},g);};
+test('a small plush flower receives a species-neutral hug hint rather than cotton-tree anatomy',()=>{const html=context('bear_plush_bloom');assert.match(html,/绒瓣小花/);assert.match(html,/轻轻按住，抱一抱软软的花叶/);assert.doesNotMatch(html,/树冠|棉花/);assert.equal(controlHint(DEMO_VARIETIES['demo-plush_cotton_tree'].interaction),'轻轻按住，抱一抱软软的花叶');assert.deepEqual(createPlantControl('hug',{at:1,x:.5,y:.5}).events,[{type:'hug'}]);});
+test('the compact aloe uses a leaf-vein light hint rather than claiming it has circuit branches',()=>{const html=context('lx_silver_biofern');assert.match(html,/银序芦荟/);assert.match(html,/轻点叶脉，追一束流动的微光/);assert.doesNotMatch(html,/电路枝|小电流/);assert.equal(controlHint(DEMO_VARIETIES['demo-circuit_bonsai'].interaction),'轻点叶脉，追一束流动的微光');assert.deepEqual(createPlantControl('pulse',{at:1,x:.5,y:.5}).events,[{type:'pulse'}]);});
+test('the new rose and pearl flower keep their appropriate sway and light-toggle instructions',()=>{const rose=context('jiji_crimson_rose_bush'),pearl=context('lx_orbital_bloom');assert.match(rose,/绯夜玫瑰丛/);assert.match(rose,/轻轻碰一下，和叶子打个招呼/);assert.match(pearl,/环轨珍珠花/);assert.match(pearl,/点一下开关灯，连点三下有小惊喜/);assert.doesNotMatch(rose+pearl,/树冠|棉花|电路枝|竹节|壶嘴/);});

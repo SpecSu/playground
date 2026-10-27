@@ -1,0 +1,431 @@
+{
+  "version": 2,
+  "character": "human-subeike",
+  "characterId": "human-subeike",
+  "default": "original",
+  "status": "parent-art-approved",
+  "source": "Approved original art with pixel-faithful lossless WebP atlases and lightweight full-body previews",
+  "outfits": {
+    "original": {
+      "id": "original",
+      "name": "白衫日常",
+      "heightMetres": 1.450000048484926,
+      "displayHeight": 75,
+      "portrait": {
+        "image": "assets/wardrobe/original-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 967,
+          "y": 179,
+          "w": 565,
+          "h": 750
+        }
+      },
+      "front": {
+        "image": "assets/wardrobe/original-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 56,
+          "y": 100,
+          "w": 428,
+          "h": 854
+        },
+        "anchor": {
+          "x": 0.5,
+          "y": 0.989461
+        }
+      },
+      "back": {
+        "image": "assets/wardrobe/original-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 542,
+          "y": 91,
+          "w": 398,
+          "h": 854
+        },
+        "anchor": {
+          "x": 0.560302,
+          "y": 0.989461
+        }
+      },
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "atlasDecodedRGBABytes": 6291456,
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      },
+      "outfitKey": "original",
+      "characterId": "human-subeike",
+      "description": "原来的白色外套与黄色墨镜",
+      "preview": {
+        "image": "assets/wardrobe/original-preview.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 140,
+          "h": 204
+        }
+      },
+      "portraitPreview": {
+        "image": "assets/wardrobe/original-portrait.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 112,
+          "h": 112
+        }
+      }
+    },
+    "outdoor-utility": {
+      "id": "outdoor-utility",
+      "outfitKey": "outdoor-utility",
+      "characterId": "human-subeike",
+      "name": "山野漫游",
+      "description": "藏蓝工装、赭黄内搭与卡其登山靴",
+      "heightMetres": 1.450000048484926,
+      "displayHeight": 75,
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      },
+      "atlasDecodedRGBABytes": 6291456,
+      "front": {
+        "image": "assets/wardrobe/outdoor-utility-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 49,
+          "y": 68,
+          "w": 439,
+          "h": 898
+        },
+        "anchor": {
+          "x": 0.503417,
+          "y": 0.989978
+        }
+      },
+      "back": {
+        "image": "assets/wardrobe/outdoor-utility-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 544,
+          "y": 70,
+          "w": 408,
+          "h": 879
+        },
+        "anchor": {
+          "x": 0.541667,
+          "y": 0.989761
+        }
+      },
+      "portrait": {
+        "image": "assets/wardrobe/outdoor-utility-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 967,
+          "y": 162,
+          "w": 569,
+          "h": 764
+        }
+      },
+      "preview": {
+        "image": "assets/wardrobe/outdoor-utility-preview.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 140,
+          "h": 204
+        }
+      },
+      "portraitPreview": {
+        "image": "assets/wardrobe/outdoor-utility-portrait.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 112,
+          "h": 112
+        }
+      }
+    },
+    "sage-gardener": {
+      "id": "sage-gardener",
+      "outfitKey": "sage-gardener",
+      "characterId": "human-subeike",
+      "name": "花园慢作",
+      "description": "鼠尾草围裙、卷袖白衫与暖棕园艺靴",
+      "heightMetres": 1.450000048484926,
+      "displayHeight": 75,
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      },
+      "atlasDecodedRGBABytes": 6291456,
+      "front": {
+        "image": "assets/wardrobe/sage-gardener-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 54,
+          "y": 100,
+          "w": 432,
+          "h": 861
+        },
+        "anchor": {
+          "x": 0.5,
+          "y": 0.989547
+        }
+      },
+      "back": {
+        "image": "assets/wardrobe/sage-gardener-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 542,
+          "y": 100,
+          "w": 405,
+          "h": 845
+        },
+        "anchor": {
+          "x": 0.550617,
+          "y": 0.989349
+        }
+      },
+      "portrait": {
+        "image": "assets/wardrobe/sage-gardener-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 968,
+          "y": 179,
+          "w": 564,
+          "h": 781
+        }
+      },
+      "preview": {
+        "image": "assets/wardrobe/sage-gardener-preview.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 140,
+          "h": 204
+        }
+      },
+      "portraitPreview": {
+        "image": "assets/wardrobe/sage-gardener-portrait.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 112,
+          "h": 112
+        }
+      }
+    },
+    "graphite-runner": {
+      "id": "graphite-runner",
+      "outfitKey": "graphite-runner",
+      "characterId": "human-subeike",
+      "name": "轻快出发",
+      "description": "石墨运动夹克、束脚裤与白色跑鞋",
+      "heightMetres": 1.450000048484926,
+      "displayHeight": 75,
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      },
+      "atlasDecodedRGBABytes": 6291456,
+      "front": {
+        "image": "assets/wardrobe/graphite-runner-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 54,
+          "y": 85,
+          "w": 432,
+          "h": 886
+        },
+        "anchor": {
+          "x": 0.5,
+          "y": 0.989842
+        }
+      },
+      "back": {
+        "image": "assets/wardrobe/graphite-runner-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 539,
+          "y": 84,
+          "w": 408,
+          "h": 879
+        },
+        "anchor": {
+          "x": 0.553922,
+          "y": 0.989761
+        }
+      },
+      "portrait": {
+        "image": "assets/wardrobe/graphite-runner-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 960,
+          "y": 174,
+          "w": 574,
+          "h": 773
+        }
+      },
+      "preview": {
+        "image": "assets/wardrobe/graphite-runner-preview.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 140,
+          "h": 204
+        }
+      },
+      "portraitPreview": {
+        "image": "assets/wardrobe/graphite-runner-portrait.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 112,
+          "h": 112
+        }
+      }
+    },
+    "evening-ink": {
+      "id": "evening-ink",
+      "outfitKey": "evening-ink",
+      "characterId": "human-subeike",
+      "name": "暮色来访",
+      "description": "墨蓝针织背心、奶油衬衫与深棕乐福鞋",
+      "heightMetres": 1.450000048484926,
+      "displayHeight": 75,
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      },
+      "atlasDecodedRGBABytes": 6291456,
+      "front": {
+        "image": "assets/wardrobe/evening-ink-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 43,
+          "y": 81,
+          "w": 458,
+          "h": 894
+        },
+        "anchor": {
+          "x": 0.495633,
+          "y": 0.989933
+        }
+      },
+      "back": {
+        "image": "assets/wardrobe/evening-ink-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 542,
+          "y": 80,
+          "w": 429,
+          "h": 882
+        },
+        "anchor": {
+          "x": 0.519814,
+          "y": 0.989796
+        }
+      },
+      "portrait": {
+        "image": "assets/wardrobe/evening-ink-atlas-visible-lossless.webp",
+        "frame": {
+          "x": 974,
+          "y": 162,
+          "w": 561,
+          "h": 757
+        }
+      },
+      "preview": {
+        "image": "assets/wardrobe/evening-ink-preview.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 140,
+          "h": 204
+        }
+      },
+      "portraitPreview": {
+        "image": "assets/wardrobe/evening-ink-portrait.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 112,
+          "h": 112
+        }
+      }
+    },
+    "christmas-santa": {
+      "id": "christmas-santa",
+      "outfitKey": "christmas-santa",
+      "characterId": "human-subeike",
+      "name": "圣诞来客",
+      "description": "圣诞红白衣帽、暖棕短靴与熟悉的黄色墨镜",
+      "heightMetres": 1.450000048484926,
+      "displayHeight": 75,
+      "mirrorForLeft": true,
+      "style": "handdrawn2d",
+      "nativeFacing": {
+        "front": "down-left",
+        "back": "up-right"
+      },
+      "atlasDecodedRGBABytes": 6291456,
+      "front": {
+        "image": "assets/wardrobe/christmas-santa-atlas-v1-visible-lossless.webp",
+        "frame": {
+          "x": 33,
+          "y": 66,
+          "w": 508,
+          "h": 918
+        },
+        "anchor": {
+          "x": 0.466535433,
+          "y": 0.990196078
+        }
+      },
+      "back": {
+        "image": "assets/wardrobe/christmas-santa-atlas-v1-visible-lossless.webp",
+        "frame": {
+          "x": 541,
+          "y": 59,
+          "w": 423,
+          "h": 918
+        },
+        "anchor": {
+          "x": 0.529550827,
+          "y": 0.990196078
+        }
+      },
+      "portrait": {
+        "image": "assets/wardrobe/christmas-santa-atlas-v1-visible-lossless.webp",
+        "frame": {
+          "x": 1059,
+          "y": 246,
+          "w": 447,
+          "h": 545
+        }
+      },
+      "preview": {
+        "image": "assets/wardrobe/christmas-santa-preview-v1.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 140,
+          "h": 204
+        }
+      },
+      "portraitPreview": {
+        "image": "assets/wardrobe/christmas-santa-portrait-v1.webp",
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 112,
+          "h": 112
+        }
+      }
+    }
+  },
+  "memoryBudget": {
+    "newAtlasCount": 4,
+    "perAtlasDecodedRGBABytes": 6291456,
+    "allNewDecodedRGBABytes": 25165824,
+    "allNewCompressedBytes": 8148677,
+    "loadingPolicy": "One shared PNG per outfit; only selected outfit awaited before selection commit. Original references existing atlas. Lazy-load unselected outfits."
+  }
+}
