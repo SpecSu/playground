@@ -1,0 +1,14 @@
+{
+  "source": "jiaxin-likeness-v5/texture-final/jiaxin-0.glb",
+  "vertex_count": 27284,
+  "changed_vertices": 2462,
+  "max_delta": 0.016686649752320034,
+  "native_neck_below_z_815_unchanged": true,
+  "faces_removed": 0,
+  "weights_unchanged": true,
+  "height_before": 1.000001311302185,
+  "height_after": 0.983320951461792,
+  "bones": 23,
+  "clips": 3,
+  "note": "Reference-directed bounded geometry trial, not an identity guarantee."
+}

@@ -1,0 +1,253 @@
+{
+  "sourceRevision": "fb449436ab8c50ae97a065a3328d7fcbb33d2637",
+  "assets": [
+    {
+      "file": "public/assets/characters/jiji-0.glb",
+      "sha256": "34b83095506390678f0cd03878ee0f34f8fa5e80eec5f734854b60a15486ce14",
+      "bytes": 14524544,
+      "heightCompensation": 1.9,
+      "beforeBounds": {
+        "min": [
+          -0.15323792397975922,
+          -3.722973076492053e-07,
+          -0.2790753245353699
+        ],
+        "max": [
+          0.12073542922735214,
+          1.0745636224746704,
+          0.2790755331516266
+        ],
+        "height": 1.074563994771978
+      },
+      "afterBounds": {
+        "min": [
+          -0.12073541432619095,
+          -3.722973076492053e-07,
+          -0.2790753245353699
+        ],
+        "max": [
+          0.12073542922735214,
+          1.0745636224746704,
+          0.2790755331516266
+        ],
+        "height": 1.074563994771978
+      },
+      "batching": {
+        "headPrimitivesBefore": 6,
+        "headPrimitivesAfter": 4,
+        "exactAttributedTriangles": true
+      }
+    },
+    {
+      "file": "public/assets/characters/jiji-0_low.glb",
+      "sha256": "7ed352190e7624d499a9b117b65024b20ac1d2314f79427b071301fcd4ccc01a",
+      "bytes": 8821928,
+      "heightCompensation": 1.9,
+      "beforeBounds": {
+        "min": [
+          -0.15323792397975922,
+          -3.722973076492053e-07,
+          -0.2790753245353699
+        ],
+        "max": [
+          0.12073542922735214,
+          1.0745636224746704,
+          0.2790755331516266
+        ],
+        "height": 1.074563994771978
+      },
+      "afterBounds": {
+        "min": [
+          -0.12073541432619095,
+          -3.722973076492053e-07,
+          -0.2790753245353699
+        ],
+        "max": [
+          0.12073542922735214,
+          1.0745636224746704,
+          0.2790755331516266
+        ],
+        "height": 1.074563994771978
+      },
+      "batching": {
+        "headPrimitivesBefore": 6,
+        "headPrimitivesAfter": 4,
+        "exactAttributedTriangles": true
+      }
+    },
+    {
+      "file": "public/assets/characters/jiji-1.glb",
+      "sha256": "4a6605c438081cc4a2e2f5dd750d150dc891fb6aeb55d931d9504eb5fc373f64",
+      "bytes": 14081568,
+      "heightCompensation": 1.7739319124146693,
+      "beforeBounds": {
+        "min": [
+          -0.15464045107364655,
+          -1.5970077527072135e-07,
+          -0.2769518196582794
+        ],
+        "max": [
+          0.13216114044189453,
+          1.0634796619415283,
+          0.27695202827453613
+        ],
+        "height": 1.0634798216423036
+      },
+      "afterBounds": {
+        "min": [
+          -0.13216063380241394,
+          -1.5970077527072135e-07,
+          -0.2769518196582794
+        ],
+        "max": [
+          0.13216114044189453,
+          0.9929160475730896,
+          0.27695202827453613
+        ],
+        "height": 0.9929162072738649
+      },
+      "batching": {
+        "headPrimitivesBefore": 24,
+        "headPrimitivesAfter": 9,
+        "exactAttributedTriangles": true
+      }
+    },
+    {
+      "file": "public/assets/characters/jiji-1_low.glb",
+      "sha256": "4ceac79b236d199fedbb6026a03f2e3b341dfcff151ed958d9fd84cda2b28267",
+      "bytes": 8253708,
+      "heightCompensation": 1.7739319124146693,
+      "beforeBounds": {
+        "min": [
+          -0.15464045107364655,
+          -1.5970077527072135e-07,
+          -0.2769518196582794
+        ],
+        "max": [
+          0.13216114044189453,
+          1.0634796619415283,
+          0.27695202827453613
+        ],
+        "height": 1.0634798216423036
+      },
+      "afterBounds": {
+        "min": [
+          -0.13216063380241394,
+          -1.5970077527072135e-07,
+          -0.2769518196582794
+        ],
+        "max": [
+          0.13216114044189453,
+          0.9929160475730896,
+          0.27695202827453613
+        ],
+        "height": 0.9929162072738649
+      },
+      "batching": {
+        "headPrimitivesBefore": 24,
+        "headPrimitivesAfter": 9,
+        "exactAttributedTriangles": true
+      }
+    },
+    {
+      "file": "public/assets/characters/jiji-2.glb",
+      "sha256": "779676dff5beb5a90a1c05353d3a1a58ef1b626d436b81b01929d33f80d67ef9",
+      "bytes": 14658892,
+      "heightCompensation": 1.808752257391983,
+      "beforeBounds": {
+        "min": [
+          -0.1529223918914795,
+          -2.2582386804970156e-07,
+          -0.2757955491542816
+        ],
+        "max": [
+          0.11566802114248276,
+          1.073679804801941,
+          0.2757954001426697
+        ],
+        "height": 1.073680030625809
+      },
+      "afterBounds": {
+        "min": [
+          -0.11554072797298431,
+          -2.2582386804970156e-07,
+          -0.2757955491542816
+        ],
+        "max": [
+          0.11554081737995148,
+          1.0221161842346191,
+          0.2757954001426697
+        ],
+        "height": 1.0221164100584872
+      },
+      "batching": {
+        "headPrimitivesBefore": 54,
+        "headPrimitivesAfter": 8,
+        "exactAttributedTriangles": true
+      }
+    },
+    {
+      "file": "public/assets/characters/jiji-2_low.glb",
+      "sha256": "06589a637a2ae184c66d6236fa919b5b335d73de90358135cc6b111b6b81aedb",
+      "bytes": 8703704,
+      "heightCompensation": 1.808752257391983,
+      "beforeBounds": {
+        "min": [
+          -0.1529223918914795,
+          -2.2582386804970156e-07,
+          -0.2757955491542816
+        ],
+        "max": [
+          0.11566802114248276,
+          1.073679804801941,
+          0.2757954001426697
+        ],
+        "height": 1.073680030625809
+      },
+      "afterBounds": {
+        "min": [
+          -0.11554072797298431,
+          -2.2582386804970156e-07,
+          -0.2757955491542816
+        ],
+        "max": [
+          0.11554081737995148,
+          1.0221161842346191,
+          0.2757954001426697
+        ],
+        "height": 1.0221164100584872
+      },
+      "batching": {
+        "headPrimitivesBefore": 54,
+        "headPrimitivesAfter": 8,
+        "exactAttributedTriangles": true
+      }
+    }
+  ],
+  "lxUnchanged": [
+    {
+      "file": "public/assets/characters/lx-2.glb",
+      "sha256": "54e9798c12e44d5f270ab42d6e09086c12b433647894b2799438b0e3a1432095"
+    },
+    {
+      "file": "public/assets/characters/lx-1_low.glb",
+      "sha256": "ae88ac7fbe76c26ba0b4553e81c6d9c0f6ae45b25e356746476e8f859f345897"
+    },
+    {
+      "file": "public/assets/characters/lx-2_low.glb",
+      "sha256": "69ba12a7afa242cb74fb70d413174b6fd6e58858296713e9bd0b26c06c517569"
+    },
+    {
+      "file": "public/assets/characters/lx-1.glb",
+      "sha256": "59389bf74eadb2594cffdc1724f47da5c56a90ffafce9d6f88483614fcb8a339"
+    },
+    {
+      "file": "public/assets/characters/lx-0_low.glb",
+      "sha256": "bdbd08238ea66d50844510b84392f1547c9bbb79a791d0dfe683a2d50a48973f"
+    },
+    {
+      "file": "public/assets/characters/lx-0.glb",
+      "sha256": "a5e53825a829519a1269671be5a2506dd979d2837dd6933af7561a33042e536c"
+    }
+  ]
+}

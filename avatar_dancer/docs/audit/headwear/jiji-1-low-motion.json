@@ -1,0 +1,380 @@
+{
+  "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-1_low.glb",
+  "base_vertices": 218,
+  "animations": [
+    {
+      "name": "dance_01_Armature",
+      "samples": [
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.016975728794932365,
+          "nearest_distance_max": 0.05069827660918236,
+          "frame": 0.0
+        },
+        {
+          "inside": 217,
+          "total": 218,
+          "nearest_distance_min": 0.01594460755586624,
+          "nearest_distance_max": 0.05377420037984848,
+          "frame": 34.75
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.016912369057536125,
+          "nearest_distance_max": 0.047309476882219315,
+          "frame": 69.5
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.016195248812437057,
+          "nearest_distance_max": 0.057090550661087036,
+          "frame": 104.25
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.01674402318894863,
+          "nearest_distance_max": 0.046027280390262604,
+          "frame": 139.0
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.01687321439385414,
+          "nearest_distance_max": 0.046900659799575806,
+          "frame": 173.75
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.01355325523763895,
+          "nearest_distance_max": 0.0571417398750782,
+          "frame": 208.5
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.014522366225719452,
+          "nearest_distance_max": 0.05228152498602867,
+          "frame": 243.25
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.014840345829725266,
+          "nearest_distance_max": 0.05301056057214737,
+          "frame": 278.0
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.01633664220571518,
+          "nearest_distance_max": 0.05055148899555206,
+          "frame": 312.75
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.016393257305026054,
+          "nearest_distance_max": 0.04779598116874695,
+          "frame": 347.5
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.015451876446604729,
+          "nearest_distance_max": 0.05436473339796066,
+          "frame": 382.25
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.015598089434206486,
+          "nearest_distance_max": 0.04969777539372444,
+          "frame": 417.0
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.01493376586586237,
+          "nearest_distance_max": 0.05395324155688286,
+          "frame": 451.75
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.017411570996046066,
+          "nearest_distance_max": 0.045522235333919525,
+          "frame": 486.5
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.016689740121364594,
+          "nearest_distance_max": 0.04923537001013756,
+          "frame": 521.25
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.016950173303484917,
+          "nearest_distance_max": 0.05078629404306412,
+          "frame": 556.0
+        }
+      ]
+    },
+    {
+      "name": "dance_03_Armature",
+      "samples": [
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.01306851301342249,
+          "nearest_distance_max": 0.05478035658597946,
+          "frame": 0.0
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.013808283023536205,
+          "nearest_distance_max": 0.05314480885863304,
+          "frame": 19.1875
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.01487645972520113,
+          "nearest_distance_max": 0.05430203676223755,
+          "frame": 38.375
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.014877003617584705,
+          "nearest_distance_max": 0.052360646426677704,
+          "frame": 57.5625
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.014566629193723202,
+          "nearest_distance_max": 0.0521182082593441,
+          "frame": 76.75
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.014696184545755386,
+          "nearest_distance_max": 0.0538412407040596,
+          "frame": 95.9375
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.014999833889305592,
+          "nearest_distance_max": 0.053817056119441986,
+          "frame": 115.125
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.013958030380308628,
+          "nearest_distance_max": 0.05301624536514282,
+          "frame": 134.3125
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.015603750012814999,
+          "nearest_distance_max": 0.05488085001707077,
+          "frame": 153.5
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.014659086242318153,
+          "nearest_distance_max": 0.05224647372961044,
+          "frame": 172.6875
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.017057102173566818,
+          "nearest_distance_max": 0.04904446750879288,
+          "frame": 191.875
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.013603872619569302,
+          "nearest_distance_max": 0.05408173054456711,
+          "frame": 211.0625
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.01478915847837925,
+          "nearest_distance_max": 0.05296793580055237,
+          "frame": 230.25
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.013209875673055649,
+          "nearest_distance_max": 0.05455593764781952,
+          "frame": 249.4375
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.016124220564961433,
+          "nearest_distance_max": 0.053940482437610626,
+          "frame": 268.625
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.012982713989913464,
+          "nearest_distance_max": 0.05277730152010918,
+          "frame": 287.8125
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.012805715203285217,
+          "nearest_distance_max": 0.053674276918172836,
+          "frame": 307.0
+        }
+      ]
+    },
+    {
+      "name": "dance_05_Armature",
+      "samples": [
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.017391405999660492,
+          "nearest_distance_max": 0.05114324018359184,
+          "frame": 0.0
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.015615960583090782,
+          "nearest_distance_max": 0.05252780765295029,
+          "frame": 4.3125
+        },
+        {
+          "inside": 217,
+          "total": 218,
+          "nearest_distance_min": 0.014024130068719387,
+          "nearest_distance_max": 0.053315360099077225,
+          "frame": 8.625
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.01700109802186489,
+          "nearest_distance_max": 0.05207683891057968,
+          "frame": 12.9375
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.014412596821784973,
+          "nearest_distance_max": 0.053078118711709976,
+          "frame": 17.25
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.014059505425393581,
+          "nearest_distance_max": 0.05285769701004028,
+          "frame": 21.5625
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.016468510031700134,
+          "nearest_distance_max": 0.05218289792537689,
+          "frame": 25.875
+        },
+        {
+          "inside": 212,
+          "total": 218,
+          "nearest_distance_min": 0.014035779982805252,
+          "nearest_distance_max": 0.05240502208471298,
+          "frame": 30.1875
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.015287347137928009,
+          "nearest_distance_max": 0.05164587125182152,
+          "frame": 34.5
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.01778334006667137,
+          "nearest_distance_max": 0.05097726359963417,
+          "frame": 38.8125
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.014436953701078892,
+          "nearest_distance_max": 0.05141933262348175,
+          "frame": 43.125
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.0167912095785141,
+          "nearest_distance_max": 0.051647815853357315,
+          "frame": 47.4375
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.01730581931769848,
+          "nearest_distance_max": 0.05215545743703842,
+          "frame": 51.75
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.01598704792559147,
+          "nearest_distance_max": 0.052807994186878204,
+          "frame": 56.0625
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.018393173813819885,
+          "nearest_distance_max": 0.05258648842573166,
+          "frame": 60.375
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.015029963105916977,
+          "nearest_distance_max": 0.05261172354221344,
+          "frame": 64.6875
+        },
+        {
+          "inside": 218,
+          "total": 218,
+          "nearest_distance_min": 0.015746094286441803,
+          "nearest_distance_max": 0.051439929753541946,
+          "frame": 69.0
+        }
+      ]
+    }
+  ],
+  "renders": [],
+  "method": "Actual exported GLB, deformed mesh ray containment of bottom attachment ring; 17 phases/clip. No camera occlusion trick."
+}

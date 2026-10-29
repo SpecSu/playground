@@ -1,0 +1,8 @@
+[
+  {
+    "asset": "jiaxin-likeness-v5/texture-final/jiaxin-0.glb",
+    "max_body_position_error": 3.6048800955423547e-07,
+    "max_skin_weight_error": 1.1920928955078125e-07,
+    "face_and_neck_same_as_approved_base": true
+  }
+]

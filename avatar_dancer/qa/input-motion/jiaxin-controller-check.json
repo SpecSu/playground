@@ -1,0 +1,42 @@
+{
+  "ready": {
+    "clip": "dance_01",
+    "time": 1,
+    "handsBelowShoulders": true,
+    "headAboveHips": 0.6726250058634076
+  },
+  "readyBounds": {
+    "floor": -0.017568546529599258,
+    "top": 0.19578183072430783,
+    "bottom": 0.6037064520632254
+  },
+  "poseBounds": [
+    {
+      "floor": -0.01882930709943281,
+      "top": 0.22858270474635245,
+      "bottom": 0.5949779142768009
+    },
+    {
+      "floor": -0.02051276046722895,
+      "top": 0.23140065668763887,
+      "bottom": 0.5949658409944469
+    },
+    {
+      "floor": -0.0067027352016326,
+      "top": 0.2394103128380453,
+      "bottom": 0.594784271547519
+    },
+    {
+      "floor": -0.013489865851509948,
+      "top": 0.19848051290764296,
+      "bottom": 0.5920080438973548
+    }
+  ],
+  "source": "/workspace/scratch/e8cd10917327/dance-stage-work/tripo/jiaxin-dances.glb",
+  "sha256": "4f6ab9440aaccdec84c93f03d10c859f12e6b1c3943d4cf602654ecb5dd17476",
+  "temposTested": [
+    128,
+    170
+  ],
+  "method": "Real GLTFLoader skin/bone transforms; no texture decoding or WebGL. Four hit poses at0.28seconds plus lifecycle and sustained tempo checks. Final costume files pending."
+}

@@ -1,0 +1,90 @@
+{
+  "source": "/workspace/scratch/e8cd10917327/proportions-work/final/jiji-0.glb",
+  "sourceSha256": "b042387d996d0c28797a492eed38bc8870f8e3a2eb278643d0a10e54960e2633",
+  "note": "CPU cross-engine skinning samples only; not rendered browser QA.",
+  "weightMatchMax": 0.0,
+  "restMatchMax": 2.3619632827376336e-07,
+  "samples": [
+    {
+      "clip": "dance_01",
+      "seconds": 3.011666584014893,
+      "max": 8.779663518657541e-05,
+      "mean": 6.553218765130612e-05,
+      "headMax": 8.252910967087729e-05,
+      "bodyMax": 8.779663518657541e-05
+    },
+    {
+      "clip": "dance_01",
+      "seconds": 10.88833303451538,
+      "max": 4.5807439532695406e-07,
+      "mean": 1.3838034531726027e-07,
+      "headMax": 2.5463115409962923e-07,
+      "bodyMax": 4.5807439532695406e-07
+    },
+    {
+      "clip": "dance_01",
+      "seconds": 18.76499948501587,
+      "max": 8.104218995310893e-07,
+      "mean": 2.0415121395821967e-07,
+      "headMax": 2.7161428531346e-07,
+      "bodyMax": 8.104218995310893e-07
+    },
+    {
+      "clip": "dance_03",
+      "seconds": 1.6629167079925538,
+      "max": 6.181737337318522e-07,
+      "mean": 1.3127272609500655e-07,
+      "headMax": 2.1500646164608157e-07,
+      "bodyMax": 6.181737337318522e-07
+    },
+    {
+      "clip": "dance_03",
+      "seconds": 6.012083482742309,
+      "max": 2.762352166831972e-05,
+      "mean": 1.3792657491974523e-06,
+      "headMax": 2.1912814929861936e-07,
+      "bodyMax": 2.762352166831972e-05
+    },
+    {
+      "clip": "dance_03",
+      "seconds": 10.361250257492067,
+      "max": 2.7433847151755805e-05,
+      "mean": 1.2901199316014174e-05,
+      "headMax": 1.395986717707814e-05,
+      "bodyMax": 2.7433847151755805e-05
+    },
+    {
+      "clip": "dance_05",
+      "seconds": 0.37375,
+      "max": 4.61743683929748e-06,
+      "mean": 1.7816426622165166e-06,
+      "headMax": 2.5019866133130515e-06,
+      "bodyMax": 4.61743683929748e-06
+    },
+    {
+      "clip": "dance_05",
+      "seconds": 1.3512499999999998,
+      "max": 6.239815656651991e-06,
+      "mean": 2.1944029693040554e-06,
+      "headMax": 3.371780807936146e-06,
+      "bodyMax": 6.239815656651991e-06
+    },
+    {
+      "clip": "dance_05",
+      "seconds": 2.3287500000000003,
+      "max": 8.845819282326597e-07,
+      "mean": 2.454224830397827e-07,
+      "headMax": 2.5386698599756987e-07,
+      "bodyMax": 8.845819282326597e-07
+    }
+  ],
+  "fps": 24,
+  "points": 60,
+  "sampledSourceNodes": [
+    "DONOR_HEAD_PRIVATE_TEST",
+    "tripo_node_9ad206fc-6020-4f29-b4b0-4c76b2729915"
+  ],
+  "passed": true,
+  "assetStatus": "V3 PROMOTED \u2014 current public hash independently verified",
+  "promotedSource": "public/assets/characters/jiji-0.glb"
+}

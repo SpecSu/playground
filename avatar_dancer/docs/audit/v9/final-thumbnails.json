@@ -1,0 +1,74 @@
+[
+  {
+    "path": "public/assets/thumbs/jiaxin-0.webp",
+    "size": [
+      384,
+      512
+    ],
+    "bytes": 8642,
+    "sha256": "98dbd8779ba94caad64c1cf4aa370de1dffe18a9f5ccd43f26213b1e59bd1fec"
+  },
+  {
+    "path": "public/assets/thumbs/jiaxin-1.webp",
+    "size": [
+      384,
+      512
+    ],
+    "bytes": 29568,
+    "sha256": "7856e7eede5c18f709d3cb1cdcaee7a45f01554026bda43ac5b04662ef5be452"
+  },
+  {
+    "path": "public/assets/thumbs/jiji-0.webp",
+    "size": [
+      384,
+      512
+    ],
+    "bytes": 16536,
+    "sha256": "ecd9481f8e46048e41486de75635811d8c972dc126ea9f81784368b6f337a10c"
+  },
+  {
+    "path": "public/assets/thumbs/jiji-1.webp",
+    "size": [
+      384,
+      512
+    ],
+    "bytes": 17504,
+    "sha256": "63537644534e6efd1724f59c353f3f007a25015f50de78d57dfacff17906e831"
+  },
+  {
+    "path": "public/assets/thumbs/jiji-2.webp",
+    "size": [
+      384,
+      512
+    ],
+    "bytes": 15272,
+    "sha256": "fa3c447b536c89fc3b7e071a3c248b7ad7cf375fb5077e06db4f514f55007d3c"
+  },
+  {
+    "path": "public/assets/thumbs/lx-0.webp",
+    "size": [
+      384,
+      512
+    ],
+    "bytes": 12870,
+    "sha256": "f1ffd7e953bc8d9864582934e8b184cc4af53374ea897000fca8cbab7a57a6da"
+  },
+  {
+    "path": "public/assets/thumbs/lx-1.webp",
+    "size": [
+      384,
+      512
+    ],
+    "bytes": 18510,
+    "sha256": "64bdd9846f7ee12a05baac96cc2c8c7c5b8c719c01c9510369acd240098923da"
+  },
+  {
+    "path": "public/assets/thumbs/lx-2.webp",
+    "size": [
+      384,
+      512
+    ],
+    "bytes": 14868,
+    "sha256": "fa7442785654364c64c821cfa172c05d5183a6883ef143bcd9efbbd0b41e325f"
+  }
+]

@@ -1,0 +1,495 @@
+{
+  "restRenderMethod": "Actual final merged GLBs, matching baseline cameras and studio lighting, Cycles CPU; no image generation.",
+  "motionMethod": "Actual pre-batching v16 GLBs; exact material + attributed-triangle multisets proven equal to final v17.",
+  "sources": [
+    {
+      "file": "public/assets/characters/jiji-0.glb",
+      "sha256": "34b83095506390678f0cd03878ee0f34f8fa5e80eec5f734854b60a15486ce14",
+      "comparisonMetrics": [
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-0.glb",
+          "label": "before",
+          "framing": "full",
+          "angle": 0,
+          "camera": [
+            3.422353982925415,
+            -2.9802322387695312e-08,
+            0.5587729215621948
+          ],
+          "scale": 1.2035118341445923,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-0/jiji-0-before-full-000.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-0.glb",
+          "label": "before",
+          "framing": "full",
+          "angle": 90,
+          "camera": [
+            -0.01625121384859085,
+            3.438605308532715,
+            0.5587729215621948
+          ],
+          "scale": 1.2035118341445923,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-0/jiji-0-before-full-090.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-0.glb",
+          "label": "before",
+          "framing": "full",
+          "angle": 180,
+          "camera": [
+            -3.4548566341400146,
+            -2.9802322387695312e-08,
+            0.5587729215621948
+          ],
+          "scale": 1.2035118341445923,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-0/jiji-0-before-full-180.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-0.glb",
+          "label": "before",
+          "framing": "head",
+          "angle": 0,
+          "camera": [
+            3.422353982925415,
+            -2.9802322387695312e-08,
+            0.9133791327476501
+          ],
+          "scale": 0.4513169527053833,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-0/jiji-0-before-head-000.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-0.glb",
+          "label": "before",
+          "framing": "head",
+          "angle": 90,
+          "camera": [
+            -0.01625121384859085,
+            3.438605308532715,
+            0.9133791327476501
+          ],
+          "scale": 0.4513169527053833,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-0/jiji-0-before-head-090.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-0.glb",
+          "label": "before",
+          "framing": "head",
+          "angle": 180,
+          "camera": [
+            -3.4548566341400146,
+            -2.9802322387695312e-08,
+            0.9133791327476501
+          ],
+          "scale": 0.4513169527053833,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-0/jiji-0-before-head-180.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-0.glb",
+          "label": "after",
+          "framing": "full",
+          "angle": 0,
+          "camera": [
+            3.422353982925415,
+            -2.9802322387695312e-08,
+            0.5587729215621948
+          ],
+          "scale": 1.2035118341445923,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-0/jiji-0-after-full-000.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-0.glb",
+          "label": "after",
+          "framing": "full",
+          "angle": 90,
+          "camera": [
+            -0.01625121384859085,
+            3.438605308532715,
+            0.5587729215621948
+          ],
+          "scale": 1.2035118341445923,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-0/jiji-0-after-full-090.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-0.glb",
+          "label": "after",
+          "framing": "full",
+          "angle": 180,
+          "camera": [
+            -3.4548566341400146,
+            -2.9802322387695312e-08,
+            0.5587729215621948
+          ],
+          "scale": 1.2035118341445923,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-0/jiji-0-after-full-180.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-0.glb",
+          "label": "after",
+          "framing": "head",
+          "angle": 0,
+          "camera": [
+            3.422353982925415,
+            -2.9802322387695312e-08,
+            0.9133791327476501
+          ],
+          "scale": 0.4513169527053833,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-0/jiji-0-after-head-000.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-0.glb",
+          "label": "after",
+          "framing": "head",
+          "angle": 90,
+          "camera": [
+            -0.01625121384859085,
+            3.438605308532715,
+            0.9133791327476501
+          ],
+          "scale": 0.4513169527053833,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-0/jiji-0-after-head-090.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-0.glb",
+          "label": "after",
+          "framing": "head",
+          "angle": 180,
+          "camera": [
+            -3.4548566341400146,
+            -2.9802322387695312e-08,
+            0.9133791327476501
+          ],
+          "scale": 0.4513169527053833,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-0/jiji-0-after-head-180.png"
+        }
+      ],
+      "sourceMotionSha256": "963fe0227a852fb5e15506c7860690870ef70a46cd2ccacf8329699be5b1e719"
+    },
+    {
+      "file": "public/assets/characters/jiji-1.glb",
+      "sha256": "4a6605c438081cc4a2e2f5dd750d150dc891fb6aeb55d931d9504eb5fc373f64",
+      "comparisonMetrics": [
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-1.glb",
+          "label": "before",
+          "framing": "full",
+          "angle": 0,
+          "camera": [
+            3.391894817352295,
+            -5.960464477539063e-08,
+            0.5530092120170593
+          ],
+          "scale": 1.1910971403121948,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-1/jiji-1-before-full-000.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-1.glb",
+          "label": "before",
+          "framing": "full",
+          "angle": 90,
+          "camera": [
+            -0.011239662766456604,
+            3.40313458442688,
+            0.5530092120170593
+          ],
+          "scale": 1.1910971403121948,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-1/jiji-1-before-full-090.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-1.glb",
+          "label": "before",
+          "framing": "full",
+          "angle": 180,
+          "camera": [
+            -3.414374351501465,
+            -5.960464477539063e-08,
+            0.5530092120170593
+          ],
+          "scale": 1.1910971403121948,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-1/jiji-1-before-full-180.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-1.glb",
+          "label": "before",
+          "framing": "head",
+          "angle": 0,
+          "camera": [
+            3.391894817352295,
+            -5.960464477539063e-08,
+            0.9039574861526489
+          ],
+          "scale": 0.44666141271591187,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-1/jiji-1-before-head-000.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-1.glb",
+          "label": "before",
+          "framing": "head",
+          "angle": 90,
+          "camera": [
+            -0.011239662766456604,
+            3.40313458442688,
+            0.9039574861526489
+          ],
+          "scale": 0.44666141271591187,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-1/jiji-1-before-head-090.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-1.glb",
+          "label": "before",
+          "framing": "head",
+          "angle": 180,
+          "camera": [
+            -3.414374351501465,
+            -5.960464477539063e-08,
+            0.9039574861526489
+          ],
+          "scale": 0.44666141271591187,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-1/jiji-1-before-head-180.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-1.glb",
+          "label": "after",
+          "framing": "full",
+          "angle": 0,
+          "camera": [
+            3.391894817352295,
+            -5.960464477539063e-08,
+            0.5530092120170593
+          ],
+          "scale": 1.1910971403121948,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-1/jiji-1-after-full-000.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-1.glb",
+          "label": "after",
+          "framing": "full",
+          "angle": 90,
+          "camera": [
+            -0.011239662766456604,
+            3.40313458442688,
+            0.5530092120170593
+          ],
+          "scale": 1.1910971403121948,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-1/jiji-1-after-full-090.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-1.glb",
+          "label": "after",
+          "framing": "full",
+          "angle": 180,
+          "camera": [
+            -3.414374351501465,
+            -5.960464477539063e-08,
+            0.5530092120170593
+          ],
+          "scale": 1.1910971403121948,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-1/jiji-1-after-full-180.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-1.glb",
+          "label": "after",
+          "framing": "head",
+          "angle": 0,
+          "camera": [
+            3.391894817352295,
+            -5.960464477539063e-08,
+            0.9039574861526489
+          ],
+          "scale": 0.44666141271591187,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-1/jiji-1-after-head-000.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-1.glb",
+          "label": "after",
+          "framing": "head",
+          "angle": 90,
+          "camera": [
+            -0.011239662766456604,
+            3.40313458442688,
+            0.9039574861526489
+          ],
+          "scale": 0.44666141271591187,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-1/jiji-1-after-head-090.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-1.glb",
+          "label": "after",
+          "framing": "head",
+          "angle": 180,
+          "camera": [
+            -3.414374351501465,
+            -5.960464477539063e-08,
+            0.9039574861526489
+          ],
+          "scale": 0.44666141271591187,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-1/jiji-1-after-head-180.png"
+        }
+      ],
+      "sourceMotionSha256": "fb1272e37c5f8b38e98ec917ce0376d3389c70691f87db46cbccfde131d16b91"
+    },
+    {
+      "file": "public/assets/characters/jiji-2.glb",
+      "sha256": "779676dff5beb5a90a1c05353d3a1a58ef1b626d436b81b01929d33f80d67ef9",
+      "comparisonMetrics": [
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-2.glb",
+          "label": "before",
+          "framing": "full",
+          "angle": 0,
+          "camera": [
+            3.4171485900878906,
+            1.4901161193847656e-07,
+            0.5583134293556213
+          ],
+          "scale": 1.202521562576294,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-2/jiji-2-before-full-000.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-2.glb",
+          "label": "before",
+          "framing": "full",
+          "angle": 90,
+          "camera": [
+            -0.01862708106637001,
+            3.4357759952545166,
+            0.5583134293556213
+          ],
+          "scale": 1.202521562576294,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-2/jiji-2-before-full-090.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-2.glb",
+          "label": "before",
+          "framing": "full",
+          "angle": 180,
+          "camera": [
+            -3.4544029235839844,
+            1.4901161193847656e-07,
+            0.5583134293556213
+          ],
+          "scale": 1.202521562576294,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-2/jiji-2-before-full-180.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-2.glb",
+          "label": "before",
+          "framing": "head",
+          "angle": 0,
+          "camera": [
+            3.4171485900878906,
+            1.4901161193847656e-07,
+            0.9126278162002563
+          ],
+          "scale": 0.45094558596611023,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-2/jiji-2-before-head-000.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-2.glb",
+          "label": "before",
+          "framing": "head",
+          "angle": 90,
+          "camera": [
+            -0.01862708106637001,
+            3.4357759952545166,
+            0.9126278162002563
+          ],
+          "scale": 0.45094558596611023,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-2/jiji-2-before-head-090.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/before/jiji-2.glb",
+          "label": "before",
+          "framing": "head",
+          "angle": 180,
+          "camera": [
+            -3.4544029235839844,
+            1.4901161193847656e-07,
+            0.9126278162002563
+          ],
+          "scale": 0.45094558596611023,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-2/jiji-2-before-head-180.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-2.glb",
+          "label": "after",
+          "framing": "full",
+          "angle": 0,
+          "camera": [
+            3.4171485900878906,
+            1.4901161193847656e-07,
+            0.5583134293556213
+          ],
+          "scale": 1.202521562576294,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-2/jiji-2-after-full-000.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-2.glb",
+          "label": "after",
+          "framing": "full",
+          "angle": 90,
+          "camera": [
+            -0.01862708106637001,
+            3.4357759952545166,
+            0.5583134293556213
+          ],
+          "scale": 1.202521562576294,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-2/jiji-2-after-full-090.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-2.glb",
+          "label": "after",
+          "framing": "full",
+          "angle": 180,
+          "camera": [
+            -3.4544029235839844,
+            1.4901161193847656e-07,
+            0.5583134293556213
+          ],
+          "scale": 1.202521562576294,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-2/jiji-2-after-full-180.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-2.glb",
+          "label": "after",
+          "framing": "head",
+          "angle": 0,
+          "camera": [
+            3.4171485900878906,
+            1.4901161193847656e-07,
+            0.9126278162002563
+          ],
+          "scale": 0.45094558596611023,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-2/jiji-2-after-head-000.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-2.glb",
+          "label": "after",
+          "framing": "head",
+          "angle": 90,
+          "camera": [
+            -0.01862708106637001,
+            3.4357759952545166,
+            0.9126278162002563
+          ],
+          "scale": 0.45094558596611023,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-2/jiji-2-after-head-090.png"
+        },
+        {
+          "source": "/workspace/scratch/e8cd10917327/headwear-work/v17/jiji-2.glb",
+          "label": "after",
+          "framing": "head",
+          "angle": 180,
+          "camera": [
+            -3.4544029235839844,
+            1.4901161193847656e-07,
+            0.9126278162002563
+          ],
+          "scale": 0.45094558596611023,
+          "image": "/workspace/scratch/e8cd10917327/headwear-work/v17/comparison-2/jiji-2-after-head-180.png"
+        }
+      ],
+      "sourceMotionSha256": "7b489397e0c3e301ac515c83d9c87034366d28985c27e3a2a72c2286557279f8"
+    }
+  ]
+}

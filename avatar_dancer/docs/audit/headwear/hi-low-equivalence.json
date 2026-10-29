@@ -1,0 +1,44 @@
+[
+  {
+    "name": "jiji-0",
+    "highSha256": "34b83095506390678f0cd03878ee0f34f8fa5e80eec5f734854b60a15486ce14",
+    "lowSha256": "7ed352190e7624d499a9b117b65024b20ac1d2314f79427b071301fcd4ccc01a",
+    "highBytes": 14524544,
+    "lowBytes": 8821928,
+    "geometryRigAnimationIdentical": true,
+    "primitives": 5,
+    "batching": {
+      "headPrimitivesBefore": 6,
+      "headPrimitivesAfter": 4,
+      "exactAttributedTriangles": true
+    }
+  },
+  {
+    "name": "jiji-1",
+    "highSha256": "4a6605c438081cc4a2e2f5dd750d150dc891fb6aeb55d931d9504eb5fc373f64",
+    "lowSha256": "4ceac79b236d199fedbb6026a03f2e3b341dfcff151ed958d9fd84cda2b28267",
+    "highBytes": 14081568,
+    "lowBytes": 8253708,
+    "geometryRigAnimationIdentical": true,
+    "primitives": 10,
+    "batching": {
+      "headPrimitivesBefore": 24,
+      "headPrimitivesAfter": 9,
+      "exactAttributedTriangles": true
+    }
+  },
+  {
+    "name": "jiji-2",
+    "highSha256": "779676dff5beb5a90a1c05353d3a1a58ef1b626d436b81b01929d33f80d67ef9",
+    "lowSha256": "06589a637a2ae184c66d6236fa919b5b335d73de90358135cc6b111b6b81aedb",
+    "highBytes": 14658892,
+    "lowBytes": 8703704,
+    "geometryRigAnimationIdentical": true,
+    "primitives": 9,
+    "batching": {
+      "headPrimitivesBefore": 54,
+      "headPrimitivesAfter": 8,
+      "exactAttributedTriangles": true
+    }
+  }
+]

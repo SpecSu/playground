@@ -1,0 +1,86 @@
+[
+  {
+    "file": "jiji-0.glb",
+    "sha256": "6f4153808ab94b2240e1b61c9187d5121ac380de5f34f64657aaccdf772265f0",
+    "original_images_identical": true,
+    "original_animation_and_skin_json_identical": true,
+    "bytes": 12254952
+  },
+  {
+    "file": "jiji-0_low.glb",
+    "sha256": "e0c41ecc1119bd317ec44feb37ee359d59efd89efb09d80f3d4adcc9ac479e00",
+    "original_images_identical": true,
+    "original_animation_and_skin_json_identical": true,
+    "bytes": 6552368
+  },
+  {
+    "file": "jiji-1.glb",
+    "sha256": "28e2f4e5e6fce2b5fe4c63aceecd7c68217bf52e3d9670b9cf62b9db2acc9ce8",
+    "original_images_identical": true,
+    "original_animation_and_skin_json_identical": true,
+    "bytes": 12406536
+  },
+  {
+    "file": "jiji-1_low.glb",
+    "sha256": "febdd725fb05fddc42abbc3b08133dd721042a03b4e17b5a24f5ae302401c57a",
+    "original_images_identical": true,
+    "original_animation_and_skin_json_identical": true,
+    "bytes": 6578828
+  },
+  {
+    "file": "jiji-2.glb",
+    "sha256": "7c4aefe15e98e718b8b279bbb76eb8966e9c4eacde0b3e4196243dd42ba9572a",
+    "original_images_identical": true,
+    "original_animation_and_skin_json_identical": true,
+    "bytes": 12629764
+  },
+  {
+    "file": "jiji-2_low.glb",
+    "sha256": "5dd679c62fa13e9ed01e9809559084b3977aace180e02072d32bdd00a0c733d0",
+    "original_images_identical": true,
+    "original_animation_and_skin_json_identical": true,
+    "bytes": 6674872
+  },
+  {
+    "file": "lx-0.glb",
+    "sha256": "8f2e5f1c4d13e65e2e6092e262e54770a2718a9e8aa23b05134f884aac70a16e",
+    "original_images_identical": true,
+    "original_animation_and_skin_json_identical": true,
+    "bytes": 11188920
+  },
+  {
+    "file": "lx-0_low.glb",
+    "sha256": "052a21654c87ef903efe7acf0432541296e29f2ad624a5920dbaffc858442141",
+    "original_images_identical": true,
+    "original_animation_and_skin_json_identical": true,
+    "bytes": 6943064
+  },
+  {
+    "file": "lx-1.glb",
+    "sha256": "d60df8f4a7a959184c69ca62cc31b7f18985a7da993b8cc928a6d6c8ee73f20e",
+    "original_images_identical": true,
+    "original_animation_and_skin_json_identical": true,
+    "bytes": 19775176
+  },
+  {
+    "file": "lx-1_low.glb",
+    "sha256": "c974e1b816095e3ec06eea362c33257684043ea24861f1d23e684dbf119dac9f",
+    "original_images_identical": true,
+    "original_animation_and_skin_json_identical": true,
+    "bytes": 9300616
+  },
+  {
+    "file": "lx-2.glb",
+    "sha256": "0d3ea0319d7b13afe8ad30ec8f8d62b20c0b5f08611a41ac0905371d56a7e923",
+    "original_images_identical": true,
+    "original_animation_and_skin_json_identical": true,
+    "bytes": 18789632
+  },
+  {
+    "file": "lx-2_low.glb",
+    "sha256": "b76c3354741208a4dd5269a1567028b02c42db332e24387cd5da5f5044b4deb9",
+    "original_images_identical": true,
+    "original_animation_and_skin_json_identical": true,
+    "bytes": 8887984
+  }
+]

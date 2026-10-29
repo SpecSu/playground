@@ -1,0 +1,90 @@
+{
+  "source": "/workspace/scratch/e8cd10917327/proportions-work/final/lx-2.glb",
+  "sourceSha256": "54e9798c12e44d5f270ab42d6e09086c12b433647894b2799438b0e3a1432095",
+  "note": "CPU cross-engine skinning samples only; not rendered browser QA.",
+  "weightMatchMax": 0.0,
+  "restMatchMax": 5.39022607881634e-07,
+  "samples": [
+    {
+      "clip": "dance_01",
+      "seconds": 3.011666584014893,
+      "max": 8.385871504132327e-05,
+      "mean": 5.763938708451242e-05,
+      "headMax": 6.511423478274578e-05,
+      "bodyMax": 8.385871504132327e-05
+    },
+    {
+      "clip": "dance_01",
+      "seconds": 10.88833303451538,
+      "max": 5.597860740501236e-07,
+      "mean": 1.2844132017061562e-07,
+      "headMax": 1.6049041769309353e-07,
+      "bodyMax": 5.597860740501236e-07
+    },
+    {
+      "clip": "dance_01",
+      "seconds": 18.76499948501587,
+      "max": 8.23484702905416e-07,
+      "mean": 3.4116762445912e-07,
+      "headMax": 3.937545496739093e-07,
+      "bodyMax": 8.23484702905416e-07
+    },
+    {
+      "clip": "dance_03",
+      "seconds": 1.6629167079925538,
+      "max": 5.567533282121839e-07,
+      "mean": 1.454460403117374e-07,
+      "headMax": 1.7978144454976402e-07,
+      "bodyMax": 5.567533282121839e-07
+    },
+    {
+      "clip": "dance_03",
+      "seconds": 6.012083482742309,
+      "max": 2.450841958889473e-05,
+      "mean": 9.347366997477906e-07,
+      "headMax": 2.3000462413479583e-07,
+      "bodyMax": 2.450841958889473e-05
+    },
+    {
+      "clip": "dance_03",
+      "seconds": 10.361250257492067,
+      "max": 2.8558902502399338e-05,
+      "mean": 1.1733532502218604e-05,
+      "headMax": 1.2246433906052164e-05,
+      "bodyMax": 2.8558902502399338e-05
+    },
+    {
+      "clip": "dance_05",
+      "seconds": 0.37375,
+      "max": 3.7343466468530875e-06,
+      "mean": 1.6445400918163254e-06,
+      "headMax": 2.235422517967874e-06,
+      "bodyMax": 3.7343466468530875e-06
+    },
+    {
+      "clip": "dance_05",
+      "seconds": 1.3512499999999998,
+      "max": 5.6313970309327235e-06,
+      "mean": 2.3701649876791336e-06,
+      "headMax": 3.1003369014672714e-06,
+      "bodyMax": 5.6313970309327235e-06
+    },
+    {
+      "clip": "dance_05",
+      "seconds": 2.3287500000000003,
+      "max": 8.499215322442173e-07,
+      "mean": 2.1958778153322023e-07,
+      "headMax": 2.6749555872404934e-07,
+      "bodyMax": 8.499215322442173e-07
+    }
+  ],
+  "fps": 24,
+  "points": 80,
+  "sampledSourceNodes": [
+    "CANONICAL_BAKED_HEAD",
+    "tripo_node_0ff25ba0-52bb-4c22-86b7-5649e59eb066"
+  ],
+  "passed": true,
+  "assetStatus": "V3 PROMOTED \u2014 current public hash independently verified",
+  "promotedSource": "public/assets/characters/lx-2.glb"
+}

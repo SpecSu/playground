@@ -1,0 +1,6 @@
+node_modules/
+.env*
+*.log
+__pycache__/
+
+# This handoff intentionally versions the delivered dist snapshot.

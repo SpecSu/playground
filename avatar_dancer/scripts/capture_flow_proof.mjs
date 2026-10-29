@@ -1,0 +1,12 @@
+// Offline evidence only: sample the production controller, never alter source assets.
+import fs from 'node:fs';import pathModule from 'node:path';import * as T from 'three';
+import {loadGeometry} from '../tests/helpers/load-rig.mjs';import {normalizeCharacterBind,createRootMotionLock} from '../src/stage.js';import {createInputMotionController} from '../src/input-motion.js';import {createFootGrounding} from '../src/foot-grounding.js';
+const path=pathModule.resolve(process.argv[2]||'public/assets/characters/jiji-0.glb'),out=pathModule.resolve(process.argv[3]||'qa/flow-proof');fs.mkdirSync(out,{recursive:true});const g=await loadGeometry('',{path});g.scene.updateMatrixWorld(true);const meshes=[],rest=[];g.scene.traverse(m=>{if(!m.isMesh)return;meshes.push(m);for(let i=0;i<m.geometry.attributes.position.count;i++){const p=new T.Vector3().fromBufferAttribute(m.geometry.attributes.position,i).applyMatrix4(m.matrixWorld);rest.push(p.toArray())}});
+normalizeCharacterBind(g.scene);g.scene.rotation.y=-Math.PI/2;const wrapper=new T.Group;wrapper.add(g.scene);let hips;g.scene.traverse(n=>{if(n.name.endsWith('Hips'))hips=n});const lock=createRootMotionLock(wrapper,hips),c=createInputMotionController(g.scene,g.animations,process.env.FLOW_REST_POSE?{restPose:JSON.parse(process.env.FLOW_REST_POSE)}:{}),ground=createFootGrounding(wrapper);c.setMode('playing');c.setBPM(170);const states=[];let index=0;
+for(let frame=0;frame<=26*60;frame++){
+ const t=frame/60;if((t<9||t>=14)&&frame%20===0&&Math.abs(t-7)>1e-4)c.hit(frame%4,'perfect');if(frame===420)c.hit(0,'miss');
+ c.update(1/60,t);lock.apply();ground.apply();
+ if(frame%4)continue;wrapper.updateMatrixWorld(true);const values=new Float32Array(rest.length*3);let cursor=0;for(const m of meshes){m.skeleton?.update();const p=new T.Vector3;for(let i=0;i<m.geometry.attributes.position.count;i++){m.getVertexPosition(i,p);p.applyMatrix4(m.matrixWorld);values[cursor++]=p.x;values[cursor++]=p.y;values[cursor++]=p.z}}
+ fs.writeFileSync(`${out}/${String(index).padStart(4,'0')}.bin`,Buffer.from(values.buffer));states.push({time:t,...c.getDiagnostics(),label:t<7?'SUSTAINED RHYTHM':t<7.5?'ONE MISS / KEEP FLOWING':t<9?'RHYTHM RECOVERED':t<14?'NO INPUT / SETTLE':'RHYTHM RETURNS / CONTINUE'});index++;
+}
+fs.writeFileSync(`${out}/metadata.json`,JSON.stringify({source:path,fps:15,frames:index,rest,states}));console.log({frames:index,vertices:rest.length});

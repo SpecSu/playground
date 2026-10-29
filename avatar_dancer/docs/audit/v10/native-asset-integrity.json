@@ -1,0 +1,53 @@
+[
+  {
+    "outfit": 0,
+    "high_sha256": "d769be4611aa9bd70dcb27e0777810322e3683ab34128851d9f465a4b05531f5",
+    "low_sha256": "cb093de4666ce333867422adc03d505dada99839ea2d039cd4072c10a979ee71",
+    "all_high_low_accessors_equal": 232,
+    "native_source_primitive0_equal": {
+      "POSITION": true,
+      "NORMAL": true,
+      "TEXCOORD_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true,
+      "indices": true
+    },
+    "native_nodes_skin_animation_json_equal": true,
+    "high_bytes": 8380176,
+    "low_bytes": 4997220
+  },
+  {
+    "outfit": 1,
+    "high_sha256": "55606683032071a5182a55273cc9eea6887d34b5234f6b138a375716b246f41c",
+    "low_sha256": "db38acce23c525815562204049f0c767a4690ed3d3f089d6d44dd66a2211a445",
+    "all_high_low_accessors_equal": 241,
+    "native_source_primitive0_equal": {
+      "POSITION": true,
+      "NORMAL": true,
+      "TEXCOORD_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true,
+      "indices": true
+    },
+    "native_nodes_skin_animation_json_equal": true,
+    "high_bytes": 5307460,
+    "low_bytes": 3619840
+  },
+  {
+    "outfit": 2,
+    "high_sha256": "64b9c5519a4e83d7726d5f33a0eade20ba2c5f66a13a92f5519265a1cd8ec3a6",
+    "low_sha256": "0ad90fa18858f22b5ecac7dd0e08bd1dff247b617ebc9143b3fe0bcdaa1bebb6",
+    "all_high_low_accessors_equal": 245,
+    "native_source_primitive0_equal": {
+      "POSITION": true,
+      "NORMAL": true,
+      "TEXCOORD_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true,
+      "indices": true
+    },
+    "native_nodes_skin_animation_json_equal": true,
+    "high_bytes": 5634504,
+    "low_bytes": 3702108
+  }
+]

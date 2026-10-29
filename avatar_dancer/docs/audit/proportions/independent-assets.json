@@ -1,0 +1,276 @@
+{
+  "asset_status": "PROMOTED \u2014 all12 public hashes independently match frozen final candidates",
+  "all_six_hi_low_nonimage_and_rig_exact": true,
+  "assets": [
+    {
+      "asset": "jiji-0.glb",
+      "sha256": "b042387d996d0c28797a492eed38bc8870f8e3a2eb278643d0a10e54960e2633",
+      "file_bytes": 12493012,
+      "embedded_images_unchanged": true,
+      "rig_animation_nodes_unchanged": true,
+      "adjustment": {
+        "version": 1,
+        "headScale": 0.88,
+        "headLowering": 0.0,
+        "headPivot": [
+          0.004199122364240401,
+          0.8346756290704709,
+          -0.005577149285049055
+        ],
+        "mainNeckRingVertices": 217,
+        "fixedNeckBase": true,
+        "faceShapeUniform": true,
+        "bodyUnchanged": true
+      },
+      "promoted_sha256": "b042387d996d0c28797a492eed38bc8870f8e3a2eb278643d0a10e54960e2633"
+    },
+    {
+      "asset": "jiji-0_low.glb",
+      "sha256": "14ddefc9c5c28e75bd70ea594c6b95d9d656fa87986717f3e43e6355ab4bd0b7",
+      "file_bytes": 6790424,
+      "embedded_images_unchanged": true,
+      "rig_animation_nodes_unchanged": true,
+      "adjustment": {
+        "version": 1,
+        "headScale": 0.88,
+        "headLowering": 0.0,
+        "headPivot": [
+          0.004199122364240401,
+          0.8346756290704709,
+          -0.005577149285049055
+        ],
+        "mainNeckRingVertices": 217,
+        "fixedNeckBase": true,
+        "faceShapeUniform": true,
+        "bodyUnchanged": true
+      },
+      "promoted_sha256": "14ddefc9c5c28e75bd70ea594c6b95d9d656fa87986717f3e43e6355ab4bd0b7"
+    },
+    {
+      "asset": "jiji-1.glb",
+      "sha256": "7dbcbe51abfd0c8a93ba255644da83888e6d9536c2134491d2e61a7a70e00fab",
+      "file_bytes": 12644596,
+      "embedded_images_unchanged": true,
+      "rig_animation_nodes_unchanged": true,
+      "adjustment": {
+        "version": 1,
+        "headScale": 0.88,
+        "headLowering": 0.0,
+        "headPivot": [
+          0.00562133790363878,
+          0.8235916116183734,
+          -0.004680844008953213
+        ],
+        "mainNeckRingVertices": 217,
+        "fixedNeckBase": true,
+        "faceShapeUniform": true,
+        "bodyUnchanged": true
+      },
+      "promoted_sha256": "7dbcbe51abfd0c8a93ba255644da83888e6d9536c2134491d2e61a7a70e00fab"
+    },
+    {
+      "asset": "jiji-1_low.glb",
+      "sha256": "08cc759735368a48aef53dcee9df86c6e29be2246c89634a524f4668f69dd6d8",
+      "file_bytes": 6816880,
+      "embedded_images_unchanged": true,
+      "rig_animation_nodes_unchanged": true,
+      "adjustment": {
+        "version": 1,
+        "headScale": 0.88,
+        "headLowering": 0.0,
+        "headPivot": [
+          0.00562133790363878,
+          0.8235916116183734,
+          -0.004680844008953213
+        ],
+        "mainNeckRingVertices": 217,
+        "fixedNeckBase": true,
+        "faceShapeUniform": true,
+        "bodyUnchanged": true
+      },
+      "promoted_sha256": "08cc759735368a48aef53dcee9df86c6e29be2246c89634a524f4668f69dd6d8"
+    },
+    {
+      "asset": "jiji-2.glb",
+      "sha256": "89b727922382881caa7ddbbf41c3032858a31797415948d861dea9dc84a666aa",
+      "file_bytes": 12867820,
+      "embedded_images_unchanged": true,
+      "rig_animation_nodes_unchanged": true,
+      "adjustment": {
+        "version": 1,
+        "headScale": 0.88,
+        "headLowering": 0.0,
+        "headPivot": [
+          0.01564336084782449,
+          0.833791893288647,
+          -0.0070638058051517676
+        ],
+        "mainNeckRingVertices": 217,
+        "fixedNeckBase": true,
+        "faceShapeUniform": true,
+        "bodyUnchanged": true
+      },
+      "promoted_sha256": "89b727922382881caa7ddbbf41c3032858a31797415948d861dea9dc84a666aa"
+    },
+    {
+      "asset": "jiji-2_low.glb",
+      "sha256": "035db4347385dd66764c2ba95d0a22865be4d5e73eb3442ba02fbec323782961",
+      "file_bytes": 6912924,
+      "embedded_images_unchanged": true,
+      "rig_animation_nodes_unchanged": true,
+      "adjustment": {
+        "version": 1,
+        "headScale": 0.88,
+        "headLowering": 0.0,
+        "headPivot": [
+          0.01564336084782449,
+          0.833791893288647,
+          -0.0070638058051517676
+        ],
+        "mainNeckRingVertices": 217,
+        "fixedNeckBase": true,
+        "faceShapeUniform": true,
+        "bodyUnchanged": true
+      },
+      "promoted_sha256": "035db4347385dd66764c2ba95d0a22865be4d5e73eb3442ba02fbec323782961"
+    },
+    {
+      "asset": "lx-0.glb",
+      "sha256": "a5e53825a829519a1269671be5a2506dd979d2837dd6933af7561a33042e536c",
+      "file_bytes": 11369624,
+      "embedded_images_unchanged": true,
+      "rig_animation_nodes_unchanged": true,
+      "adjustment": {
+        "version": 1,
+        "headScale": 1.0,
+        "headLowering": 0.012,
+        "headPivot": [
+          0.027490187659462872,
+          0.8126946456128221,
+          -0.0053568603633538225
+        ],
+        "mainNeckRingVertices": 145,
+        "fixedNeckBase": true,
+        "preserveLowerNeckOverlap": true,
+        "faceShapeUniform": true,
+        "bodyUnchanged": true
+      },
+      "promoted_sha256": "a5e53825a829519a1269671be5a2506dd979d2837dd6933af7561a33042e536c"
+    },
+    {
+      "asset": "lx-0_low.glb",
+      "sha256": "bdbd08238ea66d50844510b84392f1547c9bbb79a791d0dfe683a2d50a48973f",
+      "file_bytes": 7123768,
+      "embedded_images_unchanged": true,
+      "rig_animation_nodes_unchanged": true,
+      "adjustment": {
+        "version": 1,
+        "headScale": 1.0,
+        "headLowering": 0.012,
+        "headPivot": [
+          0.027490187659462872,
+          0.8126946456128221,
+          -0.0053568603633538225
+        ],
+        "mainNeckRingVertices": 145,
+        "fixedNeckBase": true,
+        "preserveLowerNeckOverlap": true,
+        "faceShapeUniform": true,
+        "bodyUnchanged": true
+      },
+      "promoted_sha256": "bdbd08238ea66d50844510b84392f1547c9bbb79a791d0dfe683a2d50a48973f"
+    },
+    {
+      "asset": "lx-1.glb",
+      "sha256": "59389bf74eadb2594cffdc1724f47da5c56a90ffafce9d6f88483614fcb8a339",
+      "file_bytes": 19955644,
+      "embedded_images_unchanged": true,
+      "rig_animation_nodes_unchanged": true,
+      "adjustment": {
+        "version": 1,
+        "headScale": 1.0,
+        "headLowering": 0.012,
+        "headPivot": [
+          0.0231719791062565,
+          0.8187072721839426,
+          -0.010101153799304258
+        ],
+        "mainNeckRingVertices": 143,
+        "fixedNeckBase": true,
+        "preserveLowerNeckOverlap": true,
+        "faceShapeUniform": true,
+        "bodyUnchanged": true
+      },
+      "promoted_sha256": "59389bf74eadb2594cffdc1724f47da5c56a90ffafce9d6f88483614fcb8a339"
+    },
+    {
+      "asset": "lx-1_low.glb",
+      "sha256": "ae88ac7fbe76c26ba0b4553e81c6d9c0f6ae45b25e356746476e8f859f345897",
+      "file_bytes": 9481080,
+      "embedded_images_unchanged": true,
+      "rig_animation_nodes_unchanged": true,
+      "adjustment": {
+        "version": 1,
+        "headScale": 1.0,
+        "headLowering": 0.012,
+        "headPivot": [
+          0.0231719791062565,
+          0.8187072721839426,
+          -0.010101153799304258
+        ],
+        "mainNeckRingVertices": 143,
+        "fixedNeckBase": true,
+        "preserveLowerNeckOverlap": true,
+        "faceShapeUniform": true,
+        "bodyUnchanged": true
+      },
+      "promoted_sha256": "ae88ac7fbe76c26ba0b4553e81c6d9c0f6ae45b25e356746476e8f859f345897"
+    },
+    {
+      "asset": "lx-2.glb",
+      "sha256": "54e9798c12e44d5f270ab42d6e09086c12b433647894b2799438b0e3a1432095",
+      "file_bytes": 18969856,
+      "embedded_images_unchanged": true,
+      "rig_animation_nodes_unchanged": true,
+      "adjustment": {
+        "version": 1,
+        "headScale": 1.0,
+        "headLowering": 0.012,
+        "headPivot": [
+          -0.01177852315623101,
+          0.821886759724506,
+          -0.004966092385242299
+        ],
+        "mainNeckRingVertices": 141,
+        "fixedNeckBase": true,
+        "preserveLowerNeckOverlap": true,
+        "faceShapeUniform": true,
+        "bodyUnchanged": true
+      },
+      "promoted_sha256": "54e9798c12e44d5f270ab42d6e09086c12b433647894b2799438b0e3a1432095"
+    },
+    {
+      "asset": "lx-2_low.glb",
+      "sha256": "69ba12a7afa242cb74fb70d413174b6fd6e58858296713e9bd0b26c06c517569",
+      "file_bytes": 9068212,
+      "embedded_images_unchanged": true,
+      "rig_animation_nodes_unchanged": true,
+      "adjustment": {
+        "version": 1,
+        "headScale": 1.0,
+        "headLowering": 0.012,
+        "headPivot": [
+          -0.01177852315623101,
+          0.821886759724506,
+          -0.004966092385242299
+        ],
+        "mainNeckRingVertices": 141,
+        "fixedNeckBase": true,
+        "preserveLowerNeckOverlap": true,
+        "faceShapeUniform": true,
+        "bodyUnchanged": true
+      },
+      "promoted_sha256": "69ba12a7afa242cb74fb70d413174b6fd6e58858296713e9bd0b26c06c517569"
+    }
+  ]
+}

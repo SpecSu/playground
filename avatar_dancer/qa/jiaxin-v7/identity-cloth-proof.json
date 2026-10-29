@@ -1,0 +1,19 @@
+{
+  "source": "/workspace/scratch/e8cd10917327/jiaxin-head-integration/final/jiaxin-0.glb",
+  "sha256": "d16b2e358045404fc1f6a5b2d069a47937656fe5b5bd9f60e7e8d8060379c37f",
+  "protectedHeadVertices": 10864,
+  "protectedFaceCrownEarMaxPositionError": 3.340474865707373e-07,
+  "nativeRetainedVertices": 24047,
+  "nativePositionMaxError": 3.735706548905872e-07,
+  "nativeUVMaxError": 2.9802322387695312e-08,
+  "headFullyRigidHeadBone": true,
+  "triangles": 63067,
+  "drawCalls": 4,
+  "bones": 23,
+  "clips": [
+    "dance_01",
+    "dance_03",
+    "dance_05"
+  ],
+  "note": "Geometry/UV checks, not subjective exact likeness or measured browser FPS."
+}

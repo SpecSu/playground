@@ -1,0 +1,1685 @@
+{
+  "title": "UptownFunk",
+  "sourceLabel": "用户提供音频",
+  "bpm": 115.0,
+  "duration": 80.014512,
+  "offset": 0.266,
+  "audioUrl": "/assets/audio/uptownfunk-gameplay.mp3?v=full-v14",
+  "sourceFilename": "UptownFunk.mp3",
+  "sourceTrimStart": 0,
+  "durationPolicy": "user-approved-full-source",
+  "sourceDecodedDuration": 80.014512,
+  "fadeIn": 0.15,
+  "fadeOut": 0.35,
+  "chart": [
+    {
+      "time": 2.36853,
+      "lane": 0
+    },
+    {
+      "time": 2.87968,
+      "lane": 2
+    },
+    {
+      "time": 3.44095,
+      "lane": 1
+    },
+    {
+      "time": 3.92204,
+      "lane": 3
+    },
+    {
+      "time": 4.44322,
+      "lane": 0
+    },
+    {
+      "time": 4.9644,
+      "lane": 2
+    },
+    {
+      "time": 5.47556,
+      "lane": 1
+    },
+    {
+      "time": 6.01678,
+      "lane": 3
+    },
+    {
+      "time": 6.52794,
+      "lane": 0
+    },
+    {
+      "time": 7.04912,
+      "lane": 2
+    },
+    {
+      "time": 7.56027,
+      "lane": 1
+    },
+    {
+      "time": 8.09147,
+      "lane": 3
+    },
+    {
+      "time": 8.61265,
+      "lane": 1
+    },
+    {
+      "time": 9.13383,
+      "lane": 3
+    },
+    {
+      "time": 9.65501,
+      "lane": 0
+    },
+    {
+      "time": 10.18621,
+      "lane": 2
+    },
+    {
+      "time": 10.70739,
+      "lane": 1
+    },
+    {
+      "time": 11.21855,
+      "lane": 3
+    },
+    {
+      "time": 11.73973,
+      "lane": 0
+    },
+    {
+      "time": 12.27093,
+      "lane": 2
+    },
+    {
+      "time": 12.78209,
+      "lane": 1
+    },
+    {
+      "time": 13.30327,
+      "lane": 3
+    },
+    {
+      "time": 13.82444,
+      "lane": 0
+    },
+    {
+      "time": 14.35565,
+      "lane": 2
+    },
+    {
+      "time": 14.87683,
+      "lane": 1
+    },
+    {
+      "time": 15.38798,
+      "lane": 3
+    },
+    {
+      "time": 15.90916,
+      "lane": 0
+    },
+    {
+      "time": 16.44036,
+      "lane": 2
+    },
+    {
+      "time": 16.96154,
+      "lane": 0
+    },
+    {
+      "time": 16.96154,
+      "lane": 2
+    },
+    {
+      "time": 17.48272,
+      "lane": 0
+    },
+    {
+      "time": 18.0039,
+      "lane": 3
+    },
+    {
+      "time": 18.5351,
+      "lane": 1
+    },
+    {
+      "time": 19.05628,
+      "lane": 2
+    },
+    {
+      "time": 19.56744,
+      "lane": 0
+    },
+    {
+      "time": 20.08862,
+      "lane": 3
+    },
+    {
+      "time": 20.61982,
+      "lane": 1
+    },
+    {
+      "time": 21.141,
+      "lane": 2
+    },
+    {
+      "time": 21.65215,
+      "lane": 0
+    },
+    {
+      "time": 22.17333,
+      "lane": 3
+    },
+    {
+      "time": 22.70454,
+      "lane": 1
+    },
+    {
+      "time": 23.22571,
+      "lane": 2
+    },
+    {
+      "time": 23.74689,
+      "lane": 0
+    },
+    {
+      "time": 24.25805,
+      "lane": 3
+    },
+    {
+      "time": 24.78925,
+      "lane": 1
+    },
+    {
+      "time": 25.31043,
+      "lane": 3
+    },
+    {
+      "time": 25.83161,
+      "lane": 1
+    },
+    {
+      "time": 26.34277,
+      "lane": 2
+    },
+    {
+      "time": 26.87397,
+      "lane": 0
+    },
+    {
+      "time": 27.39515,
+      "lane": 3
+    },
+    {
+      "time": 27.91633,
+      "lane": 1
+    },
+    {
+      "time": 28.43751,
+      "lane": 2
+    },
+    {
+      "time": 28.96871,
+      "lane": 0
+    },
+    {
+      "time": 29.47986,
+      "lane": 3
+    },
+    {
+      "time": 30.00104,
+      "lane": 1
+    },
+    {
+      "time": 30.52222,
+      "lane": 2
+    },
+    {
+      "time": 31.05342,
+      "lane": 0
+    },
+    {
+      "time": 31.5746,
+      "lane": 3
+    },
+    {
+      "time": 32.08576,
+      "lane": 1
+    },
+    {
+      "time": 32.60694,
+      "lane": 2
+    },
+    {
+      "time": 33.13814,
+      "lane": 0
+    },
+    {
+      "time": 33.65932,
+      "lane": 0
+    },
+    {
+      "time": 33.65932,
+      "lane": 2
+    },
+    {
+      "time": 34.17048,
+      "lane": 2
+    },
+    {
+      "time": 34.69166,
+      "lane": 1
+    },
+    {
+      "time": 35.22286,
+      "lane": 3
+    },
+    {
+      "time": 35.74404,
+      "lane": 0
+    },
+    {
+      "time": 36.26522,
+      "lane": 2
+    },
+    {
+      "time": 36.78639,
+      "lane": 1
+    },
+    {
+      "time": 37.30757,
+      "lane": 3
+    },
+    {
+      "time": 37.83878,
+      "lane": 0
+    },
+    {
+      "time": 38.88113,
+      "lane": 1
+    },
+    {
+      "time": 39.92349,
+      "lane": 0
+    },
+    {
+      "time": 40.96585,
+      "lane": 1
+    },
+    {
+      "time": 42.00821,
+      "lane": 1
+    },
+    {
+      "time": 42.52939,
+      "lane": 3
+    },
+    {
+      "time": 43.05057,
+      "lane": 0
+    },
+    {
+      "time": 43.57175,
+      "lane": 2
+    },
+    {
+      "time": 44.09293,
+      "lane": 1
+    },
+    {
+      "time": 44.6141,
+      "lane": 3
+    },
+    {
+      "time": 45.13528,
+      "lane": 0
+    },
+    {
+      "time": 45.65646,
+      "lane": 2
+    },
+    {
+      "time": 46.18766,
+      "lane": 1
+    },
+    {
+      "time": 46.69882,
+      "lane": 3
+    },
+    {
+      "time": 47.22,
+      "lane": 0
+    },
+    {
+      "time": 47.7512,
+      "lane": 2
+    },
+    {
+      "time": 48.27238,
+      "lane": 1
+    },
+    {
+      "time": 48.78354,
+      "lane": 3
+    },
+    {
+      "time": 49.31474,
+      "lane": 0
+    },
+    {
+      "time": 49.83592,
+      "lane": 2
+    },
+    {
+      "time": 50.3571,
+      "lane": 0
+    },
+    {
+      "time": 50.3571,
+      "lane": 2
+    },
+    {
+      "time": 50.61769,
+      "lane": 3
+    },
+    {
+      "time": 50.87828,
+      "lane": 0
+    },
+    {
+      "time": 51.13887,
+      "lane": 1
+    },
+    {
+      "time": 51.39946,
+      "lane": 3
+    },
+    {
+      "time": 51.66005,
+      "lane": 2
+    },
+    {
+      "time": 51.92063,
+      "lane": 1
+    },
+    {
+      "time": 52.18122,
+      "lane": 0
+    },
+    {
+      "time": 52.44181,
+      "lane": 2
+    },
+    {
+      "time": 52.96165,
+      "lane": 0
+    },
+    {
+      "time": 53.48339,
+      "lane": 3
+    },
+    {
+      "time": 53.98531,
+      "lane": 1
+    },
+    {
+      "time": 54.52653,
+      "lane": 2
+    },
+    {
+      "time": 55.04771,
+      "lane": 0
+    },
+    {
+      "time": 55.56889,
+      "lane": 3
+    },
+    {
+      "time": 56.10009,
+      "lane": 1
+    },
+    {
+      "time": 56.61125,
+      "lane": 2
+    },
+    {
+      "time": 57.13243,
+      "lane": 0
+    },
+    {
+      "time": 57.65361,
+      "lane": 3
+    },
+    {
+      "time": 58.18481,
+      "lane": 1
+    },
+    {
+      "time": 58.70599,
+      "lane": 3
+    },
+    {
+      "time": 59.21714,
+      "lane": 1
+    },
+    {
+      "time": 59.73832,
+      "lane": 2
+    },
+    {
+      "time": 60.26952,
+      "lane": 0
+    },
+    {
+      "time": 60.7907,
+      "lane": 3
+    },
+    {
+      "time": 61.31188,
+      "lane": 1
+    },
+    {
+      "time": 61.82304,
+      "lane": 2
+    },
+    {
+      "time": 62.35424,
+      "lane": 0
+    },
+    {
+      "time": 62.87542,
+      "lane": 3
+    },
+    {
+      "time": 63.3966,
+      "lane": 1
+    },
+    {
+      "time": 63.91778,
+      "lane": 2
+    },
+    {
+      "time": 64.44898,
+      "lane": 0
+    },
+    {
+      "time": 64.96014,
+      "lane": 3
+    },
+    {
+      "time": 65.48132,
+      "lane": 1
+    },
+    {
+      "time": 66.00249,
+      "lane": 2
+    },
+    {
+      "time": 66.52367,
+      "lane": 0
+    },
+    {
+      "time": 67.05488,
+      "lane": 0
+    },
+    {
+      "time": 67.05488,
+      "lane": 2
+    },
+    {
+      "time": 67.56603,
+      "lane": 2
+    },
+    {
+      "time": 68.08721,
+      "lane": 1
+    },
+    {
+      "time": 68.61841,
+      "lane": 3
+    },
+    {
+      "time": 69.13959,
+      "lane": 0
+    },
+    {
+      "time": 69.65075,
+      "lane": 2
+    },
+    {
+      "time": 70.17193,
+      "lane": 1
+    },
+    {
+      "time": 70.70313,
+      "lane": 3
+    },
+    {
+      "time": 71.22431,
+      "lane": 0
+    },
+    {
+      "time": 71.74549,
+      "lane": 2
+    },
+    {
+      "time": 72.25664,
+      "lane": 1
+    },
+    {
+      "time": 72.78785,
+      "lane": 3
+    },
+    {
+      "time": 73.30902,
+      "lane": 0
+    },
+    {
+      "time": 73.8302,
+      "lane": 2
+    },
+    {
+      "time": 74.35138,
+      "lane": 1
+    },
+    {
+      "time": 74.87256,
+      "lane": 3
+    },
+    {
+      "time": 75.40376,
+      "lane": 1
+    },
+    {
+      "time": 75.91492,
+      "lane": 3
+    },
+    {
+      "time": 76.44612,
+      "lane": 0
+    },
+    {
+      "time": 76.95728,
+      "lane": 2
+    },
+    {
+      "time": 77.47846,
+      "lane": 1
+    },
+    {
+      "time": 77.99964,
+      "lane": 3
+    },
+    {
+      "time": 78.53084,
+      "lane": 0
+    },
+    {
+      "time": 79.05202,
+      "lane": 2
+    }
+  ],
+  "sections": [
+    {
+      "name": "entrance",
+      "start": 0
+    },
+    {
+      "name": "groove",
+      "start": 2.352957
+    },
+    {
+      "name": "relaxed-phrase",
+      "start": 37.831217
+    },
+    {
+      "name": "lift",
+      "start": 50.352957
+    }
+  ],
+  "analysis": {
+    "method": "broad85–180BPM source onset-grid search, full-source refined phase fit; authored lane motifs and measured eighth pickups",
+    "matchedOnsets": 146,
+    "timedEvents": 148,
+    "gridEvidence": [
+      {
+        "grid": 2.35296,
+        "time": 2.36853,
+        "onsetDelta": 0.01557,
+        "snapped": true,
+        "strength": 0.4367
+      },
+      {
+        "grid": 2.8747,
+        "time": 2.87968,
+        "onsetDelta": 0.00499,
+        "snapped": true,
+        "strength": 0.3893
+      },
+      {
+        "grid": 3.39643,
+        "time": 3.44095,
+        "onsetDelta": 0.04452,
+        "snapped": true,
+        "strength": 0.1619
+      },
+      {
+        "grid": 3.91817,
+        "time": 3.92204,
+        "onsetDelta": 0.00387,
+        "snapped": true,
+        "strength": 0.4375
+      },
+      {
+        "grid": 4.43991,
+        "time": 4.44322,
+        "onsetDelta": 0.00331,
+        "snapped": true,
+        "strength": 0.616
+      },
+      {
+        "grid": 4.96165,
+        "time": 4.9644,
+        "onsetDelta": 0.00275,
+        "snapped": true,
+        "strength": 0.5689
+      },
+      {
+        "grid": 5.48339,
+        "time": 5.47556,
+        "onsetDelta": -0.00784,
+        "snapped": true,
+        "strength": 0.6006
+      },
+      {
+        "grid": 6.00513,
+        "time": 6.01678,
+        "onsetDelta": 0.01165,
+        "snapped": true,
+        "strength": 0.637
+      },
+      {
+        "grid": 6.52687,
+        "time": 6.52794,
+        "onsetDelta": 0.00107,
+        "snapped": true,
+        "strength": 0.5762
+      },
+      {
+        "grid": 7.04861,
+        "time": 7.04912,
+        "onsetDelta": 0.00051,
+        "snapped": true,
+        "strength": 0.7132
+      },
+      {
+        "grid": 7.57035,
+        "time": 7.56027,
+        "onsetDelta": -0.01008,
+        "snapped": true,
+        "strength": 0.6116
+      },
+      {
+        "grid": 8.09209,
+        "time": 8.09147,
+        "onsetDelta": -0.00061,
+        "snapped": true,
+        "strength": 0.7687
+      },
+      {
+        "grid": 8.61383,
+        "time": 8.61265,
+        "onsetDelta": -0.00117,
+        "snapped": true,
+        "strength": 0.5299
+      },
+      {
+        "grid": 9.13557,
+        "time": 9.13383,
+        "onsetDelta": -0.00173,
+        "snapped": true,
+        "strength": 0.8529
+      },
+      {
+        "grid": 9.6573,
+        "time": 9.65501,
+        "onsetDelta": -0.00229,
+        "snapped": true,
+        "strength": 0.6242
+      },
+      {
+        "grid": 10.17904,
+        "time": 10.18621,
+        "onsetDelta": 0.00717,
+        "snapped": true,
+        "strength": 0.7231
+      },
+      {
+        "grid": 10.70078,
+        "time": 10.70739,
+        "onsetDelta": 0.00661,
+        "snapped": true,
+        "strength": 0.554
+      },
+      {
+        "grid": 11.22252,
+        "time": 11.21855,
+        "onsetDelta": -0.00397,
+        "snapped": true,
+        "strength": 0.8825
+      },
+      {
+        "grid": 11.74426,
+        "time": 11.73973,
+        "onsetDelta": -0.00453,
+        "snapped": true,
+        "strength": 0.6603
+      },
+      {
+        "grid": 12.266,
+        "time": 12.27093,
+        "onsetDelta": 0.00493,
+        "snapped": true,
+        "strength": 0.7722
+      },
+      {
+        "grid": 12.78774,
+        "time": 12.78209,
+        "onsetDelta": -0.00565,
+        "snapped": true,
+        "strength": 0.4183
+      },
+      {
+        "grid": 13.30948,
+        "time": 13.30327,
+        "onsetDelta": -0.00621,
+        "snapped": true,
+        "strength": 0.8523
+      },
+      {
+        "grid": 13.83122,
+        "time": 13.82444,
+        "onsetDelta": -0.00677,
+        "snapped": true,
+        "strength": 0.7139
+      },
+      {
+        "grid": 14.35296,
+        "time": 14.35565,
+        "onsetDelta": 0.00269,
+        "snapped": true,
+        "strength": 0.713
+      },
+      {
+        "grid": 14.8747,
+        "time": 14.87683,
+        "onsetDelta": 0.00213,
+        "snapped": true,
+        "strength": 0.558
+      },
+      {
+        "grid": 15.39643,
+        "time": 15.38798,
+        "onsetDelta": -0.00845,
+        "snapped": true,
+        "strength": 0.721
+      },
+      {
+        "grid": 15.91817,
+        "time": 15.90916,
+        "onsetDelta": -0.00901,
+        "snapped": true,
+        "strength": 0.5191
+      },
+      {
+        "grid": 16.43991,
+        "time": 16.44036,
+        "onsetDelta": 0.00045,
+        "snapped": true,
+        "strength": 0.864
+      },
+      {
+        "grid": 16.96165,
+        "time": 16.96154,
+        "onsetDelta": -0.00011,
+        "snapped": true,
+        "strength": 0.4472
+      },
+      {
+        "grid": 17.48339,
+        "time": 17.48272,
+        "onsetDelta": -0.00067,
+        "snapped": true,
+        "strength": 0.8168
+      },
+      {
+        "grid": 18.00513,
+        "time": 18.0039,
+        "onsetDelta": -0.00123,
+        "snapped": true,
+        "strength": 0.5218
+      },
+      {
+        "grid": 18.52687,
+        "time": 18.5351,
+        "onsetDelta": 0.00823,
+        "snapped": true,
+        "strength": 0.7648
+      },
+      {
+        "grid": 19.04861,
+        "time": 19.05628,
+        "onsetDelta": 0.00767,
+        "snapped": true,
+        "strength": 0.4373
+      },
+      {
+        "grid": 19.57035,
+        "time": 19.56744,
+        "onsetDelta": -0.00291,
+        "snapped": true,
+        "strength": 0.8965
+      },
+      {
+        "grid": 20.09209,
+        "time": 20.08862,
+        "onsetDelta": -0.00347,
+        "snapped": true,
+        "strength": 0.5486
+      },
+      {
+        "grid": 20.61383,
+        "time": 20.61982,
+        "onsetDelta": 0.00599,
+        "snapped": true,
+        "strength": 0.6474
+      },
+      {
+        "grid": 21.13557,
+        "time": 21.141,
+        "onsetDelta": 0.00543,
+        "snapped": true,
+        "strength": 0.6306
+      },
+      {
+        "grid": 21.6573,
+        "time": 21.65215,
+        "onsetDelta": -0.00515,
+        "snapped": true,
+        "strength": 1.0
+      },
+      {
+        "grid": 22.17904,
+        "time": 22.17333,
+        "onsetDelta": -0.00571,
+        "snapped": true,
+        "strength": 0.6822
+      },
+      {
+        "grid": 22.70078,
+        "time": 22.70454,
+        "onsetDelta": 0.00375,
+        "snapped": true,
+        "strength": 0.503
+      },
+      {
+        "grid": 23.22252,
+        "time": 23.22571,
+        "onsetDelta": 0.00319,
+        "snapped": true,
+        "strength": 0.6512
+      },
+      {
+        "grid": 23.74426,
+        "time": 23.74689,
+        "onsetDelta": 0.00263,
+        "snapped": true,
+        "strength": 0.6159
+      },
+      {
+        "grid": 24.266,
+        "time": 24.25805,
+        "onsetDelta": -0.00795,
+        "snapped": true,
+        "strength": 0.6022
+      },
+      {
+        "grid": 24.78774,
+        "time": 24.78925,
+        "onsetDelta": 0.00151,
+        "snapped": true,
+        "strength": 0.625
+      },
+      {
+        "grid": 25.30948,
+        "time": 25.31043,
+        "onsetDelta": 0.00095,
+        "snapped": true,
+        "strength": 0.5563
+      },
+      {
+        "grid": 25.83122,
+        "time": 25.83161,
+        "onsetDelta": 0.00039,
+        "snapped": true,
+        "strength": 0.8156
+      },
+      {
+        "grid": 26.35296,
+        "time": 26.34277,
+        "onsetDelta": -0.01019,
+        "snapped": true,
+        "strength": 0.5712
+      },
+      {
+        "grid": 26.8747,
+        "time": 26.87397,
+        "onsetDelta": -0.00073,
+        "snapped": true,
+        "strength": 0.487
+      },
+      {
+        "grid": 27.39643,
+        "time": 27.39515,
+        "onsetDelta": -0.00129,
+        "snapped": true,
+        "strength": 0.4839
+      },
+      {
+        "grid": 27.91817,
+        "time": 27.91633,
+        "onsetDelta": -0.00185,
+        "snapped": true,
+        "strength": 0.8111
+      },
+      {
+        "grid": 28.43991,
+        "time": 28.43751,
+        "onsetDelta": -0.00241,
+        "snapped": true,
+        "strength": 0.4847
+      },
+      {
+        "grid": 28.96165,
+        "time": 28.96871,
+        "onsetDelta": 0.00706,
+        "snapped": true,
+        "strength": 0.627
+      },
+      {
+        "grid": 29.48339,
+        "time": 29.47986,
+        "onsetDelta": -0.00353,
+        "snapped": true,
+        "strength": 0.4192
+      },
+      {
+        "grid": 30.00513,
+        "time": 30.00104,
+        "onsetDelta": -0.00409,
+        "snapped": true,
+        "strength": 0.9256
+      },
+      {
+        "grid": 30.52687,
+        "time": 30.52222,
+        "onsetDelta": -0.00465,
+        "snapped": true,
+        "strength": 0.6627
+      },
+      {
+        "grid": 31.04861,
+        "time": 31.05342,
+        "onsetDelta": 0.00482,
+        "snapped": true,
+        "strength": 0.5616
+      },
+      {
+        "grid": 31.57035,
+        "time": 31.5746,
+        "onsetDelta": 0.00426,
+        "snapped": true,
+        "strength": 0.4594
+      },
+      {
+        "grid": 32.09209,
+        "time": 32.08576,
+        "onsetDelta": -0.00633,
+        "snapped": true,
+        "strength": 0.7562
+      },
+      {
+        "grid": 32.61383,
+        "time": 32.60694,
+        "onsetDelta": -0.00689,
+        "snapped": true,
+        "strength": 0.6437
+      },
+      {
+        "grid": 33.13557,
+        "time": 33.13814,
+        "onsetDelta": 0.00258,
+        "snapped": true,
+        "strength": 0.7101
+      },
+      {
+        "grid": 33.6573,
+        "time": 33.65932,
+        "onsetDelta": 0.00202,
+        "snapped": true,
+        "strength": 0.5208
+      },
+      {
+        "grid": 34.17904,
+        "time": 34.17048,
+        "onsetDelta": -0.00857,
+        "snapped": true,
+        "strength": 0.8193
+      },
+      {
+        "grid": 34.70078,
+        "time": 34.69166,
+        "onsetDelta": -0.00913,
+        "snapped": true,
+        "strength": 0.5887
+      },
+      {
+        "grid": 35.22252,
+        "time": 35.22286,
+        "onsetDelta": 0.00034,
+        "snapped": true,
+        "strength": 0.4677
+      },
+      {
+        "grid": 35.74426,
+        "time": 35.74404,
+        "onsetDelta": -0.00022,
+        "snapped": true,
+        "strength": 0.6013
+      },
+      {
+        "grid": 36.266,
+        "time": 36.26522,
+        "onsetDelta": -0.00078,
+        "snapped": true,
+        "strength": 0.7845
+      },
+      {
+        "grid": 36.78774,
+        "time": 36.78639,
+        "onsetDelta": -0.00134,
+        "snapped": true,
+        "strength": 0.5367
+      },
+      {
+        "grid": 37.30948,
+        "time": 37.30757,
+        "onsetDelta": -0.0019,
+        "snapped": true,
+        "strength": 0.664
+      },
+      {
+        "grid": 37.83122,
+        "time": 37.83878,
+        "onsetDelta": 0.00756,
+        "snapped": true,
+        "strength": 0.4617
+      },
+      {
+        "grid": 38.8747,
+        "time": 38.88113,
+        "onsetDelta": 0.00644,
+        "snapped": true,
+        "strength": 0.4703
+      },
+      {
+        "grid": 39.91817,
+        "time": 39.92349,
+        "onsetDelta": 0.00532,
+        "snapped": true,
+        "strength": 0.4735
+      },
+      {
+        "grid": 40.96165,
+        "time": 40.96585,
+        "onsetDelta": 0.0042,
+        "snapped": true,
+        "strength": 0.4548
+      },
+      {
+        "grid": 42.00513,
+        "time": 42.00821,
+        "onsetDelta": 0.00308,
+        "snapped": true,
+        "strength": 0.4213
+      },
+      {
+        "grid": 42.52687,
+        "time": 42.52939,
+        "onsetDelta": 0.00252,
+        "snapped": true,
+        "strength": 0.3631
+      },
+      {
+        "grid": 43.04861,
+        "time": 43.05057,
+        "onsetDelta": 0.00196,
+        "snapped": true,
+        "strength": 0.5013
+      },
+      {
+        "grid": 43.57035,
+        "time": 43.57175,
+        "onsetDelta": 0.0014,
+        "snapped": true,
+        "strength": 0.5039
+      },
+      {
+        "grid": 44.09209,
+        "time": 44.09293,
+        "onsetDelta": 0.00084,
+        "snapped": true,
+        "strength": 0.4882
+      },
+      {
+        "grid": 44.61383,
+        "time": 44.6141,
+        "onsetDelta": 0.00028,
+        "snapped": true,
+        "strength": 0.5655
+      },
+      {
+        "grid": 45.13557,
+        "time": 45.13528,
+        "onsetDelta": -0.00028,
+        "snapped": true,
+        "strength": 0.5599
+      },
+      {
+        "grid": 45.6573,
+        "time": 45.65646,
+        "onsetDelta": -0.00084,
+        "snapped": true,
+        "strength": 0.431
+      },
+      {
+        "grid": 46.17904,
+        "time": 46.18766,
+        "onsetDelta": 0.00862,
+        "snapped": true,
+        "strength": 0.425
+      },
+      {
+        "grid": 46.70078,
+        "time": 46.69882,
+        "onsetDelta": -0.00196,
+        "snapped": true,
+        "strength": 0.4162
+      },
+      {
+        "grid": 47.22252,
+        "time": 47.22,
+        "onsetDelta": -0.00252,
+        "snapped": true,
+        "strength": 0.5345
+      },
+      {
+        "grid": 47.74426,
+        "time": 47.7512,
+        "onsetDelta": 0.00694,
+        "snapped": true,
+        "strength": 0.4278
+      },
+      {
+        "grid": 48.266,
+        "time": 48.27238,
+        "onsetDelta": 0.00638,
+        "snapped": true,
+        "strength": 0.424
+      },
+      {
+        "grid": 48.78774,
+        "time": 48.78354,
+        "onsetDelta": -0.0042,
+        "snapped": true,
+        "strength": 0.5943
+      },
+      {
+        "grid": 49.30948,
+        "time": 49.31474,
+        "onsetDelta": 0.00526,
+        "snapped": true,
+        "strength": 0.5967
+      },
+      {
+        "grid": 49.83122,
+        "time": 49.83592,
+        "onsetDelta": 0.0047,
+        "snapped": true,
+        "strength": 0.5438
+      },
+      {
+        "grid": 50.35296,
+        "time": 50.3571,
+        "onsetDelta": 0.00414,
+        "snapped": true,
+        "strength": 0.5665
+      },
+      {
+        "grid": 50.8747,
+        "time": 50.87828,
+        "onsetDelta": 0.00358,
+        "snapped": true,
+        "strength": 0.4293
+      },
+      {
+        "grid": 51.39643,
+        "time": 51.39946,
+        "onsetDelta": 0.00302,
+        "snapped": true,
+        "strength": 0.4147
+      },
+      {
+        "grid": 51.91817,
+        "time": 51.92063,
+        "onsetDelta": 0.00246,
+        "snapped": true,
+        "strength": 0.5619
+      },
+      {
+        "grid": 52.43991,
+        "time": 52.44181,
+        "onsetDelta": 0.0019,
+        "snapped": true,
+        "strength": 0.8183
+      },
+      {
+        "grid": 52.96165,
+        "time": 52.96165,
+        "onsetDelta": -0.06882,
+        "snapped": false,
+        "strength": 0.1854
+      },
+      {
+        "grid": 53.48339,
+        "time": 53.48339,
+        "onsetDelta": -0.0794,
+        "snapped": false,
+        "strength": 0.1431
+      },
+      {
+        "grid": 54.00513,
+        "time": 53.98531,
+        "onsetDelta": -0.01982,
+        "snapped": true,
+        "strength": 0.5073
+      },
+      {
+        "grid": 54.52687,
+        "time": 54.52653,
+        "onsetDelta": -0.00034,
+        "snapped": true,
+        "strength": 0.5466
+      },
+      {
+        "grid": 55.04861,
+        "time": 55.04771,
+        "onsetDelta": -0.0009,
+        "snapped": true,
+        "strength": 0.6993
+      },
+      {
+        "grid": 55.57035,
+        "time": 55.56889,
+        "onsetDelta": -0.00146,
+        "snapped": true,
+        "strength": 0.5002
+      },
+      {
+        "grid": 56.09209,
+        "time": 56.10009,
+        "onsetDelta": 0.008,
+        "snapped": true,
+        "strength": 0.6285
+      },
+      {
+        "grid": 56.61383,
+        "time": 56.61125,
+        "onsetDelta": -0.00258,
+        "snapped": true,
+        "strength": 0.4601
+      },
+      {
+        "grid": 57.13557,
+        "time": 57.13243,
+        "onsetDelta": -0.00314,
+        "snapped": true,
+        "strength": 0.771
+      },
+      {
+        "grid": 57.6573,
+        "time": 57.65361,
+        "onsetDelta": -0.0037,
+        "snapped": true,
+        "strength": 0.5679
+      },
+      {
+        "grid": 58.17904,
+        "time": 58.18481,
+        "onsetDelta": 0.00576,
+        "snapped": true,
+        "strength": 0.4981
+      },
+      {
+        "grid": 58.70078,
+        "time": 58.70599,
+        "onsetDelta": 0.0052,
+        "snapped": true,
+        "strength": 0.381
+      },
+      {
+        "grid": 59.22252,
+        "time": 59.21714,
+        "onsetDelta": -0.00538,
+        "snapped": true,
+        "strength": 0.7457
+      },
+      {
+        "grid": 59.74426,
+        "time": 59.73832,
+        "onsetDelta": -0.00594,
+        "snapped": true,
+        "strength": 0.5781
+      },
+      {
+        "grid": 60.266,
+        "time": 60.26952,
+        "onsetDelta": 0.00352,
+        "snapped": true,
+        "strength": 0.6661
+      },
+      {
+        "grid": 60.78774,
+        "time": 60.7907,
+        "onsetDelta": 0.00296,
+        "snapped": true,
+        "strength": 0.4728
+      },
+      {
+        "grid": 61.30948,
+        "time": 61.31188,
+        "onsetDelta": 0.0024,
+        "snapped": true,
+        "strength": 0.5999
+      },
+      {
+        "grid": 61.83122,
+        "time": 61.82304,
+        "onsetDelta": -0.00818,
+        "snapped": true,
+        "strength": 0.4822
+      },
+      {
+        "grid": 62.35296,
+        "time": 62.35424,
+        "onsetDelta": 0.00128,
+        "snapped": true,
+        "strength": 0.533
+      },
+      {
+        "grid": 62.8747,
+        "time": 62.87542,
+        "onsetDelta": 0.00072,
+        "snapped": true,
+        "strength": 0.2905
+      },
+      {
+        "grid": 63.39643,
+        "time": 63.3966,
+        "onsetDelta": 0.00016,
+        "snapped": true,
+        "strength": 0.6899
+      },
+      {
+        "grid": 63.91817,
+        "time": 63.91778,
+        "onsetDelta": -0.0004,
+        "snapped": true,
+        "strength": 0.4472
+      },
+      {
+        "grid": 64.43991,
+        "time": 64.44898,
+        "onsetDelta": 0.00907,
+        "snapped": true,
+        "strength": 0.5654
+      },
+      {
+        "grid": 64.96165,
+        "time": 64.96014,
+        "onsetDelta": -0.00152,
+        "snapped": true,
+        "strength": 0.4855
+      },
+      {
+        "grid": 65.48339,
+        "time": 65.48132,
+        "onsetDelta": -0.00208,
+        "snapped": true,
+        "strength": 0.7922
+      },
+      {
+        "grid": 66.00513,
+        "time": 66.00249,
+        "onsetDelta": -0.00264,
+        "snapped": true,
+        "strength": 0.4904
+      },
+      {
+        "grid": 66.52687,
+        "time": 66.52367,
+        "onsetDelta": -0.0032,
+        "snapped": true,
+        "strength": 0.4369
+      },
+      {
+        "grid": 67.04861,
+        "time": 67.05488,
+        "onsetDelta": 0.00627,
+        "snapped": true,
+        "strength": 0.3496
+      },
+      {
+        "grid": 67.57035,
+        "time": 67.56603,
+        "onsetDelta": -0.00432,
+        "snapped": true,
+        "strength": 0.7272
+      },
+      {
+        "grid": 68.09209,
+        "time": 68.08721,
+        "onsetDelta": -0.00488,
+        "snapped": true,
+        "strength": 0.5362
+      },
+      {
+        "grid": 68.61383,
+        "time": 68.61841,
+        "onsetDelta": 0.00459,
+        "snapped": true,
+        "strength": 0.688
+      },
+      {
+        "grid": 69.13557,
+        "time": 69.13959,
+        "onsetDelta": 0.00403,
+        "snapped": true,
+        "strength": 0.6033
+      },
+      {
+        "grid": 69.6573,
+        "time": 69.65075,
+        "onsetDelta": -0.00656,
+        "snapped": true,
+        "strength": 0.526
+      },
+      {
+        "grid": 70.17904,
+        "time": 70.17193,
+        "onsetDelta": -0.00712,
+        "snapped": true,
+        "strength": 0.4853
+      },
+      {
+        "grid": 70.70078,
+        "time": 70.70313,
+        "onsetDelta": 0.00235,
+        "snapped": true,
+        "strength": 0.5168
+      },
+      {
+        "grid": 71.22252,
+        "time": 71.22431,
+        "onsetDelta": 0.00179,
+        "snapped": true,
+        "strength": 0.4354
+      },
+      {
+        "grid": 71.74426,
+        "time": 71.74549,
+        "onsetDelta": 0.00123,
+        "snapped": true,
+        "strength": 0.7253
+      },
+      {
+        "grid": 72.266,
+        "time": 72.25664,
+        "onsetDelta": -0.00936,
+        "snapped": true,
+        "strength": 0.5165
+      },
+      {
+        "grid": 72.78774,
+        "time": 72.78785,
+        "onsetDelta": 0.00011,
+        "snapped": true,
+        "strength": 0.5455
+      },
+      {
+        "grid": 73.30948,
+        "time": 73.30902,
+        "onsetDelta": -0.00045,
+        "snapped": true,
+        "strength": 0.4349
+      },
+      {
+        "grid": 73.83122,
+        "time": 73.8302,
+        "onsetDelta": -0.00101,
+        "snapped": true,
+        "strength": 0.8012
+      },
+      {
+        "grid": 74.35296,
+        "time": 74.35138,
+        "onsetDelta": -0.00157,
+        "snapped": true,
+        "strength": 0.5185
+      },
+      {
+        "grid": 74.8747,
+        "time": 74.87256,
+        "onsetDelta": -0.00213,
+        "snapped": true,
+        "strength": 0.389
+      },
+      {
+        "grid": 75.39643,
+        "time": 75.40376,
+        "onsetDelta": 0.00733,
+        "snapped": true,
+        "strength": 0.4123
+      },
+      {
+        "grid": 75.91817,
+        "time": 75.91492,
+        "onsetDelta": -0.00325,
+        "snapped": true,
+        "strength": 0.7061
+      },
+      {
+        "grid": 76.43991,
+        "time": 76.44612,
+        "onsetDelta": 0.00621,
+        "snapped": true,
+        "strength": 0.5324
+      },
+      {
+        "grid": 76.96165,
+        "time": 76.95728,
+        "onsetDelta": -0.00437,
+        "snapped": true,
+        "strength": 0.37
+      },
+      {
+        "grid": 77.48339,
+        "time": 77.47846,
+        "onsetDelta": -0.00493,
+        "snapped": true,
+        "strength": 0.5289
+      },
+      {
+        "grid": 78.00513,
+        "time": 77.99964,
+        "onsetDelta": -0.00549,
+        "snapped": true,
+        "strength": 0.8521
+      },
+      {
+        "grid": 78.52687,
+        "time": 78.53084,
+        "onsetDelta": 0.00397,
+        "snapped": true,
+        "strength": 0.6709
+      },
+      {
+        "grid": 79.04861,
+        "time": 79.05202,
+        "onsetDelta": 0.00341,
+        "snapped": true,
+        "strength": 0.6275
+      },
+      {
+        "grid": 51.13557,
+        "time": 51.13887,
+        "onsetDelta": 0.0033,
+        "snapped": true,
+        "strength": 0.6152
+      },
+      {
+        "grid": 51.6573,
+        "time": 51.66005,
+        "onsetDelta": 0.00274,
+        "snapped": true,
+        "strength": 0.5976
+      },
+      {
+        "grid": 52.17904,
+        "time": 52.18122,
+        "onsetDelta": 0.00218,
+        "snapped": true,
+        "strength": 0.5545
+      },
+      {
+        "grid": 50.61383,
+        "time": 50.61769,
+        "onsetDelta": 0.00386,
+        "snapped": true,
+        "strength": 0.5457
+      }
+    ]
+  }
+}

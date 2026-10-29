@@ -1,0 +1,25 @@
+{
+  "assets": [
+    {
+      "file": "dance-stage/public/assets/characters/jiaxin-0.glb",
+      "bytes": 8061708,
+      "sha256": "f9e4c61f22b6b11ae66f1e1c476b868b4c4b457ca211984b52fa25701d980a57"
+    },
+    {
+      "file": "dance-stage/public/assets/characters/jiaxin-0_low.glb",
+      "bytes": 4115720,
+      "sha256": "661eb6a2fa92105d6201e3cc94889b7bfce336ae0cbec3d084c67dd92db74be6"
+    },
+    {
+      "file": "dance-stage/public/assets/thumbs/jiaxin-0.webp",
+      "bytes": 7548,
+      "sha256": "3cad320dc9fa1d07d4ef8446d312db9e5ad29ecd532c8e18d42a8e2eb3dd44c5"
+    }
+  ],
+  "height": 1.868307357861884,
+  "rotationY": -1.5707963267948966,
+  "framing_height_multiplier": 1.0169632914010387,
+  "additional_api_credits": 0,
+  "likeness": "Bounded local improvement, not exact identity reconstruction",
+  "photo_not_public": true
+}

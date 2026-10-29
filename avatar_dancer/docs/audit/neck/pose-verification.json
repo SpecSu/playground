@@ -1,0 +1,61 @@
+{
+  "method": "Actual Blender deformed-mesh ray parity on lower neck ring, 17 phases of each of 3 original clips; >90% ring containment sanity check PLUS all actual orbit/pose renders visually inspected. This is not a watertight proof for whole source clothing.",
+  "assets": [
+    {
+      "asset": "lx-0",
+      "high_sha256": "8f2e5f1c4d13e65e2e6092e262e54770a2718a9e8aa23b05134f884aac70a16e",
+      "pose_samples_per_quality": 51,
+      "high_low_deformed_measurements_identical": true,
+      "min_lower_neck_ring_inside_torso_ratio": 1.0,
+      "rendered_views": 22,
+      "contact_sheet": "lx-0-contact.jpg"
+    },
+    {
+      "asset": "lx-1",
+      "high_sha256": "d60df8f4a7a959184c69ca62cc31b7f18985a7da993b8cc928a6d6c8ee73f20e",
+      "pose_samples_per_quality": 51,
+      "high_low_deformed_measurements_identical": true,
+      "min_lower_neck_ring_inside_torso_ratio": 0.9861111111111112,
+      "rendered_views": 22,
+      "contact_sheet": "lx-1-contact.jpg"
+    },
+    {
+      "asset": "lx-2",
+      "high_sha256": "0d3ea0319d7b13afe8ad30ec8f8d62b20c0b5f08611a41ac0905371d56a7e923",
+      "pose_samples_per_quality": 51,
+      "high_low_deformed_measurements_identical": true,
+      "min_lower_neck_ring_inside_torso_ratio": 0.9436619718309859,
+      "rendered_views": 22,
+      "contact_sheet": "lx-2-contact.jpg"
+    },
+    {
+      "asset": "jiji-0",
+      "high_sha256": "6f4153808ab94b2240e1b61c9187d5121ac380de5f34f64657aaccdf772265f0",
+      "pose_samples_per_quality": 51,
+      "high_low_deformed_measurements_identical": true,
+      "min_lower_neck_ring_inside_torso_ratio": 0.9908256880733946,
+      "rendered_views": 22,
+      "contact_sheet": "jiji-0-contact.jpg"
+    },
+    {
+      "asset": "jiji-1",
+      "high_sha256": "28e2f4e5e6fce2b5fe4c63aceecd7c68217bf52e3d9670b9cf62b9db2acc9ce8",
+      "pose_samples_per_quality": 51,
+      "high_low_deformed_measurements_identical": true,
+      "min_lower_neck_ring_inside_torso_ratio": 0.9724770642201835,
+      "rendered_views": 22,
+      "contact_sheet": "jiji-1-contact.jpg"
+    },
+    {
+      "asset": "jiji-2",
+      "high_sha256": "7c4aefe15e98e718b8b279bbb76eb8966e9c4eacde0b3e4196243dd42ba9572a",
+      "pose_samples_per_quality": 51,
+      "high_low_deformed_measurements_identical": true,
+      "min_lower_neck_ring_inside_torso_ratio": 0.9908256880733946,
+      "rendered_views": 22,
+      "contact_sheet": "jiji-2-contact.jpg"
+    }
+  ],
+  "total_numeric_pose_samples": 612,
+  "total_actual_mesh_renders": 132
+}

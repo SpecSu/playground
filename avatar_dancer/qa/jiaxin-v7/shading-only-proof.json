@@ -1,0 +1,32 @@
+{
+  "sourceSha": "ea4c04bb7de74516fe5c01c45ab74a62d9a63487ba8bebf88022353ac193de7d",
+  "finalRawSha": "700a019ce43a78fe2059448315e8094f9b983c36b1ec15eb06a66ba7a5faeb86",
+  "positionIndexSkinUVAnimationRigExact": true,
+  "changedAttributes": [
+    [
+      0,
+      0,
+      "NORMAL"
+    ],
+    [
+      0,
+      1,
+      "NORMAL"
+    ],
+    [
+      0,
+      2,
+      "NORMAL"
+    ],
+    [
+      0,
+      3,
+      "NORMAL"
+    ],
+    [
+      0,
+      3,
+      "COLOR_0"
+    ]
+  ]
+}

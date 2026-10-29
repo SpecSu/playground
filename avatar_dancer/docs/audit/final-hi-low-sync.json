@@ -1,0 +1,38 @@
+[
+  {
+    "asset": "lx-0.glb",
+    "low": "lx-0_low.glb",
+    "allNonImageBytesEqual": true,
+    "meshSkinAnimationNodeJSONEqual": true
+  },
+  {
+    "asset": "lx-1.glb",
+    "low": "lx-1_low.glb",
+    "allNonImageBytesEqual": true,
+    "meshSkinAnimationNodeJSONEqual": true
+  },
+  {
+    "asset": "lx-2.glb",
+    "low": "lx-2_low.glb",
+    "allNonImageBytesEqual": true,
+    "meshSkinAnimationNodeJSONEqual": true
+  },
+  {
+    "asset": "jiji-0.glb",
+    "low": "jiji-0_low.glb",
+    "allNonImageBytesEqual": true,
+    "meshSkinAnimationNodeJSONEqual": true
+  },
+  {
+    "asset": "jiji-1.glb",
+    "low": "jiji-1_low.glb",
+    "allNonImageBytesEqual": true,
+    "meshSkinAnimationNodeJSONEqual": true
+  },
+  {
+    "asset": "jiji-2.glb",
+    "low": "jiji-2_low.glb",
+    "allNonImageBytesEqual": true,
+    "meshSkinAnimationNodeJSONEqual": true
+  }
+]

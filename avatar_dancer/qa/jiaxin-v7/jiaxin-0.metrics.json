@@ -1,0 +1,193 @@
+{
+  "source": "/workspace/scratch/e8cd10917327/jiaxin-head-integration/jiaxin-integrated-review-v6.glb",
+  "destination": "/workspace/scratch/e8cd10917327/jiaxin-head-integration/final/jiaxin-0.glb",
+  "source_sha256": "700a019ce43a78fe2059448315e8094f9b983c36b1ec15eb06a66ba7a5faeb86",
+  "output_sha256": "d16b2e358045404fc1f6a5b2d069a47937656fe5b5bd9f60e7e8d8060379c37f",
+  "settings": {
+    "diffuse_max": 2048,
+    "normal_orm_max": 1024
+  },
+  "before": {
+    "file_bytes": 20461532,
+    "images": [
+      {
+        "index": 0,
+        "name": "jiaxin-normal-4096",
+        "roles": [
+          "normal"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 837666,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 1,
+        "name": "jiaxin-color-4096",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 3001993,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 2,
+        "name": "jiaxin-orm-4096",
+        "roles": [
+          "orm"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 1850834,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "normal"
+        ],
+        "width": 4096,
+        "height": 4096,
+        "encoded_bytes": 2038118,
+        "estimated_rgba_mipmap_bytes": 89478485
+      },
+      {
+        "index": 4,
+        "name": "Color_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 4096,
+        "height": 4096,
+        "encoded_bytes": 1492024,
+        "estimated_rgba_mipmap_bytes": 89478485
+      },
+      {
+        "index": 5,
+        "name": "ORM_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "orm"
+        ],
+        "width": 4096,
+        "height": 4096,
+        "encoded_bytes": 1658865,
+        "estimated_rgba_mipmap_bytes": 89478485
+      },
+      {
+        "index": 6,
+        "name": "ORM_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "orm"
+        ],
+        "width": 4096,
+        "height": 4096,
+        "encoded_bytes": 6511330,
+        "estimated_rgba_mipmap_bytes": 89478485
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 405.33,
+    "meshes": 1,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 242,
+    "buffer_views": 249
+  },
+  "after": {
+    "file_bytes": 8748008,
+    "images": [
+      {
+        "index": 0,
+        "name": "jiaxin-normal-4096",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 319027,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 1,
+        "name": "jiaxin-color-4096",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 3001993,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 2,
+        "name": "jiaxin-orm-4096",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 742492,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 262504,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 4,
+        "name": "Color_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 642355,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 5,
+        "name": "ORM_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 293811,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 6,
+        "name": "ORM_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 415367,
+        "estimated_rgba_mipmap_bytes": 5592405
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 69.33,
+    "meshes": 1,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 242,
+    "buffer_views": 249
+  },
+  "verification": {
+    "all_non_image_view_bytes_identical": true,
+    "semantic_json_identical": true,
+    "source_unchanged": true,
+    "accessor_and_view_bounds_valid": true
+  },
+  "memory_note": "RGBA8 plus complete mip chain estimate; not measured GPU memory."
+}

@@ -1,0 +1,1338 @@
+[
+  {
+    "file_bytes": 9354736,
+    "images": [
+      {
+        "index": 0,
+        "name": "jiaxin-normal-4096",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 319027,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 1,
+        "name": "jiaxin-color-4096",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 3001993,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 2,
+        "name": "jiaxin-orm-4096",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 742492,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 262504,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 4,
+        "name": "Color_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 642355,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 5,
+        "name": "ORM_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 293811,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 6,
+        "name": "ORM_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 415367,
+        "estimated_rgba_mipmap_bytes": 5592405
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 69.33,
+    "meshes": 1,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 296,
+    "buffer_views": 303,
+    "file": "jiaxin-0.glb",
+    "sha256": "01bd8780a769cb683a3a8a74f5db1d5509baf7bc44a93bfe6d270f7a54200d27",
+    "triangles": 63067,
+    "primitives": 4,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 5609968,
+    "images": [
+      {
+        "index": 0,
+        "name": "jiaxin-normal-4096",
+        "roles": [
+          "normal"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 113150,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 1,
+        "name": "jiaxin-color-4096",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 1023837,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 2,
+        "name": "jiaxin-orm-4096",
+        "roles": [
+          "orm"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 273841,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "normal"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 78065,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 4,
+        "name": "Color_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 228040,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 5,
+        "name": "ORM_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "orm"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 98587,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 6,
+        "name": "ORM_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "orm"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 117256,
+        "estimated_rgba_mipmap_bytes": 1398101
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 17.33,
+    "meshes": 1,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 296,
+    "buffer_views": 303,
+    "file": "jiaxin-0_low.glb",
+    "sha256": "20516614ef933bf7b7ae38ef0727dead7a92d5287af9dbae1028f38b441736ca",
+    "triangles": 63067,
+    "primitives": 4,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 9648788,
+    "images": [
+      {
+        "index": 0,
+        "name": "jiaxin-normal-4096",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 239290,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 1,
+        "name": "jiaxin-color-4096",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 1881753,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 2,
+        "name": "jiaxin-orm-4096",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 430163,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 262504,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 4,
+        "name": "Color_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 642355,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 5,
+        "name": "ORM_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 293811,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 6,
+        "name": "ORM_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 415367,
+        "estimated_rgba_mipmap_bytes": 5592405
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 69.33,
+    "meshes": 1,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 318,
+    "buffer_views": 325,
+    "file": "jiaxin-1.glb",
+    "sha256": "3f9b30ee47aa1cc4e5d7e272e40d4c53e9eef182e7c84074a8013d6f4b4fcce2",
+    "triangles": 68723,
+    "primitives": 7,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 6890372,
+    "images": [
+      {
+        "index": 0,
+        "name": "jiaxin-normal-4096",
+        "roles": [
+          "normal"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 82432,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 1,
+        "name": "jiaxin-color-4096",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 644290,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 2,
+        "name": "jiaxin-orm-4096",
+        "roles": [
+          "orm"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 158160,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "normal"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 78065,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 4,
+        "name": "Color_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 228040,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 5,
+        "name": "ORM_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "orm"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 98587,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 6,
+        "name": "ORM_f0b85273-d78c-4917-9c96-f1acac19c960",
+        "roles": [
+          "orm"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 117256,
+        "estimated_rgba_mipmap_bytes": 1398101
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 17.33,
+    "meshes": 1,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 318,
+    "buffer_views": 325,
+    "file": "jiaxin-1_low.glb",
+    "sha256": "65a049e8d723a6ea6b598ebd0b996ed810e6b624d2170ab9169cb69661d584e0",
+    "triangles": 68723,
+    "primitives": 7,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 8380176,
+    "images": [
+      {
+        "index": 0,
+        "name": "NormalGL_9ad206fc-6020-4f29-b4b0-4c76b2729915",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 707605,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 1,
+        "name": "Color_9ad206fc-6020-4f29-b4b0-4c76b2729915",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 1529935,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 2,
+        "name": "ORM_9ad206fc-6020-4f29-b4b0-4c76b2729915",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 331550,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_3aeeb833-9098-4b4e-8269-4e7df508019a",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 644611,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 4,
+        "name": "Color_3aeeb833-9098-4b4e-8269-4e7df508019a",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 1598925,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 5,
+        "name": "ORM_3aeeb833-9098-4b4e-8269-4e7df508019a",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 308358,
+        "estimated_rgba_mipmap_bytes": 5592405
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 64.0,
+    "meshes": 1,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 232,
+    "buffer_views": 238,
+    "file": "jiji-0.glb",
+    "sha256": "d769be4611aa9bd70dcb27e0777810322e3683ab34128851d9f465a4b05531f5",
+    "triangles": 67827,
+    "primitives": 4,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 4997220,
+    "images": [
+      {
+        "index": 0,
+        "name": "NormalGL_9ad206fc-6020-4f29-b4b0-4c76b2729915",
+        "roles": [
+          "normal"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 234367,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 1,
+        "name": "Color_9ad206fc-6020-4f29-b4b0-4c76b2729915",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 522638,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 2,
+        "name": "ORM_9ad206fc-6020-4f29-b4b0-4c76b2729915",
+        "roles": [
+          "orm"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 121850,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_3aeeb833-9098-4b4e-8269-4e7df508019a",
+        "roles": [
+          "normal"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 200703,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 4,
+        "name": "Color_3aeeb833-9098-4b4e-8269-4e7df508019a",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 550521,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 5,
+        "name": "ORM_3aeeb833-9098-4b4e-8269-4e7df508019a",
+        "roles": [
+          "orm"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 107955,
+        "estimated_rgba_mipmap_bytes": 1398101
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 16.0,
+    "meshes": 1,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 232,
+    "buffer_views": 238,
+    "file": "jiji-0_low.glb",
+    "sha256": "cb093de4666ce333867422adc03d505dada99839ea2d039cd4072c10a979ee71",
+    "triangles": 67827,
+    "primitives": 4,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 5307460,
+    "images": [
+      {
+        "index": 0,
+        "name": "NormalGL_d5a48f63-5c00-4c5f-93c1-149766153547",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 718882,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 1,
+        "name": "Color_d5a48f63-5c00-4c5f-93c1-149766153547",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 1442360,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 2,
+        "name": "ORM_d5a48f63-5c00-4c5f-93c1-149766153547",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 428340,
+        "estimated_rgba_mipmap_bytes": 5592405
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 32.0,
+    "meshes": 1,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 241,
+    "buffer_views": 244,
+    "file": "jiji-1.glb",
+    "sha256": "55606683032071a5182a55273cc9eea6887d34b5234f6b138a375716b246f41c",
+    "triangles": 57784,
+    "primitives": 6,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 3619840,
+    "images": [
+      {
+        "index": 0,
+        "name": "NormalGL_d5a48f63-5c00-4c5f-93c1-149766153547",
+        "roles": [
+          "normal"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 233930,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 1,
+        "name": "Color_d5a48f63-5c00-4c5f-93c1-149766153547",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 515416,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 2,
+        "name": "ORM_d5a48f63-5c00-4c5f-93c1-149766153547",
+        "roles": [
+          "orm"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 152618,
+        "estimated_rgba_mipmap_bytes": 1398101
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 8.0,
+    "meshes": 1,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 241,
+    "buffer_views": 244,
+    "file": "jiji-1_low.glb",
+    "sha256": "db38acce23c525815562204049f0c767a4690ed3d3f089d6d44dd66a2211a445",
+    "triangles": 57784,
+    "primitives": 6,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 5634504,
+    "images": [
+      {
+        "index": 0,
+        "name": "NormalGL_5ae4066b-dd00-4692-a7d9-b413a229c7ad",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 618868,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 1,
+        "name": "Color_5ae4066b-dd00-4692-a7d9-b413a229c7ad",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 1845912,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 2,
+        "name": "ORM_5ae4066b-dd00-4692-a7d9-b413a229c7ad",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 450321,
+        "estimated_rgba_mipmap_bytes": 5592405
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 32.0,
+    "meshes": 1,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 245,
+    "buffer_views": 248,
+    "file": "jiji-2.glb",
+    "sha256": "64b9c5519a4e83d7726d5f33a0eade20ba2c5f66a13a92f5519265a1cd8ec3a6",
+    "triangles": 56572,
+    "primitives": 7,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 3702108,
+    "images": [
+      {
+        "index": 0,
+        "name": "NormalGL_5ae4066b-dd00-4692-a7d9-b413a229c7ad",
+        "roles": [
+          "normal"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 195785,
+        "estimated_rgba_mipmap_bytes": 1398101
+      },
+      {
+        "index": 1,
+        "name": "Color_5ae4066b-dd00-4692-a7d9-b413a229c7ad",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 621396,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 2,
+        "name": "ORM_5ae4066b-dd00-4692-a7d9-b413a229c7ad",
+        "roles": [
+          "orm"
+        ],
+        "width": 512,
+        "height": 512,
+        "encoded_bytes": 165524,
+        "estimated_rgba_mipmap_bytes": 1398101
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 8.0,
+    "meshes": 1,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 245,
+    "buffer_views": 248,
+    "file": "jiji-2_low.glb",
+    "sha256": "0ad90fa18858f22b5ecac7dd0e08bd1dff247b617ebc9143b3fe0bcdaa1bebb6",
+    "triangles": 56572,
+    "primitives": 7,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 11369624,
+    "images": [
+      {
+        "index": 0,
+        "name": "NormalGL_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "normal"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 825472,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 1,
+        "name": "Color_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 837248,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 2,
+        "name": "ORM_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "orm"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 753113,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_d079a502-966d-4033-aae8-5253642beaf7",
+        "roles": [
+          "normal"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 1933761,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 4,
+        "name": "Color_d079a502-966d-4033-aae8-5253642beaf7",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 1332920,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 5,
+        "name": "ORM_d079a502-966d-4033-aae8-5253642beaf7",
+        "roles": [
+          "orm"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 808065,
+        "estimated_rgba_mipmap_bytes": 22369621
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 128.0,
+    "meshes": 2,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 251,
+    "buffer_views": 257,
+    "file": "lx-0.glb",
+    "sha256": "a5e53825a829519a1269671be5a2506dd979d2837dd6933af7561a33042e536c",
+    "triangles": 70400,
+    "primitives": 4,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 7123768,
+    "images": [
+      {
+        "index": 0,
+        "name": "NormalGL_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 301491,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 1,
+        "name": "Color_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 255024,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 2,
+        "name": "ORM_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 276448,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_d079a502-966d-4033-aae8-5253642beaf7",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 659658,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 4,
+        "name": "Color_d079a502-966d-4033-aae8-5253642beaf7",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 449353,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 5,
+        "name": "ORM_d079a502-966d-4033-aae8-5253642beaf7",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 302766,
+        "estimated_rgba_mipmap_bytes": 5592405
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 32.0,
+    "meshes": 2,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 251,
+    "buffer_views": 257,
+    "file": "lx-0_low.glb",
+    "sha256": "bdbd08238ea66d50844510b84392f1547c9bbb79a791d0dfe683a2d50a48973f",
+    "triangles": 70400,
+    "primitives": 4,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 19955644,
+    "images": [
+      {
+        "index": 0,
+        "name": "NormalGL_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "normal"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 825472,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 1,
+        "name": "Color_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 837248,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 2,
+        "name": "ORM_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "orm"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 753113,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_05cd658a-7f96-49a0-8ffb-b6cd14d2f14b",
+        "roles": [
+          "normal"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 3298943,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 4,
+        "name": "Color_05cd658a-7f96-49a0-8ffb-b6cd14d2f14b",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 6004093,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 5,
+        "name": "ORM_05cd658a-7f96-49a0-8ffb-b6cd14d2f14b",
+        "roles": [
+          "orm"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 3264030,
+        "estimated_rgba_mipmap_bytes": 22369621
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 128.0,
+    "meshes": 2,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 251,
+    "buffer_views": 257,
+    "file": "lx-1.glb",
+    "sha256": "59389bf74eadb2594cffdc1724f47da5c56a90ffafce9d6f88483614fcb8a339",
+    "triangles": 71196,
+    "primitives": 4,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 9481080,
+    "images": [
+      {
+        "index": 0,
+        "name": "NormalGL_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 301491,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 1,
+        "name": "Color_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 255024,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 2,
+        "name": "ORM_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 276448,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_05cd658a-7f96-49a0-8ffb-b6cd14d2f14b",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 953584,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 4,
+        "name": "Color_05cd658a-7f96-49a0-8ffb-b6cd14d2f14b",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 1765264,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 5,
+        "name": "ORM_05cd658a-7f96-49a0-8ffb-b6cd14d2f14b",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 956766,
+        "estimated_rgba_mipmap_bytes": 5592405
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 32.0,
+    "meshes": 2,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 251,
+    "buffer_views": 257,
+    "file": "lx-1_low.glb",
+    "sha256": "ae88ac7fbe76c26ba0b4553e81c6d9c0f6ae45b25e356746476e8f859f345897",
+    "triangles": 71196,
+    "primitives": 4,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 18969856,
+    "images": [
+      {
+        "index": 0,
+        "name": "NormalGL_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "normal"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 825472,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 1,
+        "name": "Color_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 837248,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 2,
+        "name": "ORM_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "orm"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 753113,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_0ff25ba0-52bb-4c22-86b7-5649e59eb066",
+        "roles": [
+          "normal"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 3017030,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 4,
+        "name": "Color_0ff25ba0-52bb-4c22-86b7-5649e59eb066",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 5111768,
+        "estimated_rgba_mipmap_bytes": 22369621
+      },
+      {
+        "index": 5,
+        "name": "ORM_0ff25ba0-52bb-4c22-86b7-5649e59eb066",
+        "roles": [
+          "orm"
+        ],
+        "width": 2048,
+        "height": 2048,
+        "encoded_bytes": 3622416,
+        "estimated_rgba_mipmap_bytes": 22369621
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 128.0,
+    "meshes": 2,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 251,
+    "buffer_views": 257,
+    "file": "lx-2.glb",
+    "sha256": "54e9798c12e44d5f270ab42d6e09086c12b433647894b2799438b0e3a1432095",
+    "triangles": 68836,
+    "primitives": 4,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  },
+  {
+    "file_bytes": 9068212,
+    "images": [
+      {
+        "index": 0,
+        "name": "NormalGL_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 301491,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 1,
+        "name": "Color_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 255024,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 2,
+        "name": "ORM_ee7959cc-25aa-4e60-9a54-3e5a61a2fd3d",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 276448,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 3,
+        "name": "NormalGL_0ff25ba0-52bb-4c22-86b7-5649e59eb066",
+        "roles": [
+          "normal"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 848281,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 4,
+        "name": "Color_0ff25ba0-52bb-4c22-86b7-5649e59eb066",
+        "roles": [
+          "diffuse"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 1520233,
+        "estimated_rgba_mipmap_bytes": 5592405
+      },
+      {
+        "index": 5,
+        "name": "ORM_0ff25ba0-52bb-4c22-86b7-5649e59eb066",
+        "roles": [
+          "orm"
+        ],
+        "width": 1024,
+        "height": 1024,
+        "encoded_bytes": 1064155,
+        "estimated_rgba_mipmap_bytes": 5592405
+      }
+    ],
+    "estimated_rgba_mipmap_mib": 32.0,
+    "meshes": 2,
+    "skins": 1,
+    "animations": 3,
+    "accessors": 251,
+    "buffer_views": 257,
+    "file": "lx-2_low.glb",
+    "sha256": "69ba12a7afa242cb74fb70d413174b6fd6e58858296713e9bd0b26c06c517569",
+    "triangles": 68836,
+    "primitives": 4,
+    "joints": 23,
+    "clips": [
+      "dance_01",
+      "dance_03",
+      "dance_05"
+    ],
+    "no_external_texture_uri": true,
+    "audit_note": "v10 final static metadata; original native Jiji face restored. Offline/code evidence, not GPU measurement."
+  }
+]

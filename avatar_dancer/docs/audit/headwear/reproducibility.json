@@ -1,0 +1,23 @@
+[
+  {
+    "asset": "jiji-0.glb",
+    "exactFile": true,
+    "exactAttributedTriangles": true,
+    "publicSHA256": "34b83095506390678f0cd03878ee0f34f8fa5e80eec5f734854b60a15486ce14",
+    "rebuiltSHA256": "34b83095506390678f0cd03878ee0f34f8fa5e80eec5f734854b60a15486ce14"
+  },
+  {
+    "asset": "jiji-1.glb",
+    "exactFile": true,
+    "exactAttributedTriangles": true,
+    "publicSHA256": "4a6605c438081cc4a2e2f5dd750d150dc891fb6aeb55d931d9504eb5fc373f64",
+    "rebuiltSHA256": "4a6605c438081cc4a2e2f5dd750d150dc891fb6aeb55d931d9504eb5fc373f64"
+  },
+  {
+    "asset": "jiji-2.glb",
+    "exactFile": true,
+    "exactAttributedTriangles": true,
+    "publicSHA256": "779676dff5beb5a90a1c05353d3a1a58ef1b626d436b81b01929d33f80d67ef9",
+    "rebuiltSHA256": "779676dff5beb5a90a1c05353d3a1a58ef1b626d436b81b01929d33f80d67ef9"
+  }
+]

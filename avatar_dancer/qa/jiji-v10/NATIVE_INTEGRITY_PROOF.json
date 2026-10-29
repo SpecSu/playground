@@ -1,0 +1,26 @@
+[
+  {
+    "outfit": 0,
+    "nativeFullPrimitiveAttributesAndIndicesExact": true,
+    "nativeNodesAnd3DanceCurvesExact": true,
+    "joints": 23,
+    "highLowGeometryAccessorsExact": 23,
+    "sha256": "d769be4611aa9bd70dcb27e0777810322e3683ab34128851d9f465a4b05531f5"
+  },
+  {
+    "outfit": 1,
+    "nativeFullPrimitiveAttributesAndIndicesExact": true,
+    "nativeNodesAnd3DanceCurvesExact": true,
+    "joints": 23,
+    "highLowGeometryAccessorsExact": 31,
+    "sha256": "55606683032071a5182a55273cc9eea6887d34b5234f6b138a375716b246f41c"
+  },
+  {
+    "outfit": 2,
+    "nativeFullPrimitiveAttributesAndIndicesExact": true,
+    "nativeNodesAnd3DanceCurvesExact": true,
+    "joints": 23,
+    "highLowGeometryAccessorsExact": 36,
+    "sha256": "64b9c5519a4e83d7726d5f33a0eade20ba2c5f66a13a92f5519265a1cd8ec3a6"
+  }
+]

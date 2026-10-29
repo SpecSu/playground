@@ -1,0 +1,22 @@
+{
+  "sourceCommit": "780054c8d5885c4a853435b88066264efee6c2e3",
+  "sourceVersion": "v14",
+  "site": "https://encore-avatar-dance.specsu.chatgpt.site",
+  "sourceWorkingTreeClean": true,
+  "excludedTrackedFiles": [
+    ".openai/hosting.json"
+  ],
+  "includedBuild": "dist copied from final current workspace",
+  "exportOnlyChanges": [
+    "HANDOFF.md",
+    "EXPORT_PROVENANCE.json",
+    "FILE_MANIFEST.json",
+    "SHA256SUMS.txt",
+    ".gitignore: retain dist in GitHub handoff",
+    "README.md: prepend current handoff notice; historical content retained",
+    ".asset-parts/ and ASSET_PARTS.json: deduplicated offline transport chunks",
+    "RESTORE_ASSETS.mjs: checksum-verified local restore",
+    "package.json: predev/pretest/prebuild restore hooks"
+  ],
+  "note": "No deployment or GitHub operation performed by export worker."
+}

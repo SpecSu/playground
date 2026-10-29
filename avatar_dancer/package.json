@@ -1,0 +1,20 @@
+{
+  "name": "encore-dance-stage",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "test": "node --test tests/*.test.mjs",
+    "predev": "node RESTORE_ASSETS.mjs",
+    "pretest": "node RESTORE_ASSETS.mjs",
+    "prebuild": "node RESTORE_ASSETS.mjs"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "vite": "^7.1.7"
+  }
+}

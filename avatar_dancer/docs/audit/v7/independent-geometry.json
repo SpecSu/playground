@@ -1,0 +1,19 @@
+{
+  "source": "public/assets/characters/jiaxin-0.glb",
+  "sha256": "d16b2e358045404fc1f6a5b2d069a47937656fe5b5bd9f60e7e8d8060379c37f",
+  "joints": 23,
+  "clips": [
+    "dance_01",
+    "dance_03",
+    "dance_05"
+  ],
+  "bridge": {
+    "triangles": 630,
+    "inwardRadialAreaFraction": 0.04526343715153373,
+    "zeroAreaTriangles": 0
+  },
+  "maxWeightSumError": 1.2293457984924316e-07,
+  "bridgeBoundaryEdges": 214,
+  "unjoinedBridgeEdges": 0,
+  "bridgeCoincidentWeightMismatches": 0
+}

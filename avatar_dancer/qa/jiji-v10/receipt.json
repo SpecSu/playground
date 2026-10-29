@@ -1,0 +1,90 @@
+{
+  "scope": "User-selected original native face / hair / neck / clothing, with fitted hats. No v9 donor face or experimental patch volumes.",
+  "records": [
+    {
+      "outfit": 0,
+      "height": 1.8646360986588815,
+      "oldRawHeight": 1.0545640138454644,
+      "newRawHeight": 1.0545635868268022,
+      "framingMultiplier": 1.018965577984119,
+      "models": [
+        {
+          "path": "public/assets/characters/jiji-0.glb",
+          "sha256": "d769be4611aa9bd70dcb27e0777810322e3683ab34128851d9f465a4b05531f5",
+          "bytes": 8380176
+        },
+        {
+          "path": "public/assets/characters/jiji-0_low.glb",
+          "sha256": "cb093de4666ce333867422adc03d505dada99839ea2d039cd4072c10a979ee71",
+          "bytes": 4997220
+        }
+      ],
+      "thumbnail": {
+        "path": "public/assets/thumbs/jiji-0.webp",
+        "sha256": "661566d9d515f907fdfc9c6d575d8a930ca4a86ad105a65542e69034526d5e95",
+        "bytes": 13344,
+        "size": [
+          384,
+          512
+        ]
+      }
+    },
+    {
+      "outfit": 1,
+      "height": 1.81813164031298,
+      "oldRawHeight": 0.9969162153800966,
+      "newRawHeight": 1.017655953980146,
+      "framingMultiplier": 1.0450288405260506,
+      "models": [
+        {
+          "path": "public/assets/characters/jiji-1.glb",
+          "sha256": "55606683032071a5182a55273cc9eea6887d34b5234f6b138a375716b246f41c",
+          "bytes": 5307460
+        },
+        {
+          "path": "public/assets/characters/jiji-1_low.glb",
+          "sha256": "db38acce23c525815562204049f0c767a4690ed3d3f089d6d44dd66a2211a445",
+          "bytes": 3619840
+        }
+      ],
+      "thumbnail": {
+        "path": "public/assets/thumbs/jiji-1.webp",
+        "sha256": "adaa0331e4776fb9eaf5c82b56f862540ca3227b3820f88c55dfd0b9a12436fa",
+        "bytes": 12514,
+        "size": [
+          384,
+          512
+        ]
+      }
+    },
+    {
+      "outfit": 2,
+      "height": 1.8001585723467837,
+      "oldRawHeight": 0.9989591710982211,
+      "newRawHeight": 1.017260163730846,
+      "framingMultiplier": 1.0554625737904064,
+      "models": [
+        {
+          "path": "public/assets/characters/jiji-2.glb",
+          "sha256": "64b9c5519a4e83d7726d5f33a0eade20ba2c5f66a13a92f5519265a1cd8ec3a6",
+          "bytes": 5634504
+        },
+        {
+          "path": "public/assets/characters/jiji-2_low.glb",
+          "sha256": "0ad90fa18858f22b5ecac7dd0e08bd1dff247b617ebc9143b3fe0bcdaa1bebb6",
+          "bytes": 3702108
+        }
+      ],
+      "thumbnail": {
+        "path": "public/assets/thumbs/jiji-2.webp",
+        "sha256": "ca31fb7824ebb0720c9edb4f9062b19218dd6d86b97a5a8a2c904a0fab468c59",
+        "bytes": 10150,
+        "size": [
+          384,
+          512
+        ]
+      }
+    }
+  ],
+  "integrityProof": "qa/jiji-v10/NATIVE_INTEGRITY_PROOF.json"
+}

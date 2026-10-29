@@ -1,0 +1,88 @@
+{
+  "source": "/workspace/scratch/e8cd10917327/jiji-v9/candidate-cleanup/jiji-0.glb",
+  "sourceSha256": "0c48ad274cfcc05541cfc3dd1e9ee78cd2508d6f4af0e621d9589c82dc44f591",
+  "note": "CPU cross-engine skinning samples only; not rendered browser QA.",
+  "weightMatchMax": 0.0,
+  "restMatchMax": 2.1464914823354775e-07,
+  "samples": [
+    {
+      "clip": "dance_01",
+      "seconds": 3.011666584014893,
+      "max": 0.00011015372156811545,
+      "mean": 6.446362914897776e-05,
+      "headMax": 7.549055916730536e-05,
+      "bodyMax": 0.00011015372156811545
+    },
+    {
+      "clip": "dance_01",
+      "seconds": 10.88833303451538,
+      "max": 5.053778851661569e-07,
+      "mean": 1.2733141515570463e-07,
+      "headMax": 2.0212918469683135e-07,
+      "bodyMax": 5.053778851661569e-07
+    },
+    {
+      "clip": "dance_01",
+      "seconds": 18.76499948501587,
+      "max": 7.599067180451239e-07,
+      "mean": 2.016050995296944e-07,
+      "headMax": 3.025522903240763e-07,
+      "bodyMax": 7.599067180451239e-07
+    },
+    {
+      "clip": "dance_03",
+      "seconds": 1.6629167079925538,
+      "max": 2.4038487470240334e-06,
+      "mean": 1.2791044516998923e-07,
+      "headMax": 2.403894931808364e-07,
+      "bodyMax": 2.4038487470240334e-06
+    },
+    {
+      "clip": "dance_03",
+      "seconds": 6.012083482742309,
+      "max": 2.3537797998974844e-05,
+      "mean": 7.407485511682091e-07,
+      "headMax": 1.6340398937062404e-07,
+      "bodyMax": 2.3537797998974844e-05
+    },
+    {
+      "clip": "dance_03",
+      "seconds": 10.361250257492067,
+      "max": 5.268145325404346e-05,
+      "mean": 1.2615728142002218e-05,
+      "headMax": 1.4115387940574265e-05,
+      "bodyMax": 5.268145325404346e-05
+    },
+    {
+      "clip": "dance_05",
+      "seconds": 0.37375,
+      "max": 8.101004582607101e-06,
+      "mean": 1.9344525277995603e-06,
+      "headMax": 2.3700459662081976e-06,
+      "bodyMax": 8.101004582607101e-06
+    },
+    {
+      "clip": "dance_05",
+      "seconds": 1.3512499999999998,
+      "max": 6.0239775641753525e-06,
+      "mean": 2.4063345064051072e-06,
+      "headMax": 3.145012214042386e-06,
+      "bodyMax": 6.0239775641753525e-06
+    },
+    {
+      "clip": "dance_05",
+      "seconds": 2.3287500000000003,
+      "max": 8.800520336767078e-07,
+      "mean": 2.218417923853259e-07,
+      "headMax": 2.515605541487654e-07,
+      "bodyMax": 8.800520336767078e-07
+    }
+  ],
+  "fps": 24,
+  "points": 120,
+  "sampledSourceNodes": [
+    "DONOR_HEAD_PRIVATE_TEST",
+    "tripo_node_9ad206fc-6020-4f29-b4b0-4c76b2729915"
+  ],
+  "passed": true
+}

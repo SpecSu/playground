@@ -1,0 +1,90 @@
+{
+  "models": [
+    {
+      "file": "jiji-2_low.glb",
+      "bytes": 7198096,
+      "skins": 1,
+      "animations": 3,
+      "images": 3
+    },
+    {
+      "file": "jiji-0_low.glb",
+      "bytes": 6844996,
+      "skins": 1,
+      "animations": 3,
+      "images": 3
+    },
+    {
+      "file": "jiji-1_low.glb",
+      "bytes": 7003364,
+      "skins": 1,
+      "animations": 3,
+      "images": 3
+    },
+    {
+      "file": "lx-2.glb",
+      "bytes": 9120408,
+      "skins": 1,
+      "animations": 3,
+      "images": 3
+    },
+    {
+      "file": "jiji-1.glb",
+      "bytes": 8840496,
+      "skins": 1,
+      "animations": 3,
+      "images": 3
+    },
+    {
+      "file": "lx-0_low.glb",
+      "bytes": 6281188,
+      "skins": 1,
+      "animations": 3,
+      "images": 3
+    },
+    {
+      "file": "lx-0.glb",
+      "bytes": 8306532,
+      "skins": 1,
+      "animations": 3,
+      "images": 3
+    },
+    {
+      "file": "lx-1.glb",
+      "bytes": 10270612,
+      "skins": 1,
+      "animations": 3,
+      "images": 3
+    },
+    {
+      "file": "jiji-2.glb",
+      "bytes": 9451988,
+      "skins": 1,
+      "animations": 3,
+      "images": 3
+    },
+    {
+      "file": "jiji-0.glb",
+      "bytes": 8719124,
+      "skins": 1,
+      "animations": 3,
+      "images": 3
+    },
+    {
+      "file": "lx-1_low.glb",
+      "bytes": 7980400,
+      "skins": 1,
+      "animations": 3,
+      "images": 3
+    },
+    {
+      "file": "lx-2_low.glb",
+      "bytes": 7305548,
+      "skins": 1,
+      "animations": 3,
+      "images": 3
+    }
+  ],
+  "errors": [],
+  "note": "Exact raw-photo bytes and GLB metadata checked; no GPU runtime claim."
+}

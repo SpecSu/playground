@@ -1,0 +1,88 @@
+{
+  "source": "/workspace/scratch/e8cd10917327/neck-work/v2/jiji-0.glb",
+  "sourceSha256": "6c599779a4113336178c8c7f3fb0ab8645862ea7cf238d94247799265843813e",
+  "note": "CPU cross-engine skinning samples only; not rendered browser QA.",
+  "restMatchMax": 2.3619632827376336e-07,
+  "samples": [
+    {
+      "clip": "dance_01",
+      "seconds": 3.011666584014893,
+      "max": 8.779663518657541e-05,
+      "mean": 6.571595702628277e-05,
+      "headMax": 8.489340490127772e-05,
+      "bodyMax": 8.779663518657541e-05
+    },
+    {
+      "clip": "dance_01",
+      "seconds": 10.88833303451538,
+      "max": 4.5807439532695406e-07,
+      "mean": 1.4145297608201747e-07,
+      "headMax": 1.999200562387517e-07,
+      "bodyMax": 4.5807439532695406e-07
+    },
+    {
+      "clip": "dance_01",
+      "seconds": 18.76499948501587,
+      "max": 8.104218995310893e-07,
+      "mean": 2.07727719908063e-07,
+      "headMax": 3.040165567860479e-07,
+      "bodyMax": 8.104218995310893e-07
+    },
+    {
+      "clip": "dance_03",
+      "seconds": 1.6629167079925538,
+      "max": 6.181737337318522e-07,
+      "mean": 1.3354182472119349e-07,
+      "headMax": 2.00058841438555e-07,
+      "bodyMax": 6.181737337318522e-07
+    },
+    {
+      "clip": "dance_03",
+      "seconds": 6.012083482742309,
+      "max": 2.762352166831972e-05,
+      "mean": 1.3803097636138245e-06,
+      "headMax": 2.602375924076584e-07,
+      "bodyMax": 2.762352166831972e-05
+    },
+    {
+      "clip": "dance_03",
+      "seconds": 10.361250257492067,
+      "max": 2.7433847151755805e-05,
+      "mean": 1.2916216011641886e-05,
+      "headMax": 1.4218237939630406e-05,
+      "bodyMax": 2.7433847151755805e-05
+    },
+    {
+      "clip": "dance_05",
+      "seconds": 0.37375,
+      "max": 4.61743683929748e-06,
+      "mean": 1.8105427479521237e-06,
+      "headMax": 2.6735466621941518e-06,
+      "bodyMax": 4.61743683929748e-06
+    },
+    {
+      "clip": "dance_05",
+      "seconds": 1.3512499999999998,
+      "max": 6.239815656651991e-06,
+      "mean": 2.2340772670549866e-06,
+      "headMax": 3.597982493410089e-06,
+      "bodyMax": 6.239815656651991e-06
+    },
+    {
+      "clip": "dance_05",
+      "seconds": 2.3287500000000003,
+      "max": 8.845819282326597e-07,
+      "mean": 2.484475618400851e-07,
+      "headMax": 2.6400325721058096e-07,
+      "bodyMax": 8.845819282326597e-07
+    }
+  ],
+  "fps": 24,
+  "points": 60,
+  "sampledSourceNodes": [
+    "DONOR_HEAD_PRIVATE_TEST",
+    "tripo_node_9ad206fc-6020-4f29-b4b0-4c76b2729915"
+  ],
+  "assetStatus": "V2 CANDIDATE \u2014 high resolution only, awaiting final promotion and low variants",
+  "passed": true
+}

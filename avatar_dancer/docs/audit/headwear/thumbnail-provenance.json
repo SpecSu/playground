@@ -1,0 +1,65 @@
+[
+  {
+    "name": "jiji-0",
+    "source_sha256": "34b83095506390678f0cd03878ee0f34f8fa5e80eec5f734854b60a15486ce14",
+    "dimensions": [
+      384,
+      512
+    ],
+    "webp_bytes": 13388,
+    "framing_height_multiplier": 1.0,
+    "manifest_height": 1.9,
+    "webp_sha256": "c7b010fd3203d9d7d310612486faedde3b9b962b76915ad628d08a3f5fb5076f"
+  },
+  {
+    "name": "jiji-1",
+    "source_sha256": "4a6605c438081cc4a2e2f5dd750d150dc891fb6aeb55d931d9504eb5fc373f64",
+    "dimensions": [
+      384,
+      512
+    ],
+    "webp_bytes": 12368,
+    "framing_height_multiplier": 1.0710670385391101,
+    "manifest_height": 1.7739319124146693,
+    "webp_sha256": "706b912ace5e94270fc7a5a0fa1a108aa3377f4db6225967fdac3dc013bda7e1"
+  },
+  {
+    "name": "jiji-2",
+    "source_sha256": "779676dff5beb5a90a1c05353d3a1a58ef1b626d436b81b01929d33f80d67ef9",
+    "dimensions": [
+      384,
+      512
+    ],
+    "webp_bytes": 10628,
+    "framing_height_multiplier": 1.0504478942514692,
+    "manifest_height": 1.808752257391983,
+    "webp_sha256": "f1289785c01fc3d4088c659a20f33a25a747cef6b30967b87447a7dd4df680e4"
+  },
+  {
+    "name": "lx-0",
+    "source_sha256": "a5e53825a829519a1269671be5a2506dd979d2837dd6933af7561a33042e536c",
+    "dimensions": [
+      384,
+      512
+    ],
+    "webp_bytes": 12870
+  },
+  {
+    "name": "lx-1",
+    "source_sha256": "59389bf74eadb2594cffdc1724f47da5c56a90ffafce9d6f88483614fcb8a339",
+    "dimensions": [
+      384,
+      512
+    ],
+    "webp_bytes": 18510
+  },
+  {
+    "name": "lx-2",
+    "source_sha256": "54e9798c12e44d5f270ab42d6e09086c12b433647894b2799438b0e3a1432095",
+    "dimensions": [
+      384,
+      512
+    ],
+    "webp_bytes": 14868
+  }
+]

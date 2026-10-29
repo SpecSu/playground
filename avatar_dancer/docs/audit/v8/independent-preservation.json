@@ -1,0 +1,54 @@
+[
+  {
+    "primitive": 0,
+    "material": "JIAXIN_BAKED_NO_SOURCE_PHOTO",
+    "exact": {
+      "POSITION": false,
+      "NORMAL": false,
+      "TEXCOORD_0": true,
+      "COLOR_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true,
+      "indices": true
+    }
+  },
+  {
+    "primitive": 1,
+    "material": "tripo_material_f0b85273-d78c-4917-9c96-f1acac19c960",
+    "exact": {
+      "POSITION": true,
+      "NORMAL": true,
+      "TEXCOORD_0": true,
+      "COLOR_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true,
+      "indices": true
+    }
+  },
+  {
+    "primitive": 2,
+    "material": "Clean rear hair tips only",
+    "exact": {
+      "POSITION": true,
+      "NORMAL": true,
+      "TEXCOORD_0": true,
+      "COLOR_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true,
+      "indices": true
+    }
+  },
+  {
+    "primitive": 3,
+    "material": "Closed anatomical neck transition",
+    "exact": {
+      "POSITION": true,
+      "NORMAL": true,
+      "TEXCOORD_0": true,
+      "COLOR_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true,
+      "indices": true
+    }
+  }
+]

@@ -1,0 +1,90 @@
+{
+  "characters": {
+    "jiji": {
+      "name": "吉吉",
+      "outfits": [
+        {
+          "model": "/assets/characters/jiji-0.glb",
+          "lowModel": "/assets/characters/jiji-0_low.glb",
+          "height": 1.8646360986588815,
+          "rotationY": -1.5707963267948966,
+          "textureProfile": "2k-head+body",
+          "lowTextureProfile": "1k-head+body"
+        },
+        {
+          "model": "/assets/characters/jiji-1.glb",
+          "lowModel": "/assets/characters/jiji-1_low.glb",
+          "height": 1.81813164031298,
+          "rotationY": -1.5707963267948966,
+          "textureProfile": "2k-head+body",
+          "lowTextureProfile": "1k-head+body"
+        },
+        {
+          "model": "/assets/characters/jiji-2.glb",
+          "lowModel": "/assets/characters/jiji-2_low.glb",
+          "height": 1.8001585723467837,
+          "rotationY": -1.5707963267948966,
+          "textureProfile": "2k-head+body",
+          "lowTextureProfile": "1k-head+body"
+        }
+      ]
+    },
+    "lx": {
+      "name": "LX",
+      "outfits": [
+        {
+          "model": "/assets/characters/lx-0.glb",
+          "lowModel": "/assets/characters/lx-0_low.glb",
+          "height": 1.9,
+          "rotationY": -1.5707963267948966,
+          "textureProfile": "2k-head+body",
+          "lowTextureProfile": "1k-head+body"
+        },
+        {
+          "model": "/assets/characters/lx-1.glb",
+          "lowModel": "/assets/characters/lx-1_low.glb",
+          "height": 1.9,
+          "rotationY": -1.5707963267948966,
+          "textureProfile": "2k-head+body",
+          "lowTextureProfile": "1k-head+body"
+        },
+        {
+          "model": "/assets/characters/lx-2.glb",
+          "lowModel": "/assets/characters/lx-2_low.glb",
+          "height": 1.9,
+          "rotationY": -1.5707963267948966,
+          "textureProfile": "2k-head+body",
+          "lowTextureProfile": "1k-head+body"
+        }
+      ]
+    },
+    "jiaxin": {
+      "name": "我的分身",
+      "outfits": [
+        {
+          "model": "/assets/characters/jiaxin-0.glb",
+          "lowModel": "/assets/characters/jiaxin-0_low.glb",
+          "height": 1.9,
+          "rotationY": -1.5707963267948966,
+          "textureProfile": "2k-head+body",
+          "lowTextureProfile": "1k-head+body",
+          "restPose": {
+            "bind": true
+          }
+        },
+        {
+          "name": "埃及法老",
+          "model": "/assets/characters/jiaxin-1.glb",
+          "lowModel": "/assets/characters/jiaxin-1_low.glb",
+          "height": 1.9988,
+          "rotationY": -1.5707963267948966,
+          "textureProfile": "2k-head+body",
+          "lowTextureProfile": "1k-head+body",
+          "restPose": {
+            "bind": true
+          }
+        }
+      ]
+    }
+  }
+}

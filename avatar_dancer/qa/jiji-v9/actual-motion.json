@@ -1,0 +1,80 @@
+[
+  {
+    "outfit": 0,
+    "sha256": "0c48ad274cfcc05541cfc3dd1e9ee78cd2508d6f4af0e621d9589c82dc44f591",
+    "bones": 23,
+    "skins": [
+      {
+        "mesh": "DONOR_HEAD_PRIVATE_TEST",
+        "vertices": 24356,
+        "unweighted_vertices": 0,
+        "min_weight_sum": 0.9999999701976776,
+        "max_weight_sum": 1.0000000298023224
+      },
+      {
+        "mesh": "tripo_node_9ad206fc-6020-4f29-b4b0-4c76b2729915",
+        "vertices": 27802,
+        "unweighted_vertices": 0,
+        "min_weight_sum": 0.9999998867278919,
+        "max_weight_sum": 1.0000001043081284
+      }
+    ],
+    "renderedClips": [
+      "jiji-0-dance_05_Armature-pose.png",
+      "jiji-0-dance_03_Armature-pose.png",
+      "jiji-0-dance_01_Armature-pose.png"
+    ]
+  },
+  {
+    "outfit": 1,
+    "sha256": "27a4b471a5d9c127567c3bace8f5e7022de414d80dbdf31e9db1cdcc7ec14f0c",
+    "bones": 23,
+    "skins": [
+      {
+        "mesh": "DONOR_HEAD_PRIVATE_TEST",
+        "vertices": 17296,
+        "unweighted_vertices": 0,
+        "min_weight_sum": 0.9999999701976776,
+        "max_weight_sum": 1.0000000298023224
+      },
+      {
+        "mesh": "tripo_node_d5a48f63-5c00-4c5f-93c1-149766153547",
+        "vertices": 26637,
+        "unweighted_vertices": 0,
+        "min_weight_sum": 0.9999998956918716,
+        "max_weight_sum": 1.0000001043081284
+      }
+    ],
+    "renderedClips": [
+      "jiji-1-dance_01_Armature-pose.png",
+      "jiji-1-dance_03_Armature-pose.png",
+      "jiji-1-dance_05_Armature-pose.png"
+    ]
+  },
+  {
+    "outfit": 2,
+    "sha256": "f8d730b70664c7419642587548204f590262fcee6499ab3fea6f2294452517f8",
+    "bones": 23,
+    "skins": [
+      {
+        "mesh": "DONOR_HEAD_PRIVATE_TEST",
+        "vertices": 16798,
+        "unweighted_vertices": 0,
+        "min_weight_sum": 0.9999999701976776,
+        "max_weight_sum": 1.0000000298023224
+      },
+      {
+        "mesh": "tripo_node_5ae4066b-dd00-4692-a7d9-b413a229c7ad",
+        "vertices": 28180,
+        "unweighted_vertices": 0,
+        "min_weight_sum": 0.9999998826533556,
+        "max_weight_sum": 1.0000001043081284
+      }
+    ],
+    "renderedClips": [
+      "jiji-2-dance_01_Armature-pose.png",
+      "jiji-2-dance_05_Armature-pose.png",
+      "jiji-2-dance_03_Armature-pose.png"
+    ]
+  }
+]

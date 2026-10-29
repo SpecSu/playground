@@ -1,0 +1,19 @@
+{
+  "source": "/workspace/scratch/e8cd10917327/jiaxin-shoulder-v8/candidate-v2.glb",
+  "sha256": "01bd8780a769cb683a3a8a74f5db1d5509baf7bc44a93bfe6d270f7a54200d27",
+  "joints": 23,
+  "clips": [
+    "dance_01",
+    "dance_03",
+    "dance_05"
+  ],
+  "bridge": {
+    "triangles": 630,
+    "inwardRadialAreaFraction": 0.04526343715153373,
+    "zeroAreaTriangles": 0
+  },
+  "maxWeightSumError": 1.2293457984924316e-07,
+  "bridgeBoundaryEdges": 214,
+  "unjoinedBridgeEdges": 0,
+  "bridgeCoincidentWeightMismatches": 0
+}
