@@ -34,3 +34,11 @@ python3 tools/build_mockup.py     # 生成 dist/mockup（v8 补丁版）
 python3 tools/build_mockup.py --promote   # 同步到 dist/
 npx vite preview                  # 预览 dist
 ```
+
+
+## v8.5 更新（2026-10-30）
+- 光污染修复：v13 金属漆改为缎面金属（metalness .55 / roughness ≥.4），机甲自发光 1.6→1.25，近白发光再压 30%，花纹发光 .45→.32
+- 擂台三条围栏发光降档：彩色 .42→.2，白色 .75→.3
+- WINNER 镜头：锁定胜者正前方 ±30° 缓摆，对准驾驶舱座位，看清驾驶员正脸
+- WINNER 构图：驾驶员脸位于画面上部，WINNER 字组下移至 47%，避开候场区
+- 分身胜利庆祝：双手保持握操纵杆，改为摇头晃脑+身体摇摆，全分身统一，杜绝穿模

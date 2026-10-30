@@ -47,3 +47,5 @@ button.primary{box-shadow:none!important;background:#DEFF72!important}
 .as-tip,.as-count{text-shadow:0 0 10px #F569A8,2px 3px 0 #171719!important}
 .as-pop{text-shadow:0 0 10px #F569A8,2px 2px 0 #171719!important}
 .slowmo{box-shadow:inset 0 0 160px rgba(245,105,168,.45)!important}
+/* WINNER：驾驶员脸在上 1/3，胜利字幕放到下 1/3，互不遮挡 */
+#banner:has(.b-main.win){top:47%}

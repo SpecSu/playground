@@ -91,6 +91,8 @@ css += '''
 .as-tip,.as-count{text-shadow:0 0 10px #F569A8,2px 3px 0 #171719!important}
 .as-pop{text-shadow:0 0 10px #F569A8,2px 2px 0 #171719!important}
 .slowmo{box-shadow:inset 0 0 160px rgba(245,105,168,.45)!important}
+/* WINNER：驾驶员脸在上 1/3，胜利字幕放到下 1/3，互不遮挡 */
+#banner:has(.b-main.win){top:47%}
 '''
 open(f'{M}/assets/{css_f}', 'w').write(css)
 
@@ -183,7 +185,7 @@ for _o,_n in [
     # 角柱顶灯：原为不受光照的纯亮色球 -> 改为白色中性
     ('new Ht({color:x<2?l[x]:16777215})', 'new Ht({color:x<2?11579568:16777215})'),
     # 围绳：发光强度 1.1 -> 0.42（新颜色亮度约为旧色 2 倍，保持 v6 视觉亮度且不外溢）
-    ('color:p[f],emissive:p[f],emissiveIntensity:1.1', 'color:p[f],emissive:p[f],emissiveIntensity:p[f]===16777215?.75:.42'),
+    ('color:p[f],emissive:p[f],emissiveIntensity:1.1', 'color:p[f],emissive:p[f],emissiveIntensity:p[f]===16777215?.3:.2'),
     # 地面光圈（加色混合）不透明度 .55 -> .28
     ('transparent:!0,opacity:.55', 'transparent:!0,opacity:.28'),
     # 机甲自发光：3.2 -> 1.6；花纹发光同步压暗
@@ -208,6 +210,35 @@ assert js.count(_o)==1, 'gen pattern'
 i=js.index(_o); js=js[:i]+_n+js[i+len(_o):]
 # 补上 IIFE 结尾：原 "},700)" -> "},700))(Ge.tok)"
 j=js.index('},700)', i); js=js[:j]+'},700))(Ge.tok)'+js[j+6:]
+
+# —— v8.1 光污染回调：v13「金属漆」让亮色主/副装甲变成 metalness=1 + 低粗糙度的镜面，
+#    环境反射高光大面积越过 bloom 阈值 → 机身整片泛光。改为缎面金属漆，并压一档自发光/白色发光。
+for _o,_n in [
+    ('rough:i.rough,metal:n.pMetal?1:i.metal', 'rough:n.pMetal?Math.max(i.rough,.42):i.rough,metal:n.pMetal?.55:i.metal'),
+    ('rough:n.sMetal?.22:i.rough+.05,metal:n.sMetal?1:i.metal', 'rough:n.sMetal?.4:i.rough+.05,metal:n.sMetal?.55:i.metal'),
+    ('G:g_(t.emissive,1.6*n.lights)', 'G:g_(new Ee(t.emissive).getHSL({}).l>.85?new Ee(t.emissive).multiplyScalar(.7):t.emissive,1.25*n.lights)'),
+    ('patEmis:Uu.has(n.pattern)?new Ee(t.emissive).multiplyScalar(.45)', 'patEmis:Uu.has(n.pattern)?new Ee(t.emissive).multiplyScalar(.32)'),
+]:
+    assert js.count(_o) == 1, _o; js = js.replace(_o, _n)
+
+# —— WINNER 镜头：原来从侧面持续环绕，几秒后转到背面只能看到座椅靠背。
+#    改为锁定在胜者正前方 ±30° 内缓慢摇摆，略俯视对准驾驶舱座位锚点，看清驾驶员正脸
+_o = 'i.target.set(f.x,f.y+x*.6,f.z),i.yaw=this.winYaw+_*.55+Math.min(1,_)*.4,i.pitch=.1+.06*Math.sin(_*.9),i.dist=4+x*(1-.12*Math.min(1,_/2))'
+assert js.count(_o) == 1, 'winner cam'
+js = js.replace(_o, 'const __s=this.focus.v.anchorWorld&&this.focus.v.anchorWorld("seat");'
+                    'i.yaw=f.yaw+.5*Math.cos(_*.4),i.pitch=.2+.04*Math.sin(_*.7),i.dist=3+x*(.6-.08*Math.min(1,_/2)),'
+                    # 构图：驾驶员脸放在画面上 1/3（距中心上移 0.4 个半屏高），WINNER 字压到下 1/3
+                    'i.target.set(__s?__s.x:f.x,(__s?__s.y+.45:f.y+x*.75)-.5*Math.tan(.384)*i.dist,__s?__s.z:f.z)')
+# —— 分身胜利庆祝（v8.5）：手臂动作在小座舱里怎么收都会穿模 → 双手保持在操纵杆上不动，
+#    改为摇头晃脑：身体左右摇摆 + 胸口轻跳 + 点头 + 歪头，所有分身统一
+_o='l("chest",h+this.lean*.4-this.cheer*.2,Math.sin(i*3)*.2*this.cheer,0),l("head",-h+this.slump*.6,Math.sin(i*.7)*.25*(1-this.cheer),this.cheer*Math.sin(i*6)*.2)'
+assert js.count(_o)==1,'cheer body'
+js=js.replace(_o,'l("spine",this.lean*.5+this.slump*.5,0,Math.sin(i*17)*this.shake*.2+Math.sin(i*5)*.12*this.cheer),'
+  'l("chest",h+this.lean*.4-this.cheer*(.08+.06*Math.abs(Math.sin(i*10))),Math.sin(i*2.5)*.15*this.cheer,Math.sin(i*5)*.1*this.cheer),'
+  'l("head",-h+this.slump*.6+this.cheer*(.14*Math.sin(i*10)-.05),Math.sin(i*.7)*.25*(1-this.cheer)+Math.sin(i*2.5)*.3*this.cheer,this.cheer*Math.sin(i*5+.6)*.22)')
+_o='l("upperArm_L",0,0,(-2+u)*d),l("upperArm_R",0,0,(2+u)*d),l("forearm_L",0,0,-.6*d),l("forearm_R",0,0,.6*d)'
+assert js.count(_o)==1,'cheer arms'
+js=js.replace(_o,'l("upperArm_L",0,0,0),l("upperArm_R",0,0,0),l("forearm_L",0,0,0),l("forearm_R",0,0,0)')
 open(f'{M}/assets/{js_f}', 'w').write(js)
 html = open(f'{M}/index.html').read()
 html = re.sub(r'<script type="module" crossorigin src="(\./assets/[^"]+)"></script>', lambda m: '<script>Promise.race([Promise.all([document.fonts.load("italic 40px ArenaCond"),document.fonts.load("40px ArenaCond")]),new Promise(r=>setTimeout(r,2500))]).finally(()=>import("'+m.group(1)+'"))</script>', html).replace('<title>', '<title>[配色模拟稿v4] ', 1)
