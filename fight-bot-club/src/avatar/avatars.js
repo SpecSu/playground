@@ -8,18 +8,18 @@ import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { damp, clamp } from '../core/util.js';
 
 export const AVATARS = [
-  { id: 'a01', name: '奶蛙', color: '#9be36b' },
-  { id: 'a02', name: '牛来', color: '#f2b45a' },
-  { id: 'a03', name: '肥嘟嘟', color: '#ff9ec7' },
-  { id: 'a04', name: '喵脆角', color: '#ffd166' },
-  { id: 'a05', name: '香蕉猫', color: '#ffe14d' },
-  { id: 'a06', name: '外星猫', color: '#7fe7ff' },
-  { id: 'a07', name: '刀盾狗', color: '#c8a27a' },
-  { id: 'a08', name: '苏贝壳', color: '#ffb3a7' },
-  { id: 'a09', name: 'Jiaxin', color: '#b9a6ff' },
-  { id: 'a10', name: 'LX', color: '#8fd3ff' },
-  { id: 'a11', name: 'Rummons', color: '#ff8a65' },
-  { id: 'a12', name: '吉吉', color: '#a5f3a1' },
+  { id: 'a01', name: '奶蛙', color: '#9AE0D0' },
+  { id: 'a02', name: '牛来', color: '#FFDE26' },
+  { id: 'a03', name: '肥嘟嘟', color: '#EEFFB8' },
+  { id: 'a04', name: '喵脆角', color: '#FFE240' },
+  { id: 'a05', name: '香蕉猫', color: '#FFDE26' },
+  { id: 'a06', name: '外星猫', color: '#FF97C6' },
+  { id: 'a07', name: '刀盾狗', color: '#C5B557' },
+  { id: 'a08', name: '苏贝壳', color: '#F0FFBE' },
+  { id: 'a09', name: 'Jiaxin', color: '#DFD7FF' },
+  { id: 'a10', name: 'LX', color: '#FFA4CD' },
+  { id: 'a11', name: 'Rummons', color: '#FFE23E' },
+  { id: 'a12', name: '吉吉', color: '#BFEFE4' },
 ];
 // 暂时隐藏的分身（数据保留，序号不变；删掉对应 id 即可恢复显示）
 export const HIDDEN_AVATARS = new Set([
@@ -152,15 +152,16 @@ export class Rider {
     if (mech.recoil > 0.5) this.shake = Math.max(this.shake, mech.recoil * 0.4);
     const rot = (n, x, y, z) => { if (!B[n] || !R[n]) return; _q.setFromEuler(new THREE.Euler(x, y, z)); B[n].quaternion.copy(R[n]).multiply(_q); };
     const bob = Math.sin(t * 2.6) * 0.03;
-    rot('spine', this.lean * 0.5 + this.slump * 0.5, 0, Math.sin(t * 17) * this.shake * 0.2);
-    rot('chest', bob + this.lean * 0.4 - this.cheer * 0.2, Math.sin(t * 3) * 0.2 * this.cheer, 0);
-    rot('head', -bob + this.slump * 0.6, Math.sin(t * 0.7) * 0.25 * (1 - this.cheer), this.cheer * Math.sin(t * 6) * 0.2);
+    // 庆祝：双手保持在操纵杆上（座舱小，举手必穿模），改为身体摇摆 + 胸口轻跳 + 点头 + 歪头
+    rot('spine', this.lean * 0.5 + this.slump * 0.5, 0, Math.sin(t * 17) * this.shake * 0.2 + Math.sin(t * 5) * 0.12 * this.cheer);
+    rot('chest', bob + this.lean * 0.4 - this.cheer * (0.08 + 0.06 * Math.abs(Math.sin(t * 10))), Math.sin(t * 2.5) * 0.15 * this.cheer, Math.sin(t * 5) * 0.1 * this.cheer);
+    rot('head', -bob + this.slump * 0.6 + this.cheer * (0.14 * Math.sin(t * 10) - 0.05), Math.sin(t * 0.7) * 0.25 * (1 - this.cheer) + Math.sin(t * 2.5) * 0.3 * this.cheer, this.cheer * Math.sin(t * 5 + 0.6) * 0.22);
     // 欢呼：双手举起挥舞（在静止姿态上叠加绕局部轴的大幅旋转，具体方向由试验确定）
     const c = this.cheer;
     if (c > 0.01) {
       const w = Math.sin(t * 9) * 0.35;
-      rot('upperArm_L', 0, 0, (-2.0 + w) * c); rot('upperArm_R', 0, 0, (2.0 + w) * c);
-      rot('forearm_L', 0, 0, -0.6 * c); rot('forearm_R', 0, 0, 0.6 * c);
+      rot('upperArm_L', 0, 0, 0); rot('upperArm_R', 0, 0, 0);
+      rot('forearm_L', 0, 0, 0); rot('forearm_R', 0, 0, 0);
     } else {
       const jig = Math.sin(t * 11) * 0.04 * (f.act ? 1 : 0.2);
       rot('upperArm_L', jig, 0, 0); rot('upperArm_R', -jig, 0, 0);

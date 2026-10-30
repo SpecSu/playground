@@ -25,12 +25,13 @@ export function makePaletteV13(rnd, form, kwHue, forceIdx) {
   // 次色搭配表（只上细节/发光）；黄铜不和黄、黄绿搭（同色相发棕）
   const PAIR = { 玫红: ['淡紫', '亮黄绿', '薄荷青', '黄铜'], 亮黄绿: ['淡紫', '玫红', '薄荷青'], 淡紫: ['薄荷青', '香蕉黄', '玫红', '亮黄绿', '黄铜'], 薄荷青: ['香蕉黄', '淡紫', '玫红', '黄铜'], 香蕉黄: ['淡紫', '薄荷青'], 黄铜: ['薄荷青', '淡紫', '玫红'] };
   // 中性 / 低饱和金属库：[色, 明度带 0暗 1中 2亮, 金属漆]
-  const NEU = { 冷白: ['#ECEBE6', 2, 0], 银: ['#BCC0C8', 2, 1], 钛灰: ['#7E838C', 1, 1], 枪灰: ['#3D3F47', 0, 1], 石墨: ['#232327', 0, 0] };
+  // v9.2：不用纯白/纯黑 —— 白 = 银白（金属），黑 = 铸铁（金属），全部带金属反射
+  const NEU = { 银白: ['#C8CBD1', 2, 1], 银: ['#A9AEB7', 2, 1], 钛灰: ['#767C86', 1, 1], 枪灰: ['#5A5E66', 0, 1], 铸铁: ['#45474D', 0, 1] }; // 金属反射≈固有色×环境，暗金属固有色要比漆面亮一档才不会变成死黑
   const N = (k) => ({ c: jit(NEU[k][0], 0.025), metal: !!NEU[k][2], name: k });
   // 低饱和有色金属：只从淡紫 / 薄荷青推导（玫红暗版=酒红，黄/黄绿暗版=橄榄，都发脏）
   const tintHue = (v) => (v && (v[0] === '淡紫' || v[0] === '薄荷青')) ? v[1] : pick([252, 166]);
   const darkTint = (v) => { const h = tintHue(v); return { c: hsl(h, R(0.18, 0.28), h === 252 ? R(0.26, 0.31) : R(0.21, 0.26)), metal: true, name: h === 252 ? '深紫钢' : '暗青钢' }; };
-  const pearl = (v) => ({ c: hsl(tintHue(v), R(0.1, 0.18), R(0.85, 0.9)), metal: false, name: '珍珠白' });
+  const pearl = (v) => ({ c: hsl(tintHue(v), R(0.1, 0.16), R(0.74, 0.8)), metal: true, name: '珠光白' });
 
   // 鲜艳色的「大面积版本」：中明度、略降饱和；黄铜就是黄铜金属
   const big = (v) => {
@@ -51,18 +52,18 @@ export function makePaletteV13(rnd, form, kwHue, forceIdx) {
   // —— 明度结构方案：主色 V1 落在哪块大面积；P/S/M 其余部分全部中性
   const PLANS = [
     // [权重, 名称, () => { p, s, m, fin }]
-    [2, '亮甲', () => ({ p: big(v1), s: pick([N('石墨'), N('枪灰')]), m: pick([N('银'), N('钛灰')]), fin: 'satin', cut: 1 })],
-    [2.5, '暗甲', () => ({ p: rnd() < 0.5 ? darkTint(v2 || v1) : pick([N('枪灰'), N('石墨')]), s: big(v1), m: pick([N('银'), N('钛灰')]), fin: pick(['satin', 'gloss']) })],
-    [2.2, '白甲', () => ({ p: rnd() < 0.5 ? N('冷白') : pearl(v2 || v1), s: big(v1), m: pick([N('枪灰'), N('石墨')]), fin: 'gloss' })],
+    [2, '亮甲', () => ({ p: big(v1), s: pick([N('铸铁'), N('枪灰')]), m: pick([N('银'), N('钛灰')]), fin: 'satin', cut: 1 })],
+    [2.5, '暗甲', () => ({ p: rnd() < 0.5 ? darkTint(v2 || v1) : pick([N('枪灰'), N('铸铁')]), s: big(v1), m: pick([N('银'), N('钛灰')]), fin: pick(['satin', 'gloss']) })],
+    [2.2, '白甲', () => ({ p: rnd() < 0.5 ? N('银白') : pearl(v2 || v1), s: big(v1), m: pick([N('枪灰'), N('铸铁')]), fin: 'gloss' })],
     [2, '金属甲', () => (v1[0] === '黄铜'
-      ? { p: big(v1), s: pick([N('石墨'), N('枪灰')]), m: N('银'), fin: 'chrome' }
-      : { p: pick([N('银'), N('钛灰')]), s: big(v1), m: pick([N('枪灰'), N('石墨')]), fin: 'satin' })],
+      ? { p: big(v1), s: pick([N('铸铁'), N('枪灰')]), m: N('银'), fin: 'chrome' }
+      : { p: pick([N('银'), N('钛灰')]), s: big(v1), m: pick([N('枪灰'), N('铸铁')]), fin: rnd() < 0.5 ? 'chrome' : 'satin' })],
     // 中性主体：P/S/M 全部黑白灰 / 低饱和金属，亮色只做细节件 + 发光
     [2.3, '中性', () => {
       const t = pick([
-        () => ({ p: N('石墨'), s: N('钛灰'), m: N('银') }), () => ({ p: N('冷白'), s: N('石墨'), m: N('钛灰') }),
-        () => ({ p: N('银'), s: N('石墨'), m: N('枪灰') }), () => ({ p: darkTint(v1), s: N('银'), m: N('石墨') }),
-        () => ({ p: pearl(v1), s: N('枪灰'), m: N('银') }), () => ({ p: N('枪灰'), s: N('冷白'), m: N('石墨') }),
+        () => ({ p: N('铸铁'), s: N('钛灰'), m: N('银') }), () => ({ p: N('银白'), s: N('铸铁'), m: N('钛灰') }),
+        () => ({ p: N('银'), s: N('铸铁'), m: N('枪灰') }), () => ({ p: darkTint(v1), s: N('银'), m: N('铸铁') }),
+        () => ({ p: pearl(v1), s: N('枪灰'), m: N('银') }), () => ({ p: N('枪灰'), s: N('银白'), m: N('铸铁') }),
       ])();
       return { ...t, fin: pick(['satin', 'gloss', 'matte']), neutral: 1 };
     }],
@@ -72,7 +73,7 @@ export function makePaletteV13(rnd, form, kwHue, forceIdx) {
   let p = o.p.c, s = o.s.c, m = o.m.c;
 
   // —— 明度结构校正：主题色只往亮推（压暗会变脏），推不动就推另一侧的中性色
-  const NEUTRAL = /^(冷白|银|钛灰|枪灰|石墨|深紫钢|暗青钢|珍珠白)$/;
+  const NEUTRAL = /^(银白|银|钛灰|枪灰|铸铁|深紫钢|暗青钢|珠光白)$/;
   const pVivid = !NEUTRAL.test(o.p.name), sVivid = !NEUTRAL.test(o.s.name);
   const push = (c, ref, need, upOnly) => { const [h, ss, l] = toHsl(c); const dir = val(c) <= val(ref) ? -1 : 1; for (const d of (upOnly ? [1] : [dir, -dir])) { for (let k = 1; k <= 14; k++) { const t = hsl(h, ss, l + d * k * 0.035); if (gap(t, ref) >= need) return t; } } return c; };
   if (gap(p, s) < 0.2) { if (sVivid) p = push(p, s, 0.22); else if (pVivid) s = push(s, p, 0.22); else s = push(s, p, 0.22); }
@@ -88,7 +89,7 @@ export function makePaletteV13(rnd, form, kwHue, forceIdx) {
     // 中性主体：只有 1 种亮色（V1），点缀在细节和发光上
     acc = small(v1); e = v1[0] === '黄铜' ? '#F5F4F0' : v1[2]; e2 = e;
   } else {
-    acc = v2 ? small(v2) : (rnd() < 0.5 ? '#F2F1EC' : small(v1));
+    acc = v2 ? small(v2) : (rnd() < 0.5 ? '#D3D7DD' : small(v1));
     const glowOf = (v) => (v[0] === '黄铜' ? null : v[2]);
     e = (v2 && rnd() < 0.4 && glowOf(v2)) || glowOf(v1) || (v2 && glowOf(v2)) || '#F5F4F0';
     e2 = e;

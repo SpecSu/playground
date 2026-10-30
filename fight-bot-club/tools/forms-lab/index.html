@@ -1,0 +1,20 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>v9 · 12 体型全家福</title>
+<style>
+@font-face { font-family: 'ArenaCond'; src: url('/public/fonts/anton.woff2') format('woff2'); }
+html,body{margin:0;background:#171719;color:#F5F4F0;font-family:-apple-system,"PingFang SC",sans-serif}
+#wrap{position:relative;width:1600px;height:1190px}
+h1{position:absolute;left:40px;top:18px;margin:0;font:italic 400 40px/1 ArenaCond,Impact,sans-serif;letter-spacing:2px}
+h1 small{font:600 15px/1 -apple-system,"PingFang SC";letter-spacing:0;color:#9A9AA0;margin-left:16px;font-style:normal}
+#c{position:absolute;left:0;top:80px}
+.lab{position:absolute;width:400px;height:370px;pointer-events:none}
+.lab .t{position:absolute;left:18px;top:14px;font-weight:800;font-size:22px}
+.lab .t i{font-style:normal;color:#DEFF72;font-weight:700;font-size:13px;margin-left:8px}
+.lab .t em{font-style:normal;color:#F569A8;font-weight:700;font-size:12px;margin-left:6px;border:1px solid #F569A8;padding:1px 5px}
+.lab .s{position:absolute;left:18px;bottom:14px;font-size:12px;color:#9A9AA0}
+.lab .n{position:absolute;right:18px;top:12px;font:italic 400 30px/1 ArenaCond,Impact;color:#3A3A40}
+.grid{position:absolute;left:0;top:80px;width:1600px;height:1110px;pointer-events:none;
+  background-image:linear-gradient(#26252A 1px,transparent 1px),linear-gradient(90deg,#26252A 1px,transparent 1px);background-size:400px 370px}
+</style></head>
+<body><div id="wrap"><h1>FIGHT BOT CLUB · 12 FORMS<small>v9 体型扩展 · 每种体型随机生成 1 台（外观/配色/武器均随机）</small></h1><canvas id="c"></canvas><div class="grid"></div><div id="labs"></div></div>
+<script type="module" src="./lab.js"></script></body></html>

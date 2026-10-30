@@ -5,6 +5,7 @@ import { clamp, damp } from '../core/util.js';
 import { MechView } from './mech.js';
 import * as P from './parts.js';
 import { rbox, box, cyl, sph, tor, cone, plate, rod, taper } from './geo.js';
+import { EXT_FORMS } from './forms2.js';
 
 const PI = Math.PI;
 
@@ -378,9 +379,10 @@ class DogView extends MechView {
     B.head.rotation.set(S.headP + Math.sin(t * 1.7) * 0.03, S.hy, 0);
     B.jaw.rotation.x = S.jaw;
     for (const s of ['L', 'R']) { B['fa' + s].rotation.x = -PI / 2 + (s === 'R' ? this.shot[0] : this.shot[1]) * 0.25 - S.pitch * 0.5; B['ua' + s].rotation.y = S.hy * 0.5; }
+    this.wagPh = (this.wagPh || 0) + (this.cele > 0 ? 8 : 2.5 + A * 3) * dt; this.wagA = damp(this.wagA ?? 0.22, this.cele > 0 ? 0.5 : 0.22, 4, dt);
     for (let i = 0; i < this.tailNames.length; i++) {
-      const tb = B[this.tailNames[i]]; const wag = this.cele > 0 ? 8 : 2.5 + A * 3;
-      tb.rotation.set(this.dead ? 0.3 : -0.35 + i * 0.1, Math.sin(t * wag - i * 0.6) * (this.cele > 0 ? 0.5 : 0.22), 0);
+      const tb = B[this.tailNames[i]];
+      tb.rotation.set(this.dead ? 0.3 : -0.35 + i * 0.1, Math.sin(this.wagPh - i * 0.6) * this.wagA, 0);
     }
     // 四足 IK（对角小跑）
     const mx = spd > 0.01 ? vs / spd : 0, mz = spd > 0.01 ? vf / spd : 1;
@@ -404,8 +406,29 @@ class DogView extends MechView {
   }
 }
 
-export const FORMS = { humanoid: MechView, dog: DogView, spider: SpiderView, hover: HoverView, tank: TankView, wraith: WraithView };
+// v9：浮游炮 / 能量灵体并入蝠鲼（旧类保留以便回滚）
+export const FORMS = { humanoid: MechView, dog: DogView, spider: SpiderView, tank: TankView, legacyHover: HoverView, legacyWraith: WraithView, ...EXT_FORMS, hover: EXT_FORMS.manta, wraith: EXT_FORMS.manta };
+// 防抖：非人形机型的骨骼在每帧姿态写完后再做一次临界阻尼平滑 + 角速度上限
+// （IK 落脚 / 转向瞬间方向翻转会让腿骨一帧跳很大角度，看起来像高频抽搐；人形脚踝 IK 同理，统一处理）
+const SMOOTH_K = 28, MAX_W = 22; // 1/s, rad/s
+function antiJitter(v) {
+  const raw = v.update.bind(v); const prev = new Map();
+  v.update = (f, dt, o) => {
+    raw(f, dt, o);
+    if (!(dt > 0)) return;
+    const k = 1 - Math.exp(-SMOOTH_K * dt), lim = MAX_W * dt;
+    for (const name in v.bones) {
+      const r = v.bones[name].rotation; let p = prev.get(name);
+      if (!p) { prev.set(name, [r.x, r.y, r.z]); continue; }
+      const c = [r.x, r.y, r.z];
+      for (let i = 0; i < 3; i++) { let d = (c[i] - p[i]) * k; if (d > lim) d = lim; else if (d < -lim) d = -lim; p[i] += d; }
+      r.set(p[0], p[1], p[2]);
+    }
+  };
+  return v;
+}
 export function createView(design) {
   const C = FORMS[design.form] || MechView;
-  return new C(design);
+  const v = new C(design);
+  return antiJitter(v);
 }

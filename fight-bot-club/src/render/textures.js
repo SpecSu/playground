@@ -60,7 +60,7 @@ export function makePanelMaps(seed = 7, W = 512) {
 export function makeCanvasFloor(W = 1024) {
   const c = document.createElement('canvas'); c.width = c.height = W; const g = c.getContext('2d');
   const grd = g.createRadialGradient(W / 2, W / 2, W * 0.1, W / 2, W / 2, W * 0.72);
-  grd.addColorStop(0, '#2a3346'); grd.addColorStop(1, '#141a26');
+  grd.addColorStop(0, '#2B2A31'); grd.addColorStop(1, '#16161A'); // 明度回到 v6 水平，避免顶光下发白
   g.fillStyle = grd; g.fillRect(0, 0, W, W);
   // 帆布纹理
   const r = mulberry32(3);
@@ -68,13 +68,13 @@ export function makeCanvasFloor(W = 1024) {
   for (let i = 0; i < 60; i++) { g.fillStyle = `rgba(0,0,0,${r() * 0.12})`; g.beginPath(); g.arc(r() * W, r() * W, 10 + r() * 60, 0, 7); g.fill(); }
   // 边框
   g.strokeStyle = 'rgba(255,255,255,0.12)'; g.lineWidth = 8; g.strokeRect(40, 40, W - 80, W - 80);
-  g.strokeStyle = 'rgba(255,60,90,0.5)'; g.lineWidth = 3; g.strokeRect(58, 58, W - 116, W - 116);
+  g.strokeStyle = 'rgba(221, 255, 111, 0.5)'; g.lineWidth = 3; g.strokeRect(58, 58, W - 116, W - 116);
   // 中心徽标
   g.save(); g.translate(W / 2, W / 2);
   g.strokeStyle = 'rgba(255,255,255,0.16)'; g.lineWidth = 6; g.beginPath(); g.arc(0, 0, W * 0.2, 0, 7); g.stroke();
-  g.strokeStyle = 'rgba(255,64,96,0.35)'; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, W * 0.215, 0, 7); g.stroke();
-  g.fillStyle = 'rgba(255,255,255,0.2)'; g.font = `900 ${W * 0.09}px Arial Black, Arial, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText('UGC', 0, -W * 0.045); g.font = `800 ${W * 0.045}px Arial, sans-serif`; g.fillStyle = 'rgba(255,90,120,0.35)'; g.fillText('ROBOT ARENA', 0, W * 0.05);
+  g.strokeStyle = 'rgba(222, 255, 114, 0.35)'; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, W * 0.215, 0, 7); g.stroke();
+  g.fillStyle = 'rgba(255,255,255,0.2)'; g.font = `italic 400 ${W * 0.09}px ArenaCond, Impact, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('UGC', 0, -W * 0.045); g.font = `italic 400 ${W * 0.045}px ArenaCond, Impact, sans-serif`; g.letterSpacing = '2px'; g.fillStyle = 'rgba(227, 255, 133, 0.35)'; g.fillText('ROBOT ARENA', 0, W * 0.05);
   g.restore();
   // 角落标记
   g.fillStyle = 'rgba(255,255,255,0.07)'; g.font = `700 ${W * 0.026}px Arial, sans-serif`; g.textAlign = 'center';
@@ -83,14 +83,14 @@ export function makeCanvasFloor(W = 1024) {
 }
 
 // 文字贴图（围裙广告板 / 大屏）
-export function makeTextTexture(lines, { w = 1024, h = 128, bg = '#0b0f18', fg = '#ffffff', accent = '#ff3d6e', font = 'Arial Black, Arial' } = {}) {
+export function makeTextTexture(lines, { w = 1024, h = 128, bg = '#18181B', fg = '#ffffff', accent = '#DEFF70', font = 'Arial Black, Arial' } = {}) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
   g.fillStyle = bg; g.fillRect(0, 0, w, h);
-  const grd = g.createLinearGradient(0, 0, w, 0); grd.addColorStop(0, accent); grd.addColorStop(1, '#6a5cff');
+  const grd = g.createLinearGradient(0, 0, w, 0); grd.addColorStop(0, accent); grd.addColorStop(1, '#C4B6FF');
   g.fillStyle = grd; g.fillRect(0, h - 6, w, 6); g.fillRect(0, 0, w, 3);
   g.fillStyle = fg; g.font = `900 ${h * 0.5}px ${font}`; g.textAlign = 'center'; g.textBaseline = 'middle';
   const seg = w / lines.length;
-  lines.forEach((s, i) => { g.fillStyle = i % 2 ? accent : fg; g.fillText(s, seg * (i + 0.5), h * 0.5); });
+  lines.forEach((s, i) => { g.fillStyle = i % 2 ? accent : fg; g.fillText(s, seg * (i + 0.5), h * 0.5, seg * 0.86); });
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
 }
 

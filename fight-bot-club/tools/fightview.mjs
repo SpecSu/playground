@@ -2,10 +2,10 @@
 import { Sim, Fighter } from '../src/game/sim.js';
 import { generateDesign, EXAMPLE_PROMPTS } from '../src/mech/design.js';
 import { createView } from '../src/mech/forms.js';
-const forms = ['humanoid', 'dog', 'spider', 'hover', 'tank', 'wraith'];
+const forms = ['humanoid', 'dog', 'spider', 'tank', 'manta', 'tiger', 'turtle', 'croc', 'trex', 'flamingo', 'frog', 'rabbit'];
 let errs = 0, maxY = 0, n = 0;
-for (let i = 0; i < 18; i++) {
-  const fa = forms[i % 6], fb = forms[(i * 5 + 1) % 6];
+for (let i = 0; i < 36; i++) {
+  const fa = forms[i % 12], fb = forms[(i * 5 + 1) % 12];
   const a = generateDesign(EXAMPLE_PROMPTS[i % 8], 'p', { form: fa }), b = generateDesign(EXAMPLE_PROMPTS[(i + 3) % 8], 'q', { form: fb });
   const s = new Sim(); const A = new Fighter(a, 0), B = new Fighter(b, 1); s.setFighters(A, B); A.frozen = B.frozen = false;
   const V = [createView(a), createView(b)];

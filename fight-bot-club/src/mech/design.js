@@ -1,6 +1,7 @@
 // 提示词 → 机甲设计规格（纯数据，可序列化 / 可复现）
 // 关键词决定倾向（定位 / 武器 / 配色 / 造型母题），随机种子决定具体组合与数值；同一提示词每次生成都不同
 import { mulberry32, hashStr, clamp } from '../core/util.js';
+import { makePaletteV13 } from '../../tools/palette-lab/rule_v13.js';
 
 const has = (p, words) => words.some((w) => p.includes(w));
 const score = (p, words) => words.reduce((s, w) => s + (p.includes(w) ? 1 : 0), 0);
@@ -65,21 +66,32 @@ const MOTIF_KW = {
 };
 // 形态原型关键词（命中则强倾向，否则随机分配，人形不再是默认）
 const FORM_KW = {
-  dog: ['狗', '犬', '狼', '獒', '豹', '狐', '猎犬', '四足', '猫', '虎', '狮', 'dog', 'wolf', 'hound', 'k9', 'beast', 'cat', 'tiger'],
+  dog: ['狗', '犬', '狼', '獒', '狐', '猎犬', '豺', 'dog', 'wolf', 'hound', 'k9', 'fox'],
+  tiger: ['猫', '虎', '狮', '豹', '猞猁', '咪', '喵', '熊', 'cat', 'tiger', 'lion', 'panther', 'leopard', 'beast'],
   spider: ['蜘蛛', '蛛', '多足', '蝎', '蟹', '虫', '甲虫', '螳螂', '六足', '八足', 'spider', 'crab', 'insect', 'bug', 'scorpion', 'arachn'],
-  hover: ['飞', '悬浮', '无人机', '浮游', '鹰', '隼', '翼', '天空', '空中', '炮台', '卫星', 'drone', 'hover', 'fly', 'sky', 'jet', 'ufo'],
-  tank: ['坦克', '重装', '堡垒', '要塞', '战车', '履带', '巨像', '犀', '龟', '象', '泰坦', 'tank', 'fortress', 'walker', 'titan', 'rhino'],
-  wraith: ['灵', '幽灵', '能量', '鬼', '魂', '幻影', '虚空', '以太', '星灵', '光之', '神秘', 'ghost', 'spirit', 'wraith', 'energy', 'void', 'phantom', 'ether'],
-  humanoid: ['人形', '武士', '骑士', '拳击', '战士', '高达', '机甲战士', '格斗', '忍者', 'knight', 'samurai', 'humanoid', 'gundam', 'ninja'],
+  tank: ['坦克', '战车', '履带', '堡垒', '要塞', '巨像', '犀', '象', '推土', 'tank', 'fortress', 'rhino', 'bulldozer'],
+  manta: ['蝠鲼', '鳐', '魔鬼鱼', '飞', '悬浮', '无人机', '浮游', '天空', '空中', '炮台', '卫星', '灵', '幽灵', '能量', '鬼', '魂', '幻影', '虚空', '飞碟',
+    'manta', 'ray', 'drone', 'hover', 'fly', 'sky', 'ufo', 'ghost', 'spirit', 'wraith', 'void', 'phantom'],
+  turtle: ['龟', '玄武', '鳖', '甲壳', '盾', 'turtle', 'tortoise', 'shell'],
+  croc: ['鳄', '蜥', '巨蜥', '短吻', 'croc', 'gator', 'alligator', 'lizard'],
+  trex: ['恐龙', '霸王龙', '暴龙', '龙', '迅猛', '侏罗纪', 'dino', 'rex', 'raptor', 'dragon', 'jurassic'],
+  flamingo: ['火烈鸟', '鸟', '鹤', '鹰', '隼', '鸵', '鹭', '孔雀', '翼', 'bird', 'flamingo', 'crane', 'hawk', 'eagle', 'falcon'],
+  frog: ['蛙', '蟾', '呱', 'frog', 'toad'],
+  rabbit: ['兔', '月兔', '跳跳', 'rabbit', 'bunny', 'hare'],
+  humanoid: ['人形', '武士', '战士', '骑士', '拳击', '巨人', '高达', '机甲战士', 'samurai', 'knight', 'boxer', 'gundam', 'humanoid'],
 };
-// 定位 → 形态倾向（无关键词时）
+// 按定位的形态倾向（无形态关键词时）：12 种体型都有出场机会
 const FORM_BY_ROLE = {
-  tank: [['tank', 3.2], ['humanoid', 1.3], ['spider', 1], ['dog', 0.4], ['hover', 0.5], ['wraith', 0.5]],
-  assassin: [['dog', 2.4], ['wraith', 2.2], ['spider', 1.8], ['humanoid', 1.2], ['hover', 0.6], ['tank', 0.1]],
-  gunner: [['hover', 3], ['tank', 1.6], ['spider', 1.1], ['humanoid', 1], ['wraith', 0.8], ['dog', 0.5]],
-  brawler: [['humanoid', 1.8], ['dog', 1.6], ['tank', 1.4], ['spider', 1.2], ['wraith', 1], ['hover', 0.2]],
+  tank: [['tank', 2.4], ['turtle', 2.4], ['humanoid', 1.2], ['trex', 1.2], ['croc', 1], ['tiger', 0.8], ['spider', 0.8], ['frog', 0.6], ['dog', 0.4], ['manta', 0.4], ['rabbit', 0.3], ['flamingo', 0.3]],
+  assassin: [['dog', 1.8], ['rabbit', 1.6], ['tiger', 1.4], ['spider', 1.4], ['flamingo', 1.3], ['manta', 1.2], ['frog', 1], ['croc', 0.9], ['humanoid', 0.9], ['trex', 0.5], ['turtle', 0.2], ['tank', 0.1]],
+  gunner: [['manta', 2.4], ['tank', 1.5], ['flamingo', 1.2], ['turtle', 1.1], ['spider', 1], ['humanoid', 1], ['frog', 0.9], ['rabbit', 0.7], ['trex', 0.6], ['dog', 0.5], ['croc', 0.5], ['tiger', 0.5]],
+  brawler: [['tiger', 1.8], ['humanoid', 1.5], ['trex', 1.5], ['croc', 1.4], ['dog', 1.2], ['tank', 1], ['spider', 1], ['frog', 1], ['rabbit', 0.8], ['turtle', 0.7], ['flamingo', 0.6], ['manta', 0.5]],
 };
-export const FORM_CN = { humanoid: '人形', dog: '机械犬', spider: '多足蛛', hover: '浮游炮', tank: '履带战车', wraith: '能量灵体' };
+export const FORM_CN = {
+  humanoid: '人形', dog: '机械犬', spider: '多足蛛', tank: '履带战车', manta: '蝠鲼', tiger: '猫虎', turtle: '玄武龟', croc: '鳄鱼', trex: '霸王龙', flamingo: '火烈鸟', frog: '青蛙', rabbit: '兔子',
+  hover: '蝠鲼', wraith: '蝠鲼',
+};
+export const FORM_LIST = ['humanoid', 'dog', 'spider', 'tank', 'manta', 'tiger', 'turtle', 'croc', 'trex', 'flamingo', 'frog', 'rabbit'];
 const TAIL_KW = ['尾', '蝎', '恐龙', '龙', '猫', '狐', 'tail', 'scorpion', 'dino'];
 
 // ———————————————————— 配色：16 套完全不同的配色家族 ————————————————————
@@ -208,10 +220,15 @@ export function generateDesign(prompt, owner, opts = {}) {
   }
   // 形态反推定位（仅在提示词没有明确定位时）
   if (!anyKw) {
-    const FR = { hover: [['gunner', 1]], tank: [['tank', 3], ['gunner', 1], ['brawler', 1]], dog: [['assassin', 2], ['brawler', 2], ['gunner', 0.5]], spider: [['assassin', 1.5], ['brawler', 1.2], ['tank', 1], ['gunner', 0.8]], wraith: [['assassin', 2.5], ['gunner', 1], ['brawler', 0.8]] }[form];
+    const FR = {
+      manta: [['gunner', 2], ['assassin', 1.2]], tank: [['tank', 3], ['gunner', 1], ['brawler', 1]], dog: [['assassin', 2], ['brawler', 2], ['gunner', 0.5]],
+      spider: [['assassin', 1.5], ['brawler', 1.2], ['tank', 1], ['gunner', 0.8]], tiger: [['brawler', 2.5], ['assassin', 1.5], ['tank', 0.6]],
+      turtle: [['tank', 3], ['gunner', 1.2], ['brawler', 0.6]], croc: [['brawler', 2], ['tank', 1.5], ['assassin', 0.8]], trex: [['brawler', 2.2], ['tank', 1.8], ['gunner', 0.5]],
+      flamingo: [['assassin', 2], ['gunner', 1.5], ['brawler', 0.6]], frog: [['brawler', 1.5], ['gunner', 1.2], ['assassin', 1.2], ['tank', 0.6]], rabbit: [['assassin', 2.5], ['brawler', 1.2], ['gunner', 0.6]],
+    }[form];
     if (FR && !FR.some(([x]) => x === role)) role = r.weighted(FR);
   }
-  if (form === 'hover') role = 'gunner';
+  if (form === 'hover' || form === 'wraith') form = 'manta'; // 旧形态并入蝠鲼
   const info = ROLE_INFO[role];
   const range = role === 'gunner' ? 'ranged' : (role === 'tank' && form !== 'tank' && r.chance(0.25)) || (form === 'tank' && role === 'tank' && r.chance(0.4)) ? 'ranged' : 'melee';
 
@@ -266,10 +283,9 @@ export function generateDesign(prompt, owner, opts = {}) {
     // 颜色关键词强制体现在强调色/发光色上
     sc.a = hsl(hue, 0.85, 0.5); sc.e = hsl(hue, 1, 0.6);
   }
-  const palette = {
-    primary: hslToHex(sc.p), secondary: hslToHex(sc.s), accent: hslToHex(sc.a), emissive: hslToHex(sc.e),
-    emissive2: hslToHex(sc.e2 || sc.e), metal: hslToHex(sc.m),
-  };
+  // v13 配色规则（tools/palette-lab/rule_v13.js）：鲜艳色≤2 且一主一次、明度分层、左右对称涂装
+  const pal13 = makePaletteV13(r, null, k.hues.length ? hue : null);
+  const palette = pal13.palette;
 
   const roleShape = {
     tank: { torso: [[0, 3], [1, 3], [4, 2], [6, 2], [2, 1]], legs: [[0, 4], [3, 2], [4, 3]], arms: [[0, 3], [1, 2], [4, 3]], height: [0.9, 1.0], bulk: [1.15, 1.35] },
@@ -280,7 +296,7 @@ export function generateDesign(prompt, owner, opts = {}) {
 
   const motif = k.motifs.length ? r.pick(k.motifs) : r.weighted([['none', 4], ['horns', 1], ['ears', 1], ['fin', 1], ['crown', 0.6], ['spikes', 1], ['antenna', 1], ['crest', 1]]);
   const look = {
-    scheme: schemeName, finish: sc.finish, pattern: sc.pattern, worn: sc.worn || r.range(0, 0.4), pMetal: !!sc.pMetal, sMetal: !!sc.sMetal,
+    scheme: schemeName, finish: pal13.finish, pattern: pal13.pattern, worn: pal13.worn, pMetal: pal13.pMetal, sMetal: pal13.sMetal,
     torso: r.weighted(roleShape.torso), legs: r.weighted(roleShape.legs), arms: r.weighted(roleShape.arms),
     head: r.int(0, 5), cockpit: r.weighted([[0, 3], [1, 3], [2, 2], [3, 2]]), back: r.int(0, 6), shoulder: r.int(0, 5),
     motif, tail: k.tail ? true : r.chance(0.12),

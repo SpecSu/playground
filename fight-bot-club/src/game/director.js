@@ -96,8 +96,10 @@ export class Director {
       // 胜者：近距离特写环绕旋转
       const f = this.focus.f, h = this.focus.v.height;
       const first = !this.focusAge; this.focusAge = (this.focusAge || 0) + rdt; const a = this.focusAge;
-      W.target.set(f.x, f.y + h * 0.6, f.z);
-      W.yaw = this.winYaw + a * 0.55 + Math.min(1, a) * 0.4; W.pitch = 0.1 + 0.06 * Math.sin(a * 0.9); W.dist = 4.0 + h * (1.0 - 0.12 * Math.min(1, a / 2));
+      // 锁定胜者正前方 ±30° 缓慢摇摆，略俯视对准驾驶舱座位；构图：驾驶员脸在画面上 1/3，WINNER 字在下 1/3
+      const s = this.focus.v.anchorWorld && this.focus.v.anchorWorld('seat');
+      W.yaw = f.yaw + 0.5 * Math.cos(a * 0.4); W.pitch = 0.2 + 0.04 * Math.sin(a * 0.7); W.dist = 3 + h * (0.6 - 0.08 * Math.min(1, a / 2));
+      W.target.set(s ? s.x : f.x, (s ? s.y + 0.45 : f.y + h * 0.75) - 0.5 * Math.tan(0.384) * W.dist, s ? s.z : f.z);
       if (!first) { this.yaw = W.yaw; this.pitch = W.pitch; }
     } else {
       // 战斗：取两机中点，沿连线斜向取景

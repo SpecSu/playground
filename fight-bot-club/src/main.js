@@ -16,7 +16,7 @@ const SanitizeShader = {
       gl_FragColor = c; }`,
 };
 import { Sim, Fighter, RING } from './game/sim.js';
-import { generateDesign, EXAMPLE_PROMPTS, ratings, ROLE_CN } from './mech/design.js';
+import { generateDesign, EXAMPLE_PROMPTS, ratings, ROLE_CN, FORM_LIST } from './mech/design.js';
 import { createView } from './mech/forms.js';
 import { GLOBAL_TIME } from './render/materials.js';
 import { Arena } from './world/arena.js';
@@ -55,7 +55,7 @@ function setupPost() {
   composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: isMobile ? 0 : 4 }));
   composer.addPass(new RenderPass(scene, camera));
   composer.addPass(new ShaderPass(SanitizeShader));
-  bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.55, 0.5, 0.86);
+  bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.3, 0.25, 0.96);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
 }
@@ -540,7 +540,7 @@ function startAssist(f, v) {
   G.sim.paused = true; acc = 0;
   { const b = $('#banner'); if (b.classList.contains('show')) { b.classList.remove('show'); b.classList.add('hide'); bannerTimer = 0; } }
   director.setMode('assist', { f, v }, ASSIST_DUR + 0.1);
-  asEl.className = 'on ' + (slot(f) ? 'b' : 'a'); asEl.style.setProperty('--c', f.d.palette?.emissive ? '#' + new THREE.Color(f.d.palette.emissive).getHexString() : '#ff3d8b');
+  asEl.className = 'on ' + (slot(f) ? 'b' : 'a'); asEl.style.setProperty('--c', f.d.palette?.emissive ? '#' + new THREE.Color(f.d.palette.emissive).getHexString() : '#DEFF70');
   asN.textContent = '0'; asMult.textContent = '伤害 +0%'; asBar.style.width = '0%';
   audio.play('riser', { vol: 0.7 }); audio.play('crowdCharge', { vol: 0.6 });
 }
@@ -659,13 +659,16 @@ document.querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => { b.
 // ———————————————————— UGC 创造 ————————————————————
 const pv = { scene: new THREE.Scene(), cam: new THREE.PerspectiveCamera(30, 1, 0.1, 100), view: null, design: null, rot: 0, on: false, genT: 0 };
 {
-  pv.scene.add(new THREE.HemisphereLight(0xbcd0ff, 0x221a28, 0.8));
-  const k = new THREE.DirectionalLight(0xffffff, 2.6); k.position.set(4, 8, 6); pv.scene.add(k);
-  const r1 = new THREE.DirectionalLight(0xff3d7f, 1.6); r1.position.set(-6, 3, -5); pv.scene.add(r1);
-  const r2 = new THREE.DirectionalLight(0x3dc8ff, 1.6); r2.position.set(6, 3, -5); pv.scene.add(r2);
+  // 预览光照对齐擂台实际灯光（所见即所得）：半球 + 暖白主光 + 玫红/黄绿轮廓 + 冷补光 + 舞台彩色顶灯轻染色
+  pv.scene.add(new THREE.HemisphereLight(0x8fa6ff, 0x1a1020, 0.55));
+  const k = new THREE.DirectionalLight(0xfff1e0, 2.3); k.position.set(6, 22, 9); pv.scene.add(k);
+  const r1 = new THREE.DirectionalLight(0xf569a8, 0.9); r1.position.set(-14, 7, -10); pv.scene.add(r1);
+  const r2 = new THREE.DirectionalLight(0xdeff72, 0.9); r2.position.set(14, 6, -8); pv.scene.add(r2);
+  const fl = new THREE.DirectionalLight(0x9aa8ff, 0.5); fl.position.set(0, 5, 18); pv.scene.add(fl);
+  [[0xf569a8, -1], [0xdeff72, 1], [0x7fe5cd, 0]].forEach(([c, kx]) => { const L = new THREE.DirectionalLight(c, 0.35); L.position.set(kx * 5, 14, -4); pv.scene.add(L); });
   const disc = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.8, 0.18, 48), new THREE.MeshStandardMaterial({ color: 0x141826, metalness: 0.7, roughness: 0.35 }));
   disc.position.y = -0.09; pv.scene.add(disc);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.7, 0.03, 6, 64), new THREE.MeshBasicMaterial({ color: 0x3dc8ff })); ring.rotation.x = Math.PI / 2; ring.position.y = 0.01; pv.scene.add(ring); pv.ring = ring;
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.7, 0.03, 6, 64), new THREE.MeshBasicMaterial({ color: 0xdeff72, transparent: true, opacity: 0.45 })); ring.rotation.x = Math.PI / 2; ring.position.y = 0.01; pv.scene.add(ring); pv.ring = ring;
 }
 const RP = {
   a: ['霓虹', '黄金', '废土', '深海', '国潮', '暗黑', '冰霜', '熔岩', '糖果', '军绿', '赛博', '蒸汽朋克', '水墨', '电光', '毒液', '樱花', '星空', '铁锈'],
@@ -685,17 +688,28 @@ $('#refFile').onchange = (e) => {
   const url = URL.createObjectURL(f); const img = $('#refImg'); img.src = url; img.classList.add('on'); $('#refNote').classList.remove('hidden');
 };
 $('#btnGen').onclick = () => generate();
-$('#btnRand').onclick = () => { $('#prompt').value = randomPrompt(); generate(); };
+// 🎲 随机：每次体型都和上一台不同（近 3 台尽量不重复）；手输 prompt 生成不受影响，仍按关键词匹配
+const randHist = [];
+$('#btnRand').onclick = () => {
+  const recent = randHist.slice(-3); const last = randHist[randHist.length - 1] || (pv.design && pv.design.form);
+  let pool = FORM_LIST.filter((f) => !recent.includes(f) && f !== last); if (!pool.length) pool = FORM_LIST.filter((f) => f !== last);
+  const form = pool[Math.floor(Math.random() * pool.length)]; randHist.push(form);
+  $('#prompt').value = randomPrompt(); generate({ form });
+};
 $('#prompt').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); generate(); } });
-function generate() {
+function generate(gopt) {
   let prompt = $('#prompt').value.trim();
   if (!prompt) { prompt = randomPrompt(); $('#prompt').value = prompt; }
   audio.unlock(); audio.play('morph', { vol: 0.5 }); audio.play('servo2', { vol: 0.4, delay: 0.3 });
   $('#previewBox').classList.add('show'); statsPending(); $('#genFx').classList.add('on'); $('#previewHint').classList.add('hidden');
   $('#btnJoin').disabled = true; $('#btnGen').disabled = true;
   if (pv.view) { pv.scene.remove(pv.view.root); pv.view.dispose(); pv.view = null; }
+  // 连点「随机 / 换一个」：只认最后一次点击，加新模型前先销毁当前模型，避免堆叠
+  const tk = pv.tok = (pv.tok || 0) + 1;
   setTimeout(async () => {
-    const d = generateDesign(prompt, '我');
+    if (tk !== pv.tok) return;
+    if (pv.view) { pv.scene.remove(pv.view.root); pv.view.dispose(); pv.view = null; }
+    const d = generateDesign(prompt, '我', gopt && gopt.form ? { form: gopt.form } : undefined);
     const v = createView(d); v.fxCol = hex3(d.palette.emissive);
     pv.design = d; pv.view = v; pv.f = new Fighter(d, 0); pv.f.x = 0; pv.f.z = 0; pv.f.yaw = 0; pv.rot = -0.6; pv.genT = 0;
     v.cele = 0; pv.scene.add(v.root);
@@ -741,9 +755,9 @@ function ensurePreviewRenderer() {
   $('#previewBox').prepend(c);
   pvR = new THREE.WebGLRenderer({ canvas: c, antialias: true, alpha: true, powerPreference: 'high-performance', preserveDrawingBuffer: TEST });
   pvR.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
-  pvR.toneMapping = THREE.ACESFilmicToneMapping; pvR.toneMappingExposure = 1.1; pvR.outputColorSpace = THREE.SRGBColorSpace;
+  pvR.toneMapping = THREE.ACESFilmicToneMapping; pvR.toneMappingExposure = 0.98; pvR.outputColorSpace = THREE.SRGBColorSpace;
   const pm = new THREE.PMREMGenerator(pvR);
-  import('three/examples/jsm/environments/RoomEnvironment.js').then(({ RoomEnvironment }) => { pv.scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; pv.scene.environmentIntensity = 0.6; });
+  import('three/examples/jsm/environments/RoomEnvironment.js').then(({ RoomEnvironment }) => { pv.scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; pv.scene.environmentIntensity = 0.55; });
   return pvR;
 }
 function renderPreview(dt) {
@@ -751,7 +765,6 @@ function renderPreview(dt) {
   const R = ensurePreviewRenderer();
   const box = $('#previewBox'); const w = box.clientWidth, h = box.clientHeight; if (w < 10) return;
   const c = R.domElement; if (c.width !== Math.round(w * R.getPixelRatio()) || c.height !== Math.round(h * R.getPixelRatio())) R.setSize(w, h, false);
-  pv.ring.material.color.setHSL((performance.now() / 4000) % 1, 0.8, 0.6);
   pv.rot += dt * 0.6; pv.genT += dt;
   const v = pv.view, f = pv.f; f.yaw = pv.rot;
   v.update(f, dt, null);
@@ -813,7 +826,7 @@ function loop(now) {
   arena.update(dt, GLOBAL_TIME.value, excite);
   vfx.update(AS.on ? dt * 0.05 : dt, GLOBAL_TIME.value, { sim: G.sim, views });
   director.update(dt, rdt, G.F.map((f, i) => (f && G.V[i] && G.V[i].root.parent ? { f, v: G.V[i] } : null)));
-  if (bloom) bloom.strength = 0.5 + (G.timeScale < 0.6 ? 0.25 : 0);
+  if (bloom) bloom.strength = 0.28 + (G.timeScale < 0.6 ? 0.14 : 0);
   if (G.phase !== 'boot') updateHud(rdt);
   if (composer) composer.render(); else renderer.render(scene, camera);
   renderPreview(rdt);

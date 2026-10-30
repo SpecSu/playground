@@ -421,7 +421,7 @@ export class VFX {
   }
   // KO 碎片
   burst(x, y, z, palette, n = 60, scale = 1) {
-    const cols = [palette.primary, palette.secondary, palette.accent, palette.metal, '#2b2f36'].map((h) => new THREE.Color(h));
+    const cols = [palette.primary, palette.secondary, palette.accent, palette.metal, '#3A3941'].map((h) => new THREE.Color(h));
     if (this.low) n = Math.ceil(n * 0.6);
     for (let i = 0; i < n; i++) {
       const d = this.debris.length < 90 ? {} : this.debris.shift();

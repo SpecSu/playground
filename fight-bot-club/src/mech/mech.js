@@ -6,25 +6,37 @@ import { mechMaterial, PATTERNS, glowMaterial, GLOBAL_TIME } from '../render/mat
 import * as P from './parts.js';
 
 export const FINISH = {
-  gloss: { rough: 0.3, metal: 0.18 }, satin: { rough: 0.46, metal: 0.32 }, matte: { rough: 0.72, metal: 0.08 }, chrome: { rough: 0.28, metal: 0.88 },
+  // v9.2 钢铁机甲：所有漆面都是金属底（亮漆 / 缎面 / 喷砂 / 镀铬），不再有塑料面
+  gloss: { rough: 0.26, metal: 0.62 }, satin: { rough: 0.36, metal: 0.7 }, matte: { rough: 0.5, metal: 0.62 }, chrome: { rough: 0.16, metal: 0.95 },
 };
 const PAT_EMIS = new Set(['circuit', 'drip', 'cracks']);
 
 export function makeMats(design, uni) {
   const pal = design.palette, L = design.look; const fin = FINISH[L.finish] || FINISH.satin;
   const pat = PATTERNS[L.pattern] || 0;
-  const patCol = ['stripes', 'checker', 'hazard', 'chevron', 'trim', 'split', 'wave', 'cloud'].includes(L.pattern) ? pal.secondary : (L.pattern === 'carbon' ? '#050608' : (PAT_EMIS.has(L.pattern) ? new THREE.Color(pal.primary).multiplyScalar(0.5).getStyle() : pal.accent));
+  const patCol = ['stripes', 'checker', 'hazard', 'chevron', 'trim', 'split', 'wave', 'cloud'].includes(L.pattern) ? pal.secondary : (L.pattern === 'carbon' ? '#2A2B2F' : (PAT_EMIS.has(L.pattern) ? new THREE.Color(pal.primary).multiplyScalar(0.5).getStyle() : pal.accent));
   const patScale = { stripes: 1, split: 1, checker: 1.1, camo: 0.9, digital: 0.9, circuit: 0.8, hex: 1.3, hazard: 0.9, dots: 1.2, carbon: 1, drip: 0.7, cracks: 0.9, wave: 1, cloud: 0.8, chevron: 1, trim: 1.3, patch: 1 }[L.pattern] || 1;
   const wear = L.worn;
+  // 金属分级（v9.1）：中性色/黄铜/暗色钢 = 真金属（v6 质感：高金属度 + 低粗糙度，环境反射清晰）；
+  // 鲜艳色 = 金属车漆（中金属度，避免整块彩色反光泛白）
+  const metalOf = (hex, flag, baseR, baseM) => {
+    if (!flag) return { rough: baseR, metal: baseM };
+    const h = new THREE.Color(hex).getHSL({});
+    const real = h.s < 0.3 || (h.h > 0.08 && h.h < 0.15 && h.s < 0.62) || h.l < 0.3;
+    if (real && h.l < 0.36) return { rough: L.finish === 'chrome' ? 0.26 : 0.36, metal: 0.82 }; // 铸铁 / 枪灰：拉丝钢，保留暗部层次
+    if (real) return { rough: L.finish === 'chrome' ? 0.16 : L.finish === 'matte' ? 0.38 : 0.26, metal: 0.96 };
+    return { rough: Math.max(baseR, 0.32), metal: 0.62 }; // 彩色 = 金属车漆
+  };
+  const mP = metalOf(pal.primary, L.pMetal, fin.rough, fin.metal), mS = metalOf(pal.secondary, L.sMetal, fin.rough + 0.05, fin.metal);
   const mats = {
-    P: mechMaterial({ color: pal.primary, rough: fin.rough, metal: L.pMetal ? 1 : fin.metal, pattern: pat, patCol, patEmis: PAT_EMIS.has(L.pattern) ? pal.emissive : '#000', patScale, patSeed: (L.patternSeed % 1000) / 37, wear, uni }),
-    S: mechMaterial({ color: pal.secondary, rough: L.sMetal ? 0.22 : fin.rough + 0.05, metal: L.sMetal ? 1 : fin.metal, wear: wear * 0.7, uni, panelB: true }),
-    A: mechMaterial({ color: pal.accent, rough: 0.34, metal: 0.4, wear: wear * 0.5, uni, normalScale: 0.4 }),
-    M: mechMaterial({ color: pal.metal, rough: 0.42, metal: 0.85, wear: 0.3, uni, normalScale: 0.5, panelB: true }),
-    K: mechMaterial({ color: '#16181d', rough: 0.68, metal: 0.25, wear: 0.1, uni, panel: false }),
-    C: mechMaterial({ color: '#c9ced8', rough: 0.18, metal: 1.0, wear: 0.05, uni, panel: false }),
-    G: glowMaterial(pal.emissive, 3.2 * L.lights),
-    W: new THREE.MeshStandardMaterial({ color: new THREE.Color(pal.emissive).lerp(new THREE.Color('#9fd8ff'), 0.6), transparent: true, opacity: 0.22, roughness: 0.05, metalness: 0.1, depthWrite: false, envMapIntensity: 2, side: THREE.DoubleSide }),
+    P: mechMaterial({ color: pal.primary, rough: mP.rough, metal: mP.metal, envI: 1.7, pattern: pat, patCol, patEmis: PAT_EMIS.has(L.pattern) ? new THREE.Color(pal.emissive).multiplyScalar(0.32) : '#000', patScale, patSeed: (L.patternSeed % 1000) / 37, wear, uni }),
+    S: mechMaterial({ color: pal.secondary, rough: mS.rough, metal: mS.metal, envI: 1.7, wear: wear * 0.7, uni, panelB: true }),
+    A: mechMaterial({ color: pal.accent, rough: 0.3, metal: 0.7, envI: 1.6, wear: wear * 0.5, uni, normalScale: 0.4 }),
+    M: mechMaterial({ color: pal.metal, rough: 0.3, metal: 0.96, envI: 1.8, wear: 0.3, uni, normalScale: 0.5, panelB: true }),
+    K: mechMaterial({ color: '#45474C', rough: 0.42, metal: 0.8, wear: 0.1, uni, panel: false, envI: 1.9 }), // 铸铁关节
+    C: mechMaterial({ color: '#D3D2CE', rough: 0.18, metal: 1.0, wear: 0.05, uni, panel: false }),
+    G: glowMaterial(new THREE.Color(pal.emissive).getHSL({}).l > 0.85 ? new THREE.Color(pal.emissive).multiplyScalar(0.7) : pal.emissive, 1.25 * L.lights),
+    W: new THREE.MeshStandardMaterial({ color: new THREE.Color(pal.emissive).lerp(new THREE.Color('#FFB1D4'), 0.6), transparent: true, opacity: 0.22, roughness: 0.05, metalness: 0.1, depthWrite: false, envMapIntensity: 2, side: THREE.DoubleSide }),
   };
   return mats;
 }

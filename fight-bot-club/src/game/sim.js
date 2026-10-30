@@ -16,6 +16,14 @@ export const FORM_SIM = {
   hover: { r: 1.0, h: 0.85, reach: 1, g: 0.5, ceil: 4.2 },
   tank: { r: 1.25, h: 0.82, reach: 1.05, g: 1.25, ceil: 99 },
   wraith: { r: 0.95, h: 1.0, reach: 1.05, g: 0.6, ceil: 4.6 },
+  manta: { r: 1.25, h: 0.75, reach: 1.05, g: 0.5, ceil: 4.4 },
+  tiger: { r: 1.15, h: 0.8, reach: 1.15, g: 1.1, ceil: 99 },
+  turtle: { r: 1.3, h: 0.72, reach: 1.0, g: 1.3, ceil: 99 },
+  croc: { r: 1.2, h: 0.55, reach: 1.25, g: 1.15, ceil: 99 },
+  trex: { r: 1.15, h: 1.05, reach: 1.15, g: 1.15, ceil: 99 },
+  flamingo: { r: 0.9, h: 1.1, reach: 1.1, g: 0.8, ceil: 99 },
+  frog: { r: 1.1, h: 0.62, reach: 1.05, g: 0.7, ceil: 99 },
+  rabbit: { r: 0.95, h: 0.85, reach: 1.0, g: 0.72, ceil: 99 },
 };
 export const ROLE_AI = {
   tank: { pref: 2.7, react: 0.5, block: 0.6, dodge: 0.12, jump: 0.12, aggr: 0.62, circle: 0.55, turn: 4.2, poise: 0.55, think: 0.55 },

@@ -17,7 +17,7 @@ export class Arena {
     this.scene = scene; this.q = quality;
     const r = mulberry32(42);
     scene.background = new THREE.Color(0x04050b);
-    scene.fog = new THREE.FogExp2(0x05060d, 0.017);
+    scene.fog = new THREE.FogExp2(0x05060d, 0.011); // 雾减淡：画面更通透
 
     // —— 环境反射（一次生成）
     const pm = new THREE.PMREMGenerator(renderer);
@@ -27,7 +27,7 @@ export class Arena {
 
     // —— 灯光（恒定数量）
     this.hemi = new THREE.HemisphereLight(0x8fa6ff, 0x1a1020, 0.55); scene.add(this.hemi);
-    const key = this.key = new THREE.DirectionalLight(0xfff1e0, 2.3);
+    const key = this.key = new THREE.DirectionalLight(0xfff1e0, 2.0);
     key.position.set(6, 22, 9); key.target.position.set(0, 0, 0);
     key.castShadow = true;
     const S = quality.shadow;
@@ -35,8 +35,8 @@ export class Arena {
     const sc = key.shadow.camera; sc.left = sc.bottom = -13; sc.right = sc.top = 13; sc.near = 4; sc.far = 50;
     key.shadow.bias = -0.0006; key.shadow.normalBias = 0.03;
     scene.add(key, key.target);
-    const rimA = new THREE.DirectionalLight(0xff3d7f, 1.5); rimA.position.set(-14, 7, -10); scene.add(rimA);
-    const rimB = new THREE.DirectionalLight(0x3dc8ff, 1.5); rimB.position.set(14, 6, -8); scene.add(rimB);
+    const rimA = new THREE.DirectionalLight(0xf569a8, 0.9); rimA.position.set(-14, 7, -10); scene.add(rimA);
+    const rimB = new THREE.DirectionalLight(0xdeff72, 0.9); rimB.position.set(14, 6, -8); scene.add(rimB);
     const fill = new THREE.DirectionalLight(0x9aa8ff, 0.5); fill.position.set(0, 5, 18); scene.add(fill);
     this.rims = [rimA, rimB];
 
@@ -56,36 +56,36 @@ export class Arena {
     ]);
     top.position.y = -0.12; top.receiveShadow = true; scene.add(top);
     // 台基 + 围裙广告
-    const skirtTex = makeTextTexture(['UGC ROBOT ARENA', '即梦 · 机甲擂台', 'CREATE · FIGHT · WIN'], { w: 2048, h: 160, accent: '#ff3d6e' });
+    const skirtTex = makeTextTexture(['UGC ROBOT ARENA', '即梦 · 机甲擂台', 'CREATE · FIGHT · WIN'], { w: 2048, h: 160, accent: '#DEFF70' });
     skirtTex.wrapS = THREE.RepeatWrapping;
     this.skirtTex = skirtTex;
     const skirtMat = new THREE.MeshStandardMaterial({ map: skirtTex, emissiveMap: skirtTex, emissive: 0xffffff, emissiveIntensity: 0.55, roughness: 0.5 });
     const skirt = new THREE.Mesh(new THREE.BoxGeometry(MAT * 2 + 0.1, PLAT_H - 0.24, MAT * 2 + 0.1), [skirtMat, skirtMat, new THREE.MeshBasicMaterial({ color: 0 }), new THREE.MeshBasicMaterial({ color: 0 }), skirtMat, skirtMat]);
     skirt.position.y = -0.24 - (PLAT_H - 0.24) / 2; scene.add(skirt);
     // 台边 LED 灯带
-    const led = new THREE.Mesh(new THREE.BoxGeometry(MAT * 2 + 0.16, 0.06, MAT * 2 + 0.16), new THREE.MeshBasicMaterial({ color: 0xff2e6a }));
+    const led = new THREE.Mesh(new THREE.BoxGeometry(MAT * 2 + 0.16, 0.06, MAT * 2 + 0.16), new THREE.MeshBasicMaterial({ color: 0xb84d7e }));
     led.position.y = -0.27; scene.add(led); this.led = led;
     // 角柱
     const postGeo = [];
-    const padCols = [0xff2e55, 0x2e9bff, 0xf5f5f5, 0xf5f5f5];
+    const padCols = [0x9e3f6b, 0x8fa63c, 0xf5f5f5, 0xf5f5f5]; // 压暗的玫红/黄绿，避免受光泛光
     const posts = [[-1, -1], [1, 1], [1, -1], [-1, 1]];
     const metal = new THREE.MeshStandardMaterial({ color: 0xb8c0cc, metalness: 1, roughness: 0.28 });
     posts.forEach(([sx, sz], i) => {
       const g = new THREE.CylinderGeometry(0.16, 0.2, 3.4, 16); g.translate(sx * POST, 1.5, sz * POST); postGeo.push(g);
-      const pad = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2.2, 0.5), new THREE.MeshStandardMaterial({ color: padCols[i], roughness: 0.55, emissive: padCols[i], emissiveIntensity: i < 2 ? 0.25 : 0.04 }));
+      const pad = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2.2, 0.5), new THREE.MeshStandardMaterial({ color: padCols[i], roughness: 0.55, emissive: padCols[i], emissiveIntensity: 0 }));
       pad.position.set(sx * POST, 1.65, sz * POST); pad.rotation.y = Math.PI / 4; scene.add(pad);
-      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), new THREE.MeshBasicMaterial({ color: i < 2 ? padCols[i] : 0xffffff }));
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), new THREE.MeshBasicMaterial({ color: i < 2 ? 0xb0b0b0 : 0xffffff }));
       cap.position.set(sx * POST, 3.25, sz * POST); scene.add(cap);
     });
     const postMesh = new THREE.Mesh(mergeGeometries(postGeo), metal); postMesh.castShadow = false; scene.add(postMesh);
     // 围绳（发光管，可抖动）
     this.ropes = [];
-    const ropeCols = [0xff2e6a, 0xffffff, 0x2ec5ff];
+    const ropeCols = [0xf569a8, 0xffffff, 0xdeff72];
     const H = [0.95, 1.75, 2.55];
     for (let side = 0; side < 4; side++) {
       for (let k = 0; k < 3; k++) {
         const g = new THREE.CylinderGeometry(0.055, 0.055, POST * 2, 8, 12, true); g.rotateZ(Math.PI / 2);
-        const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: ropeCols[k], emissive: ropeCols[k], emissiveIntensity: 1.1, roughness: 0.4 }));
+        const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: ropeCols[k], emissive: ropeCols[k], emissiveIntensity: ropeCols[k] === 0xffffff ? 0.3 : 0.2, roughness: 0.4 }));
         const ang = side * Math.PI / 2;
         m.position.set(Math.sin(ang) * POST, H[k], Math.cos(ang) * POST); m.rotation.y = ang;
         m.userData = { side, k, base: g.attributes.position.array.slice(), wob: 0, wobT: 0 };
@@ -102,7 +102,7 @@ export class Arena {
     const floor = new THREE.Mesh(new THREE.CircleGeometry(80, 48), new THREE.MeshStandardMaterial({ color: 0x07080e, roughness: 0.35, metalness: 0.6 }));
     floor.rotation.x = -Math.PI / 2; floor.position.y = -PLAT_H; scene.add(floor);
     // 地面光圈
-    const ringGlow = new THREE.Mesh(new THREE.RingGeometry(MAT + 1.0, MAT + 1.25, 64), new THREE.MeshBasicMaterial({ color: 0x3dc8ff, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const ringGlow = new THREE.Mesh(new THREE.RingGeometry(MAT + 1.0, MAT + 1.25, 64), new THREE.MeshBasicMaterial({ color: 0xdeff72, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending, depthWrite: false }));
     ringGlow.rotation.x = -Math.PI / 2; ringGlow.position.y = -PLAT_H + 0.02; scene.add(ringGlow);
     // 看台（台阶状） + 人群
     const tiers = 7, perTier = 72;
@@ -144,7 +144,7 @@ export class Arena {
     // 荧光棒 / 手机闪光（点精灵，着色器闪烁）
     const n = Math.floor(people.length * 0.55);
     const pos = new Float32Array(n * 3), cl = new Float32Array(n * 3), ph = new Float32Array(n);
-    const palette = [[1, 0.2, 0.45], [0.2, 0.8, 1], [1, 0.85, 0.3], [0.7, 0.4, 1], [1, 1, 1]];
+    const palette = [[0.961, 0.412, 0.659], [0.871, 1, 0.447], [1, 0.882, 0.208], [0.718, 0.643, 1], [0.498, 0.898, 0.804]];
     for (let i = 0; i < n; i++) {
       const p = people[Math.floor(r() * people.length)];
       pos.set([p.x * 0.985, p.y + 1.75 + r() * 0.4, p.z * 0.985], i * 3); cl.set(palette[Math.floor(r() * palette.length)], i * 3); ph[i] = r() * 100;
@@ -180,10 +180,10 @@ export class Arena {
     const coneMat = new THREE.ShaderMaterial({
       uniforms: { uCol: { value: new THREE.Color(1, 1, 1) } },
       vertexShader: `varying float vY; varying vec3 vN; varying vec3 vV; void main(){ vY = uv.y; vN = normalize(normalMatrix*normal); vec4 mv = modelViewMatrix*vec4(position,1.0); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
-      fragmentShader: `uniform vec3 uCol; varying float vY; varying vec3 vN; varying vec3 vV; void main(){ float f = pow(abs(dot(vN, vV)), 1.6); float a = f * pow(vY, 1.6) * 0.16; gl_FragColor = vec4(uCol * a, 1.0); }`,
+      fragmentShader: `uniform vec3 uCol; varying float vY; varying vec3 vN; varying vec3 vV; void main(){ float f = pow(abs(dot(vN, vV)), 1.6); float a = f * pow(vY, 2.2) * 0.07; gl_FragColor = vec4(uCol * a, 1.0); }`,
       transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
     });
-    const cols = [0xffffff, 0xff4d8a, 0x4dc3ff, 0xffffff, 0xffc04d, 0x9d6bff, 0xffffff, 0x4dffc3];
+    const cols = [0xffffff, 0xf569a8, 0xdeff72, 0xffffff, 0xffe135, 0xb7a4ff, 0xffffff, 0x7fe5cd];
     this.cones = [];
     for (let i = 0; i < 8; i++) {
       const ang = i / 8 * Math.PI * 2 + 0.39;
@@ -215,11 +215,11 @@ export class Arena {
     }
     g.add(new THREE.Mesh(new THREE.BoxGeometry(6, 4.4, 6), frame));
     this.scene.add(g); this.screen = g;
-    this.setScreen('UGC ROBOT ARENA', '等待挑战者', '#ff3d6e', '#3dc8ff');
+    this.setScreen('UGC ROBOT ARENA', '等待挑战者', '#DEFF70', '#FF61A8');
   }
-  setScreen(a, b, ca = '#ff3d6e', cb = '#3dc8ff', mid = 'VS') {
+  setScreen(a, b, ca = '#DEFF70', cb = '#FF61A8', mid = 'VS') {
     const g = this.screenCtx, W = 1024, H = 512;
-    const grd = g.createLinearGradient(0, 0, W, H); grd.addColorStop(0, '#0b1020'); grd.addColorStop(1, '#170b1e');
+    const grd = g.createLinearGradient(0, 0, W, H); grd.addColorStop(0, '#1D1C20'); grd.addColorStop(1, '#130D2B');
     g.fillStyle = grd; g.fillRect(0, 0, W, H);
     g.fillStyle = ca; g.fillRect(0, 0, W / 2, 10); g.fillStyle = cb; g.fillRect(W / 2, 0, W / 2, 10);
     g.fillStyle = ca; g.fillRect(0, H - 10, W / 2, 10); g.fillStyle = cb; g.fillRect(W / 2, H - 10, W / 2, 10);
