@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>UGC 机器人擂台 · 扁平配色模拟稿</title>
+<style>
+@font-face { font-family: 'Cond'; src: url('img/anton.woff2') format('woff2'); }
+:root {
+  --lime: #DEFF72;   /* 主强调：按钮 / 数字 / 选中 / 我方 */
+  --pink: #F569A8;   /* 次强调：标签 / 星号 / 敌方 / 大招 */
+  --violet: #B7A4FF; /* 辅助：技能 / 防御 */
+  --mint: #7FE5CD;   /* 辅助：普攻 / 速度 */
+  --bg: #171719;     /* 底 */
+  --card: #232126;   /* 卡片 */
+  --line: #2E2C33;   /* 分隔线 */
+  --txt: #F5F4F0; --dim: #9B99A1; --black: #0B0B0C;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0B0B0C; color: var(--txt); font-family: 'PingFang SC', 'Source Han Sans SC', 'Noto Sans CJK SC', sans-serif; padding: 40px 36px 60px; }
+.cond { font-family: 'Cond', Impact, sans-serif; letter-spacing: .5px; }
+.eyebrow { font-size: 11px; letter-spacing: 3px; font-weight: 700; color: var(--dim); text-transform: uppercase; }
+header { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; margin-bottom: 34px; flex-wrap: wrap; }
+header h1 { font-size: 40px; font-weight: 900; margin-top: 10px; }
+header h1 i { color: var(--pink); font-style: normal; }
+header p { color: var(--dim); margin-top: 8px; font-size: 14px; }
+.pal { display: flex; gap: 10px; }
+.sw { width: 108px; }
+.sw b { display: block; height: 56px; }
+.sw span { display: block; font-size: 12px; margin-top: 8px; font-weight: 700; }
+.sw em { display: block; font-size: 11px; color: var(--dim); font-style: normal; margin-top: 2px; }
+.row { display: flex; gap: 28px; flex-wrap: wrap; }
+.cap { font-size: 13px; color: var(--dim); margin: 12px 2px 0; width: 390px; line-height: 1.6; }
+.cap b { color: var(--txt); }
+
+/* —— 手机屏 —— */
+.phone { width: 390px; height: 780px; position: relative; overflow: hidden; background: var(--bg) url('img/arena.png') center/cover; }
+.phone.dim::after { content: ''; position: absolute; inset: 0; background: rgba(11, 11, 12, .45); z-index: 1; }
+
+/* 顶部 PK */
+.pk { position: absolute; top: 0; left: 0; right: 0; padding: 14px 12px 0; display: flex; align-items: flex-start; gap: 8px; z-index: 5; }
+.side { flex: 1; min-width: 0; }
+.side .who { display: flex; gap: 8px; align-items: center; }
+.side.r .who { flex-direction: row-reverse; text-align: right; }
+.ava { width: 42px; height: 42px; flex: none; background: var(--card) center/cover; }
+.side.l .ava { box-shadow: inset 0 -3px 0 var(--lime); }
+.side.r .ava { box-shadow: inset 0 -3px 0 var(--pink); }
+.nm { font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nm small { color: var(--dim); font-weight: 600; }
+.sub { font-size: 10.5px; color: var(--dim); margin-top: 2px; }
+.hp { height: 8px; background: rgba(255,255,255,.12); margin-top: 8px; position: relative; }
+.hp i { position: absolute; top: 0; bottom: 0; }
+.side.l .hp i { left: 0; background: var(--lime); }
+.side.r .hp i { right: 0; background: var(--pink); }
+.hpn { font-size: 13px; margin-top: 4px; }
+.side.r .hpn { text-align: right; }
+.mid { width: 58px; text-align: center; padding-top: 2px; }
+.mid .t { font-size: 34px; line-height: 1; }
+.mid .rd { font-size: 9px; letter-spacing: 2px; color: var(--black); background: var(--lime); padding: 2px 0; margin-top: 4px; font-weight: 800; }
+
+/* 队列 */
+.queue { position: absolute; right: 10px; top: 112px; z-index: 5; width: 62px; }
+.queue .eyebrow { font-size: 9px; letter-spacing: 2px; text-align: center; margin-bottom: 6px; color: var(--txt); }
+.qi { width: 62px; height: 62px; background: var(--card) center/cover; margin-bottom: 6px; position: relative; }
+.qi.next { box-shadow: inset 0 0 0 2px var(--lime); }
+.qi.next::after { content: 'NEXT'; position: absolute; left: 0; bottom: 0; background: var(--lime); color: var(--black); font-size: 9px; font-weight: 900; padding: 1px 4px; letter-spacing: 1px; }
+.qi.mine::after { content: 'YOU'; position: absolute; left: 0; bottom: 0; background: var(--pink); color: var(--black); font-size: 9px; font-weight: 900; padding: 1px 4px; }
+
+/* 底部按钮 */
+.dock { position: absolute; left: 12px; right: 12px; bottom: 16px; display: flex; gap: 8px; z-index: 5; }
+.btn { height: 54px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 900; font-size: 16px; }
+.btn.pri { flex: 1; background: var(--lime); color: var(--black); justify-content: space-between; padding: 0 18px; }
+.btn.pri small { font-size: 10px; letter-spacing: 2px; font-weight: 800; }
+.btn.sq { width: 54px; background: var(--card); color: var(--txt); }
+.btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: square; }
+
+/* 大招 + TAP */
+.ultban { position: absolute; left: 0; right: 0; top: 150px; z-index: 6; text-align: left; padding: 0 22px; }
+.ultban .eyebrow { color: var(--pink); }
+.ultban h2 { font-size: 46px; font-weight: 900; margin-top: 6px; line-height: 1; }
+.ultban h2 i { color: var(--pink); font-style: normal; }
+.ultban p { font-size: 13px; color: var(--dim); margin-top: 8px; }
+.boost { position: absolute; left: 22px; right: 22px; top: 300px; z-index: 6; background: var(--card); padding: 18px 20px; }
+.boost .eyebrow { color: var(--txt); font-size: 12px; letter-spacing: 1px; text-transform: none; }
+.boost .n { font-size: 74px; color: var(--lime); line-height: 1; margin-top: 8px; }
+.boost .bar { height: 6px; background: var(--line); margin-top: 12px; }
+.boost .bar i { display: block; height: 100%; width: 62%; background: var(--lime); }
+.boost .mul { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin-top: 8px; }
+.boost .mul b { color: var(--pink); }
+.tap { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); width: 132px; height: 132px; border-radius: 50%; z-index: 6;
+  background: rgba(222, 255, 114, .22); box-shadow: inset 0 0 0 3px var(--lime); display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.tap b { font-family: 'Cond', Impact; font-size: 44px; color: #fff; line-height: 1; }
+.tap small { font-size: 10px; letter-spacing: 2px; color: var(--lime); font-weight: 800; margin-top: 4px; }
+.pop { position: absolute; z-index: 6; font-family: 'Cond'; color: var(--lime); font-size: 22px; }
+
+/* 抽屉面板 */
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 8; padding: 22px 18px 18px; }
+.sh-head { display: flex; justify-content: space-between; align-items: flex-start; }
+.sh-head h3 { font-size: 30px; font-weight: 900; margin-top: 8px; line-height: 1.1; }
+.sh-head h3 i { color: var(--pink); font-style: normal; }
+.x { width: 40px; height: 40px; border-radius: 50%; box-shadow: inset 0 0 0 1px #4A4850; display: flex; align-items: center; justify-content: center; flex: none; }
+.x svg { width: 16px; height: 16px; stroke: var(--txt); stroke-width: 2; }
+.chg { white-space: nowrap; display: flex; align-items: center; gap: 6px; background: var(--card); padding: 4px 10px 4px 4px; font-size: 12px; font-weight: 700; margin-right: 8px; }
+.chg span { width: 28px; height: 28px; background: center/cover; display: block; }
+
+/* 创造 */
+.pv { display: flex; gap: 12px; margin-top: 16px; }
+.pvbox { flex: 1; height: 196px; background: var(--card) url('img/robot.png') center/cover; }
+.stats { width: 104px; display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+.st .h { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; color: var(--dim); font-weight: 700; }
+.st .h em { font-family: 'Cond'; font-style: normal; color: var(--txt); font-size: 15px; }
+.st .b { height: 4px; background: var(--line); margin-top: 4px; }
+.st .b i { display: block; height: 100%; }
+.nmrow { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.nmrow b { font-size: 24px; font-weight: 900; }
+.tag { font-size: 11px; font-weight: 800; padding: 3px 8px; color: var(--pink); box-shadow: inset 0 0 0 1px var(--pink); }
+.dots { margin-left: auto; display: flex; gap: 3px; }
+.dots i { width: 12px; height: 12px; display: block; }
+.moves { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.mv { font-size: 11px; font-weight: 700; padding: 5px 9px; background: var(--card); display: flex; gap: 6px; align-items: center; }
+.mv::before { content: ''; width: 6px; height: 6px; background: var(--c); }
+.mv.u { background: var(--pink); color: var(--black); }
+.mv.u::before { background: var(--black); }
+.field { display: flex; gap: 8px; margin-top: 12px; }
+.inp { flex: 1; height: 58px; background: var(--card); padding: 10px 12px; font-size: 14px; display: flex; align-items: center; box-shadow: inset 0 -2px 0 var(--lime); }
+.ref { width: 58px; height: 58px; background: var(--card); display: flex; align-items: center; justify-content: center; color: var(--dim); font-size: 22px; }
+.acts { display: flex; gap: 8px; margin-top: 12px; }
+.acts .btn { font-size: 15px; }
+.acts .rand { width: 58px; background: var(--card); flex-direction: column; gap: 0; font-size: 11px; color: var(--pink); }
+.acts .gen { width: 104px; background: var(--card); }
+
+/* 排行榜 */
+.score { background: var(--card); padding: 18px 20px; margin-top: 18px; }
+.score .eyebrow { text-transform: none; letter-spacing: 1px; color: var(--txt); font-size: 13px; font-weight: 600; }
+.score .n { font-size: 64px; color: var(--lime); line-height: 1; margin-top: 8px; }
+.score p { font-size: 12px; color: var(--dim); margin-top: 6px; }
+.lh { display: flex; justify-content: space-between; align-items: baseline; margin: 20px 0 10px; }
+.lh b { font-size: 18px; font-weight: 900; }
+.lh span { font-size: 11px; color: var(--dim); }
+.rr { display: flex; align-items: center; gap: 12px; height: 62px; padding: 0 14px 0 12px; border-bottom: 1px solid var(--line); }
+.rr .k { width: 20px; font-size: 13px; color: var(--dim); }
+.rr .a { width: 40px; height: 40px; background: var(--card) center/cover; flex: none; }
+.rr .w { flex: 1; min-width: 0; }
+.rr .w b { font-size: 15px; display: block; }
+.rr .w small { font-size: 11px; color: var(--dim); }
+.rr .s { font-size: 22px; }
+.rr.me { background: var(--lime); color: var(--black); border: 0; }
+.rr.me .k, .rr.me small { color: rgba(11,11,12,.6); }
+.rr.me .a { box-shadow: 0 0 0 2px var(--black); }
+.cta { margin-top: 16px; background: var(--lime); color: var(--black); height: 58px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 20px; font-weight: 900; }
+.cta svg { width: 24px; height: 24px; stroke: var(--black); stroke-width: 2.6; fill: none; }
+
+/* WINNER */
+.win { position: absolute; left: 0; right: 0; top: 190px; z-index: 6; padding: 0 22px; }
+.win .eyebrow { color: var(--lime); }
+.win h2 { font-family: 'Cond'; font-size: 96px; line-height: .95; margin-top: 6px; }
+.win h2 i { color: var(--lime); font-style: normal; }
+.win .who { display: flex; align-items: center; gap: 10px; margin-top: 14px; background: var(--card); padding: 10px 12px; }
+.win .who span { width: 40px; height: 40px; background: center/cover; }
+.win .who b { font-size: 16px; display: block; }
+.win .who small { color: var(--dim); font-size: 11px; }
+.win .who em { margin-left: auto; font-family: 'Cond'; font-style: normal; color: var(--lime); font-size: 22px; }
+.ko { position: absolute; right: 22px; top: 140px; z-index: 6; background: var(--pink); color: var(--black); font-family: 'Cond'; font-size: 30px; padding: 2px 12px; }
+#c3 .sh-head h3 { font-size: 25px; white-space: nowrap; }
+
+.sec { margin-top: 56px; }
+.sec h2 { font-size: 28px; font-weight: 900; margin-top: 8px; } .sec h2 i { color: var(--pink); font-style: normal; }
+.sec > p { color: var(--dim); font-size: 14px; margin-top: 6px; }
+.keys { display: flex; gap: 14px; margin-top: 20px; flex-wrap: wrap; }
+.key { width: 200px; background: var(--card); padding: 16px; }
+.key .ar { height: 92px; display: flex; align-items: center; justify-content: center; font-size: 46px; font-weight: 900; color: var(--black); }
+.key b { display: block; font-size: 22px; margin-top: 12px; font-family: 'Cond'; letter-spacing: 1px; }
+.key span { font-size: 12px; color: var(--dim); display: block; margin-top: 4px; line-height: 1.6; }
+.key.ext .ar { box-shadow: inset 0 0 0 1px #3a3840; }
+.rbs { display: grid; grid-template-columns: repeat(4, 260px); gap: 14px; margin-top: 20px; }
+.rb { background: var(--card); }
+.rbi { height: 238px; background: center/cover; }
+.rbm { display: flex; align-items: center; gap: 8px; padding: 12px 14px; }
+.rbm b { font-size: 15px; } .rbm small { font-size: 11px; color: var(--dim); }
+.rbc { margin-left: auto; display: flex; gap: 3px; } .rbc i { width: 16px; height: 16px; display: block; box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="eyebrow">UGC ROBOT ARENA / FLAT COLOR MOCKUP</div>
+    <h1>扁平配色模拟稿 <i>✳</i></h1>
+    <p>只是静态示意，不改主程序。3D 擂台和机甲保持原样，只换 HUD 和面板的配色与样式。</p>
+  </div>
+  <div class="pal">
+    <div class="sw"><b style="background:#DEFF72"></b><span>亮黄绿 #DEFF72</span><em>主强调：按钮/数字/我方</em></div>
+    <div class="sw"><b style="background:#F569A8"></b><span>玫红 #F569A8</span><em>次强调：标签/敌方/大招</em></div>
+    <div class="sw"><b style="background:#B7A4FF"></b><span>淡紫 #B7A4FF</span><em>辅助：技能/防御</em></div>
+    <div class="sw"><b style="background:#7FE5CD"></b><span>薄荷 #7FE5CD</span><em>辅助：普攻/速度</em></div>
+    <div class="sw"><b style="background:#232126;box-shadow:inset 0 0 0 1px #3a3840"></b><span>深灰 #232126</span><em>卡片/按钮底</em></div>
+    <div class="sw"><b style="background:#171719;box-shadow:inset 0 0 0 1px #3a3840"></b><span>黑 #171719</span><em>面板底色</em></div>
+  </div>
+</header>
+
+<div class="row">
+  <!-- ① 对战主界面 -->
+  <div>
+    <div class="phone">
+      <div class="pk">
+        <div class="side l"><div class="who"><div class="ava" style="background-image:url(img/a01.webp)"></div><div style="min-width:0"><div class="nm">奶蛙 <small>· 不动天罚</small></div><div class="sub">人形 · 重装坦克</div></div></div><div class="hp"><i style="width:72%"></i></div><div class="hpn cond">13,320</div></div>
+        <div class="mid"><div class="t cond">87</div><div class="rd">ROUND 1</div></div>
+        <div class="side r"><div class="who"><div class="ava" style="background-image:url(img/a06.webp)"></div><div style="min-width:0"><div class="nm">外星猫 <small>· 财神蛛</small></div><div class="sub">多足蛛 · 敏捷刺客</div></div></div><div class="hp"><i style="width:48%"></i></div><div class="hpn cond">5,510</div></div>
+      </div>
+      <div class="queue"><div class="eyebrow">NEXT UP</div><div class="qi next" style="background-image:url(img/a08.webp)"></div><div class="qi mine" style="background-image:url(img/a03.webp)"></div><div class="qi" style="background-image:url(img/a07.webp)"></div><div class="qi" style="background-image:url(img/a10.webp)"></div></div>
+      <div class="dock">
+        <div class="btn sq"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7"/></svg></div>
+        <div class="btn pri">创造机器人 <small>BUILD ↗</small></div>
+        <div class="btn sq"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></div>
+      </div>
+    </div>
+    <div class="cap"><b>① 对战主界面</b>：我方用亮黄绿、敌方用玫红，从血条、头像下沿到队列标签都按这个区分。去掉渐变和发光，倒计时、血量用窄体数字。主按钮是整块亮黄绿实色，最显眼。</div>
+  </div>
+
+  <!-- ② 大招助力 -->
+  <div>
+    <div class="phone dim">
+      <div class="pk" style="z-index:7">
+        <div class="side l"><div class="who"><div class="ava" style="background-image:url(img/a01.webp)"></div><div style="min-width:0"><div class="nm">奶蛙 <small>· 不动天罚</small></div><div class="sub">人形 · 重装坦克</div></div></div><div class="hp"><i style="width:72%"></i></div><div class="hpn cond">13,320</div></div>
+        <div class="mid"><div class="t cond">64</div><div class="rd">ROUND 1</div></div>
+        <div class="side r"><div class="who"><div class="ava" style="background-image:url(img/a06.webp)"></div><div style="min-width:0"><div class="nm">外星猫 <small>· 财神蛛</small></div><div class="sub">多足蛛 · 敏捷刺客</div></div></div><div class="hp"><i style="width:48%"></i></div><div class="hpn cond">5,510</div></div>
+      </div>
+      <div class="ultban"><div class="eyebrow">ULTIMATE / 奶蛙</div><h2>全弹发射 <i>✳</i></h2><p>狂点屏幕为大招助力，助力越多伤害越高</p></div>
+      <div class="boost"><div class="eyebrow">观众助力</div><div class="n cond">1,286</div><div class="bar"><i></i></div><div class="mul"><span>剩余 1.8s</span><span>伤害加成 <b>×1.62</b></span></div></div>
+      <span class="pop" style="left:70px;bottom:250px">+1</span><span class="pop" style="right:84px;bottom:270px;color:var(--pink)">+12</span><span class="pop" style="left:120px;bottom:300px">+1</span>
+      <div class="tap"><b>TAP</b><small>狂点助力</small></div>
+    </div>
+    <div class="cap"><b>② 大招 + TAP 助力</b>：大招名字用大号粗体加玫红星号，借参考图的标题写法。助力数字是亮黄绿大字。TAP 按钮改成半透明亮黄绿圆，配亮黄绿描边，白字不透明。</div>
+  </div>
+
+  <!-- ③ 创造面板 -->
+  <div>
+    <div class="phone dim">
+      <div class="sheet" id="c3" style="height:560px">
+        <div class="sh-head"><div><div class="eyebrow">BUILD / YOUR MECH</div><h3>创造你的机器人 <i>✳</i></h3></div><div style="display:flex;align-items:center"><div class="chg"><span style="background-image:url(img/a08.webp)"></span>更换</div><div class="x"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div></div></div>
+        <div class="pv">
+          <div class="pvbox"></div>
+          <div class="stats">
+            <div class="st"><div class="h">攻击<em>39</em></div><div class="b"><i style="width:62%;background:var(--pink)"></i></div></div>
+            <div class="st"><div class="h">防御<em>17</em></div><div class="b"><i style="width:30%;background:var(--violet)"></i></div></div>
+            <div class="st"><div class="h">耐久<em>1481</em></div><div class="b"><i style="width:55%;background:var(--lime)"></i></div></div>
+            <div class="st"><div class="h">攻速<em>1.02</em></div><div class="b"><i style="width:44%;background:var(--mint)"></i></div></div>
+            <div class="st"><div class="h">移速<em>4.0</em></div><div class="b"><i style="width:50%;background:var(--mint)"></i></div></div>
+          </div>
+        </div>
+        <div class="nmrow"><b>天罚</b><span class="tag">履带战车 · 远程火力</span><div class="dots"><i style="background:#c0392b"></i><i style="background:#d4a017"></i><i style="background:#ff8a1f"></i></div></div>
+        <div class="moves"><span class="mv" style="--c:var(--mint)">普攻 · 脉冲速射</span><span class="mv" style="--c:var(--violet)">技能 · 聚能激光</span><span class="mv u">大招 · 万雷天罚</span></div>
+        <div class="field"><div class="inp">电光犀牛狙击手，激光枪</div><div class="ref">▣</div></div>
+        <div class="acts"><div class="btn rand">🎲<span>随机</span></div><div class="btn gen">↻ 换一个</div><div class="btn pri" style="justify-content:center">加入挑战队列</div></div>
+      </div>
+    </div>
+    <div class="cap"><b>③ 创造面板</b>：保留 v6.1 的左右布局。五项属性用四种辅助色区分，三个技能标签用小色块标出类型，大招标签是实色玫红。主按钮亮黄绿，次要按钮深灰。</div>
+  </div>
+
+  <!-- ④ 排行榜 -->
+  <div>
+    <div class="phone dim">
+      <div class="sheet" style="height:640px">
+        <div class="sh-head"><div><div class="eyebrow">TODAY / RANKING</div><h3>今日战绩 <i>✳</i></h3></div><div class="x"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div></div>
+        <div class="score"><div class="eyebrow">我的机器人今日胜场</div><div class="n cond">12 WINS</div><p>最高连胜 5 · 累计伤害 354,850</p></div>
+        <div class="lh"><b>擂台排行</b><span>按胜场 · 实时</span></div>
+        <div class="rr me"><span class="k cond">01</span><span class="a" style="background-image:url(img/a08.webp)"></span><div class="w"><b>苏贝壳 · 天罚</b><small>履带战车 · YOU</small></div><span class="s cond">12</span></div>
+        <div class="rr"><span class="k cond">02</span><span class="a" style="background-image:url(img/a01.webp)"></span><div class="w"><b>奶蛙 · 不动天罚</b><small>人形 · 重装坦克</small></div><span class="s cond">9</span></div>
+        <div class="rr"><span class="k cond">03</span><span class="a" style="background-image:url(img/a06.webp)"></span><div class="w"><b>外星猫 · 财神蛛</b><small>多足蛛 · 敏捷刺客</small></div><span class="s cond">7</span></div>
+        <div class="rr"><span class="k cond">04</span><span class="a" style="background-image:url(img/a07.webp)"></span><div class="w"><b>刀盾狗 · 锈锯</b><small>多足蛛 · 莽夫斗士</small></div><span class="s cond">4</span></div>
+        <div class="cta">回到擂台 <svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></div>
+      </div>
+    </div>
+    <div class="cap"><b>④ 排行榜</b>：基本照着参考图的写法：上面一块深灰卡片放亮黄绿大数字，我自己那行整行亮黄绿高亮，其他行只用细分隔线，底部是一整条亮黄绿按钮。</div>
+  </div>
+
+  <!-- ⑤ WINNER -->
+  <div>
+    <div class="phone">
+      <div class="ko">K.O.</div>
+      <div class="win"><div class="eyebrow">ROUND 1 / RESULT</div><h2>WIN<i>NER</i></h2>
+        <div class="who"><span style="background-image:url(img/a01.webp)"></span><div><b>奶蛙 · 不动天罚</b><small>人形 · 重装坦克 · 三连胜</small></div><em>×3</em></div></div>
+    </div>
+    <div class="cap"><b>⑤ 胜利结算</b>：WINNER 用窄体超大字，后半截亮黄绿；K.O. 是玫红实色块。下面的小字统一放进深灰卡片，不会再被光晕挡住。</div>
+  </div>
+</div>
+
+<div class="sec"><div class="eyebrow">COLOR TOKENS / 参考图取色</div><h2>四个箭头色值 + 扩展色 <i>✳</i></h2><p>四个箭头的色值是在参考图里按像素取的主色，前 4 个就是。</p><div class="keys"><div class="key"><div class="ar" style="background:#F569A8">←</div><b>#F569A8</b><span>玫红 · R245 G105 B168 · 次强调</span></div><div class="key"><div class="ar" style="background:#B7A4FF">↓</div><b>#B7A4FF</b><span>淡紫 · R183 G164 B255 · 辅助</span></div><div class="key"><div class="ar" style="background:#DEFF72">↑</div><b>#DEFF72</b><span>亮黄绿 · R222 G255 B114 · 主强调</span></div><div class="key"><div class="ar" style="background:#7FE5CD">→</div><b>#7FE5CD</b><span>薄荷青绿 · R127 G229 B205 · 辅助</span></div><div class="key ext"><div class="ar" style="background:#FFE135"></div><b>#FFE135</b><span>香蕉黄 · 新增 · 机器人配色</span></div><div class="key ext"><div class="ar" style="background:#F5F4F0"></div><b>#F5F4F0</b><span>白 · 文字 / 机甲白</span></div><div class="key ext"><div class="ar" style="background:#232126"></div><b>#232126</b><span>深灰 · 卡片 / 机甲深灰</span></div><div class="key ext"><div class="ar" style="background:#171719"></div><b>#171719</b><span>黑 · 底色 / 机甲黑</span></div></div></div>
+<div class="sec"><div class="eyebrow">MECH PALETTES / 机器人随机配色</div><h2>机器人配色示例 <i>✳</i></h2><p>下面是用游戏引擎实际渲染出来的机甲。配色池换成这 8 种色组：主色 / 副色 / 点缀色 / 发光色，每种都只从上面 8 个颜色里挑。目前只在模拟稿里演示，线上还没改。</p><div class="rbs"><div class="rb"><div class="rbi" style="background-image:url(img/rb0.png)"></div><div class="rbm"><b>霓虹玫红</b><small>人形</small><div class="rbc"><i style="background:#F569A8" title="#F569A8"></i><i style="background:#171719" title="#171719"></i><i style="background:#F5F4F0" title="#F5F4F0"></i><i style="background:#DEFF72" title="#DEFF72"></i></div></div></div><div class="rb"><div class="rbi" style="background-image:url(img/rb1.png)"></div><div class="rbm"><b>淡紫幻影</b><small>多足蛛</small><div class="rbc"><i style="background:#B7A4FF" title="#B7A4FF"></i><i style="background:#232126" title="#232126"></i><i style="background:#171719" title="#171719"></i><i style="background:#7FE5CD" title="#7FE5CD"></i></div></div></div><div class="rb"><div class="rbi" style="background-image:url(img/rb2.png)"></div><div class="rbm"><b>酸性黄绿</b><small>履带战车</small><div class="rbc"><i style="background:#DEFF72" title="#DEFF72"></i><i style="background:#171719" title="#171719"></i><i style="background:#F569A8" title="#F569A8"></i><i style="background:#DEFF72" title="#DEFF72"></i></div></div></div><div class="rb"><div class="rbi" style="background-image:url(img/rb3.png)"></div><div class="rbm"><b>薄荷冰霜</b><small>机械犬</small><div class="rbc"><i style="background:#7FE5CD" title="#7FE5CD"></i><i style="background:#F5F4F0" title="#F5F4F0"></i><i style="background:#171719" title="#171719"></i><i style="background:#B7A4FF" title="#B7A4FF"></i></div></div></div><div class="rb"><div class="rbi" style="background-image:url(img/rb4.png)"></div><div class="rbm"><b>香蕉警戒</b><small>人形</small><div class="rbc"><i style="background:#FFE135" title="#FFE135"></i><i style="background:#171719" title="#171719"></i><i style="background:#F5F4F0" title="#F5F4F0"></i><i style="background:#F569A8" title="#F569A8"></i></div></div></div><div class="rb"><div class="rbi" style="background-image:url(img/rb5.png)"></div><div class="rbm"><b>纯白极简</b><small>浮游炮台</small><div class="rbc"><i style="background:#F5F4F0" title="#F5F4F0"></i><i style="background:#232126" title="#232126"></i><i style="background:#DEFF72" title="#DEFF72"></i><i style="background:#7FE5CD" title="#7FE5CD"></i></div></div></div><div class="rb"><div class="rbi" style="background-image:url(img/rb6.png)"></div><div class="rbm"><b>碳黑玫刃</b><small>幽影</small><div class="rbc"><i style="background:#1C1C1F" title="#1C1C1F"></i><i style="background:#2E2C33" title="#2E2C33"></i><i style="background:#F569A8" title="#F569A8"></i><i style="background:#B7A4FF" title="#B7A4FF"></i></div></div></div><div class="rb"><div class="rbi" style="background-image:url(img/rb7.png)"></div><div class="rbm"><b>深灰撞黄</b><small>多足蛛</small><div class="rbc"><i style="background:#3A3840" title="#3A3840"></i><i style="background:#FFE135" title="#FFE135"></i><i style="background:#171719" title="#171719"></i><i style="background:#7FE5CD" title="#7FE5CD"></i></div></div></div></div></div>
+</body>
+</html>

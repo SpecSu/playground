@@ -1,0 +1,22 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>机甲配色 v13 预览</title>
+<style>
+@font-face { font-family: 'ArenaCond'; src: url('/public/fonts/anton.woff2') format('woff2'); }
+html,body{margin:0;background:#171719;color:#F5F4F0;font-family:-apple-system,"PingFang SC",sans-serif}
+#wrap{position:relative;width:1600px;height:1190px}
+h1{position:absolute;left:40px;top:18px;margin:0;font:italic 400 40px/1 ArenaCond,Impact,sans-serif;letter-spacing:2px}
+h1 small{font:600 15px/1 -apple-system,"PingFang SC";letter-spacing:0;color:#9A9AA0;margin-left:16px;font-style:normal}
+#c{position:absolute;left:0;top:80px}
+.lab{position:absolute;width:400px;height:370px;pointer-events:none}
+.lab .t{position:absolute;left:18px;top:12px;font-weight:800;font-size:17px}
+.lab .t i{font-style:normal;color:#9A9AA0;font-weight:600;font-size:12px;margin-left:6px}
+.lab .sw{position:absolute;left:18px;bottom:14px;display:flex;gap:6px;align-items:center}
+.lab .sw b{width:22px;height:22px;display:block;border:1px solid rgba(245,244,240,.15)}
+.lab .sw b.g{border-radius:50%;width:16px;height:16px;margin-left:6px}
+.lab .sw span{font-size:11px;color:#9A9AA0;margin-left:6px}
+.lab .n{position:absolute;right:18px;top:12px;font:italic 400 26px/1 ArenaCond,Impact;color:#3A3A40}
+.grid{position:absolute;left:0;top:80px;width:1600px;height:1110px;pointer-events:none;
+  background-image:linear-gradient(#26252A 1px,transparent 1px),linear-gradient(90deg,#26252A 1px,transparent 1px);background-size:400px 370px}
+</style></head>
+<body><div id="wrap"><h1>MECH PALETTE V13<small>鲜艳色≤2种且一主一次 · 左右对称涂装 · 允许中性主体 · 随机抽样 12 台</small></h1><canvas id="c"></canvas><div class="grid"></div><div id="labs"></div></div>
+<script type="module" src="./lab.js"></script></body></html>

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#05060c" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>UGC 机器人对战擂台</title>
+  <link rel="preload" as="image" href="./avatars/thumb/a01.webp" fetchpriority="high">
+  <link rel="preload" as="image" href="./avatars/thumb/a02.webp" fetchpriority="high">
+  <!-- 暂时隐藏的分身 <link rel="preload" as="image" href="/avatars/thumb/a03.webp" fetchpriority="high"> -->
+  <link rel="preload" as="image" href="./avatars/thumb/a04.webp" fetchpriority="high">
+  <!-- 暂时隐藏的分身 <link rel="preload" as="image" href="/avatars/thumb/a05.webp" fetchpriority="high"> -->
+  <!-- 暂时隐藏的分身 <link rel="preload" as="image" href="/avatars/thumb/a06.webp" fetchpriority="high"> -->
+  <link rel="preload" as="image" href="./avatars/thumb/a07.webp" fetchpriority="high">
+  <link rel="preload" as="image" href="./avatars/thumb/a08.webp" fetchpriority="high">
+  <link rel="preload" as="image" href="./avatars/thumb/a09.webp" fetchpriority="high">
+  <link rel="preload" as="image" href="./avatars/thumb/a10.webp" fetchpriority="high">
+  <link rel="preload" as="image" href="./avatars/thumb/a11.webp" fetchpriority="high">
+  <link rel="preload" as="image" href="./avatars/thumb/a12.webp" fetchpriority="high">
+  <script type="module" crossorigin src="./assets/index-SwCFyIqs.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-D4AWhXEc.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene"></canvas>
+    <div id="fx-layer"></div>
+
+    <!-- 顶部 HUD -->
+    <div id="hud" class="hidden">
+      <div class="bars">
+        <div class="fcard" id="fc0">
+          <div class="fc-top"><div class="fc-frame"><img class="fc-ava" alt="" /></div><div class="fc-meta"><div class="fc-name">—</div><div class="fc-sub">—</div></div></div>
+          <div class="hp"><div class="hp-lag"></div><div class="hp-fill"></div><span class="hp-num"></span></div>
+          <div class="en"><div class="en-fill"></div></div>
+        </div>
+        <div class="mid"><div id="timer">00</div><div id="round">ROUND 1</div></div>
+        <div class="fcard right" id="fc1">
+          <div class="fc-top"><div class="fc-frame"><img class="fc-ava" alt="" /></div><div class="fc-meta"><div class="fc-name">—</div><div class="fc-sub">—</div></div></div>
+          <div class="hp"><div class="hp-lag"></div><div class="hp-fill"></div><span class="hp-num"></span></div>
+          <div class="en"><div class="en-fill"></div></div>
+        </div>
+      </div>
+      <div id="ticker"></div>
+    </div>
+
+    <!-- 中央横幅 -->
+    <div id="introCard"></div>
+    <div id="banner"><div class="b-main"></div><div class="b-sub"></div></div>
+    <div id="ultcut"><div class="uc-inner"><div class="uc-tag">ULTIMATE</div><div class="uc-name"></div><div class="uc-owner"></div></div></div>
+
+    <!-- 底部：队列 + 操作 -->
+    <div id="bottom" class="hidden">
+      <div id="queueWrap">
+        <div class="q-title">挑战队列 <span id="qCount"></span></div>
+        <div id="queue"></div>
+      </div>
+      <div class="actions">
+        <button id="btnRoster" class="ghost"><svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 0 1-10 0V4zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8M9.5 17h5"/></svg><span>战绩</span></button>
+        <button id="btnCreate" class="primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>创造机器人</span></button>
+        <button id="btnSound" class="ghost icon"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+      </div>
+    </div>
+
+    <!-- 启动加载 -->
+    <div id="start" class="sheet-full">
+      <div class="st-hero">
+        <div class="st-kicker">UGC ROBOT ARENA</div>
+        <h1>机甲擂台 · 创造即战斗</h1>
+        <p>一句话造出你的机器人，坐进驾驶舱，看它在擂台上自主开打。</p>
+      </div>
+      <div class="st-foot"><div class="st-loadbar"><i></i></div><div id="loadTip">正在加载擂台…</div></div>
+    </div>
+
+    <!-- 选择分身（首次创造机器人时弹出） -->
+    <div id="pilot" class="sheet hidden">
+      <div class="sh-head"><div class="sh-title"><small>PILOT</small>选择你的分身</div><button class="sh-close" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="sh-body">
+        <div class="pl-sub">分身会坐进你造的机甲驾驶舱，代表你出战</div>
+        <div id="avaGrid"></div>
+        <button id="btnPilot" class="primary big">确认分身 · <span id="avaName"></span></button>
+      </div>
+    </div>
+
+    <!-- 创造机器人 -->
+    <div id="create" class="sheet hidden">
+      <div class="sh-head"><div class="sh-title"><small>BUILD</small>创造你的机器人</div><button id="pilotChip" title="更换分身"><img alt=""><span>更换</span></button><button class="sh-close" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="sh-body">
+        <div id="pvRow"><div id="previewBox"><div id="genFx"><div class="scanline"></div><div class="gen-text">AI 正在设计机甲…</div></div><div id="previewHint">描述外观、武器、风格，生成后可预览</div></div><div id="piStats" class="pi-stats"></div></div>
+        <div id="previewInfo" class="hidden">
+          <div class="pi-row"><div class="pi-name"></div><div class="pi-role"></div><div class="pi-sw"></div></div>
+          <div class="pi-moves"></div>
+        </div>
+        <div class="field">
+          <textarea id="prompt" maxlength="60" rows="2" placeholder="例如：霓虹赛博刺客，双刀，闪电般的速度"></textarea>
+          <label class="ref" title="参考图（占位）"><input id="refFile" type="file" accept="image/*" /><span class="ref-ico"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4"/><circle cx="15.5" cy="9" r="1.5"/></svg></span><img id="refImg" alt="" /></label>
+        </div>
+        <div id="refNote" class="hidden">参考图已附加 · 当前版本以文字描述为主，参考图生成 3D 即将开放</div>
+        <div class="sh-actions">
+          <button id="btnRand" class="ghost" title="随机灵感"><span class="dice">🎲</span><span>随机</span></button>
+          <button id="btnGen" class="ghost"><svg viewBox="0 0 24 24"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg><span>生成设计</span></button>
+          <button id="btnJoin" class="primary" disabled>加入挑战队列</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 战绩榜 -->
+    <div id="roster" class="sheet hidden">
+      <div class="sh-head"><div class="sh-title"><small>RANKING</small>今日战绩</div><button class="sh-close" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="sh-body"><div id="rosterList"></div></div>
+    </div>
+
+    <div id="toast"></div>
+    <div id="tapHint" class="hidden">点击屏幕开启声音</div>
+  </div>
+</body>
+</html>

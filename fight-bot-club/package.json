@@ -1,0 +1,9 @@
+{
+  "name": "ugc-arena",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": { "dev": "vite --host 0.0.0.0", "build": "vite build", "preview": "vite preview" },
+  "dependencies": { "three": "0.170.0" },
+  "devDependencies": { "vite": "^5.4.0" }
+}

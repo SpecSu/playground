@@ -1,0 +1,26 @@
+<!doctype html><html><body><script type="module">
+import * as THREE from 'three';
+import { generateDesign } from '../../src/mech/design.js';
+import { createView } from '../../src/mech/forms.js';
+const FORMS = ['humanoid', 'tank', 'spider', 'dog', 'hover', 'wraith'];
+const out = {};
+for (const form of FORMS) {
+  const acc = {}; let tot = 0;
+  for (let n = 0; n < 12; n++) {
+    const d = generateDesign('测试 ' + n + form, 'lab', { form });
+    const v = createView(d);
+    const inv = new Map(Object.entries(v.mats).map(([k, m]) => [m, k]));
+    v.root.updateMatrixWorld(true);
+    v.root.traverse((o) => {
+      if (!o.isMesh) return; const k = inv.get(o.material) || 'other'; const g = o.geometry; const p = g.attributes.position; const idx = g.index;
+      const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(); let s = 0;
+      const cnt = idx ? idx.count : p.count;
+      for (let i = 0; i < cnt; i += 3) { const i0 = idx ? idx.getX(i) : i, i1 = idx ? idx.getX(i + 1) : i + 1, i2 = idx ? idx.getX(i + 2) : i + 2;
+        a.fromBufferAttribute(p, i0); b.fromBufferAttribute(p, i1); c.fromBufferAttribute(p, i2); s += b.sub(a).cross(c.sub(a)).length() / 2; }
+      acc[k] = (acc[k] || 0) + s; tot += s;
+    });
+  }
+  out[form] = Object.fromEntries(Object.entries(acc).map(([k, v]) => [k, Math.round(v / tot * 100)]));
+}
+console.log(JSON.stringify(out)); window.__ready = true;
+</script></body></html>
