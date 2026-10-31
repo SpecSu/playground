@@ -105,6 +105,8 @@ export class MechView {
     const invRoot = new THREE.Matrix4().copy(this.inner.matrixWorld).invert();
     for (const k in bones) bones[k].userData.rest = new THREE.Matrix4().multiplyMatrices(invRoot, bones[k].matrixWorld);
     this.meshes = bake(ps, bones, this.mats, 1);
+    // v10.1：座舱 + 分身整体放大，让驾驶员更显眼（座舱骨骼缩放会连带座椅 / 操纵杆 / 分身一起放大）
+    this.cockpitK = this.cockpitScale(); bones.cockpit.scale.setScalar(this.cockpitK);
 
     // 尺度
     this.scale = design.scale; this.root.scale.setScalar(this.scale);
@@ -123,6 +125,7 @@ export class MechView {
     P.buildWeapons(ctx); P.buildSpecial(ctx); P.buildBack(ctx); P.buildLegs(ctx); P.buildMotif(ctx); P.buildTail(ctx);
   }
   calcHeight(d) { return d.H + d.WH + 0.2 + d.CH + 0.9; }
+  cockpitScale() { return 1.4; }
 
   setRider(av) {
     if (this.rider) this.anchors.seat.remove(this.rider.root);
@@ -255,6 +258,14 @@ export class MechView {
         case 'sp_laser': { k = 16; const ch = at < 0.55; add('chest', ch ? -0.2 : 0.05); set('uaL', 0.2, 0, 0.8); set('uaR', 0.2, 0, -0.8); set('faL', -1.0); set('faR', -1.0); crouch += 0.25; break; }
         case 'sp_shock': { k = 22; const up = at < 0.5; set('uaL', up ? -2.9 : -0.6, 0, 0.3); set('uaR', up ? -2.9 : -0.6, 0, -0.3); set('faL', up ? -0.6 : -0.1); set('faR', up ? -0.6 : -0.1); add('chest', up ? -0.3 : 0.5); crouch += up ? 0.1 : 0.55; break; }
         case 'sp_elec': { k = 18; set('uaL', -1.3, 0, 1.0); set('uaR', -1.3, 0, -1.0); set('faL', -0.3); set('faR', -0.3); add('chest', -0.15); crouch += 0.1; break; }
+        // —— v10 小招
+        case 'sp_blink': { k = 26; if (at < 0.3) { crouch += 0.35; add('chest', 0.35); set('uaL', 0.5, 0, 0.5); set('uaR', 0.6, 0, -0.9); set('faR', -0.6); }
+          else { const s2 = at < 0.62 ? 1 : -1; set('ua' + (s2 > 0 ? 'R' : 'L'), -1.5, 0, s2 * -0.9); set('fa' + (s2 > 0 ? 'R' : 'L'), -0.2); set('ua' + (s2 > 0 ? 'L' : 'R'), -0.4, 0, s2 * 0.5); add('chest', 0.25, s2 * 0.6, 0); crouch += 0.25; } break; }
+        case 'sp_hook': { k = 20; const H = D.hook; const pull = H && (H.st === 'pull'); const sm = H && (H.st === 'smash' || H.st === 'done');
+          if (sm) { set('uaR', -2.4, 0, -0.2); set('faR', -0.8); set('uaL', -0.3, 0, 0.4); add('chest', -0.3, -0.4); }
+          else { set('uaL', pull ? -0.6 : -1.45, 0, 0.05); set('faL', pull ? -1.5 : -0.1); add('chest', pull ? -0.25 : 0.1, pull ? 0.35 : 0.2, 0); set('uaR', -0.4, 0, -0.5); set('faR', -1.3); crouch += pull ? 0.35 : 0.15; } break; }
+        case 'sp_disc': { k = 24; const th = at > 0.3 && at < 0.65; set('uaL', th ? -1.4 : 0.3, 0, th ? -0.5 : 1.1); set('uaR', th ? -1.4 : 0.3, 0, th ? 0.5 : -1.1); set('faL', -0.3); set('faR', -0.3); add('chest', th ? 0.25 : -0.15, 0, 0); crouch += 0.2; break; }
+        case 'sp_mortar': { k = 18; const kick = Math.max(0, Math.sin((at - 0.35) / 0.23 * Math.PI)) * 0.2; crouch += 0.4; add('chest', -0.35 - kick); set('uaL', -0.9, 0, 0.4); set('uaR', -0.9, 0, -0.4); set('faL', -1.0); set('faR', -1.0); break; }
         // —— 大招
         case 'ult_meteor': {
           k = 16;
@@ -265,6 +276,13 @@ export class MechView {
         }
         case 'ult_barrage': { k = 16; crouch += 0.35; add('chest', -0.25); set('uaL', 0.1, 0, 0.9); set('uaR', 0.1, 0, -0.9); set('faL', -1.3); set('faR', -1.3); break; }
         case 'ult_beam': { k = 14; const ch = at < 1.0; add('chest', ch ? -0.25 : 0.12); set('uaL', ch ? 0.4 : -1.1, 0, ch ? 0.9 : 0.25); set('uaR', ch ? 0.4 : -1.1, 0, ch ? -0.9 : -0.25); set('faL', ch ? -1.4 : -0.6); set('faR', ch ? -1.4 : -0.6); crouch += 0.3; break; }
+        case 'ult_blackhole': { k = 14; const up = at > 0.5; set('uaL', up ? -2.2 : -0.6, 0, up ? 0.9 : 0.4); set('uaR', up ? -2.2 : -0.6, 0, up ? -0.9 : -0.4); set('faL', up ? -0.3 : -1.4); set('faR', up ? -0.3 : -1.4); add('chest', up ? -0.3 + Math.sin(t * 20) * 0.03 : 0.2); crouch += up ? 0.1 : 0.3; break; }
+        case 'ult_orbital': { k = 14; const fire = D.orb && D.orb.st !== 'lock'; set('uaR', -2.9, 0, -0.15); set('faR', -0.1); set('uaL', fire ? -0.6 : -0.3, 0, 0.6); set('faL', -1.2); add('chest', fire ? -0.4 : -0.2); crouch += fire ? 0.35 : 0.15; break; }
+        case 'ult_tornado': { k = 26; const on = at > 0.4 && at < 2.75; set('uaL', on ? -1.6 : -0.3, 0, on ? 1.4 : 0.5); set('uaR', on ? -1.6 : -0.3, 0, on ? -1.4 : -0.5); set('faL', on ? -0.1 : -1.2); set('faR', on ? -0.1 : -1.2); add('chest', on ? 0.05 : 0.3); crouch += on ? 0.15 : 0.4; break; }
+        case 'ult_phantom': { k = 32; const fin = !D.ghost && at > 1.5; if (fin) { set('uaL', -2.6, 0, -0.9); set('uaR', -2.6, 0, 0.9); set('faL', -0.2); set('faR', -0.2); add('chest', 0.45); crouch += 0.45; }
+          else { set('uaL', 0.6, 0, 0.5); set('uaR', -1.5, 0, -1.2); set('faR', -0.1); add('chest', 0.55, -0.4, 0); crouch += 0.35; } break; }
+        case 'ult_glacier': { k = 18; if (at < 0.5) { const w = clamp(at / 0.5, 0, 1); set('uaL', -2.8 * w, 0, 0.3); set('uaR', -2.8 * w, 0, -0.3); set('faL', -0.6); set('faR', -0.6); add('chest', -0.3 * w); crouch += 0.1; }
+          else { set('uaL', -0.8, 0, 0.3); set('uaR', -0.8, 0, -0.3); set('faL', -0.1); set('faR', -0.1); add('chest', 0.55); crouch += 0.55; } break; }
         case 'ult_frenzy': {
           k = 30; const i = a.ticks || 0; const s2 = i % 2 ? 1 : -1; const ph = ((at - 0.5) % 0.24) / 0.24;
           set('ua' + (s2 > 0 ? 'L' : 'R'), -1.4, 0, s2 * (1 - ph * 2)); set('fa' + (s2 > 0 ? 'L' : 'R'), -0.4);

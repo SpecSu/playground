@@ -4,7 +4,7 @@
 import { Sim, Fighter } from '../src/game/sim.js';
 import { generateDesign, EXAMPLE_PROMPTS } from '../src/mech/design.js';
 import { createView } from '../src/mech/forms.js';
-const forms = ['humanoid', 'dog', 'spider', 'tank', 'manta', 'tiger', 'turtle', 'croc', 'trex', 'flamingo', 'frog', 'rabbit'];
+const forms = ['humanoid', 'dog', 'spider', 'tank', 'manta', 'tiger', 'turtle', 'croc', 'trex', 'flamingo'];
 const T0 = +(process.argv[2] || 600), DT = 1 / 60;
 const res = {};
 for (const form of forms) {

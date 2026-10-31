@@ -431,9 +431,11 @@ export class VFX {
     }
   }
   // 伤害数字
-  number(pos, text, cls = '') {
+  number(pos, text, cls = '', combo = 0) {
     const N = this.nums.find((q) => q.life <= 0) || this.nums.reduce((a, b) => (a.life < b.life ? a : b));
-    N.life = N.max = cls.includes('big') ? 1.3 : 0.95; N.p = pos.clone(); N.p.x += rnd(-0.9, 0.9); N.p.y += rnd(-0.3, 0.5); N.vy = rnd(2.4, 3.6); N.el.textContent = text;
+    // v10.1：连击时数字左右交错、弹得更快更高，寿命更短 → 节奏感
+    const ck = Math.min(1, Math.max(0, combo - 1) / 7);
+    N.life = N.max = cls.includes('big') ? 1.3 : 0.95 - ck * 0.2; N.p = pos.clone(); N.p.x += combo > 1 ? (combo % 2 ? 1 : -1) * rnd(0.35, 1.0) : rnd(-0.9, 0.9); N.p.y += rnd(-0.3, 0.5) + ck * 0.4; N.vy = rnd(2.4, 3.6) * (1 + ck * 0.6); N.pop = 1 + ck * 0.5; N.el.textContent = text;
     N.el.className = 'dmg ' + cls; N.el.style.display = 'block';
     const v = parseFloat(text);
     if (!isNaN(v) && !/block|heal|tag/.test(cls)) {
@@ -445,7 +447,7 @@ export class VFX {
       const c = stops[i].map((x, k) => Math.round(x + (stops[i + 1][k] - x) * u));
       N.el.style.color = `rgb(${c})`;
       N.el.style.textShadow = `0 0 ${6 + tt * 10}px rgba(${c},.75), 0 2px 0 #000, 0 0 3px #000`;
-      N.el.style.fontSize = `${30 + tt * 26}px`;
+      N.el.style.fontSize = `${30 + tt * 26 + ck * 14}px`;
     } else { N.el.style.color = ''; N.el.style.textShadow = ''; N.el.style.fontSize = ''; }
   }
 
@@ -590,10 +592,11 @@ export class VFX {
       _v.copy(N.p).project(cam);
       if (_v.z > 1) { N.el.style.display = 'none'; continue; }
       N.el.style.display = 'block';
-      const u = 1 - N.life / N.max; const sc = u < 0.12 ? 0.6 + u / 0.12 * 0.8 : 1.4 - Math.min(0.4, (u - 0.12) * 2);
+      const u = 1 - N.life / N.max; const pk = 0.4 * (N.pop || 1); const sc = u < 0.1 ? 0.5 + u / 0.1 * (0.5 + pk) : 1 + pk - Math.min(pk, (u - 0.1) * 2.4);
       N.el.style.transform = `translate3d(${((_v.x + 1) / 2 * W).toFixed(1)}px, ${((1 - _v.y) / 2 * H).toFixed(1)}px, 0) translate(-50%, -50%) scale(${sc.toFixed(2)})`;
       N.el.style.opacity = Math.min(1, N.life / 0.3).toFixed(2);
     }
+    if (this.ext) this.ext.update(dt, t, ctx); // v10 扩展特效（需在粒子 update 之后、flush 之前写入即时光点）
     this.add.flush(); this.smk.flush(); this.str.flush();
   }
 }

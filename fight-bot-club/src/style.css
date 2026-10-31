@@ -61,10 +61,19 @@ button:active { transform: scale(0.96); }
 .dmg.big { font-size: 30px; }
 .dmg.block { color: #9fb6d6; font-size: 14px; }
 .dmg.heal { color: #8affb0; }
+/* v10.1 连击计数 */
+.combo { position: absolute; top: 40%; z-index: 9; pointer-events: none; display: flex; align-items: baseline; gap: 4px; opacity: 0; transition: opacity .25s; --k: 0; }
+.combo.c0 { left: 12px; } .combo.c1 { right: 12px; flex-direction: row-reverse; }
+.combo.show { opacity: 1; }
+.combo b { font-family: 'ArenaCond', Impact, sans-serif; font-style: italic; font-weight: 400; font-size: calc(40px + var(--k) * 20px); line-height: 1; padding: 0 .1em; color: #fff;
+  -webkit-text-stroke: 1.5px #171719; paint-order: stroke fill; text-shadow: 0 3px 0 rgba(0, 0, 0, .5), 0 6px 14px rgba(0, 0, 0, .55); }
+.combo span { font-family: 'ArenaCond', Impact, sans-serif; font-style: italic; font-size: 14px; letter-spacing: 2px; color: #FFE135; text-shadow: 0 1px 2px #000; }
+.combo.pop b { animation: cbPop .22s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes cbPop { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
 .dmg.tag { font-size: 13px; color: #9ff; font-style: normal; letter-spacing: 1px; }
 
 /* —— 横幅 —— */
-#banner { position: absolute; left: 0; right: 0; top: 34%; text-align: center; pointer-events: none; opacity: 0; }
+#banner { position: absolute; z-index: 20; left: 0; right: 0; top: 34%; text-align: center; pointer-events: none; opacity: 0; }
 #banner.show { animation: bannerIn 0.35s cubic-bezier(.2,1.6,.4,1) forwards; }
 #banner.hide { animation: bannerOut 0.3s forwards; }
 @keyframes bannerIn { from { opacity: 0; transform: scale(2.4); } to { opacity: 1; transform: scale(1); } }
@@ -91,44 +100,52 @@ button:active { transform: scale(0.96); }
 .vsrow .vsx { font-size: 44px; color: var(--gold); text-shadow: 0 0 20px rgba(255, 180, 40, .9), 0 4px 0 #7a4b00; }
 
 /* 大招切入 */
-#ultcut { position: absolute; left: -10%; right: -10%; top: 54%; height: 104px; pointer-events: none; opacity: 0; transform: skewY(-6deg) translateX(-100%);
+#ultcut { position: absolute; z-index: 20; left: -10%; right: -10%; top: 54%; height: 112px; pointer-events: none; opacity: 0; transform: skewY(-6deg) translateX(-100%);
   background: linear-gradient(90deg, transparent, rgba(255, 61, 110, 0.85) 18%, rgba(255, 122, 61, 0.85) 82%, transparent); }
 #ultcut.show { animation: ultIn 1.6s cubic-bezier(.2,.9,.3,1) forwards; }
 @keyframes ultIn { 0% { opacity: 0; transform: skewY(-6deg) translateX(-60%); } 12% { opacity: 1; transform: skewY(-6deg) translateX(0); } 82% { opacity: 1; transform: skewY(-6deg) translateX(2%); } 100% { opacity: 0; transform: skewY(-6deg) translateX(40%); } }
-.uc-inner { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding-left: 18%; }
+.uc-inner { position: absolute; inset: 0; display: flex; align-items: center; gap: 14px; padding-left: 15%; }
+.uc-ava { flex: none; width: 82px; height: 82px; border-radius: 50%; overflow: hidden; transform: skewY(6deg); background: #171719;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--uc, #fff), 0 6px 18px rgba(0, 0, 0, 0.6); }
+.uc-ava img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.uc-txt { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .uc-tag { font-size: 13px; letter-spacing: 6px; font-weight: 900; color: #ffe2a8; }
 .uc-name { font-size: 44px; line-height: 1.05; font-weight: 900; font-style: italic; letter-spacing: 1px; color: #fff; -webkit-text-stroke: 1px #3a0012; paint-order: stroke fill; text-shadow: 3px 3px 0 #7a1030, 0 0 18px rgba(255, 230, 160, 0.6); }
-.uc-owner { font-size: 14px; font-weight: 800; text-shadow: 0 1px 3px #000; color: #ffe; opacity: 0.9; }
+.uc-owner { font-size: 14px; font-weight: 800; text-shadow: 0 1px 3px #000; color: #ffe; opacity: 0.95; white-space: nowrap; }
+.uc-owner b { font-size: 17px; font-weight: 900; }
 
 /* —— 底部 —— */
 #bottom { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 10px calc(10px + var(--sab)); pointer-events: none;
   background: linear-gradient(180deg, transparent, rgba(3, 4, 10, 0.75) 40%); }
 #bottom > * { pointer-events: auto; }
-.q-title { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #fff; font-weight: 900; margin: 0 2px 2px; letter-spacing: 2px; font-style: italic;
-  text-shadow: 0 1px 0 #000, 0 0 4px #000, 0 2px 6px rgba(0, 0, 0, 0.9); }
-.q-title::before { content: ''; width: 4px; height: 12px; background: var(--pink); transform: skewX(-18deg); box-shadow: 0 0 8px var(--pink); }
-#qCount { color: #fff; }
-#queue { display: flex; gap: 10px; overflow-x: auto; padding: 12px 6px 10px; scrollbar-width: none; }
+/* v10.1 候场队列：紧凑单行（左侧「候场」竖标 + 圆形头像条），与场上 HUD 明确区分 */
+#queueWrap { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; }
+.q-title { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 38px; height: 44px; gap: 1px;
+  border-right: 1px dashed rgba(255, 255, 255, 0.28); padding-right: 6px; color: rgba(255, 255, 255, 0.72); font-style: italic; text-shadow: 0 1px 2px #000; }
+.q-title span { font-size: 10px; font-weight: 900; letter-spacing: 2px; }
+.q-title b { font-family: 'ArenaCond', Impact, sans-serif; font-weight: 400; font-size: 20px; line-height: 1; color: #fff; }
+#queue { flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; padding: 9px 2px 2px; scrollbar-width: none; align-items: flex-end;
+  -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
 #queue::-webkit-scrollbar { display: none; }
-/* 候选机甲：斜切卡 + 机甲半身像 + 机体发光色描边 + 大号序号 */
-.qi { --qc: #3dd6ff; flex: none; width: 82px; height: 92px; position: relative; transform: skewX(-8deg); border-radius: 4px;
-  background: linear-gradient(165deg, color-mix(in srgb, var(--qc) 34%, #0a0d18) 0%, #070910 72%);
-  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--qc) 55%, transparent); animation: qiIn 0.45s cubic-bezier(.2,1.3,.4,1) both; }
-@keyframes qiIn { from { opacity: 0; transform: skewX(-8deg) translateY(16px); } }
-.qi::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--qc); box-shadow: 0 0 10px var(--qc), 0 0 2px #fff; }
-.qi .qimg { position: absolute; left: -6px; right: -6px; top: 0; bottom: 20px; transform: skewX(8deg); overflow: hidden; }
-.qi .qimg img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; display: block; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--qc) 60%, transparent)); }
-.qi .qno { position: absolute; top: 2px; left: 6px; font-family: 'ArenaCond', Impact, sans-serif; font-size: 22px; line-height: 1; color: rgba(255, 255, 255, 0.92);
-  text-shadow: 2px 2px 0 color-mix(in srgb, var(--qc) 70%, #000), 0 0 8px rgba(0, 0, 0, 0.8); transform: skewX(0deg); }
-.qi .qn { position: absolute; left: 0; right: 0; bottom: 4px; padding: 0 6px; font-size: 11px; font-weight: 900; font-style: italic; color: #fff; text-align: center;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px #000, 0 0 6px #000; }
-.qi.next { --qc: #ff3d6e; width: 92px; box-shadow: inset 0 0 0 1.5px #ff3d6e, 0 0 18px rgba(255, 61, 110, 0.45); }
-.qi.next::before { content: 'NEXT'; position: absolute; top: 4px; right: 12px; z-index: 2; font-family: 'ArenaCond', Impact, sans-serif; font-size: 11px; letter-spacing: 1px;
-  color: #fff; background: #ff3d6e; padding: 1px 5px; box-shadow: 0 0 10px #ff3d6e; animation: nextPulse 1.1s ease-in-out infinite; }
-@keyframes nextPulse { 50% { box-shadow: 0 0 2px #ff3d6e; opacity: 0.75; } }
-.qi.mine { box-shadow: inset 0 0 0 1.5px #ffd25a, 0 0 16px rgba(255, 210, 90, 0.45); }
-.qi.mine .qn::before { content: 'ME '; color: #ffd25a; }
+.qi { --qc: #3dd6ff; flex: none; width: 44px; position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; opacity: 0.78;
+  animation: qiIn 0.4s cubic-bezier(.2,1.3,.4,1) both; }
+@keyframes qiIn { from { opacity: 0; transform: translateY(12px); } }
+.qi .qimg { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; background: color-mix(in srgb, var(--qc) 26%, #0b0d14);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--qc) 70%, transparent); }
+.qi .qimg img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(0.25); }
+.qi .qn { max-width: 52px; font-size: 9.5px; line-height: 12px; font-weight: 800; color: rgba(255, 255, 255, 0.82); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px #000; }
+.qi .qn i { font-style: normal; font-family: 'ArenaCond', Impact, sans-serif; color: rgba(255, 255, 255, 0.5); margin-right: 2px; }
+.qi.next { width: 50px; opacity: 1; }
+.qi.next .qimg { width: 40px; height: 40px; box-shadow: 0 0 0 2px #ff3d6e, 0 0 12px rgba(255, 61, 110, 0.55); }
+.qi.next .qimg img { filter: none; }
+.qi.next .qn { color: #fff; font-weight: 900; }
+.qi.next::before { content: 'NEXT'; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); z-index: 2; font-family: 'ArenaCond', Impact, sans-serif; font-size: 9px; letter-spacing: 1px; line-height: 11px;
+  color: #fff; background: #ff3d6e; padding: 0 4px; border-radius: 2px; animation: nextPulse 1.1s ease-in-out infinite; }
+@keyframes nextPulse { 50% { opacity: 0.7; } }
+.qi.mine { opacity: 1; }
+.qi.mine .qimg { box-shadow: 0 0 0 2px #ffd25a, 0 0 10px rgba(255, 210, 90, 0.5); }
+/* 自己的条目：编号 + 名字统一黄色，不加额外标签 */
+.qi.mine .qn, .qi.mine.next .qn, .qi.mine .qn i { color: #FFE135; }
 .actions { display: flex; gap: 8px; }
 .actions .primary { flex: 1; font-size: 16px; }
 
@@ -386,15 +403,31 @@ button.primary.big { clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 
 
 /* 层级体系：场景特效 5 < 登场条 12 < HUD/底栏 < 助力层 60–61 < 弹出面板 80–82 < 提示 90 < 启动页 95 */
 #toast { z-index: 90; }
+/* 提示条：倾斜四边形外框（与名字牌/卡片同一套斜切语言），放到屏幕下半部，不挡机甲脸 */
+#toast { top: auto; bottom: calc(var(--sab) + 190px); background: none; border: 0; border-radius: 0; padding: 9px 22px; isolation: isolate; overflow: visible;
+  font-size: 13px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); transform: translate(-50%, 10px); transition: opacity .3s, transform .3s; }
+#toast::before { content: ''; position: absolute; inset: 0; z-index: -1; transform: skewX(-16deg); background: rgba(12, 12, 16, 0.86);
+  border-left: 4px solid #FFE135; box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45); }
+#toast.show { transform: translate(-50%, 0); }
+body.assisting #toast { opacity: 0; } /* 投票时提示条不压在 TAP 圈上 */
 
-/* 登场介绍时底部队列让位 */
+/* 登场介绍：操作按钮保留，只让候场队列下沉淡出，介绍条落在队列原位（按钮正上方） */
 #bottom { transition: opacity .3s, transform .3s; }
-#bottom.yield { opacity: 0; transform: translateY(24px); pointer-events: none; }
-#bottom.yield > * { pointer-events: none; }
+#queueWrap { transition: opacity .25s, transform .3s; }
+#bottom.intro #queueWrap { opacity: 0; transform: translateY(14px); pointer-events: none; }
+#introCard { bottom: calc(var(--sab) + 66px); }
 /* 子弹时间：大招字幕上移，避开 TAP */
 body.assisting #ultcut { top: 15%; }
+/* 投票获胜方配色的大招条幅：黄绿方用深色字保证可读，粉方保持白字 */
+#ultcut.v0 { background: linear-gradient(90deg, transparent, rgba(222, 255, 114, 0.94) 18%, rgba(196, 240, 70, 0.94) 82%, transparent); }
+#ultcut.v0 .uc-tag { color: rgba(23, 23, 25, 0.7); }
+#ultcut.v0 .uc-name { color: #171719; -webkit-text-stroke: 0; text-shadow: 3px 3px 0 rgba(255, 255, 255, 0.55); }
+#ultcut.v0 .uc-owner { color: #171719; text-shadow: none; }
+#ultcut.v0 .uc-ava { box-shadow: 0 0 0 3px #171719, 0 0 0 6px #fff, 0 6px 18px rgba(0, 0, 0, 0.5); }
+#ultcut.v1 { background: linear-gradient(90deg, transparent, rgba(245, 105, 168, 0.92) 18%, rgba(232, 72, 150, 0.92) 82%, transparent); }
+#ultcut.v1 .uc-tag { color: #fff; opacity: .85; }
+#ultcut.v1 .uc-name { text-shadow: 3px 3px 0 rgba(90, 10, 50, 0.8); -webkit-text-stroke: 1px #4a0828; }
 body.assisting #tapHint { display: none; }
-#queueWrap { transition: opacity .25s; }
 body.assisting #queueWrap { opacity: 0; pointer-events: none; }
 
 /* v6.1 创造面板压缩：配色并入名字行、五项属性一行、随机灵感并入按钮行 */
@@ -426,3 +459,150 @@ body.assisting #queueWrap { opacity: 0; pointer-events: none; }
 /* v6.3：生成中右侧属性列保留占位，不再被预览挤掉 */
 #create .pi-stats.pending .st em { color: var(--dim); }
 #create .pi-stats.pending .sb i { width: 0 !important; }
+
+/* v10.1 场上名牌：跟随机甲头顶，半透明小标签 */
+.ntag { position: absolute; left: 0; top: 0; z-index: 4; /* 场上名字牌：最底层 UI，低于连击 / 登场卡 / 大招横幅 / 中央条幅 */ pointer-events: none; opacity: 0; transition: opacity .25s; will-change: transform; --c: #fff; }
+.ntag.on { opacity: 1; }
+.nt-in { position: absolute; left: 0; top: 4px; transform: translateX(-50%); display: flex; align-items: center; gap: 4px; white-space: nowrap; isolation: isolate;
+  padding: 1px 10px; font-size: 11px; line-height: 14px; font-weight: 800; font-style: italic; color: rgba(255, 255, 255, 0.92); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); }
+/* 倾斜四边形底板（与 HUD/队列的斜切语言统一） */
+.nt-in::before { content: ''; position: absolute; inset: 0; z-index: -1; transform: skewX(-18deg); background: rgba(12, 12, 16, 0.5); border-bottom: 2px solid var(--c); border-left: 3px solid var(--c); }
+/* 「我」：与名字同字号同斜体（继承 .nt-in 的 italic），只换黄色 */
+.nt-in em { font-style: italic; font-size: 11px; line-height: 14px; color: #FFE135; font-weight: 900; }
+
+/* v10.1 启动页：FIGHT BOT CLUB 大字（与 READY 同款字形/描边/投影） */
+#start .st-hero { max-width: 360px; }
+.st-logo { display: flex; flex-direction: column; align-items: center; }
+#start .st-logo .b-main { display: block; padding: 0 .1em; color: #F5F4F0 !important; -webkit-text-stroke: 0 !important; text-shadow: none !important; }
+/* FIGHT 按字宽反推（Anton：FIGHT≈2.0em，BOT CLUB≈3.42em）：92px+5 间距 ≈ 210px，与第二行 50px+5 间距 ≈ 211px 等宽；行间距由截图校准 */
+#start .st-logo .l1 { font-size: 92px; line-height: 0.86; letter-spacing: 5px; }
+#start .st-logo .l2 { font-size: 50px; line-height: 0.86; letter-spacing: 5px; margin-top: 12px; }
+.st-sub { margin: 22px 0 0 !important; font-size: 12px !important; color: rgba(255, 255, 255, 0.6) !important; letter-spacing: 1px; }
+
+/* ———— v10.1 投票大招 ———— */
+.en { display: none; }
+/* 大招倒计时：顶部居中斜切条，双方共用，越接近越满，最后 3 秒变热 */
+#ultClock { position: relative; margin: 6px auto 0; width: max-content; display: flex; align-items: center; gap: 8px; padding: 3px 16px 3px 14px; overflow: visible; opacity: 0; transition: opacity .3s;
+  isolation: isolate; color: #fff; }
+#ultClock.show { opacity: 1; }
+#ultClock::before { content: ''; position: absolute; inset: 0; z-index: -1; transform: skewX(-18deg); background: rgba(12, 12, 16, 0.62); }
+#ultClock .uk-l { font-family: 'ArenaCond', Impact, sans-serif; font-style: italic; font-size: 12px; letter-spacing: 2px; line-height: 16px; opacity: .8; }
+#ultClock i { width: 128px; height: 5px; background: rgba(255, 255, 255, 0.16); transform: skewX(-18deg); overflow: hidden; }
+#ultClock s { display: block; height: 100%; background: #F5F4F0; transform-origin: left; transform: scaleX(0); }
+#ultClock b { font-family: 'ArenaCond', Impact, sans-serif; font-style: italic; font-weight: 400; font-size: 16px; line-height: 18px; min-width: 2.8em; padding-right: 3px; text-align: center; white-space: nowrap; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+#ultClock .uk-l { padding-right: 2px; white-space: nowrap; }
+#ultClock.hot s { background: #FFE135; }
+#ultClock.hot b { color: #FFE135; animation: ukHot .5s ease-in-out infinite alternate; }
+@keyframes ukHot { to { opacity: .55; } }
+
+#vote { position: absolute; inset: 0; z-index: 60; display: none; flex-direction: column; align-items: center; pointer-events: none;
+  padding: calc(var(--sat) + 103px) 14px calc(var(--sab) + 14px); background: rgba(6, 6, 10, 0.5); }
+#vote.on, #vote.release { display: flex; }
+#vote.on { animation: vtIn .25s ease-out both; }
+#vote.release { animation: vtOut .24s ease-in forwards; } /* 快速让位给大招色带 */
+@keyframes vtIn { from { opacity: 0; } }
+@keyframes vtOut { to { opacity: 0; } }
+/* 标题区：VOTE NOW 大字 + 中文副标 + 倒计时，三层上下排开，留足呼吸 */
+.vt-head { display: flex; flex-direction: column; align-items: center; overflow: visible; }
+.vt-title { font-family: 'ArenaCond', Impact, sans-serif; font-style: italic; font-weight: 400; font-size: 58px; line-height: 1.05; letter-spacing: 4px; padding: 0 .12em; color: #F5F4F0;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45); }
+.vt-sub { display: flex; align-items: center; gap: 10px; margin-top: 2px; font-size: 13px; font-weight: 900; letter-spacing: 6px; text-indent: 6px; color: rgba(255, 255, 255, 0.82); text-shadow: 0 1px 2px #000; }
+.vt-sub i { display: block; width: 26px; height: 2px; background: rgba(255, 255, 255, 0.45); transform: skewX(-30deg); }
+.vt-clock { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 4px 18px 4px 16px; position: relative; isolation: isolate; overflow: visible; }
+.vt-clock::before { content: ''; position: absolute; inset: 0; z-index: -1; transform: skewX(-18deg); background: rgba(12, 12, 16, 0.6); }
+.vt-clock b { display: block; width: 34px; font-family: 'ArenaCond', Impact, sans-serif; font-style: italic; font-weight: 400; font-size: 30px; line-height: 38px; height: 38px; padding-right: 2px;
+  color: #fff; text-align: center; font-variant-numeric: tabular-nums; transform-origin: 50% 55%; }
+.vt-clock i { width: 168px; height: 6px; background: rgba(255, 255, 255, 0.16); transform: skewX(-20deg); overflow: hidden; }
+.vt-clock s { display: block; height: 100%; background: #F5F4F0; transform-origin: left; }
+.vt-clock.hot b { color: #FFE135; animation: vtBeat .5s ease-out infinite; }
+.vt-clock.hot s { background: #FFE135; }
+@keyframes vtBeat { 0% { transform: scale(1.22); } 100% { transform: scale(1); } }
+/* 选手卡：只留头像 + 名字，一眼识别双方 */
+.vt-cards { display: flex; align-items: center; gap: 6px; width: 100%; max-width: 360px; margin-top: 18px; }
+.vt-vs { flex: none; width: 30px; text-align: center; font-family: 'ArenaCond', Impact, sans-serif; font-style: italic; font-size: 22px; color: rgba(255, 255, 255, 0.85); }
+.vt-card { flex: 1; min-width: 0; position: relative; isolation: isolate; padding: 7px 12px 7px 10px; display: flex; align-items: center; gap: 9px; }
+.vt-card.s1 { flex-direction: row-reverse; padding: 7px 10px 7px 12px; }
+.vt-card::before { content: ''; position: absolute; inset: 0; z-index: -1; transform: skewX(-12deg); background: rgba(12, 12, 16, 0.72); border-bottom: 3px solid var(--vc); }
+.vc-ava { flex: none; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #171719; box-shadow: 0 0 0 2px var(--vc); }
+.vc-ava img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vc-t { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.vt-card.s1 .vc-t { align-items: flex-end; }
+.vc-ult { max-width: 100%; font-size: 11px; font-weight: 800; color: rgba(255, 255, 255, 0.62); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vc-pilot { min-width: 0; max-width: 100%; display: flex; align-items: baseline; gap: 5px; font-size: 15px; font-weight: 900; color: #fff; white-space: nowrap; }
+.vt-card.s1 .vc-pilot { flex-direction: row-reverse; }
+.vc-pilot span { overflow: hidden; text-overflow: ellipsis; }
+.vc-pilot em { flex: none; font-style: normal; font-size: 12px; font-weight: 900; color: #FFE135; }
+/* 边缘氛围光：两层（各一方颜色）由 JS 平滑控制强度，整体快速呼吸 */
+.vt-glow { position: absolute; inset: 0; z-index: -1; pointer-events: none; animation: vgBreath .9s ease-in-out infinite; }
+.vt-glow i { position: absolute; inset: 0; opacity: 0; }
+@keyframes vgBreath { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+#ultClock { transition: opacity .3s, transform .35s cubic-bezier(.3, 1.3, .5, 1); }
+#ultClock.yield { opacity: 0 !important; transform: translateY(-14px) scale(.85); }
+body.assisting #ticker { opacity: 0 !important; }
+/* 投票圈：两圈直径之和固定，按票数互相挤压 */
+.vt-arena { position: relative; flex: 1; width: 100%; min-height: 200px; margin-top: 10px; }
+.vt-orb { position: absolute; left: var(--x, 50%); top: 50%; width: var(--d, 160px); height: var(--d, 160px); transform: translate(-50%, -50%); margin: 0; padding: 0; border: 0; border-radius: 50%;
+  background: var(--vb, var(--vc)); color: var(--vi); pointer-events: auto; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 0 0 3px rgba(23, 23, 25, 0.9), 0 10px 30px rgba(0, 0, 0, 0.5); transition: left .14s linear, width .14s linear, height .14s linear, opacity .3s, filter .3s; }
+.vt-arena.snap .vt-orb { transition: none; }
+/* 全局 button:active 会把 transform 改成 none/scale，导致圈心定位丢失跳位：这里锁住定位，按压反馈交给内层 */
+.vt-orb:active, .vt-orb:focus { transform: translate(-50%, -50%); filter: none; outline: none; }
+.vt-orb.off:active { filter: saturate(.35) brightness(.7); }
+.vt-orb::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 2px solid var(--vc); opacity: 0; animation: vtRing 1s ease-out infinite; pointer-events: none; }
+@keyframes vtRing { 0% { opacity: .8; transform: scale(.94); } 100% { opacity: 0; transform: scale(1.18); } }
+.vo-in { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+.vo-in b { font-family: 'ArenaCond', Impact, sans-serif; font-style: italic; font-weight: 400; font-size: calc(var(--d, 160px) * 0.27); letter-spacing: 2px; }
+.vo-in em { font-style: normal; font-family: 'ArenaCond', Impact, sans-serif; font-size: calc(var(--d, 160px) * 0.13); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.vo-in small { display: none; font-size: clamp(9px, calc(var(--d, 160px) * 0.075), 14px); font-weight: 900; margin-top: 4px; max-width: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 点击回弹：整圈先猛涨再压缩再回弹（用独立 scale 属性，不破坏 translate 定位） */
+.vt-orb.hit { animation: voHit .34s cubic-bezier(.2, .9, .3, 1); }
+@keyframes voHit { 0% { scale: 1; } 18% { scale: 1.16; } 42% { scale: .93; } 66% { scale: 1.05; } 84% { scale: .99; } 100% { scale: 1; } }
+.vt-orb.hit .vo-in { animation: voHitIn .34s ease-out; }
+@keyframes voHitIn { 0% { transform: scale(1); } 20% { transform: scale(1.12, .9); } 50% { transform: scale(.95, 1.06); } 100% { transform: scale(1); } }
+.vt-ring { position: absolute; inset: 0; z-index: 3; border-radius: 50%; border: 5px solid #fff; pointer-events: none; animation: vtRingOut .5s cubic-bezier(.15, .8, .3, 1) forwards; }
+@keyframes vtRingOut { 0% { opacity: .95; transform: scale(1); border-width: 6px; } 100% { opacity: 0; transform: scale(1.45); border-width: 1px; } }
+.vt-orb.ping { animation: voPing .2s ease-out; }
+@keyframes voPing { 0% { filter: brightness(1.25); } 100% { filter: none; } }
+.vt-orb.pick { box-shadow: 0 0 0 3px rgba(23, 23, 25, 0.9), 0 0 0 6px #fff, 0 10px 30px rgba(0, 0, 0, 0.5); }
+.vt-orb.pick::before { content: '已支持'; position: absolute; left: 50%; top: -12px; transform: translateX(-50%) skewX(-12deg); z-index: 3; padding: 1px 8px; background: #fff; color: #171719; font-size: 11px; font-weight: 900; white-space: nowrap; }
+.vt-orb.off { filter: saturate(.35) brightness(.7); }
+.vt-orb.off::after, .vt-orb.lose::after { display: none; }
+.vt-orb.deny { animation: voDeny .25s; }
+@keyframes voDeny { 25% { margin-left: -6px; } 75% { margin-left: 6px; } }
+.vt-orb.win { filter: none; }
+.vt-orb.lose { opacity: .25; }
+.vt-tip { margin-top: 8px; font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.8); text-shadow: 0 1px 2px #000; }
+.vt-result { position: absolute; left: 0; right: 0; top: 50%; display: none; flex-direction: column; align-items: center; pointer-events: none; z-index: 5; }
+.vt-result.show { display: flex; animation: vrIn .4s ease-out both; }
+.vt-result { top: 44%; transform: translateY(-50%); z-index: 8; }
+/* 揭晓：标题 / 倒计时 / 选手卡 / 提示退场，圈压暗，公告独占中心 */
+#vote.reveal .vt-head, #vote.reveal .vt-cards, #vote.reveal .vt-tip { animation: vtLeave .3s cubic-bezier(.5, 0, .9, .4) forwards; }
+@keyframes vtLeave { to { opacity: 0; transform: translateY(-26px) scale(.94); } }
+#vote.reveal .vt-arena { animation: vtDim .35s ease-out forwards; }
+@keyframes vtDim { to { opacity: .45; filter: blur(1px); } }
+#vote.reveal .vt-orb::after, #vote.reveal .vt-orb.pick::before { display: none; }
+/* 结果公告：一体化斜切黑底板（头像 + 昵称 + 大招名），中性黑白，只用一条获胜色细边点题 */
+.vt-result { left: 50%; right: auto; transform: translate(-50%, -50%); width: max-content; max-width: calc(100% - 28px); }
+.vr-kicker { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; font-family: 'ArenaCond', Impact, sans-serif; font-style: italic; font-size: 30px; line-height: 1; letter-spacing: 3px; color: #F5F4F0;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.5), 0 8px 20px rgba(0, 0, 0, 0.6); }
+.vr-kicker i { font-family: inherit; font-style: normal; font-size: 13px; font-weight: 900; letter-spacing: 4px; color: rgba(255, 255, 255, 0.8); }
+.vr-plate { position: relative; isolation: isolate; display: flex; align-items: center; gap: 14px; padding: 10px 30px 10px 14px; }
+.vr-plate::before { content: ''; position: absolute; inset: 0; z-index: -1; transform: skewX(-12deg); background: rgba(10, 10, 14, 0.9);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55); border-bottom: 4px solid var(--vc, #fff); }
+.vr-ava { flex: none; width: 74px; height: 74px; overflow: hidden; transform: skewX(-12deg); background: #222; box-shadow: 0 0 0 2px #fff; }
+.vr-ava img { width: 130%; height: 100%; margin-left: -15%; object-fit: cover; transform: skewX(12deg); display: block; }
+.vr-t { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.vr-name { display: flex; align-items: center; gap: 8px; font-size: 30px; font-weight: 900; line-height: 1.1; color: #fff; letter-spacing: 1px; white-space: nowrap; }
+.vr-name em { font-style: normal; font-size: 11px; font-weight: 900; letter-spacing: 1px; padding: 1px 7px; background: #fff; color: #171719; transform: skewX(-12deg); }
+.vr-ult { font-size: 15px; font-weight: 900; letter-spacing: 2px; color: rgba(255, 255, 255, 0.78); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vr-ult::before { content: '大招 · '; color: rgba(255, 255, 255, 0.5); }
+@keyframes vrIn { from { opacity: 0; scale: 1.5; } 60% { opacity: 1; scale: .97; } }
+.vt-plus { position: absolute; z-index: 62; pointer-events: none; font-family: 'ArenaCond', Impact, sans-serif; font-style: italic; font-size: 36px; line-height: 1; color: #fff;
+  -webkit-text-stroke: 1.5px #171719; paint-order: stroke fill; text-shadow: 0 3px 0 rgba(0, 0, 0, 0.55), 0 6px 14px rgba(0, 0, 0, 0.6);
+  transform: translate(-50%, -50%) rotate(var(--r, 0deg)); animation: vtPlus .7s cubic-bezier(.2, .9, .3, 1) forwards; }
+@keyframes vtPlus { 0% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r, 0deg)) scale(.5); }
+  18% { opacity: 1; transform: translate(-50%, -80%) rotate(var(--r, 0deg)) scale(1.25); }
+  100% { opacity: 0; transform: translate(-50%, -190%) rotate(var(--r, 0deg)) scale(1); } }
+body.assisting #bottom { opacity: 0; pointer-events: none; }
+body.assisting #bottom > * { pointer-events: none; }
+.vo-in em { margin-top: 6px; }

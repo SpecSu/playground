@@ -62,6 +62,13 @@ css += '''
 .uc-tag{color:#171719!important}
 .uc-name{color:#F5F4F0!important;-webkit-text-stroke-color:#3A0A20!important;text-shadow:3px 3px 0 #171719!important}
 .uc-owner{color:#F5F4F0!important;text-shadow:none!important}
+/* v10.1 投票模式：条幅跟随获胜方投票色——黄绿方深色字，粉方白字 */
+#ultcut.v0{background:rgba(222,255,114,.94)!important}
+#ultcut.v0 .uc-tag{color:rgba(23,23,25,.7)!important}
+#ultcut.v0 .uc-name{color:#171719!important;-webkit-text-stroke:0!important;text-shadow:2px 2px 0 rgba(255,255,255,.55)!important}
+#ultcut.v0 .uc-owner{color:#171719!important}
+#ultcut.v0 .uc-ava{box-shadow:0 0 0 3px #171719,0 0 0 6px #F5F4F0,0 6px 18px rgba(0,0,0,.5)!important}
+#ultcut.v1{background:rgba(245,105,168,.92)!important}
 /* READY / FIGHT：主体白字不变，发光 + 投影改玫红 */
 .b-main:not(.ko):not(.win):not(.vs){-webkit-text-stroke-color:#2A0A18!important;text-shadow:0 0 22px rgba(245,105,168,.95),0 0 48px rgba(245,105,168,.5),0 5px 0 #9E3A68,0 10px 26px #000!important}
 /* K.O. / WINNER：与 READY/FIGHT 同款样式（白字+细描边+单层发光+实色下投影），仅颜色为香蕉黄；光效收紧不发糊 */
@@ -104,6 +111,11 @@ open(f'{M}/assets/{css_f}', 'w').write(css)
 v = fn = sc = '-'
 html = open(f'{M}/index.html').read()
 html = re.sub(r'<script type="module" crossorigin src="(\./assets/[^"]+)"></script>', lambda m: '<script>Promise.race([Promise.all([document.fonts.load("italic 40px ArenaCond"),document.fonts.load("40px ArenaCond")]),new Promise(r=>setTimeout(r,2500))]).finally(()=>import("'+m.group(1)+'"))</script>', html).replace('<title>', '<title>[配色模拟稿v4] ', 1)
+# v10.1：启动页大字需要首帧就出现 —— 把 Anton 字体内联进 HTML，不等网络
+import base64
+_b64 = base64.b64encode(open('public/fonts/anton.woff2', 'rb').read()).decode()
+html = re.sub(r'\s*<link rel="preload" as="font"[^>]*anton[^>]*>', '', html)
+html = html.replace('</title>', '</title>\n  <style>@font-face{font-family:ArenaCond;src:url(data:font/woff2;base64,' + _b64 + ') format("woff2");font-display:block}</style>', 1)
 open(f'{M}/index.html', 'w').write(html)
 print('ok', v, fn, sc)
 

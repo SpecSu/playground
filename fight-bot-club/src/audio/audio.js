@@ -93,6 +93,21 @@ export class AudioEngine {
     return s;
   }
   pick(arr, opt) { return this.play(arr[Math.floor(Math.random() * arr.length)], opt); }
+  // 投票点击：合成的短促清脆“哒”——高频三角波快速下滑 + 极短噪声瞬态；直连 master，不受慢镜低通影响
+  tap(k = 0) {
+    if (!this.ctx || this.muted || this.ctx.state !== 'running') return;
+    const c = this.ctx, t = c.currentTime;
+    if (this._tapT && t - this._tapT < 0.025) return; this._tapT = t;
+    const f0 = 1500 + Math.min(1, k) * 700 + Math.random() * 120;
+    const o = c.createOscillator(); o.type = 'triangle';
+    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f0 * 0.45, t + 0.06);
+    const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.32, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.085);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + 0.1);
+    if (!this._clickBuf) { const n = Math.floor(c.sampleRate * 0.012), b = c.createBuffer(1, n, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3); this._clickBuf = b; }
+    const s = c.createBufferSource(); s.buffer = this._clickBuf;
+    const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 3000;
+    const g2 = c.createGain(); g2.gain.value = 0.22; s.connect(hp); hp.connect(g2); g2.connect(this.master); s.start(t);
+  }
   // 持续声（喷火 / 电锯）
   loop(key, name, vol = 0.6) {
     if (!this.ready || !this.ctx || this.ctx.state !== 'running') return;

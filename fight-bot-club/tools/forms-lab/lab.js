@@ -45,7 +45,7 @@ ONLY.forEach((form, i) => {
   cells.push({ scene, cam });
   const col = i % 4, row = Math.floor(i / 4);
   const el = document.createElement('div'); el.className = 'lab'; el.style.left = col * CW + 'px'; el.style.top = 80 + row * CH + 'px';
-  el.innerHTML = `<div class="t">${d.formCn}<i>${form.toUpperCase()}</i>${['manta', 'tiger', 'turtle', 'croc', 'trex', 'flamingo', 'frog', 'rabbit'].includes(form) ? '<em>NEW</em>' : ''}</div><div class="n">${String(i + 1).padStart(2, '0')}</div>
+  el.innerHTML = `<div class="t">${d.formCn}<i>${form.toUpperCase()}</i>${['manta', 'tiger', 'turtle', 'croc', 'trex', 'flamingo'].includes(form) ? '<em>NEW</em>' : ''}</div><div class="n">${String(i + 1).padStart(2, '0')}</div>
     <div class="s">${d.name} · ${d.roleCn} · ${d.range === 'ranged' ? '远程' : '近战'} · 大招「${d.moves.ult}」</div>`;
   labs.appendChild(el);
 });

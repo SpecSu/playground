@@ -56,7 +56,7 @@ export class Arena {
     ]);
     top.position.y = -0.12; top.receiveShadow = true; scene.add(top);
     // 台基 + 围裙广告
-    const skirtTex = makeTextTexture(['UGC ROBOT ARENA', '即梦 · 机甲擂台', 'CREATE · FIGHT · WIN'], { w: 2048, h: 160, accent: '#DEFF70' });
+    const skirtTex = makeTextTexture(['FIGHT BOT CLUB', '即梦 · 机甲擂台', 'CREATE · FIGHT · WIN'], { w: 2048, h: 160, accent: '#DEFF70' });
     skirtTex.wrapS = THREE.RepeatWrapping;
     this.skirtTex = skirtTex;
     const skirtMat = new THREE.MeshStandardMaterial({ map: skirtTex, emissiveMap: skirtTex, emissive: 0xffffff, emissiveIntensity: 0.55, roughness: 0.5 });
@@ -211,11 +211,12 @@ export class Arena {
     const g = new THREE.Group(); g.position.y = 19.5;
     for (let s = 0; s < 4; s++) {
       const p = new THREE.Mesh(new THREE.PlaneGeometry(8, 4), mat);
-      const ang = s * Math.PI / 2; p.position.set(Math.sin(ang) * 3.01, 0, Math.cos(ang) * 3.01); p.rotation.y = ang; g.add(p);
+      // v10.1 修复：屏宽 8 却贴在 6 宽的箱体上，四面屏两端各伸出 1 个单位互相穿插，斜看像两块屏交叠；箱体改为 8.4 宽，屏面居中贴合
+      const ang = s * Math.PI / 2; p.position.set(Math.sin(ang) * 4.21, 0, Math.cos(ang) * 4.21); p.rotation.y = ang; g.add(p);
     }
-    g.add(new THREE.Mesh(new THREE.BoxGeometry(6, 4.4, 6), frame));
+    g.add(new THREE.Mesh(new THREE.BoxGeometry(8.4, 4.4, 8.4), frame));
     this.scene.add(g); this.screen = g;
-    this.setScreen('UGC ROBOT ARENA', '等待挑战者', '#DEFF70', '#FF61A8');
+    this.setScreen('FIGHT BOT CLUB', '等待挑战者', '#DEFF70', '#FF61A8');
   }
   setScreen(a, b, ca = '#DEFF70', cb = '#FF61A8', mid = 'VS') {
     const g = this.screenCtx, W = 1024, H = 512;

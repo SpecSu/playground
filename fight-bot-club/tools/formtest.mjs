@@ -4,7 +4,7 @@ import { createView } from '../src/mech/forms.js';
 import { Fighter } from '../src/game/sim.js';
 const acts = [null, 'jab', 'heavy', 'shoot', 'block', 'hitstun', 'leap', 'sp_laser', 'ult_beam', 'dodge'];
 const out = {};
-for (const form of (process.argv[2] ? process.argv[2].split(',') : ['humanoid', 'dog', 'spider', 'tank', 'manta', 'tiger', 'turtle', 'croc', 'trex', 'flamingo', 'frog', 'rabbit'])) {
+for (const form of (process.argv[2] ? process.argv[2].split(',') : ['humanoid', 'dog', 'spider', 'tank', 'manta', 'tiger', 'turtle', 'croc', 'trex', 'flamingo'])) {
   let tris = 0, meshes = 0, errs = 0, minY = 1e9, maxY = -1e9, n = 30;
   for (let i = 0; i < n; i++) {
     const d = generateDesign(['黄金重装坦克，巨型铁拳', '霓虹刺客双刀', '深海远程炮台导弹', '废土电锯莽夫'][i % 4], 'x', { form });

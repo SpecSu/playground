@@ -17,7 +17,7 @@ function ik(L1, L2, fwd, dy, kneeSign) {
   const b = Math.acos(clamp((L1 * L1 + L2 * L2 - D * D) / (2 * L1 * L2), -1, 1));
   return [-(psi + kneeSign * a), kneeSign * (PI - b)];
 }
-const MELEE_ACTS = new Set(['jab', 'cross', 'heavy', 'jumppunch', 'bash', 'sp_charge', 'ult_frenzy', 'sp_chainsaw', 'sp_drill']);
+const MELEE_ACTS = new Set(['jab', 'cross', 'heavy', 'jumppunch', 'bash', 'sp_charge', 'ult_frenzy', 'sp_chainsaw', 'sp_drill', 'sp_blink', 'sp_hook', 'ult_phantom', 'ult_tornado']);
 
 // ———————————————————— 上半身复用型（蛛 / 浮游 / 灵体 / 战车） ————————————————————
 class UpperForm extends MechView {
@@ -357,7 +357,7 @@ class DogView extends MechView {
       else if (a.type === 'hitstun') { lunge = -0.25; pitch = -0.2; headP = -0.3; roll = this.recoilZ; }
       else if (a.type === 'dodge') { roll = -(D.side || 1) * 0.3; crouch = 0.2; }
       else if (a.type === 'leap' || a.type === 'ult_meteor') { crouch = D.phase ? (D.phase === 2 ? 0.4 : 0) : 0.45; pitch = f.vy > 0 ? -0.35 : 0.25; headP = -0.2; }
-      else if (a.type === 'shoot' || a.type.startsWith('sp_') || a.type.startsWith('ult_')) { crouch = 0.2; headP = -0.1; jaw = ['sp_flame', 'sp_laser', 'ult_beam', 'ult_inferno'].includes(a.type) ? 0.7 : 0.15; pitch = -0.05 * (this.shot[0] + this.shot[1]); }
+      else if (a.type === 'shoot' || a.type.startsWith('sp_') || a.type.startsWith('ult_')) { crouch = 0.2; headP = -0.1; jaw = ['sp_flame', 'sp_laser', 'ult_beam', 'ult_inferno', 'ult_blackhole', 'ult_orbital', 'ult_glacier'].includes(a.type) ? 0.7 : 0.15; pitch = -0.05 * (this.shot[0] + this.shot[1]); }
     }
     if (this.cele > 0 && f.alive) { headP = -0.7; jaw = 0.5 + Math.sin(t * 9) * 0.2; crouch = Math.max(0, Math.sin(t * 6)) * -0.15; }
     pitch += -this.recoil * 0.2; crouch += this.squash * 0.35;

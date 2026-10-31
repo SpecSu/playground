@@ -16,11 +16,12 @@ const SanitizeShader = {
       gl_FragColor = c; }`,
 };
 import { Sim, Fighter, RING } from './game/sim.js';
-import { generateDesign, EXAMPLE_PROMPTS, ratings, ROLE_CN, FORM_LIST } from './mech/design.js';
+import { generateDesign, EXAMPLE_PROMPTS, ratings, ROLE_CN, FORM_LIST, ULT_NAMES } from './mech/design.js';
 import { createView } from './mech/forms.js';
 import { GLOBAL_TIME } from './render/materials.js';
 import { Arena } from './world/arena.js';
 import { VFX, hex3 } from './fx/vfx.js';
+import { VFX2 } from './fx/vfx2.js';
 import { AudioEngine } from './audio/audio.js';
 import { Director } from './game/director.js';
 import { AVATARS, avatarVisible, loadAvatar, makeRider, renderThumbs, riderHeadBox } from './avatar/avatars.js';
@@ -68,7 +69,7 @@ function resize() {
   if (composer) { composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(w, h); bloom.resolution.set(w * 0.5, h * 0.5); }
   vfx && vfx.setSize(w, h, camera.fov);
 }
-let vfx = null;
+let vfx = null, vfx2 = null;
 
 // ———————————————————— 状态 ————————————————————
 const audio = new AudioEngine();
@@ -76,7 +77,7 @@ let arena, director;
 // 分身头像：静态预烘焙 WebP（每张约 7KB，HTML 头部已 preload），无需等 GLB 加载与离屏渲染
 let thumbs = Array.from({ length: 12 }, (_, i) => `/avatars/thumb/a${String(i + 1).padStart(2, '0')}.webp`);
 const VISIBLE_AVAS = AVATARS.map((_, i) => i).filter(avatarVisible);
-let myAva = VISIBLE_AVAS[Math.floor(Math.random() * VISIBLE_AVAS.length)];
+let myAva = Math.max(0, AVATARS.findIndex((a) => a.id === 'a08')); // v10.1：默认分身 a08，在创造页点「更换」再换
 const roster = [];      // 所有参赛机器人
 const queue = [];       // 待战队列（roster 引用）
 const G = {
@@ -93,6 +94,7 @@ const BOTS = [
   { ava: 3, name: '喵脆角', prompt: '霓虹赛博刺客猎犬，双刀，闪电般的速度', role: 'assassin', form: 'dog' },
   { ava: 7, name: '苏贝壳', prompt: '深海鲨鱼浮游炮台，蜂群导弹', role: 'gunner', form: 'hover' },
   { ava: 6, name: '刀盾狗', prompt: '废土拼装多足蜘蛛，电锯手臂，锈迹斑斑', role: 'brawler', form: 'spider' },
+  { ava: 1, name: '牛来', prompt: '', role: '', form: '' }, // v10.2：开场共 5 台（2 台对战 + 3 台候擂）
 ];
 
 function makeEntry(design, ava, owner, mine = false) {
@@ -107,7 +109,7 @@ function designForRole(prompt, owner, role, form) {
 // 随机 prompt 生成若干候选，取满足条件且 score 最高者（用于开场对阵）
 function pickDesign(owner, opts, ok, score, n = 120) {
   let best = null;
-  for (let i = 0; i < n; i++) { const d = generateDesign(randomPrompt(), owner, opts()); if (ok(d) && (!best || score(d) > score(best))) best = d; }
+  for (let i = 0; i < n; i++) { const d = generateDesign(randomPrompt(), owner, opts()); if (ok(d) && !score) return d; if (ok(d) && (!best || score(d) > score(best))) best = d; }
   return best || generateDesign(randomPrompt(), owner, opts());
 }
 
@@ -199,16 +201,21 @@ async function boot() {
   tip.textContent = '正在搭建擂台…'; await nextFrame();
   arena = new Arena(scene, renderer, Q);
   vfx = new VFX(scene, camera, { low: Q.low });
+  vfx2 = new VFX2(vfx);
   director = new Director(camera, canvas);
   resize();
   app.insertAdjacentHTML('beforeend', '<div class="vignette"></div><div class="slowmo" id="slowmo"></div>');
   // 冷启动：4 台预设机器人 + 4 位模拟玩家
-  // 开场第一对：「全弹发射」导弹重机 vs「万雷天罚」轻巧多足蛛，体型反差拉满；外观依旧随机。其余全部保持原随机逻辑
-  const opener = [
-    pickDesign(BOTS[0].name, () => ({ form: Math.random() < 0.5 ? 'humanoid' : 'tank' }), (d) => d.ult === 'barrage', (d) => d.scale),
-    pickDesign(BOTS[1].name, () => ({ form: 'spider' }), (d) => d.ult === 'storm', (d) => -d.scale),
-  ];
-  BOTS.forEach((b, i) => queue.push(makeEntry(opener[i] || designForRole(b.prompt, b.name, b.role, b.form), b.ava, b.name)));
+  // v10.2 开场 5 台（前 2 台对战、后 3 台候擂）：体型 5 选不重复、大招互不重复；
+  // 第一轮对战两台大招固定「全弹发射」「万雷天罚」，体型随机；候擂 3 台大招从其余大招里随机且互不相同
+  const forms = [...FORM_LIST].sort(() => Math.random() - 0.5).slice(0, BOTS.length);
+  const usedUlt = new Set(['barrage', 'storm']);
+  const opener = BOTS.map((b, i) => {
+    const want = i === 0 ? 'barrage' : i === 1 ? 'storm' : null;
+    const d = pickDesign(b.name, () => ({ form: forms[i] }), (x) => (want ? x.ult === want : !usedUlt.has(x.ult)), null, 400);
+    usedUlt.add(d.ult); return d;
+  });
+  BOTS.forEach((b, i) => queue.push(makeEntry(opener[i], b.ava, b.name)));
   // 预编译 + 首帧
   tip.textContent = '正在生成机甲…'; await nextFrame();
   renderOnce();
@@ -220,7 +227,7 @@ async function boot() {
   // 先开打（开始页后面就能看到擂台）
   nextMatch();
   requestAnimationFrame(loop);
-  if (TEST) window.__G = { G, roster, queue, director, renderer, scene, camera, audio, vfx, renderThumbs, getThumbs: () => thumbs, makeRider, riderHeadBox, renderMechThumb, makeEntry, generateDesign, AS };
+  if (TEST) window.__G = { G, roster, queue, director, renderer, scene, camera, audio, vfx, vfx2, renderThumbs, getThumbs: () => thumbs, makeRider, riderHeadBox, renderMechThumb, makeEntry, generateDesign, AS, startFight, renderQueue, introCard, finishVote, createView, THREE };
 }
 function renderOnce() { if (composer) composer.render(); else renderer.render(scene, camera); }
 
@@ -280,6 +287,7 @@ function nextMatch() {
     toast(`🏆 ${champ.design.name} 四连胜卫冕，荣誉下场休息`);
     queue.push(champ); disposeSlot(0); champ = null; G.champStreak = 0;
   }
+  if (vfx2) vfx2.reset();
   const sim = new Sim(); G.sim = sim; projSeen.clear();
   sim.muzzle = (f, slot) => { const v = views.get(f); return v ? v.muzzleWorld(slot) : null; };
   sim.on(onSimEvent);
@@ -301,7 +309,7 @@ function nextMatch() {
   const challF = spawn(chall, 1, cx, cz, true);
   const v1 = makeView(chall); G.V[1] = v1; views.set(challF, v1);
   G.F = [champF, challF]; G.E = [champ, chall];
-  sim.setFighters(champF, challF);
+  sim.setFighters(champF, challF); sim.enableVote();
   champF.frozen = challF.frozen = true;
   G.phase = 'intro'; G.t = 0; G.clock = MAX_TIME; G.koT = 0;
   // 擂主卫冕：镜头直接从胜者特写推到新挑战者特写，不回远景
@@ -385,7 +393,7 @@ function celebrate() {
   director.setMode('winner', { f, v });
   banner('WINNER', `${AVATARS[e.ava]?.name || e.owner} · ${e.design.name}${G.champStreak > 1 ? ` · ${G.champStreak} 连胜` : ''}`, 'win', 3.2);
   audio.play('voWinner', { vol: 1, force: true, bus: 'master', vary: false }); audio.play('cheer1', { vol: 0.55, force: true });
-  if (e.mine) toast('🎉 你的机器人赢了！');
+  // v10.1：胜利不再弹「你的机器人赢了」——WINNER 大字 + 胜者特写已表达，提示条只会挡脸
 }
 function finishRound() {
   const li = G.loserIdx, wi = 1 - li;
@@ -401,15 +409,15 @@ function finishRound() {
 
 // ———————————————————— 模拟事件 → 表现 ————————————————————
 const HIT_SFX = { jab: ['hitM1', 'hitM2'], cross: ['hitM2', 'hitM3'], heavy: ['hitH1', 'hitH2'], bash: ['hitH3', 'hitM4'] };
-const ULT_TEXT = { meteor: '陨星重砸', barrage: '全弹发射', beam: '光子巨炮', frenzy: '狂暴连斩', inferno: '炼狱火旋', storm: '万雷天罚' };
+const ULT_TEXT = ULT_NAMES;
 let lastCin = -99;
 function slot(f) { return G.F.indexOf(f); }
 function onSimEvent(type, d) {
   const now = performance.now() / 1000;
   switch (type) {
     case 'swing': {
-      if (d.type === 'frenzy') { const v = views.get(d.f); if (v) vfx.slash(d.f, v.fxCol, d.i >= 8, d.i); }
-      const heavy = d.type === 'heavy' || d.type === 'leap' || d.type === 'frenzy' && d.i >= 8;
+      if (d.type === 'frenzy' || d.type === 'blink' || d.type === 'phantom' || d.type === 'hook') { const v = views.get(d.f); if (v) vfx.slash(d.f, v.fxCol, d.type === 'frenzy' ? d.i >= 8 : d.type !== 'phantom' || d.i >= 9, d.i || 0); }
+      const heavy = d.type === 'heavy' || d.type === 'leap' || d.type === 'hook' || d.type === 'blink' && !d.i || d.type === 'frenzy' && d.i >= 8 || d.type === 'phantom' && d.i >= 9;
       const blade = d.f.d.main === 'blade' || d.f.d.main === 'claw';
       audio.play(heavy ? 'whooshH' : blade ? (Math.random() < 0.5 ? 'sword1' : 'sword2') : (Math.random() < 0.5 ? 'whoosh1' : 'whoosh2'), { vol: heavy ? 0.7 : 0.45, cd: 0.08 });
       if (heavy) audio.play('hydr', { vol: 0.35, cd: 0.3 });
@@ -430,11 +438,16 @@ function onSimEvent(type, d) {
         if (!flameish) vfx.sparks(P.x, P.y, P.z, heavy ? 22 : (kind === 'bullet' ? 4 : 12), { speed: heavy ? 13 : 9, nx: nx / nl, nz: nz / nl, flash: heavy ? 2.6 : 1.4, c: kind === 'elec' || kind === 'storm' || kind === 'laser' || kind === 'beam' ? [0.6, 0.85, 1] : undefined });
         if (heavy) { vfx.ring(o.x, 0.05, o.z, 0.5, 3, 0.35, 0xffd0a0, 0.6); vfx.light(P.x, P.y, P.z, 18); }
         const big = dmg >= 1200 || (ult && dmg > 700);
-        if (flameish || kind === 'beam') {
+        if (flameish || kind === 'beam' || (dmg < 700 && (kind === 'blackhole' || kind === 'orbital' || kind === 'tornado'))) {
           // 持续伤害合并显示，避免数字刷屏
           const k = 'dot' + slot(o); const A = (G[k] = G[k] || { sum: 0, t: 0 }); A.sum += dmg;
           const now = performance.now(); if (now - A.t > 380) { vfx.number(P, `${Math.round(A.sum)}`, A.sum > 600 ? 'big' : ''); A.sum = 0; A.t = now; }
-        } else vfx.number(P, `${Math.round(dmg)}`, crit ? 'crit' : big ? 'big' : '');
+        } else {
+          // v10.1 连击：同一攻击者 0.9s 内连续命中累加，数字越打越大、越快弹出
+          const cs = slot(f), C = (G.cb = G.cb || [{ n: 0, t: 0 }, { n: 0, t: 0 }])[cs], nowC = performance.now();
+          C.n = nowC - C.t < 900 ? C.n + 1 : 1; C.t = nowC; if (!ult) comboHud(cs, C.n);
+          vfx.number(P, `${Math.round(dmg)}`, crit ? 'crit' : big ? 'big' : '', ult ? 0 : C.n);
+        }
         // 音效
         if (kind === 'bullet') audio.play('hitFast', { vol: 0.35, cd: 0.07 });
         else if (kind === 'flame' || kind === 'inferno') audio.play('punch', { vol: 0.15, cd: 0.25 });
@@ -443,7 +456,7 @@ function onSimEvent(type, d) {
         else if (heavy || ult) audio.pick(['hitH1', 'hitH2', 'hitH3'], { vol: 0.9, cd: 0.08 });
         else audio.pick(HIT_SFX[kind] || ['hitM1', 'hitM2', 'hitM3', 'hitM4'], { vol: 0.65, cd: 0.05 });
         if (f.d.main === 'blade' && ['jab', 'cross', 'heavy'].includes(kind)) audio.play('sword2', { vol: 0.35, cd: 0.1 });
-        if (ult) { director.ultHit(heavy || dmg > 900); if (kind === 'frenzy' && heavy) vfx.ultBurst(P.x, P.y, P.z, views.get(f)?.fxCol || [1, 0.4, 0.6], 1.4); else if (kind === 'beam' && Math.random() < 0.5) vfx.ultBurst(P.x, P.y, P.z, views.get(f)?.fxCol || [0.6, 0.9, 1], 0.8); } else director.shake(heavy ? 0.55 : 0.12);
+        if (ult) { director.ultHit(heavy || dmg > 900); if (kind === 'frenzy' && heavy) vfx.ultBurst(P.x, P.y, P.z, views.get(f)?.fxCol || [1, 0.4, 0.6], 1.4); else if (kind === 'beam' && Math.random() < 0.5) vfx.ultBurst(P.x, P.y, P.z, views.get(f)?.fxCol || [0.6, 0.9, 1], 0.8); } else { director.shake(heavy ? 0.6 : kind === 'bullet' ? 0.07 : 0.2); if (['jab', 'cross', 'heavy', 'bash'].includes(kind)) { G.hitstop = Math.max(G.hitstop || 0, heavy ? 0.085 : 0.04); if (heavy) director.punch(0.14); } }
         // 慢动作：重击/暴击/大招重伤
         if ((heavy && (crit || dmg > 1100)) || (ult && dmg > 1300)) {
           if (now - lastCin > 5) { lastCin = now; slow(0.22, 0.45); audio.play('cinhit', { vol: 0.75 }); director.setMode('impact', { f: o, v }, 0.6); }
@@ -475,6 +488,8 @@ function onSimEvent(type, d) {
       else if (p.kind === 'plasma') { vfx.muzzle(p, 1, col); audio.play(Math.random() < 0.5 ? 'laser1' : 'laser2', { vol: 0.42, cd: 0.08, dur: 0.6, fade: 0.2 }); }
       else if (p.kind === 'shell' || p.kind === 'bigshell') { vfx.muzzle(p, p.kind === 'bigshell' ? 2.4 : 1.6); vfx.smk.emit({ x: p.x, y: p.y, z: p.z, life: 1, s0: 0.6, s1: 2.2, c: [0.3, 0.3, 0.32], a: 0.5, ground: false }); audio.play(p.kind === 'bigshell' ? 'cannon2' : 'cannon1', { vol: 0.75, cd: 0.1 }); director.shake(0.2); }
       else if (p.kind === 'missile') { vfx.muzzle(p, 0.8); audio.play('rocket', { vol: 0.42, cd: 0.09, dur: 0.6, fade: 0.2 }); }
+      else if (p.kind === 'disc') { vfx.muzzle(p, 1.2, col); audio.play('whooshH', { vol: 0.6, cd: 0.08 }); audio.play('sword1', { vol: 0.4, cd: 0.08, rate: 1.3 }); }
+      else if (p.kind === 'mortar') { vfx.muzzle(p, 2, [1, 0.7, 0.4]); vfx.smk.emit({ x: p.x, y: p.y, z: p.z, vy: 2, life: 1.2, s0: 0.8, s1: 2.6, c: [0.3, 0.3, 0.32], a: 0.5, ground: false }); audio.play('cannon2', { vol: 0.6, cd: 0.1, rate: 1.2 }); director.shake(0.25); }
       break;
     }
     case 'fx': {
@@ -511,77 +526,223 @@ function onSimEvent(type, d) {
       break;
     }
     case 'strike': if (d.phase === 'warn') { vfx.warn(d.x, d.z); audio.play('elec', { vol: 0.25, cd: 0.1 }); } else { vfx.bolt(d.x, d.z); audio.play('thunder', { vol: 0.8, cd: 0.12 }); director.shake(0.5); } break;
-    case 'ult': {
-      document.body.classList.add('assisting');
-      const v = views.get(d.f), e = G.E[slot(d.f)];
-      ultCut(ULT_TEXT[d.ult] || d.f.d.moves?.ult || '大招', `${d.f.d.name} · ${e ? e.owner : ''}`);
-      startAssist(d.f, v);
-      audio.play('braam', { vol: 0.85, force: true }); audio.play('voCombo', { vol: 0.5, delay: 0.1, bus: 'master' }); audio.duckMusic(0.5, 3.6);
-      audio.setExcite(0.9);
-      ticker(`「${d.f.d.name}」蓄力大招「${ULT_TEXT[d.ult]}」！全场狂点助力！`);
+    // —— v10 新招式
+    case 'blink': {
+      const v = views.get(d.f); vfx2.blink(d.f, d.from, d.to, v, v ? v.fxCol : [0.8, 0.6, 1]);
+      audio.play('whooshH', { vol: 0.8 }); audio.play('elec', { vol: 0.45, rate: 1.4 }); director.shake(0.35);
       break;
     }
-    case 'actEnd': if (d.type && d.type.startsWith('ult_')) { director.ultFinish(); addFlash(); audio.pick(['hitH1', 'hitH2', 'hitH3'], { vol: 1, force: true }); } break;
-    case 'ko': onKO(d.loser, d.winner); break;
+    case 'hook': {
+      const v = views.get(d.f), col = v ? v.fxCol : [1, 0.8, 0.5];
+      if (d.phase === 'fire') { audio.play('cannon1', { vol: 0.45, rate: 1.5 }); audio.play('servo2', { vol: 0.5 }); }
+      else if (d.phase === 'catch') { const o = d.o; vfx2.hookCatch(o.x, o.y + o.height * 0.55, o.z, col); audio.play('block2', { vol: 0.8 }); audio.play('hydr', { vol: 0.6, delay: 0.05 }); director.shake(0.45); vfx.number(new THREE.Vector3(o.x, o.y + o.height, o.z), '擒拿!', 'tag'); }
+      else if (d.phase === 'miss') audio.play('whoosh2', { vol: 0.4 });
+      break;
+    }
+    case 'discHit': { const v = views.get(d.p.owner); vfx2.discHit(d.x, d.y, d.z, v ? v.fxCol : [1, 0.6, 0.8]); audio.play(Math.random() < 0.5 ? 'sword1' : 'sword2', { vol: 0.7, cd: 0.05 }); break; }
+    case 'mortarWarn': { vfx2.mortarWarn(d.x, d.z, d.life, views.get(d.f)?.fxCol); audio.play('elec', { vol: 0.2, cd: 0.1, rate: 1.6 }); break; }
+    case 'blackhole': {
+      const v = views.get(d.f), col = v ? v.fxCol : [0.7, 0.4, 1];
+      vfx2.blackhole(d.phase, d.x, d.y, d.z, col);
+      if (d.phase === 'open') { audio.play('sub', { vol: 0.9 }); audio.play('riser', { vol: 0.6 }); audio.play('morph', { vol: 0.6 }); director.shake(0.6); slow(0.45, 0.25); }
+      else { audio.play('expXL', { vol: 1, force: true }); audio.play('thunder', { vol: 0.6, delay: 0.04 }); director.shake(1.3); addFlash(); slow(0.25, 0.4); }
+      break;
+    }
+    case 'orbital': {
+      const v = views.get(d.f), col = v ? v.fxCol : [1, 0.4, 0.3];
+      vfx2.orbital(d.phase, d.x, d.z, col);
+      if (d.phase === 'lock') { audio.play('riser', { vol: 0.7 }); audio.play('servo1', { vol: 0.5 }); ticker('⚠ 天基轨道炮已锁定目标！'); }
+      else if (d.phase === 'fire') { audio.play('laser2', { vol: 1, rate: 0.55, force: true }); audio.play('expXL', { vol: 0.9, force: true }); audio.play('thunder', { vol: 0.7 }); audio.loop('orb', 'flame', 0.55); director.shake(1.4); addFlash(); slow(0.3, 0.35); }
+      else { audio.stopLoop('orb'); audio.play('expL', { vol: 0.7 }); }
+      break;
+    }
+    case 'tornado': {
+      const i = slot(d.f), v = views.get(d.f), col = v ? v.fxCol : [0.7, 0.9, 1];
+      vfx2.tornado(i, d.f, d.on, d.fin, col);
+      if (d.on) { audio.play('rise', { vol: 0.7 }); audio.play('whooshH', { vol: 0.9 }); audio.loop('torn' + i, 'chainsaw', 0.35); director.shake(0.5); }
+      else { audio.stopLoop('torn' + i); if (d.fin) { audio.play('expL', { vol: 0.95, force: true }); audio.play('debris1', { vol: 0.7, delay: 0.1 }); director.shake(1.2); addFlash(); } }
+      break;
+    }
+    case 'phantom': {
+      const v = views.get(d.f), col = v ? v.fxCol : [1, 0.5, 0.8];
+      vfx2.phantom(d.phase, d, v, col);
+      if (d.phase === 'start') { audio.play('morph', { vol: 0.7 }); audio.play('whooshH', { vol: 0.7 }); }
+      else if (d.phase === 'pass') { audio.play(d.i % 2 ? 'sword1' : 'sword2', { vol: 0.75 }); audio.play('whoosh1', { vol: 0.5 }); director.shake(0.3); }
+      else if (d.phase === 'gather') { audio.play('riser', { vol: 0.5 }); }
+      else if (d.phase === 'final') { audio.play('cinhit', { vol: 1, force: true }); audio.play('expL', { vol: 0.8 }); director.shake(1.3); addFlash(); slow(0.22, 0.45); }
+      break;
+    }
+    case 'glacier': {
+      const v = views.get(d.f), col = v ? v.fxCol : [0.6, 0.9, 1];
+      vfx2.glacier(d.phase, d, col);
+      if (d.phase === 'charge') { audio.play('riser', { vol: 0.5 }); audio.play('steam', { vol: 0.5, rate: 0.7 }); }
+      else if (d.phase === 'slam') { audio.play('boom', { vol: 0.9 }); audio.play('steam', { vol: 0.8 }); audio.play('expM', { vol: 0.5 }); director.shake(0.7); }
+      else if (d.phase === 'spike') audio.play(Math.random() < 0.5 ? 'block1' : 'debris2', { vol: 0.35, cd: 0.09, rate: 1.5 });
+      else if (d.phase === 'freeze') { audio.play('block2', { vol: 0.9, rate: 0.7 }); audio.play('steam', { vol: 0.8 }); director.shake(0.6); vfx.number(new THREE.Vector3(d.o.x, d.o.y + d.o.height, d.o.z), '冰封!', 'tag'); slow(0.4, 0.3); }
+      else if (d.phase === 'shatter' && !d.miss) { audio.play('expXL', { vol: 0.9, force: true }); audio.play('debris1', { vol: 0.9, delay: 0.05 }); audio.play('techdeb', { vol: 0.6, delay: 0.2 }); director.shake(1.3); addFlash(); }
+      break;
+    }
+    case 'ultVote': startVote(); break;
+    case 'ult': {
+      const v = views.get(d.f), e = G.E[slot(d.f)];
+      ultCut(ULT_TEXT[d.ult] || d.f.d.moves?.ult || '大招', e, G.sim && G.sim.voteMode ? slot(d.f) : -1);
+      director.setMode('ult', { f: d.f, v }, 2.8); director.shake(0.9); director.punch(0.3);
+      slow(0.35, 0.5); addFlash();
+      audio.play('braam', { vol: 0.85, force: true }); audio.play('cinhit', { vol: 0.8, force: true }); audio.play('voCombo', { vol: 0.5, delay: 0.1, bus: 'master' }); audio.duckMusic(0.5, 3.2);
+      audio.setExcite(0.9);
+      break;
+    }
+    case 'actEnd': if (d.type && (d.type === 'ult_blackhole' || d.type === 'ult_orbital' || d.type === 'ult_tornado')) { vfx2.stopFor(d.type, slot(d.f)); if (d.type === 'ult_orbital') audio.stopLoop('orb'); if (d.type === 'ult_tornado') audio.stopLoop('torn' + slot(d.f)); }
+      if (d.type && d.type.startsWith('ult_')) { director.ultFinish(); addFlash(); audio.pick(['hitH1', 'hitH2', 'hitH3'], { vol: 1, force: true }); } break;
+    case 'actCut': if (d.type === 'ult_blackhole' || d.type === 'ult_orbital' || d.type === 'ult_tornado') { vfx2.stopFor(d.type, slot(d.f)); if (d.type === 'ult_orbital') audio.stopLoop('orb'); if (d.type === 'ult_tornado') { audio.stopLoop('torn' + slot(d.f)); vfx2.tornado(slot(d.f), d.f, false, false); } } break;
+    case 'ko': vfx2.stopAll(); audio.stopLoop('orb'); audio.stopLoop('torn0'); audio.stopLoop('torn1'); onKO(d.loser, d.winner); break;
   }
 }
 
-// ———————————————————— 观众助力大招（3 秒子弹时间） ————————————————————
-const ASSIST_DUR = 3;
-const AS = { on: false, t: 0, f: null, total: 0, mine: 0, shown: 0, crowd: 0, rate: 0 };
-const asEl = document.createElement('div'); asEl.id = 'assist';
-asEl.innerHTML = '<div class="as-tip">狂点助力 · 大招威力加成</div><div class="as-ring"><i></i><i></i><div class="as-core"><b>TAP!</b></div></div><div class="as-count"><span class="x">×</span><span class="n">0</span><span class="l">助力</span></div><div class="as-bar"><i></i></div><div class="as-mult">伤害 +0%</div><div class="as-time"></div>';
-app.appendChild(asEl);
-const asN = asEl.querySelector('.as-count .n'), asBar = asEl.querySelector('.as-bar i'), asMult = asEl.querySelector('.as-mult'), asRing = asEl.querySelector('.as-ring'), asTime = asEl.querySelector('.as-time');
-function assistMult(total) { return 1 + Math.min(1.2, total / 480); } // 最高 +120%
-function startAssist(f, v) {
-  if (!G.sim) return;
-  Object.assign(AS, { on: true, t: 0, f, total: 0, mine: 0, shown: 0, crowd: 0, rate: 18 + Math.random() * 22, burst: 0 });
+// ———————————————————— v10.1 观众投票大招：双方共用倒计时 → 子弹时间 5 秒投票 → 票多者放大招 ————————————————————
+const VOTE_DUR = 5, VOTE_COL = ['#DEFF72', '#F569A8'], VOTE_INK = ['#171719', '#171719'];
+const AS = { on: false, t: 0, n: [0, 0], shown: [0, 0], crowd: [0, 0], rate: [0, 0], surge: [0, 0], side: -1, mine: 0, share: 0.5, done: false };
+const vtEl = document.createElement('div'); vtEl.id = 'vote';
+vtEl.innerHTML = `<div class="vt-glow"><i class="g0"></i><i class="g1"></i></div>
+  <div class="vt-head"><div class="vt-title">VOTE NOW</div><div class="vt-sub"><i></i>谁来放大招<i></i></div>
+  <div class="vt-clock"><b>5</b><i><s></s></i></div></div>
+  <div class="vt-cards">${[0, 1].map((i) => `<div class="vt-card s${i}"><div class="vc-ava"><img alt=""></div><div class="vc-t"><div class="vc-pilot"><span></span><em>我</em></div><div class="vc-ult"></div></div></div>`).join('<div class="vt-vs">VS</div>')}</div>
+  <div class="vt-arena">${[0, 1].map((i) => `<button class="vt-orb s${i}" data-s="${i}"><span class="vo-in"><b>TAP</b><em>0</em></span></button>`).join('')}</div>
+  <div class="vt-tip">只能支持一边 · 狂点你支持的圈</div><div class="vt-result"></div>`;
+app.appendChild(vtEl);
+const VT = {
+  clock: vtEl.querySelector('.vt-clock b'), bar: vtEl.querySelector('.vt-clock s'), tip: vtEl.querySelector('.vt-tip'), res: vtEl.querySelector('.vt-result'),
+  orbs: [...vtEl.querySelectorAll('.vt-orb')], cards: [...vtEl.querySelectorAll('.vt-card')], arena: vtEl.querySelector('.vt-arena'),
+  glow: [...vtEl.querySelectorAll('.vt-glow i')], gv: [0, 0],
+};
+// 结果公告直接挂在 #vote 根层：揭晓时标题 / 倒计时 / 选手卡退场，公告独占视觉中心
+const hexA = (h, a) => `rgba(${parseInt(h.slice(1, 3), 16)}, ${parseInt(h.slice(3, 5), 16)}, ${parseInt(h.slice(5, 7), 16)}, ${a})`;
+VT.orbs.forEach((o, i) => { o.style.setProperty('--vb', hexA(VOTE_COL[i], 0.9)); VT.glow[i].style.boxShadow = `inset 0 0 28px 6px ${hexA(VOTE_COL[i], 0.85)}, inset 0 0 120px 30px ${hexA(VOTE_COL[i], 0.32)}`; o.style.setProperty('--vc', VOTE_COL[i]); o.style.setProperty('--vi', VOTE_INK[i]); VT.cards[i].style.setProperty('--vc', VOTE_COL[i]); });
+function fillVoteCards() {
+  for (let i = 0; i < 2; i++) {
+    const e = G.E[i], c = VT.cards[i]; if (!e) continue;
+    c.querySelector('.vc-ava img').src = pilotThumb(e);
+    c.querySelector('.vc-pilot span').textContent = pilotName(e);
+    c.querySelector('.vc-pilot em').style.display = e.mine ? '' : 'none';
+    c.querySelector('.vc-ult').textContent = `大招 · ${e.design.moves.ult}`;
+  }
+}
+function startVote() {
+  if (!G.sim || G.phase !== 'fight') { G.sim && G.sim.resolveVote(null); return; }
+  Object.assign(AS, { on: true, t: 0, n: [0, 0], shown: [0, 0], crowd: [0, 0], side: -1, mine: 0, share: 0.5, done: false, win: null,
+    rate: [14 + Math.random() * 20, 14 + Math.random() * 20], surge: [0, 0] });
+  VT.gv = [0, 0]; VT.glow.forEach((g) => (g.style.opacity = 0));
   G.sim.paused = true; acc = 0;
   { const b = $('#banner'); if (b.classList.contains('show')) { b.classList.remove('show'); b.classList.add('hide'); bannerTimer = 0; } }
-  director.setMode('assist', { f, v }, ASSIST_DUR + 0.1);
-  asEl.className = 'on ' + (slot(f) ? 'b' : 'a'); asEl.style.setProperty('--c', f.d.palette?.emissive ? '#' + new THREE.Color(f.d.palette.emissive).getHexString() : '#DEFF70');
-  asN.textContent = '0'; asMult.textContent = '伤害 +0%'; asBar.style.width = '0%';
-  audio.play('riser', { vol: 0.7 }); audio.play('crowdCharge', { vol: 0.6 });
+  document.body.classList.add('assisting');
+  fillVoteCards();
+  VT.orbs.forEach((o) => { o.classList.remove('pick', 'off', 'win', 'lose'); o.style.removeProperty('--d'); });
+  VT.tip.textContent = '只能支持一边 · 狂点你支持的圈'; VT.res.textContent = ''; VT.res.className = 'vt-result';
+  vtEl.className = 'on';
+  layoutOrbs(0.5, true);
+  director.setMode('fight');
+  audio.play('riser', { vol: 0.7 }); audio.play('crowdCharge', { vol: 0.6 }); audio.play('braam', { vol: 0.6 }); audio.duckMusic(0.5, VOTE_DUR + 1);
+  ticker('大招时刻！观众投票决定谁来放大招！');
 }
-function assistTap(x, y) {
-  if (!AS.on) return;
-  AS.mine++; AS.total += 1; AS.burst = Math.min(1, AS.burst + 0.25);
-  audio.play(Math.random() < 0.5 ? 'hitFast' : 'block1', { vol: 0.22, rate: 1.3 + Math.min(0.6, AS.mine * 0.01), cd: 0.03 });
-  const p = document.createElement('div'); p.className = 'as-pop'; p.textContent = '+1';
-  p.style.left = x + 'px'; p.style.top = y + 'px'; p.style.setProperty('--dx', ((Math.random() - 0.5) * 80) + 'px');
-  app.appendChild(p); setTimeout(() => p.remove(), 700);
-  asRing.classList.remove('hit'); void asRing.offsetWidth; asRing.classList.add('hit');
-  if (navigator.vibrate) try { navigator.vibrate(8); } catch (e) {}
+// 两圈挤压：直径之和固定，按票数份额分配；圈心随分界点移动，彼此贴合
+function layoutOrbs(share, snap) {
+  const W = VT.arena.clientWidth || 380, H = VT.arena.clientHeight || 300;
+  const total = Math.min(W * 1.02, H * 1.9), k = clamp(0.5 + (share - 0.5) * 1.6, 0.13, 0.87); // 份额差放大 1.6 倍，领先方挤压更明显
+  const d0 = total * k, d1 = total - d0;
+  VT.orbs[0].style.setProperty('--d', d0.toFixed(1) + 'px'); VT.orbs[1].style.setProperty('--d', d1.toFixed(1) + 'px');
+  const x0 = (W - total) / 2; // 左圈左缘
+  VT.orbs[0].style.setProperty('--x', (x0 + d0 / 2).toFixed(1) + 'px'); VT.orbs[1].style.setProperty('--x', (x0 + d0 + d1 / 2 - 4).toFixed(1) + 'px');
+  VT.orbs[0].style.zIndex = d0 >= d1 ? 2 : 1; VT.orbs[1].style.zIndex = d1 > d0 ? 2 : 1;
+  if (snap) VT.arena.classList.add('snap'); else VT.arena.classList.remove('snap');
 }
-app.addEventListener('pointerdown', (ev) => { if (AS.on && !ev.target.closest('.sheet:not(.hidden), button')) { assistTap(ev.clientX - app.getBoundingClientRect().left, ev.clientY - app.getBoundingClientRect().top); ev.stopPropagation(); ev.preventDefault(); } }, true);
+function voteTap(i, ev) {
+  if (!AS.on || AS.done) return;
+  if (AS.side < 0) { AS.side = i; VT.orbs[i].classList.add('pick'); VT.orbs[1 - i].classList.add('off'); VT.tip.textContent = `你支持了 ${pilotName(G.E[i])} · 继续狂点！`; }
+  if (i !== AS.side) { VT.orbs[i].classList.remove('deny'); void VT.orbs[i].offsetWidth; VT.orbs[i].classList.add('deny'); return; }
+  AS.n[i] += 1; AS.mine++; AS.surge[i] = Math.min(1.5, AS.surge[i] + 0.18);
+  AS.share = clamp(AS.share + (i ? -0.012 : 0.012), 0.05, 0.95); // 每次点击即时把己方往外顶一下
+  const o = VT.orbs[i]; o.classList.remove('hit'); void o.offsetWidth; o.classList.add('hit');
+  audio.tap(Math.min(1, AS.mine / 40));
+  const r = app.getBoundingClientRect();
+  // 白色波纹挂在投票圆内部（inset:0），圆心天然与投票圆重合，圆的位移 / 缩放过渡时也跟着走
+  const ring = document.createElement('i'); ring.className = 'vt-ring'; o.appendChild(ring); setTimeout(() => ring.remove(), 520);
+  const x = (ev ? ev.clientX - r.left : r.width * (i ? 0.75 : 0.25)), y = (ev ? ev.clientY - r.top : r.height * 0.62);
+  const p = document.createElement('div'); p.className = 'vt-plus'; p.textContent = '+1'; p.style.cssText = `left:${x + (Math.random() - 0.5) * 24}px;top:${y - 10}px;--r:${((Math.random() - 0.5) * 16).toFixed(1)}deg`; app.appendChild(p); setTimeout(() => p.remove(), 650);
+}
+VT.orbs.forEach((o, i) => o.addEventListener('pointerdown', (ev) => { ev.preventDefault(); ev.stopPropagation(); audio.unlock(); voteTap(i, ev); }));
 function updateAssist(rdt) {
   if (!AS.on) return;
   AS.t += rdt;
-  // 模拟全场观众：越接近结束越疯狂；玩家狂点会带动全场
-  const heat = 1 + AS.t * 0.9 + AS.burst * 1.5; AS.burst = Math.max(0, AS.burst - rdt * 1.2);
-  AS.crowd += AS.rate * heat * rdt * (0.6 + Math.random() * 0.8);
-  const total = Math.floor(AS.crowd) + AS.mine; AS.total = total;
-  AS.shown += (total - AS.shown) * Math.min(1, rdt * 14);
-  asN.textContent = Math.round(AS.shown);
-  const m = assistMult(total); asMult.textContent = `伤害 +${Math.round((m - 1) * 100)}%`; asBar.style.width = Math.min(100, (m - 1) / 1.2 * 100) + '%';
-  asTime.textContent = Math.max(0, ASSIST_DUR - AS.t).toFixed(1) + 's';
-  if (AS.t >= ASSIST_DUR || !G.sim || G.phase !== 'fight') endAssist();
+  if (!AS.done) {
+    // 模拟现场观众：各自基础热度 + 随机爆发 + 越到最后越疯狂；落后方偶尔反扑，保持拉锯
+    const heat = 1 + AS.t * 0.5;
+    for (let i = 0; i < 2; i++) {
+      if (Math.random() < rdt * 0.9) AS.surge[i] = Math.min(1.5, AS.surge[i] + Math.random() * 0.9);
+      AS.surge[i] = Math.max(0, AS.surge[i] - rdt * 0.8);
+      const behind = AS.n[i] < AS.n[1 - i] * 0.8 ? 1.35 : 1;
+      AS.crowd[i] += AS.rate[i] * heat * (1 + AS.surge[i]) * behind * rdt * (0.5 + Math.random());
+      const c = Math.floor(AS.crowd[i]); if (c > 0) { AS.crowd[i] -= c; AS.n[i] += c; if (Math.random() < 0.35) { const o = VT.orbs[i]; o.classList.remove('ping'); void o.offsetWidth; o.classList.add('ping'); } }
+      AS.shown[i] += (AS.n[i] - AS.shown[i]) * Math.min(1, rdt * 12);
+      VT.orbs[i].querySelector('em').textContent = Math.round(AS.shown[i]);
+    }
+    const tgt = (AS.n[0] + 4) / (AS.n[0] + AS.n[1] + 8);
+    AS.share += (tgt - AS.share) * Math.min(1, rdt * 6);
+    layoutOrbs(AS.share);
+    updateGlow(rdt);
+    const left = Math.max(0, VOTE_DUR - AS.t);
+    const sec = Math.ceil(left); if (VT.clock.textContent !== String(sec)) { VT.clock.textContent = sec; VT.clock.parentNode.classList.toggle('hot', sec <= 3); if (sec <= 3 && sec > 0) audio.play('block2', { vol: 0.45, rate: 1.6 }); }
+    VT.bar.style.transform = `scaleX(${(left / VOTE_DUR).toFixed(3)})`;
+    if (AS.t >= VOTE_DUR) finishVote();
+  } else { updateGlow(rdt); if (AS.t >= AS.endT) endAssist(); }
+  if (!G.sim || G.phase !== 'fight') endAssist(true);
 }
-function endAssist() {
-  if (!AS.on) return; AS.on = false; setTimeout(() => document.body.classList.remove('assisting'), 1200);
-  const f = AS.f, m = assistMult(AS.total);
-  if (f) f.ultBoost = m;
-  asEl.className = 'release'; setTimeout(() => { if (!AS.on) asEl.className = ''; }, 900);
-  if (G.sim) G.sim.paused = false;
-  const v = views.get(f);
-  director.setMode('ult', { f, v }, 2.8); director.shake(0.9); director.punch(0.3);
-  slow(0.35, 0.5); addFlash();
-  audio.play('cinhit', { vol: 0.9, force: true }); audio.play('crowdCharge', { vol: 0.5 });
-  ticker(`全场 ${AS.total} 次助力！大招伤害 +${Math.round((m - 1) * 100)}%！`);
+// 边缘氛围光：颜色跟随优势方；票差越大越亮；持平无光；两色各自平滑淡入淡出（领先切换时交叉过渡，不突变）
+function updateGlow(rdt) {
+  const tot = AS.n[0] + AS.n[1], d = (AS.n[0] - AS.n[1]) / Math.max(12, tot);
+  const lead = AS.done ? (AS.win === 0 ? 1 : -1) : Math.abs(d) < 0.04 ? 0 : d;
+  for (let i = 0; i < 2; i++) {
+    const tgt = clamp((i ? -lead : lead) * 3.2, 0, 1) * (lead ? 0.55 + 0.45 * Math.min(1, tot / 40) : 0);
+    VT.gv[i] += (tgt - VT.gv[i]) * Math.min(1, rdt * 3.5);
+    VT.glow[i].style.opacity = VT.gv[i].toFixed(3);
+  }
+}
+function finishVote() {
+  AS.done = true; AS.endT = AS.t + 0.9; // 结果公告只做「投票揭晓」0.9s 快闪；谁放什么大招交给随后的大招色带完整展示（1.6s），两者不再叠加
+  if (AS.n[0] === AS.n[1]) AS.n[Math.random() < 0.5 ? 0 : 1]++;
+  const w = AS.n[0] > AS.n[1] ? 0 : 1; AS.win = w;
+  VT.orbs[w].classList.add('win'); VT.orbs[1 - w].classList.add('lose');
+  layoutOrbs(w === 0 ? 0.84 : 0.16);
+  VT.orbs.forEach((o, i) => (o.querySelector('em').textContent = AS.n[i]));
+  VT.clock.textContent = '0';
+  const e = G.E[w];
+  VT.res.innerHTML = `<div class="vr-kicker">ULT GRANTED<i>获得大招</i></div>
+    <div class="vr-plate"><div class="vr-ava"><img src="${pilotThumb(e)}" alt=""></div><div class="vr-t">
+    <div class="vr-name">${pilotName(e)}${AS.side === w ? '<em>我支持的</em>' : ''}</div><div class="vr-ult">${e ? e.design.moves.ult : ''}</div></div></div>`;
+  VT.res.style.setProperty('--vc', VOTE_COL[w]); VT.res.className = 'vt-result show s' + w;
+  vtEl.className = 'on reveal'; // 标题 / 倒计时 / 选手卡 / 提示退场，给公告让位
+  audio.play('cinhit', { vol: 0.8, force: true }); audio.play(AS.side < 0 || AS.side === w ? 'cheer1' : 'boo', { vol: 0.6 });
+}
+function endAssist(abort) {
+  if (!AS.on) return; AS.on = false; document.body.classList.remove('assisting');
+  vtEl.className = 'release'; setTimeout(() => { if (!AS.on) vtEl.className = ''; }, 260);
+  if (!G.sim) return;
+  G.sim.paused = false;
+  if (abort || AS.win == null) { G.sim.resolveVote(null); return; }
+  const f = G.F[AS.win], tot = AS.n[0] + AS.n[1], share = AS.n[AS.win] / Math.max(1, tot);
+  const boost = 1 + Math.min(0.6, share * 0.6 + tot / 2000); // 得票越多 / 越碾压，大招越痛（最高 +60%）
+  AS.boost = boost; G.sim.resolveVote(f, boost);
+  ticker(`全场 ${tot} 票！${pilotName(G.E[AS.win])} 以 ${Math.round(share * 100)}% 拿下大招，威力 +${Math.round((boost - 1) * 100)}%！`);
 }
 
 // ———————————————————— 表现辅助 ————————————————————
+// v10.1 连击计数：场边大号 N HITS，3 连起显示，停手 1s 淡出（左右各一方，不挡机甲）
+const comboEls = [0, 1].map((i) => { const el = document.createElement('div'); el.className = 'combo c' + i; el.innerHTML = '<b></b><span>HITS</span>'; app.appendChild(el); return { el, b: el.querySelector('b'), t: 0 }; });
+function comboHud(i, n) {
+  const c = comboEls[i]; if (n < 3) return;
+  c.b.textContent = n; c.el.style.setProperty('--k', Math.min(1, (n - 3) / 9).toFixed(2));
+  c.el.classList.remove('pop'); void c.el.offsetWidth; c.el.classList.add('show', 'pop');
+  clearTimeout(c.t); c.t = setTimeout(() => c.el.classList.remove('show'), 1100);
+}
 function slow(s, dur) { G.slowTo = Math.min(G.slowTo, s); G.slowT = Math.max(G.slowT, dur); audio.setSlow(s); $('#slowmo')?.classList.add('on'); }
 function addFlash() { const d = document.createElement('div'); d.className = 'flashwhite'; app.appendChild(d); setTimeout(() => d.remove(), 450); }
 let bannerTimer = 0;
@@ -596,14 +757,19 @@ function introCard(i, noCut) {
   if (!(noCut && director.mode === 'introCard' && director.focus?.f === f)) director.setMode('introCard', { f, v, side: i ? -1 : 1 }, 0, !noCut);
   const c = $('#introCard'); const col = e.design.palette.emissive;
   c.style.setProperty('--ic', col); c.className = i ? 'b' : 'a';
-  const champTag = i === 0 ? (G.champStreak > 0 ? `擂主 · ${G.champStreak} 连胜` : '擂主') : (e.mine ? '你的挑战者' : '新挑战者');
-  c.innerHTML = `<div class="ic-ava"><img src="${e.thumb || thumbs[e.ava] || ''}" alt=""></div><div class="ic-main"><div class="ic-top"><span class="ic-tag">${champTag}</span><span class="ic-owner"><small>创造者</small>${AVATARS[e.ava]?.name || e.owner}${e.mine ? '（你）' : ''}</span></div><div class="ic-name">${e.design.name}</div><div class="ic-role">${e.design.formCn || '人形'} · ${e.design.roleCn} · 大招「${e.design.moves.ult}」</div></div>`;
-  void c.offsetWidth; c.classList.add('show'); $('#bottom').classList.add('yield');
+  const champTag = i === 0 ? (G.champStreak > 0 ? `擂主 · ${G.champStreak} 连胜` : '擂主') : (e.mine ? '我的挑战者' : '新挑战者');
+  c.innerHTML = `<div class="ic-ava"><img src="${e.thumb || thumbs[e.ava] || ''}" alt=""></div><div class="ic-main"><div class="ic-top"><span class="ic-tag">${champTag}</span><span class="ic-owner"><small>创造者</small>${AVATARS[e.ava]?.name || e.owner}${e.mine ? '（我）' : ''}</span></div><div class="ic-name">${e.design.name}</div><div class="ic-role">${e.design.formCn || '人形'} · ${e.design.roleCn} · 大招「${e.design.moves.ult}」</div></div>`;
+  void c.offsetWidth; c.classList.add('show'); $('#bottom').classList.add('intro');
   audio.play('baydoor', { vol: 0.55 }); audio.play('hydr', { vol: 0.5, delay: 0.15 }); audio.play('crowdCharge', { vol: 0.35, delay: 0.3 });
 }
-function hideIntroCard() { $('#introCard').classList.remove('show'); $('#bottom').classList.remove('yield'); }
-function ultCut(name, owner) {
-  const u = $('#ultcut'); u.querySelector('.uc-name').textContent = name; u.querySelector('.uc-owner').textContent = owner;
+function hideIntroCard() { $('#introCard').classList.remove('show'); $('#bottom').classList.remove('intro'); }
+function pilotName(e) { return e ? (AVATARS[e.ava]?.name || e.owner || '') : ''; }
+function pilotThumb(e) { return e ? (thumbs[e.ava] || e.thumb || '') : ''; }
+function ultCut(name, e, side = -1) {
+  const u = $('#ultcut'); u.className = side >= 0 ? 'v' + side : ''; // 投票模式：条幅底色跟随获胜方的投票色（黄绿 / 粉）
+  u.querySelector('.uc-name').textContent = name;
+  u.querySelector('.uc-owner').innerHTML = e ? `<b>${pilotName(e)}${e.mine ? '（我）' : ''}</b> 的「${e.design.name}」` : '';
+  u.querySelector('.uc-ava img').src = pilotThumb(e); u.style.setProperty('--uc', side >= 0 ? VOTE_COL[side] : e ? e.design.palette.emissive : '#fff');
   u.classList.remove('show'); void u.offsetWidth; u.classList.add('show');
 }
 let toastT = 0;
@@ -616,16 +782,60 @@ const hud = [0, 1].map((i) => {
   const r = $('#fc' + i);
   return { r, ava: r.querySelector('.fc-ava'), name: r.querySelector('.fc-name'), sub: r.querySelector('.fc-sub'), fill: r.querySelector('.hp-fill'), lag: r.querySelector('.hp-lag'), num: r.querySelector('.hp-num'), en: r.querySelector('.en-fill'), lagV: 1, last: -1 };
 });
+// 场上名牌：跟随机甲头顶的轻量标签（只显示驾驶分身名字，半透明，不抢画面）
+const ntags = [0, 1].map((i) => {
+  const el = document.createElement('div'); el.className = 'ntag ' + (i ? 'b' : 'a');
+  el.innerHTML = '<span class="nt-in"><b></b><em></em></span>';
+  app.insertBefore(el, $('#hud'));
+  return { el, b: el.querySelector('b'), em: el.querySelector('em'), x: -1, y: -1, on: false };
+});
+const _ntV = new THREE.Vector3();
+function setupTags() {
+  for (let i = 0; i < 2; i++) {
+    const e = G.E[i], t = ntags[i]; if (!e) continue;
+    t.b.textContent = pilotName(e); t.em.textContent = e.mine ? '我' : ''; t.em.style.display = e.mine ? '' : 'none';
+    t.el.style.setProperty('--c', e.design.palette.emissive); t.x = -1;
+  }
+}
+function updateTags(rdt) {
+  const W = app.clientWidth, H = app.clientHeight;
+  const show = G.phase === 'fight' || G.phase === 'intro' && G.t > 1.2;
+  const pos = [];
+  for (let i = 0; i < 2; i++) {
+    const t = ntags[i], f = G.F[i], v = G.V[i];
+    let vis = show && f && f.alive && v && v.root.parent;
+    let hot = false;
+    if (vis && AS.on) vis = false; // 子弹时间里由助力面板的头像+名字说明对象，名牌让位
+    if (vis) {
+      const r = v.root.position; _ntV.set(r.x, Math.max(0, r.y) - 0.1, r.z).project(camera); // 脚下地面位置
+      let x = (_ntV.x + 1) / 2 * W, y = (1 - _ntV.y) / 2 * H;
+      if (_ntV.z > 1 || x < -20 || x > W + 20 || y < 100 || y > H + 60) vis = false; // 出画就隐藏
+      else {
+        x = clamp(x, 44, W - 44); y = Math.min(y, H - 150); // 脚部被底栏遮住时贴在底栏上沿，仍在机身下部，不挡脸
+        if (t.x < 0) { t.x = x; t.y = y; } else { const k = Math.min(1, rdt * 16); t.x += (x - t.x) * k; t.y += (y - t.y) * k; }
+        pos[i] = t;
+      }
+    }
+    if (vis !== t.on) { t.on = vis; t.el.classList.toggle('on', vis); }
+    t.el.classList.toggle('hot', hot);
+  }
+  // 两个名牌重叠时上下错开
+  let oy = [0, 0];
+  if (pos[0] && pos[1] && Math.abs(pos[0].x - pos[1].x) < 96 && Math.abs(pos[0].y - pos[1].y) < 24) { const dn = pos[0].y < pos[1].y ? 1 : 0; oy[dn] = 24 - Math.abs(pos[0].y - pos[1].y); }
+  for (let i = 0; i < 2; i++) { const t = ntags[i]; if (t.on) t.el.style.transform = `translate3d(${t.x.toFixed(1)}px, ${(t.y + oy[i]).toFixed(1)}px, 0)`; }
+}
 function setupHud() {
+  setupTags();
   for (let i = 0; i < 2; i++) {
     const e = G.E[i], h = hud[i];
     h.ava.src = e.thumb || thumbs[e.ava] || '';
     h.name.innerHTML = `<b>${AVATARS[e.ava]?.name || e.owner}</b><i>·</i>${e.design.name}`;
-    h.sub.textContent = `${e.design.formCn || '人形'} · ${e.design.roleCn}${e.mine ? ' · 你' : ''}${i === 0 && G.champStreak > 0 ? ` · 擂主 ${G.champStreak} 连胜` : ''}`;
+    h.sub.textContent = `大招 · ${e.design.moves.ult}`;
     h.lagV = 1; h.ava.parentElement.style.setProperty('--qc', e.design.palette.emissive);
   }
   $('#round').textContent = `ROUND ${G.round}`;
 }
+const UK = { el: $('#ultClock'), s: $('#ultClock s'), b: $('#ultClock b'), txt: '' };
 function updateHud(dt) {
   for (let i = 0; i < 2; i++) {
     const f = G.F[i], h = hud[i]; if (!f) continue;
@@ -635,22 +845,33 @@ function updateHud(dt) {
     const en = f.energy / 100; h.en.style.width = `${en * 100}%`; h.en.classList.toggle('full', en >= 1);
   }
   $('#timer').textContent = String(Math.max(0, Math.ceil(G.clock)));
+  // 大招倒计时：双方共用，斜切条从满到空，最后 3 秒变热并闪烁
+  if (G.sim && G.sim.voteMode) {
+    const S = G.sim, live = G.phase === 'fight' || G.phase === 'intro';
+    const L = S.voteOpen || AS.on ? 0 : S.ultClock;
+    const busy = !AS.on && !S.voteOpen && G.F.some((f) => f && (f.forceUlt || f.act && f.act.type.startsWith('ult_')));
+    const txt = AS.on || S.voteOpen ? 'VOTE' : busy ? 'ULT!' : String(Math.ceil(L));
+    if (UK.txt !== txt) { UK.txt = txt; UK.b.textContent = txt; }
+    const k = busy ? 0 : clamp(L / (S.ultPeriod || 1), 0, 1);
+    UK.s.style.transform = `scaleX(${(1 - k).toFixed(3)})`;
+    UK.el.classList.toggle('hot', !busy && L <= 3 || AS.on); UK.el.classList.toggle('show', live); UK.el.classList.toggle('yield', AS.on || S.voteOpen); // 投票面板有自己的 5 秒倒计时：顶部条上收让位，结束后回落
+  }
 }
 function swatch(p) { return [p.primary, p.secondary, p.accent, p.emissive].map((c) => `<i style="background:${c}"></i>`).join(''); }
 function renderQueue() {
   const q = $('#queue'); q.innerHTML = '';
   queue.forEach((e, i) => {
     const d = document.createElement('div'); d.className = 'qi' + (e.mine ? ' mine' : '') + (i === 0 ? ' next' : '');
-    d.style.setProperty('--qc', e.design.palette.emissive); d.style.animationDelay = `${i * 0.05}s`;
-    d.innerHTML = `<div class="qimg"><img src="${e.thumb || thumbs[e.ava] || ''}" alt=""></div><div class="qno">${String(i + 1).padStart(2, '0')}</div><div class="qn">${AVATARS[e.ava]?.name || e.owner}</div>`;
+    d.style.setProperty('--qc', e.design.palette.emissive); d.style.animationDelay = `${i * 0.04}s`;
+    d.innerHTML = `<div class="qimg"><img src="${e.thumb || thumbs[e.ava] || ''}" alt=""></div><div class="qn">${i === 0 ? '' : `<i>${i + 1}</i>`}${AVATARS[e.ava]?.name || e.owner}</div>`;
     q.appendChild(d);
   });
-  $('#qCount').textContent = `· ${queue.length} 台待战`;
+  $('#qCount').textContent = queue.length;
 }
 function renderRoster() {
   const list = $('#rosterList');
   const arr = [...roster].sort((a, b) => b.wins - a.wins || a.losses - b.losses);
-  list.innerHTML = arr.map((e, i) => `<div class="rr${e.mine ? ' mine' : ''}"><div class="rk">${i + 1}</div><img class="mt" src="${e.thumb || thumbs[e.ava] || ''}" alt=""><div class="rm"><div class="rn">${AVATARS[e.ava]?.name || e.owner}${e.mine ? '<em class="me">你</em>' : ''}</div><div class="rs">${e.design.name} · ${e.design.formCn || ''}${e.design.roleCn} · 最高 ${e.best} 连胜</div></div><div class="rw">${e.wins}<small>${e.losses} 负</small></div></div>`).join('');
+  list.innerHTML = arr.map((e, i) => `<div class="rr${e.mine ? ' mine' : ''}"><div class="rk">${i + 1}</div><img class="mt" src="${e.thumb || thumbs[e.ava] || ''}" alt=""><div class="rm"><div class="rn">${AVATARS[e.ava]?.name || e.owner}${e.mine ? '<em class="me">我</em>' : ''}</div><div class="rs">${e.design.name} · ${e.design.formCn || ''}${e.design.roleCn} · 最高 ${e.best} 连胜</div></div><div class="rw">${e.wins}<small>${e.losses} 负</small></div></div>`).join('');
 }
 $('#btnRoster').onclick = () => { renderRoster(); $('#roster').classList.remove('hidden'); audio.play('servo1', { vol: 0.4 }); };
 $('#btnSound').onclick = () => { audio.unlock(); audio.setMuted(!audio.muted); $('#btnSound').innerHTML = audio.muted ? '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM17 9l5 6M22 9l-5 6"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>'; $('#btnSound').classList.toggle('off', audio.muted); if (!audio.muted) audio.startMusic(); };
@@ -682,7 +903,7 @@ function openCreate() {
   pv.on = true;
 }
 function closePreview() { pv.on = false; }
-$('#btnCreate').onclick = () => { audio.unlock(); audio.play('baydoor', { vol: 0.35 }); if (!pilotPicked) openPilot(); else openCreate(); };
+$('#btnCreate').onclick = () => { audio.unlock(); audio.play('baydoor', { vol: 0.35 }); openCreate(); }; // v10.1：不再首次弹选分身页，直接进创造页
 $('#refFile').onchange = (e) => {
   const f = e.target.files[0]; if (!f) return;
   const url = URL.createObjectURL(f); const img = $('#refImg'); img.src = url; img.classList.add('on'); $('#refNote').classList.remove('hidden');
@@ -786,7 +1007,8 @@ function loop(now) {
   // 慢动作
   if (G.slowT > 0) { G.slowT -= rdt; G.timeScale += (G.slowTo - G.timeScale) * Math.min(1, rdt * 20); if (G.slowT <= 0) { G.slowTo = 1; audio.setSlow(1); $('#slowmo')?.classList.remove('on'); } }
   else G.timeScale += (1 - G.timeScale) * Math.min(1, rdt * 4);
-  const dt = rdt * G.timeScale;
+  let dt = rdt * G.timeScale;
+  if (G.hitstop > 0) { G.hitstop -= rdt; dt *= 0.06; } // v10.1 顿帧：近战命中瞬间短暂定格，打击更“实”
   GLOBAL_TIME.value += dt;
   G.t += rdt;
   if (bannerTimer > 0) { bannerTimer -= rdt; if (bannerTimer <= 0) { const b = $('#banner'); b.classList.remove('show'); b.classList.add('hide'); } }
@@ -815,6 +1037,8 @@ function loop(now) {
       if (!p.dead && G.sim.proj.includes(p)) continue;
       projSeen.delete(id);
       const y = Math.max(0.2, p.y);
+      if (p.kind === 'disc') { vfx2.discCatch(p.x, p.y, p.z, views.get(p.owner)?.fxCol || [1, 0.6, 0.8]); continue; }
+      if (p.kind === 'mortar') { vfx2.mortarBoom(p.x, p.z, views.get(p.owner)?.fxCol); audio.play('expL', { vol: 0.75, cd: 0.06 }); director.shake(0.55); continue; }
       vfx.impact(p.kind, p.x, y, p.z, { col: views.get(p.owner)?.fxCol });
       if (p.kind === 'shell') audio.play('expM', { vol: 0.7, cd: 0.08 });
       else if (p.kind === 'bigshell') { audio.play('expL', { vol: 0.85 }); director.shake(0.6); }
@@ -827,7 +1051,7 @@ function loop(now) {
   vfx.update(AS.on ? dt * 0.05 : dt, GLOBAL_TIME.value, { sim: G.sim, views });
   director.update(dt, rdt, G.F.map((f, i) => (f && G.V[i] && G.V[i].root.parent ? { f, v: G.V[i] } : null)));
   if (bloom) bloom.strength = 0.28 + (G.timeScale < 0.6 ? 0.14 : 0);
-  if (G.phase !== 'boot') updateHud(rdt);
+  if (G.phase !== 'boot') { updateHud(rdt); updateTags(rdt); }
   if (composer) composer.render(); else renderer.render(scene, camera);
   renderPreview(rdt);
   // 自适应分辨率

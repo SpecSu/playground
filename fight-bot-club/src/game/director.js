@@ -13,7 +13,7 @@ export class Director {
     this.mode = 'intro'; this.focus = null; this.focusT = 0;
     this.shotT = 0; this.shotPhi = 0.62; this.shotPitch = 0.3; this.shotSide = 1;
     this.user = { active: false, last: -1e9, yaw: 0, pitch: 0, dist: 0 };
-    this.shakeA = 0; this.time = 0;
+    this.shakeA = 0; this.time = 0; this.blend = 0;
     this.bindTouch();
   }
   bindTouch() {
@@ -46,7 +46,9 @@ export class Director {
     this.punch(0.08 + 0.12 * k + (big ? 0.08 : 0));
   }
   ultFinish() { this.shakeA = 2.2; this.punch(0.4); this.ultN = 0; if (this.focus) { this.mode = 'ult'; this.focusT = 0.7; } }
-  setMode(m, focus = null, dur = 0, cut = true) { if (m !== this.mode || focus !== this.focus) { this.focusAge = 0; if (m === 'introCard' && cut) this.cut = true; if (m === 'winner') { this.cut = true; this.winYaw = (focus?.f.yaw || 0) + 0.6; } } this.mode = m; this.focus = focus; this.focusT = dur; }
+  // 锁定式机位（胜者环绕 / 子弹时间）直接写入当前角度；用户接管或刚松手过渡中则交给阻尼
+  lockAuto() { if (this.user.active || this.blend > 0) return; this.yaw = this.want.yaw; this.pitch = this.want.pitch; }
+  setMode(m, focus = null, dur = 0, cut = true) { if (m !== this.mode || focus !== this.focus) { if (this.mode === 'winner' && m !== 'winner' && this.user.active) { this.user.active = false; this.cut = true; } this.focusAge = 0; if (m === 'introCard' && cut) this.cut = true; if (m === 'winner') { this.cut = true; this.winYaw = (focus?.f.yaw || 0) + 0.6; } } this.mode = m; this.focus = focus; this.focusT = dur; }
 
   // fs: [{f, v}] 场上机甲
   update(dt, rdt, fs) {
@@ -87,7 +89,7 @@ export class Director {
       if (first) { this.asYaw = f.yaw + 0.9; this.cut = true; }
       W.target.set(f.x, f.y + h * 0.6, f.z);
       W.yaw = this.asYaw + k * 2.4 + k * k * 0.8; W.pitch = 0.08 + 0.12 * Math.sin(k * Math.PI); W.dist = 4.2 + h * (1.05 - 0.3 * k);
-      if (!first) { this.yaw = W.yaw; this.pitch = W.pitch; }
+      if (!first) this.lockAuto(); // 用户拖动时不能硬写 yaw/pitch，否则与用户阻尼每帧互相拉扯 → 高频抖动
     } else if (this.mode === 'ko' && this.focus) {
       const f = this.focus.f, h = this.focus.v.height;
       W.target.set(f.x, f.y + h * 0.4, f.z);
@@ -100,7 +102,7 @@ export class Director {
       const s = this.focus.v.anchorWorld && this.focus.v.anchorWorld('seat');
       W.yaw = f.yaw + 0.5 * Math.cos(a * 0.4); W.pitch = 0.2 + 0.04 * Math.sin(a * 0.7); W.dist = 3 + h * (0.6 - 0.08 * Math.min(1, a / 2));
       W.target.set(s ? s.x : f.x, (s ? s.y + 0.45 : f.y + h * 0.75) - 0.5 * Math.tan(0.384) * W.dist, s ? s.z : f.z);
-      if (!first) { this.yaw = W.yaw; this.pitch = W.pitch; }
+      if (!first) this.lockAuto(); // 用户拖动时不能硬写 yaw/pitch，否则与用户阻尼每帧互相拉扯 → 高频抖动
     } else {
       // 战斗：取两机中点，沿连线斜向取景
       const a = alive[0].f, b = alive[1].f;
@@ -139,11 +141,15 @@ export class Director {
     }
     // 用户接管
     const idle = (performance.now() - this.user.last) / 1000;
-    const useUser = this.user.active && idle < 5;
-    if (this.user.active && idle >= 5) this.user.active = false;
+    // 胜者环绕期间：用户一旦拖动就一直保持用户视角（不再 5 秒后自动弹回），直到切到下一个镜头模式
+    const hold = this.mode === 'winner';
+    const useUser = this.user.active && (hold || idle < 5);
+    if (this.user.active && !hold && idle >= 5) { this.user.active = false; this.blend = 1; }
     const ty = useUser ? this.user.yaw : W.yaw, tp = useUser ? this.user.pitch : W.pitch, td = useUser ? this.user.dist : W.dist;
     if (this.cut && !useUser) { this.cut = false; this.yaw = ty; this.pitch = tp; this.dist = td; this.target.copy(W.target); }
-    const k = useUser ? 14 : (this.mode === 'ult' ? 5 : this.mode === 'ko' ? 3 : 2.2);
+    // blend：用户松手回到导演机位时，先慢阻尼过渡，避免锁定式机位（胜者 / 子弹时间）瞬间跳回
+    if (this.blend > 0) this.blend = Math.max(0, this.blend - rdt / 1.2);
+    const k = useUser ? 14 : this.blend > 0 ? 2.2 + (1 - this.blend) * 18 : (this.mode === 'ult' ? 5 : this.mode === 'ko' ? 3 : 2.2);
     this.yaw = dampAngle(this.yaw, ty, k, rdt); this.pitch = damp(this.pitch, tp, k, rdt); this.dist = damp(this.dist, td, useUser ? 14 : 2.4, rdt);
     this.target.x = damp(this.target.x, W.target.x, 4, rdt); this.target.y = damp(this.target.y, W.target.y, 4, rdt); this.target.z = damp(this.target.z, W.target.z, 4, rdt);
     // 位置（限制在场馆内、不低于台面）

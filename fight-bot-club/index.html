@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#05060c" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>UGC 机器人对战擂台</title>
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/anton.woff2" crossorigin fetchpriority="high">
   <link rel="preload" as="image" href="/avatars/thumb/a01.webp" fetchpriority="high">
   <link rel="preload" as="image" href="/avatars/thumb/a02.webp" fetchpriority="high">
   <!-- 暂时隐藏的分身 <link rel="preload" as="image" href="/avatars/thumb/a03.webp" fetchpriority="high"> -->
@@ -40,18 +41,19 @@
           <div class="en"><div class="en-fill"></div></div>
         </div>
       </div>
+      <div id="ultClock"><span class="uk-l">ULT</span><i><s></s></i><b>12</b></div>
       <div id="ticker"></div>
     </div>
 
     <!-- 中央横幅 -->
     <div id="introCard"></div>
     <div id="banner"><div class="b-main"></div><div class="b-sub"></div></div>
-    <div id="ultcut"><div class="uc-inner"><div class="uc-tag">ULTIMATE</div><div class="uc-name"></div><div class="uc-owner"></div></div></div>
+    <div id="ultcut"><div class="uc-inner"><div class="uc-ava"><img alt="" /></div><div class="uc-txt"><div class="uc-tag">ULTIMATE</div><div class="uc-name"></div><div class="uc-owner"></div></div></div></div>
 
     <!-- 底部：队列 + 操作 -->
     <div id="bottom" class="hidden">
       <div id="queueWrap">
-        <div class="q-title">挑战队列 <span id="qCount"></span></div>
+        <div class="q-title"><span>候场</span><b id="qCount"></b></div>
         <div id="queue"></div>
       </div>
       <div class="actions">
@@ -64,9 +66,8 @@
     <!-- 启动加载 -->
     <div id="start" class="sheet-full">
       <div class="st-hero">
-        <div class="st-kicker">UGC ROBOT ARENA</div>
-        <h1>机甲擂台 · 创造即战斗</h1>
-        <p>一句话造出你的机器人，坐进驾驶舱，看它在擂台上自主开打。</p>
+        <div class="st-logo"><span class="b-main l1">FIGHT</span><span class="b-main l2">BOT CLUB</span></div>
+        <p class="st-sub">一句话造出你的机器人，坐进驾驶舱，看它在擂台上自主开打</p>
       </div>
       <div class="st-foot"><div class="st-loadbar"><i></i></div><div id="loadTip">正在加载擂台…</div></div>
     </div>

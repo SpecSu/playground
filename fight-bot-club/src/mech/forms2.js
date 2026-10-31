@@ -1,6 +1,7 @@
 // v9 新机型扩展：蝠鲼 Manta / 猫虎 / 玄武龟 / 鳄鱼 / 霸王龙 / 火烈鸟 / 青蛙 / 兔子
 // 复用：材质、驾驶舱（分身座位）、武器（远程肩炮 / 近战咬合锚点）、特技件、背包、全部招式与特效锚点
 import * as THREE from 'three';
+const _JV = new THREE.Vector3();
 import { clamp, damp } from '../core/util.js';
 import { MechView } from './mech.js';
 import * as P from './parts.js';
@@ -8,6 +9,7 @@ import { rbox, box, cyl, sph, tor, cone, plate, rod, taper } from './geo.js';
 
 const PI = Math.PI;
 const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+const BLz = (d, k) => d.BL * k;
 function ik2(L1, L2, fwd, dy, ks) {
   const D = clamp(Math.hypot(fwd, dy), Math.abs(L1 - L2) + 0.03, L1 + L2 - 0.004);
   const psi = Math.atan2(fwd, -dy);
@@ -15,7 +17,7 @@ function ik2(L1, L2, fwd, dy, ks) {
   const b = Math.acos(clamp((L1 * L1 + L2 * L2 - D * D) / (2 * L1 * L2), -1, 1));
   return [-(psi + ks * a), ks * (PI - b)];
 }
-const MELEE = new Set(['jab', 'cross', 'heavy', 'jumppunch', 'bash', 'sp_charge', 'ult_frenzy', 'sp_chainsaw', 'sp_drill']);
+const MELEE = new Set(['jab', 'cross', 'heavy', 'jumppunch', 'bash', 'sp_charge', 'ult_frenzy', 'sp_chainsaw', 'sp_drill', 'sp_blink', 'sp_hook', 'ult_phantom', 'ult_tornado']);
 const SIDES = [[1, 'L'], [-1, 'R']];
 
 // ———————————————— 通用整身兽形基类（动作 / 头部追踪 / 尾巴 / 武器 / 驾驶舱，子类只管造型与步态） ————————————————
@@ -80,12 +82,13 @@ class Beast extends MechView {
     this.legs.push({ a, b, sx, g: (i === 0 || i === 3) ? 0 : 1, front, splay, L1, L2 });
   }
   // —— 尾巴：n 节，逐节收细
-  tail(c, n, start, len, w0, h0, mats = ['P', 'M'], tip = 'G', parent = 'chest') {
+  tail(c, n, start, len, w0, h0, mats = ['P', 'M'], tip = 'G', parent = 'chest', solid = false, kEnd = 0.7) {
     const { ps } = c; let p = parent;
     for (let i = 0; i < n; i++) {
-      const k = 1 - i / n * 0.7;
+      const k = 1 - i / n * kEnd;
       const bn = c.bone('xt' + i, p, i === 0 ? start : [0, 0, -len]);
-      ps.add(bn, mats[i % mats.length], taper(rbox(w0 * k, h0 * k, len * 1.08, 0.05), 0.85, 1, 0), [0, 0, -len * 0.5], [PI / 2, 0, 0]);
+      if (solid) { const k2 = 1 - (i + 1) / n * kEnd; ps.add(bn, mats[i % mats.length], taper(rbox(w0 * k, len * 1.16, h0 * k, Math.min(0.05, w0 * k * 0.3)), k2 / k, k2 / k, 0), [0, 0, -len * 0.5], [-PI / 2, 0, 0]); }
+      else ps.add(bn, mats[i % mats.length], taper(rbox(w0 * k, h0 * k, len * 1.08, 0.05), 0.85, 1, 0), [0, 0, -len * 0.5], [PI / 2, 0, 0]);
       if (i === n - 1 && tip) ps.add(bn, tip, cone(w0 * k * 0.45, len * 0.7, 6), [0, 0, -len * 1.2], [-PI / 2, 0, 0]);
       p = bn; this.tailNames.push(bn);
     }
@@ -118,7 +121,7 @@ class Beast extends MechView {
       else if (a.type === 'hitstun') { lunge = -0.25; pitch = -0.2; headP = -0.3; roll = this.recoilZ; }
       else if (a.type === 'dodge') { roll = -(D.side || 1) * 0.3; crouch = 0.2; }
       else if (a.type === 'leap' || a.type === 'ult_meteor') { crouch = D.phase ? (D.phase === 2 ? 0.4 : 0) : 0.45; pitch = f.vy > 0 ? -0.35 : 0.25; headP = -0.2; }
-      else if (a.type === 'shoot' || a.type.startsWith('sp_') || a.type.startsWith('ult_')) { crouch = 0.2; headP = -0.1; jaw = ['sp_flame', 'sp_laser', 'ult_beam', 'ult_inferno'].includes(a.type) ? 0.7 : 0.15; pitch = -0.05 * (this.shot[0] + this.shot[1]); }
+      else if (a.type === 'shoot' || a.type.startsWith('sp_') || a.type.startsWith('ult_')) { crouch = 0.2; headP = -0.1; jaw = ['sp_flame', 'sp_laser', 'ult_beam', 'ult_inferno', 'ult_blackhole', 'ult_orbital', 'ult_glacier'].includes(a.type) ? 0.7 : 0.15; pitch = -0.05 * (this.shot[0] + this.shot[1]); }
     }
     if (this.cele > 0 && f.alive) { headP = -0.5; jaw = 0.45 + Math.sin(t * 9) * 0.2; crouch = Math.max(0, Math.sin(t * 6)) * -0.12; }
     pitch += -this.recoil * 0.2; crouch += this.squash * 0.35;
@@ -132,7 +135,16 @@ class Beast extends MechView {
     this.pose(f, dt, S, A, vf, vs, spd, t);
     B.chest.position.z = S.lunge * (this.lungeK ?? 1);
     B.head.rotation.set((S.headP + Math.sin(t * 1.7) * 0.03) * (this.headK ?? 1), S.hy * (this.headYK ?? 1), 0);
-    if (B.xjaw) B.xjaw.rotation.x = S.jaw * (this.jawK ?? 1);
+    if (B.xjaw) {
+      let ja = S.jaw * (this.jawK ?? 1); B.xjaw.rotation.x = ja;
+      // v10.1 张嘴防穿地：下颌尖低于地面就逐步收小开口角度（鳄鱼长吻贴地，最容易穿模）
+      const tip = this.anchors.jawTip;
+      // 先收嘴，嘴已合上仍低于地面（低头扑咬 / 格挡时长吻下压）再把头抬起
+      if (tip && !this.dead) for (let it = 0; it < 10; it++) {
+        tip.updateWorldMatrix(true, false); tip.getWorldPosition(_JV); if (_JV.y >= 0.08) break;
+        if (ja > 0.03) { ja *= 0.6; B.xjaw.rotation.x = ja; } else B.head.rotation.x -= 0.07;
+      }
+    }
     for (const [, s] of SIDES) { B['fa' + s].rotation.x = -PI / 2 + (s === 'R' ? this.shot[0] : this.shot[1]) * 0.25 - S.pitch * 0.5; B['ua' + s].rotation.y = S.hy * 0.5; }
     // 尾巴相位按帧积分（频率随速度变化时不跳相位；旧写法 sin(t*频率) 在 t 很大时会疯狂抖动）
     const wagF = this.cele > 0 ? 8 : 2.2 + A * 3; this.wagA = damp(this.wagA ?? 0.2, (this.tailAmp ?? 0.2) * (this.cele > 0 ? 2 : 1), 4, dt); const wagA = this.wagA;
@@ -182,57 +194,70 @@ class Beast extends MechView {
   }
 }
 
-// ———————————————— 猫虎：比机械犬更宽、更厚、更矮壮，前胸肌肉块 + 虎纹 + 剑齿 ————————————————
+// ———————————————— 猫科（v10.1 重做）：猎豹式修长比例——深胸细腰、高腿、小头、长尾 S 形上扬，步态轻盈 ————————————————
 class TigerView extends Beast {
   shape(d, b, ll) {
-    const k = b * 1.1 + 0.12;
-    d.BL = 2.75 * k; d.BW = 1.5 * k; d.BH = 1.08 * k; d.L1 = 0.74 * ll; d.L2 = 0.72 * ll; d.H = (d.L1 + d.L2) * 0.86 + 0.32; d.LW = 0.5 * k;
-    d.ck = [0, d.BH * 0.5 + 0.04, -0.2]; d.hd = [0, 0.32, d.BL * 0.5 + 0.12]; d.bk = [0, d.BH * 0.45, -d.BL * 0.36];
-    d.sh = [d.BW * 0.5 + 0.14, d.BH * 0.3, d.BL * 0.2];
-    this.hb = d.BW * 0.62; this.hz = 0.75; this.mouth = ['head', [0, -0.12, 1.05]];
+    const k = b * 0.62 + 0.36; d.k = k;
+    d.BL = 3.05 * k; d.BW = 0.86 * k; d.BH = 0.78 * k; d.L1 = 0.98 * ll; d.L2 = 0.96 * ll; d.H = (d.L1 + d.L2) * 0.84 + 0.3; d.LW = 0.3 * k;
+    d.ck = [0, d.BH * 0.62, BLz(d, 0.02)]; d.hd = [0, d.BH * 0.36, d.BL * 0.5 + 0.12]; d.bk = [0, d.BH * 0.4, -d.BL * 0.34];
+    d.sh = [d.BW * 0.5 + 0.1, d.BH * 0.28, d.BL * 0.26];
+    this.hb = 0.52 * k + 0.08; this.hz = 0.6; this.mouth = ['head', [0, -0.1, 0.78]]; this.headK = 0.8; this.tiltK = 0.8; this.earBack = -0.1;
   }
   body(c) {
     const { ps, d } = c; const { BL, BW, BH } = d;
-    ps.add('chest', 'P', rbox(BW, BH, BL * 0.56, 0.22), [0, 0.02, BL * 0.14]);
-    ps.add('chest', 'S', taper(rbox(BW * 0.9, BH * 0.86, BL * 0.42, 0.18), 0.9, 1, 0), [0, -0.02, -BL * 0.28]);
+    // 深胸（前） → 细腰 → 收紧后胯：三段式，侧面看是明显的猫科腰线
+    ps.add('chest', 'P', taper(rbox(BW, BH * 1.08, BL * 0.4, 0.2), 0.92, 1, 0, 0.9, 0.85), [0, -BH * 0.02, BL * 0.25]);
+    ps.add('chest', 'S', rbox(BW * 0.64, BH * 0.56, BL * 0.34, 0.14), [0, BH * 0.14, -BL * 0.04]);
+    ps.add('chest', 'P', taper(rbox(BW * 0.9, BH * 0.86, BL * 0.3, 0.18), 0.95, 1, 0, 0.82, 0.9), [0, BH * 0.06, -BL * 0.31]);
+    ps.add('chest', 'K', rbox(BW * 0.5, 0.12, BL * 0.3, 0.04), [0, -BH * 0.5, BL * 0.24]);
+    // 背脊：一条细长发光脊线 + 小节甲片
+    for (let i = 0; i < 7; i++) ps.add('chest', i % 2 ? 'A' : 'M', rbox(BW * 0.26, 0.07, 0.24, 0.03), [0, BH * (0.46 + (i > 1 && i < 5 ? -0.12 : 0)), BL * 0.36 - i * BL * 0.12]);
+    ps.add('chest', 'G', box(0.04, 0.03, BL * 0.7), [0, BH * 0.52, 0]);
     for (const [sx] of SIDES) {
-      ps.add('chest', 'P', sph(1, 16, 12), [sx * BW * 0.4, BH * 0.12, BL * 0.26], [0, 0, 0], [BW * 0.3, BH * 0.5, BL * 0.22]);   // 前肩肌肉
-      ps.add('chest', 'S', sph(1, 16, 12), [sx * BW * 0.36, BH * 0.02, -BL * 0.32], [0, 0, 0], [BW * 0.28, BH * 0.46, BL * 0.2]); // 后腿肌肉
-      for (let i = 0; i < 4; i++) ps.add('chest', 'K', rbox(0.06, BH * 0.62, 0.11, 0.02), [sx * (BW * 0.5 + 0.03), 0.04, BL * (0.12 - i * 0.15)], [0.4, 0, 0]); // 虎纹
-      ps.add('chest', 'G', box(0.03, 0.05, BL * 0.42), [sx * (BW * 0.5 + 0.02), BH * 0.32, -0.05]);
+      ps.add('chest', 'S', sph(1, 16, 12), [sx * BW * 0.36, BH * 0.08, BL * 0.3], [0, 0, 0], [BW * 0.2, BH * 0.44, BL * 0.15]);   // 前肩胛
+      ps.add('chest', 'S', sph(1, 16, 12), [sx * BW * 0.34, BH * 0.1, -BL * 0.32], [0, 0, 0], [BW * 0.2, BH * 0.42, BL * 0.15]); // 后胯
+      for (let i = 0; i < 5; i++) ps.add('chest', 'K', rbox(0.04, BH * (0.5 - Math.abs(i - 2) * 0.06), 0.07, 0.015), [sx * (BW * (i > 1 && i < 4 ? 0.34 : 0.48) + 0.02), BH * 0.1, BL * (0.2 - i * 0.12)], [0.5, 0, 0]); // 斑纹
+      ps.add('chest', 'G', box(0.025, 0.035, BL * 0.34), [sx * (BW * 0.5 + 0.01), BH * 0.26, BL * 0.22]);
     }
-    ps.add('chest', 'K', rbox(BW * 0.72, 0.22, BL * 0.78, 0.06), [0, -BH * 0.5, 0]);
-    for (let i = 0; i < 5; i++) ps.add('chest', i % 2 ? 'A' : 'M', rbox(BW * 0.34, 0.1, 0.2, 0.03), [0, BH * 0.54, -BL * 0.1 - i * 0.24]);
-    ps.add('chest', 'M', cyl(0.42, 0.5, 0.55, 12), [0, 0.18, BL * 0.47], [1.0, 0, 0]);
-    // 头：方阔虎头 + 剑齿
+    ps.add('chest', 'M', cyl(0.2, 0.26, 0.5, 12), [0, BH * 0.22, BL * 0.47], [1.1, 0, 0]); // 修长颈
+    // 头：小而尖的楔形猫头 + 立耳 + 杏仁眼
     const hb = this.hb;
-    ps.add('head', 'P', rbox(hb, 0.62, 0.78, 0.18), [0, 0.04, 0.2]);
-    ps.add('head', 'S', taper(rbox(hb * 0.76, 0.4, 0.48, 0.12), 0.8, 0.85, 0), [0, -0.08, 0.68]);
-    ps.add('head', 'K', rbox(hb * 0.32, 0.14, 0.14, 0.05), [0, 0.06, 0.94]);
-    ps.add('head', 'A', rbox(hb * 1.06, 0.12, 0.34, 0.04), [0, 0.3, 0.32]);
+    ps.add('head', 'P', taper(rbox(hb, 0.42, 0.54, 0.16), 0.86, 0.9, 0), [0, 0.04, 0.12]);
+    ps.add('head', 'S', taper(rbox(hb * 0.6, 0.24, 0.34, 0.09), 0.7, 0.8, 0), [0, -0.06, 0.48]);
+    ps.add('head', 'K', rbox(hb * 0.24, 0.1, 0.08, 0.03), [0, 0.0, 0.66]);
+    ps.add('head', 'A', taper(rbox(hb * 0.8, 0.07, 0.36, 0.03), 0.7, 1, 0), [0, 0.23, 0.14]);
     for (const [sx] of SIDES) {
-      ps.add('head', 'G', plate([[0, 0], [0.22, 0.05], [0.18, 0.11], [0.02, 0.08]], 0.04, 0.01), [sx * hb * 0.18, 0.16, 0.6], [0, 0, sx > 0 ? 0 : PI]);
-      ps.add('head', 'A', plate([[0, 0], [0.26, 0], [0.12, 0.26]], 0.06, 0.015), [sx * hb * 0.3, 0.32, -0.02], [-0.2, -PI / 2, sx * 0.3]);
-      ps.add('head', 'S', sph(0.2, 10, 8), [sx * hb * 0.5, -0.1, 0.36], [0, 0, 0], [0.6, 1, 1]);
+      ps.add('head', 'G', plate([[0, 0], [0.2, 0.04], [0.17, 0.09], [0.02, 0.06]], 0.035, 0.008), [sx * hb * 0.14, 0.1, 0.39], [0, 0, sx > 0 ? -0.15 : PI + 0.15]);
+      ps.add('head', 'S', sph(0.13, 10, 8), [sx * hb * 0.42, -0.06, 0.22], [0, 0, 0], [0.6, 0.9, 1]);
+      const ear = c.bone('xear' + (sx > 0 ? 'L' : 'R'), 'head', [sx * hb * 0.32, 0.22, 0.0]);
+      ps.add(ear, 'P', plate([[0, 0], [0.24, 0], [0.1, 0.36]], 0.05, 0.012), [-0.1, 0, 0.02], [-0.15, 0, 0]);
+      ps.add(ear, 'G', plate([[0, 0], [0.12, 0], [0.05, 0.2]], 0.02, 0.004), [-0.05, 0.03, 0.05], [-0.15, 0, 0]);
+      this.ears.push({ n: ear, s: sx });
     }
-    const jaw = c.bone('xjaw', 'head', [0, -0.24, 0.3]);
-    ps.add(jaw, 'M', rbox(hb * 0.66, 0.14, 0.6, 0.05), [0, -0.06, 0.28]);
-    for (const [sx] of SIDES) ps.add('head', 'C', cone(0.05, 0.36, 6), [sx * hb * 0.22, -0.36, 0.8], [PI, 0, 0]);
-    this.tail(c, 5, [0, BH * 0.28, -BL * 0.5], 0.36, 0.26, 0.24, ['P', 'K'], 'A');
-    this.tailPitch = -0.45; this.tailCurl = 0.16; this.tailAmp = 0.25;
+    const jaw = c.bone('xjaw', 'head', [0, -0.16, 0.22]);
+    ps.add(jaw, 'M', taper(rbox(hb * 0.5, 0.1, 0.4, 0.04), 0.8, 1, 0), [0, -0.04, 0.18]);
+    for (const [sx] of SIDES) ps.add('head', 'C', cone(0.03, 0.18, 6), [sx * hb * 0.16, -0.22, 0.56], [PI, 0, 0]);
+    // 长尾：9 节，细长，S 形上扬
+    this.tail(c, 10, [0, BH * 0.32, -BL * 0.46], 0.3, 0.17, 0.19, ['P', 'K'], 'G', 'chest', true, 0.55);
+    this.tailPitch = 0.42; this.tailCurl = -0.11; this.tailAmp = 0.3;
     let i = 0;
-    for (const [fz, front] of [[BL * 0.32, true], [-BL * 0.33, false]]) for (const [sx] of SIDES) this.ikLeg(c, i++, [sx * BW * 0.4, -0.14, fz], d.L1, d.L2, front, sx, d.LW, -1, 3);
+    for (const [fz, front] of [[BL * 0.3, true], [-BL * 0.33, false]]) for (const [sx] of SIDES) this.ikLeg(c, i++, [sx * BW * 0.32, -0.1, fz], d.L1, d.L2, front, sx, d.LW, front ? -1 : 1, 3);
   }
   calcHeight(d) { return d.H + d.BH * 0.5 + 1.25; }
-  stride(d) { return (d.L1 + d.L2) * 0.8; }
+  stride(d) { return (d.L1 + d.L2) * 0.95; }
+  cockpitScale() { return 1.36; } // v10.1：座舱世界尺度对齐其他体型
   pose(f, dt, S, A, vf, vs, spd, t) {
-    const d = this.d; const py = d.H - S.crouch * 0.55 + Math.abs(Math.sin(this.phase)) * 0.05 * A + Math.sin(t * 2) * 0.015;
-    this.body3(f, dt, S, py, vf, vs); this.trot(f, dt, S, A, vf, vs, spd, 0.3, 0.32);
+    const d = this.d; const py = d.H - S.crouch * 0.6 + Math.abs(Math.sin(this.phase)) * 0.09 * A + Math.sin(t * 1.6) * 0.012;
+    // 奔跑时脊柱伸缩（前后身交替俯仰），待机时轻微压低前身——猫科的“潜伏”感
+    const flex = Math.sin(this.phase * 2) * 0.05 * A - (1 - A) * 0.03;
+    this.body3(f, dt, S, py, vf, vs, flex);
+    this.trot(f, dt, S, A, vf, vs, spd, 0.42, 0.36);
   }
 }
 
 // ———————————————— 玄武龟：大圆顶龟甲（六角甲片）+ 外八字粗腿 + 蛇形尾 ————————————————
 class TurtleView extends Beast {
+  cockpitScale() { return 1.0; } // v10.1：龟整体放大 1.32，座舱不跟着放大，与其他体型对齐
   shape(d, b, ll) {
     const k = b * 1.0 + 0.2; d.k = k;
     d.L1 = 0.5 * ll; d.L2 = 0.62 * ll; d.SP = 0.95; d.H = d.L1 * Math.cos(d.SP) + d.L2 + 0.32; d.LW = 0.46 * k;
@@ -279,50 +304,59 @@ class TurtleView extends Beast {
   }
 }
 
-// ———————————————— 鳄鱼：超长低矮身体 + 长吻利齿 + 背脊鳞甲 + 粗长尾 ————————————————
+// ———————————————— 鳄鱼（v10.1 重做）：扁平低趴的长条身——窄而薄的背甲带两排骨板、超长扁吻、粗长侧扁尾、外八字短腿 ————————————————
 class CrocView extends Beast {
+  cockpitScale() { return 1.25; }
   shape(d, b, ll) {
-    const k = b * 0.95 + 0.08; d.k = k;
-    d.BL = 2.9 * k; d.BW = 1.55 * k; d.BH = 0.82 * k; d.L1 = 0.52 * ll; d.L2 = 0.46 * ll; d.SP = 1.1; d.H = d.L1 * Math.cos(d.SP) + d.L2 + 0.3; d.LW = 0.46 * k;
-    d.ck = [0, d.BH * 0.5 + 0.02, -0.1]; d.hd = [0, 0.04, d.BL * 0.5 + 0.02]; d.bk = [0, d.BH * 0.45, -d.BL * 0.34];
-    d.sh = [d.BW * 0.5 + 0.12, d.BH * 0.3, d.BL * 0.22];
-    this.hb = 0.95 * k; this.hz = 0.8; this.mouth = ['head', [0, -0.08, 1.5]]; this.tiltK = 0.5; this.deadRoll = 1.4; this.deadY = 0.35;
-    this.headK = 0.6; this.jawK = 1.3;
+    const k = b * 0.6 + 0.4; d.k = k;
+    d.BL = 3.5 * k; d.BW = 1.08 * k; d.BH = 0.5 * k; d.L1 = 0.42 * ll; d.L2 = 0.34 * ll; d.SP = 1.2; d.H = d.L1 * Math.cos(d.SP) + d.L2 + 0.22; d.LW = 0.3 * k;
+    d.ck = [0, d.BH * 0.5 + 0.02, -0.05]; d.hd = [0, 0.0, d.BL * 0.5 + 0.02]; d.bk = [0, d.BH * 0.45, -d.BL * 0.36];
+    d.sh = [d.BW * 0.5 + 0.1, d.BH * 0.3, d.BL * 0.26];
+    this.hb = 0.62 * k; this.hz = 1.0; this.mouth = ['head', [0, -0.06, 1.9]]; this.tiltK = 0.4; this.deadRoll = 1.4; this.deadY = 0.3;
+    this.headK = 0.45; this.jawK = 0.9; // v10.1：长吻开口幅度收小
   }
   body(c) {
     const { ps, d } = c; const { BL, BW, BH, k } = d;
-    ps.add('chest', 'P', taper(rbox(BW, BH, BL, 0.24), 0.82, 1, 0), [0, 0, 0]);
-    ps.add('chest', 'S', rbox(BW * 1.1, BH * 0.45, BL * 0.84, 0.14), [0, -BH * 0.14, 0]);
-    for (const [sx] of SIDES) ps.add('chest', 'A', rbox(0.1, BH * 0.3, BL * 0.5, 0.04), [sx * BW * 0.56, -BH * 0.05, 0.05]);
-    ps.add('chest', 'K', rbox(BW * 0.8, 0.16, BL * 0.9, 0.05), [0, -BH * 0.5, 0]);
-    for (let i = 0; i < 7; i++) for (const [sx] of SIDES) ps.add('chest', i % 3 === 1 ? 'A' : 'M', cone(0.16, 0.26, 4), [sx * BW * 0.22, BH * 0.56, BL * 0.38 - i * BL * 0.12], [0, PI / 4, 0]);
-    for (const [sx] of SIDES) ps.add('chest', 'G', box(0.03, 0.04, BL * 0.6), [sx * (BW * 0.54 + 0.01), 0.02, 0]);
-    // 长吻头
-    ps.add('head', 'P', rbox(1.05 * k, 0.56, 0.7, 0.16), [0, 0.06, 0.24]);
-    ps.add('head', 'S', taper(rbox(0.82 * k, 0.32, 1.0, 0.1), 0.8, 1, 0, 1, 1), [0, -0.02, 0.98]);
-    ps.add('head', 'A', rbox(0.9 * k, 0.1, 0.24, 0.04), [0, 0.12, 1.36]);
-    ps.add('head', 'K', rbox(0.84 * k, 0.07, 0.95, 0.02), [0, -0.19, 0.98]);
-    for (const [sx] of SIDES) {
-      ps.add('head', 'M', sph(0.17, 10, 8), [sx * 0.32 * k, 0.36, 0.3]); ps.add('head', 'G', sph(0.09, 8, 6), [sx * 0.32 * k, 0.41, 0.4]);
-      for (let i = 0; i < 5; i++) ps.add('head', 'C', cone(0.04, 0.15, 4), [sx * 0.37 * k, -0.22, 0.6 + i * 0.19], [PI, 0, 0]);
+    // 扁平纺锤形躯干：中段最宽，两头收窄（俯视是鳄鱼的“梭形”）
+    ps.add('chest', 'P', taper(rbox(BW, BH, BL * 0.56, 0.16), 1, 1, 0, 1, 1), [0, 0, 0]);
+    ps.add('chest', 'P', taper(rbox(BW, BH * 0.9, BL * 0.26, 0.14), 1, 1, 0), [0, -BH * 0.02, BL * 0.36]);
+    ps.add('chest', 'S', taper(rbox(BW * 0.92, BH * 0.86, BL * 0.26, 0.14), 1, 1, 0), [0, -BH * 0.02, -BL * 0.36]);
+    ps.add('chest', 'K', rbox(BW * 0.84, 0.1, BL * 0.92, 0.04), [0, -BH * 0.5, 0]);
+    // 侧腹护板（低而长的一条）
+    for (const [sx] of SIDES) { ps.add('chest', 'A', rbox(0.06, BH * 0.36, BL * 0.7, 0.02), [sx * BW * 0.52, -BH * 0.08, 0]); ps.add('chest', 'G', box(0.025, 0.03, BL * 0.62), [sx * (BW * 0.52 + 0.03), BH * 0.08, 0]); }
+    // 背甲：横向甲板条 + 两排纵向骨棱（鳄鱼最标志的“骨板背”）
+    for (let i = 0; i < 9; i++) {
+      const z = BL * 0.42 - i * BL * 0.105;
+      ps.add('chest', i % 2 ? 'S' : 'M', rbox(BW * 0.78, 0.06, BL * 0.085, 0.02), [0, BH * 0.52, z]);
+      for (const [sx] of SIDES) ps.add('chest', i % 3 === 1 ? 'A' : 'K', taper(rbox(0.1, 0.16, 0.2, 0.02), 0.2, 0.6, 0), [sx * BW * 0.2, BH * 0.6, z]);
     }
-    const jaw = c.bone('xjaw', 'head', [0, -0.16, 0.2]);
-    ps.add(jaw, 'M', taper(rbox(0.8 * k, 0.16, 1.35, 0.05), 0.85, 1, 0), [0, -0.05, 0.74]);
-    for (const [sx] of SIDES) for (let i = 0; i < 5; i++) ps.add(jaw, 'C', cone(0.036, 0.13, 4), [sx * 0.33 * k, 0.06, 0.45 + i * 0.2]);
-    this.tail(c, 6, [0, 0.02, -BL * 0.5], 0.36, 1.15 * k, 0.62 * k, ['P', 'S'], 'M');
-    const tns = this.tailNames;
-    tns.forEach((tn, i) => { if (i < 5) ps.add(tn, i % 2 ? 'A' : 'M', cone(0.12, 0.2, 4), [0, 0.32 * (1 - i * 0.14), -0.18], [0, PI / 4, 0]); });
-    this.tailPitch = 0.03; this.tailCurl = 0; this.tailAmp = 0.22;
+    // 长扁吻：头部前段又长又窄又薄，侧面看是一根“铲子”
+    ps.add('head', 'P', taper(rbox(0.9 * k, 0.4, 0.6, 0.12), 0.85, 1, 0), [0, 0.04, 0.2]);
+    ps.add('head', 'S', taper(rbox(0.58 * k, 0.2, 1.5, 0.06), 1, 1, 0, 1, 1), [0, -0.04, 1.18], [0, 0, 0], [1, 1, 1]);
+    ps.add('head', 'A', rbox(0.66 * k, 0.08, 0.22, 0.03), [0, 0.06, 1.86]); // 吻端鼻垫
+    ps.add('head', 'K', rbox(0.56 * k, 0.05, 1.4, 0.02), [0, -0.15, 1.16]);
+    for (const [sx] of SIDES) {
+      ps.add('head', 'M', sph(0.13, 10, 8), [sx * 0.28 * k, 0.28, 0.24]); ps.add('head', 'G', sph(0.07, 8, 6), [sx * 0.28 * k, 0.32, 0.32]); // 凸起眼包
+      for (let i = 0; i < 7; i++) ps.add('head', 'C', cone(0.03, 0.12, 4), [sx * 0.27 * k, -0.18, 0.55 + i * 0.19], [PI, 0, 0]);
+    }
+    const jaw = c.bone('xjaw', 'head', [0, -0.14, 0.18]);
+    ps.add(jaw, 'M', taper(rbox(0.56 * k, 0.12, 1.75, 0.04), 1, 1, 0), [0, -0.04, 0.9]);
+    c.anchor('jawTip', jaw, [0, -0.12, 1.78]);
+    for (const [sx] of SIDES) for (let i = 0; i < 7; i++) ps.add(jaw, 'C', cone(0.028, 0.11, 4), [sx * 0.25 * k, 0.05, 0.45 + i * 0.2]);
+    // 粗长侧扁尾：8 节，根部与躯干同宽、竖向扁平，顶上两排骨棱汇成一排
+    this.tail(c, 8, [0, 0.02, -BL * 0.48], 0.44, 0.62 * k, 0.5 * k, ['P', 'S'], 'M', 'chest', true, 0.8);
+    this.tailNames.forEach((tn, i) => { const h = 0.48 * k * (1 - i / 8 * 0.7); ps.add(tn, i % 2 ? 'A' : 'K', taper(rbox(0.06, 0.18, 0.24, 0.02), 0.2, 0.6, 0), [0, h * 0.5 + 0.06, -0.2]); });
+    this.tailPitch = 0.02; this.tailCurl = 0.005; this.tailAmp = 0.28;
     let i = 0;
-    for (const [fz, front] of [[BL * 0.3, true], [-BL * 0.3, false]]) for (const [sx] of SIDES) this.sprawlLeg(c, i++, [sx * BW * 0.46, -0.12, fz], d.L1, d.L2, front, sx, d.LW, d.SP);
+    for (const [fz, front] of [[BL * 0.3, true], [-BL * 0.28, false]]) for (const [sx] of SIDES) this.sprawlLeg(c, i++, [sx * BW * 0.48, -0.1, fz], d.L1, d.L2, front, sx, d.LW, d.SP);
   }
   calcHeight(d) { return d.H + d.BH * 0.5 + 1.25; }
-  stride(d) { return 1.1; }
+  stride(d) { return 1.0; }
   pose(f, dt, S, A, vf, vs, spd, t) {
-    const d = this.d; const py = d.H - S.crouch * 0.3 + Math.abs(Math.sin(this.phase)) * 0.03 * A;
-    this.body3(f, dt, S, py, vf, vs); this.crawl(f, dt, A, vf, spd, 0.5, 0.4);
-    // 身体左右扭动（爬行蛇形）
-    this.bones.chest.rotation.y = Math.sin(this.phase) * 0.1 * A;
+    const d = this.d; const py = d.H - S.crouch * 0.18 + Math.abs(Math.sin(this.phase)) * 0.02 * A;
+    this.body3(f, dt, S, py, vf, vs); this.crawl(f, dt, A, vf, spd, 0.55, 0.32);
+    // 身体左右扭动（爬行蛇形），尾巴随之反向摆
+    this.bones.chest.rotation.y = Math.sin(this.phase) * 0.14 * A;
   }
 }
 
@@ -369,10 +403,11 @@ class Biped extends Beast {
 }
 
 class RexView extends Biped {
+  cockpitScale() { return 1.06; } // v10.1：整体缩到 1.25 倍后补偿，座舱世界尺度与其他体型一致（≈1.4）
   shape(d, b, ll) {
     const k = b * 0.95 + 0.14; d.k = k;
     d.L1 = 1.0 * ll; d.L2 = 1.05 * ll; d.LW = 0.5 * k; this.footH = 0.2; d.H = (d.L1 + d.L2) * 0.88 + 0.12 + 0.25;
-    d.ck = [0, 0.62 * k, -0.45 * k]; d.hd = [0, 1.0 * k, 1.7 * k]; d.bk = [0, 0.55 * k, -1.05 * k];
+    d.ck = [0, 0.84 * k, -0.5 * k]; d.hd = [0, 0.86 * k, 1.75 * k]; d.bk = [0, 0.55 * k, -1.05 * k]; // v10.1：座舱抬高、头部略压低前伸，正面机位分身不被恐龙头挡住
     d.sh = [0.66 * k, 0.15 * k, 0.55 * k];
     this.hb = 0.85; this.hz = 0.7; this.mouth = ['head', [0, -0.25, 1.2]]; this.deadY = 0.7; this.headK = 0.7;
   }

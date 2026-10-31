@@ -22,6 +22,10 @@ const SPECIAL_KW = {
   elec: ['电', '雷', '闪电', '磁', 'thunder', 'lightning', 'electric', 'tesla', '霆'],
   shock: ['震', '地震', '锤', '砸', '践踏', 'quake', 'hammer', 'stomp'],
   charge: ['冲撞', '撞', '冲锋', '犀', '公牛', '蛮牛', '火车', 'ram', 'charge', 'bull'],
+  blink: ['瞬移', '闪现', '瞬影', '忍者', '影', '幻', 'ninja', 'blink', 'teleport', 'shadow'],
+  hook: ['钩', '锁链', '抓', '擒', '鞭', 'hook', 'chain', 'grapple'],
+  disc: ['飞刃', '回旋', '飞盘', '圆锯', '镖', '飞镖', 'disc', 'boomerang', 'shuriken'],
+  mortar: ['迫击', '曲射', '榴弹', '轰炸', '炮兵', 'mortar', 'grenade', 'bomb'],
 };
 const MAIN_KW = {
   blade: ['剑', '刀', '斩', '武士', '刃', '镰', 'sword', 'blade', 'katana', 'samurai', 'scythe'],
@@ -76,22 +80,22 @@ const FORM_KW = {
   croc: ['鳄', '蜥', '巨蜥', '短吻', 'croc', 'gator', 'alligator', 'lizard'],
   trex: ['恐龙', '霸王龙', '暴龙', '龙', '迅猛', '侏罗纪', 'dino', 'rex', 'raptor', 'dragon', 'jurassic'],
   flamingo: ['火烈鸟', '鸟', '鹤', '鹰', '隼', '鸵', '鹭', '孔雀', '翼', 'bird', 'flamingo', 'crane', 'hawk', 'eagle', 'falcon'],
-  frog: ['蛙', '蟾', '呱', 'frog', 'toad'],
-  rabbit: ['兔', '月兔', '跳跳', 'rabbit', 'bunny', 'hare'],
   humanoid: ['人形', '武士', '战士', '骑士', '拳击', '巨人', '高达', '机甲战士', 'samurai', 'knight', 'boxer', 'gundam', 'humanoid'],
 };
-// 按定位的形态倾向（无形态关键词时）：12 种体型都有出场机会
+// 按定位的形态倾向（无形态关键词时）：10 种体型都有出场机会
 const FORM_BY_ROLE = {
-  tank: [['tank', 2.4], ['turtle', 2.4], ['humanoid', 1.2], ['trex', 1.2], ['croc', 1], ['tiger', 0.8], ['spider', 0.8], ['frog', 0.6], ['dog', 0.4], ['manta', 0.4], ['rabbit', 0.3], ['flamingo', 0.3]],
-  assassin: [['dog', 1.8], ['rabbit', 1.6], ['tiger', 1.4], ['spider', 1.4], ['flamingo', 1.3], ['manta', 1.2], ['frog', 1], ['croc', 0.9], ['humanoid', 0.9], ['trex', 0.5], ['turtle', 0.2], ['tank', 0.1]],
-  gunner: [['manta', 2.4], ['tank', 1.5], ['flamingo', 1.2], ['turtle', 1.1], ['spider', 1], ['humanoid', 1], ['frog', 0.9], ['rabbit', 0.7], ['trex', 0.6], ['dog', 0.5], ['croc', 0.5], ['tiger', 0.5]],
-  brawler: [['tiger', 1.8], ['humanoid', 1.5], ['trex', 1.5], ['croc', 1.4], ['dog', 1.2], ['tank', 1], ['spider', 1], ['frog', 1], ['rabbit', 0.8], ['turtle', 0.7], ['flamingo', 0.6], ['manta', 0.5]],
+  tank: [['tank', 2.4], ['turtle', 2.4], ['humanoid', 1.2], ['trex', 1.2], ['croc', 1], ['tiger', 0.8], ['spider', 0.8], ['dog', 0.4], ['manta', 0.4], ['flamingo', 0.3]],
+  assassin: [['dog', 1.8], ['tiger', 1.4], ['spider', 1.4], ['flamingo', 1.3], ['manta', 1.2], ['croc', 0.9], ['humanoid', 0.9], ['trex', 0.5], ['turtle', 0.2], ['tank', 0.1]],
+  gunner: [['manta', 2.4], ['tank', 1.5], ['flamingo', 1.2], ['turtle', 1.1], ['spider', 1], ['humanoid', 1], ['trex', 0.6], ['dog', 0.5], ['croc', 0.5], ['tiger', 0.5]],
+  brawler: [['tiger', 1.8], ['humanoid', 1.5], ['trex', 1.5], ['croc', 1.4], ['dog', 1.2], ['tank', 1], ['spider', 1], ['turtle', 0.7], ['flamingo', 0.6], ['manta', 0.5]],
 };
 export const FORM_CN = {
-  humanoid: '人形', dog: '机械犬', spider: '多足蛛', tank: '履带战车', manta: '蝠鲼', tiger: '猫虎', turtle: '玄武龟', croc: '鳄鱼', trex: '霸王龙', flamingo: '火烈鸟', frog: '青蛙', rabbit: '兔子',
+  humanoid: '人形', dog: '机械犬', spider: '多足蛛', tank: '履带战车', manta: '蝠鲼', tiger: '猫虎', turtle: '玄武龟', croc: '鳄鱼', trex: '霸王龙', flamingo: '火烈鸟',
   hover: '蝠鲼', wraith: '蝠鲼',
 };
-export const FORM_LIST = ['humanoid', 'dog', 'spider', 'tank', 'manta', 'tiger', 'turtle', 'croc', 'trex', 'flamingo', 'frog', 'rabbit'];
+// v10.1：体型整体缩放——霸王龙 / 玄武做成场上的“巨兽”级
+export const FORM_SCALE = { trex: 1.25, turtle: 1.32, croc: 1.06 };
+export const FORM_LIST = ['humanoid', 'dog', 'spider', 'tank', 'manta', 'tiger', 'turtle', 'croc', 'trex', 'flamingo'];
 const TAIL_KW = ['尾', '蝎', '恐龙', '龙', '猫', '狐', 'tail', 'scorpion', 'dino'];
 
 // ———————————————————— 配色：16 套完全不同的配色家族 ————————————————————
@@ -151,8 +155,8 @@ const ROLE_INFO = {
 export const ROLE_ADJ = { tank: 0.95, assassin: 1.2, gunner: 1.1, brawler: 0.8 };
 export const ROLE_CN = Object.fromEntries(Object.entries(ROLE_INFO).map(([k, v]) => [k, v.cn]));
 
-const SPECIAL_NAMES = { charge: '蛮牛冲撞', chainsaw: '链锯绞杀', flame: '烈焰喷射', cannon: '重型火炮', laser: '聚能激光', missile: '蜂群导弹', drill: '螺旋钻击', shock: '震地践踏', elec: '雷霆电弧' };
-const ULT_NAMES = { meteor: '陨星重砸', barrage: '全弹发射', beam: '光子巨炮', frenzy: '狂暴连斩', inferno: '炼狱火旋', storm: '万雷天罚' };
+export const SPECIAL_NAMES = { charge: '蛮牛冲撞', chainsaw: '链锯绞杀', flame: '烈焰喷射', cannon: '重型火炮', laser: '聚能激光', missile: '蜂群导弹', drill: '螺旋钻击', shock: '震地践踏', elec: '雷霆电弧', blink: '瞬影突袭', hook: '钩锁擒拿', disc: '回旋飞刃', mortar: '曲射迫击' };
+export const ULT_NAMES = { meteor: '陨星重砸', barrage: '全弹发射', beam: '光子巨炮', frenzy: '狂暴连斩', inferno: '炼狱火旋', storm: '万雷天罚', blackhole: '奇点黑洞', orbital: '天基轨道炮', tornado: '钢铁旋风', phantom: '千影杀阵', glacier: '极寒冰封' };
 const MAIN_NAMES = { fist: '铁拳连击', blade: '利刃连斩', hammer: '重锤猛击', claw: '撕裂钳击', gatling: '加特林扫射', blaster: '脉冲速射', cannon: '臂炮轰击' };
 
 const NAME_A = { racing: ['疾风', '极速', '赤线', '涡轮'], military: ['铁幕', '钢盔', '野战', '突击'], neon: ['霓虹', '赛博', '电幻', '光谱'], chrome: ['镜钢', '银翼', '水银', '铬骨'], royal: ['圣辉', '王权', '天穹', '荣耀'], hazard: ['重工', '警戒', '铁矿', '钻探'], candy: ['糖心', '泡泡', '甜甜圈', '棉花'], stealth: ['暗影', '夜魇', '黑曜', '幽冥'], ceramic: ['白垩', '天使', '晨星', '素羽'], scrap: ['废铁', '锈牙', '拾荒', '破锣'], toxic: ['剧毒', '酸蚀', '瘟疫', '变异'], ocean: ['深海', '霜牙', '潮汐', '冰川'], lava: ['熔核', '炎狱', '火山', '焦土'], carbon: ['碳骨', '零式', '机能', '极简'], gold: ['金甲', '鎏金', '黄金', '财神'], dragon: ['赤龙', '麒麟', '战神', '玄武'], duotone: ['双子', '撞色', '裂变', '镜像'] };
@@ -224,11 +228,12 @@ export function generateDesign(prompt, owner, opts = {}) {
       manta: [['gunner', 2], ['assassin', 1.2]], tank: [['tank', 3], ['gunner', 1], ['brawler', 1]], dog: [['assassin', 2], ['brawler', 2], ['gunner', 0.5]],
       spider: [['assassin', 1.5], ['brawler', 1.2], ['tank', 1], ['gunner', 0.8]], tiger: [['brawler', 2.5], ['assassin', 1.5], ['tank', 0.6]],
       turtle: [['tank', 3], ['gunner', 1.2], ['brawler', 0.6]], croc: [['brawler', 2], ['tank', 1.5], ['assassin', 0.8]], trex: [['brawler', 2.2], ['tank', 1.8], ['gunner', 0.5]],
-      flamingo: [['assassin', 2], ['gunner', 1.5], ['brawler', 0.6]], frog: [['brawler', 1.5], ['gunner', 1.2], ['assassin', 1.2], ['tank', 0.6]], rabbit: [['assassin', 2.5], ['brawler', 1.2], ['gunner', 0.6]],
+      flamingo: [['assassin', 2], ['gunner', 1.5], ['brawler', 0.6]],
     }[form];
     if (FR && !FR.some(([x]) => x === role)) role = r.weighted(FR);
   }
   if (form === 'hover' || form === 'wraith') form = 'manta'; // 旧形态并入蝠鲼
+  if (form === 'frog') form = 'croc'; if (form === 'rabbit') form = 'dog'; // 青蛙 / 兔子已下线
   const info = ROLE_INFO[role];
   const range = role === 'gunner' ? 'ranged' : (role === 'tank' && form !== 'tank' && r.chance(0.25)) || (form === 'tank' && role === 'tank' && r.chance(0.4)) ? 'ranged' : 'melee';
 
@@ -241,18 +246,30 @@ export function generateDesign(prompt, owner, opts = {}) {
   else main = range === 'ranged' ? r.weighted(rangedMains) : r.weighted(meleeMains[role]);
 
   const specialPool = {
-    tank: [['charge', 3], ['shock', 3], ['cannon', 2], ['flame', 2], ['drill', 1], ['elec', 1]],
-    assassin: [['chainsaw', 2], ['laser', 2], ['elec', 3], ['drill', 2], ['charge', 1]],
-    gunner: [['missile', 3], ['cannon', 3], ['laser', 3], ['flame', 1], ['elec', 1]],
-    brawler: [['charge', 3], ['chainsaw', 3], ['flame', 2], ['shock', 2], ['drill', 2]],
+    tank: [['charge', 3], ['shock', 3], ['cannon', 2], ['flame', 2], ['drill', 1], ['elec', 1], ['hook', 3], ['mortar', 2.5]],
+    assassin: [['chainsaw', 2], ['laser', 2], ['elec', 3], ['drill', 2], ['charge', 1], ['blink', 4], ['disc', 3], ['hook', 1.5]],
+    gunner: [['missile', 3], ['cannon', 3], ['laser', 3], ['flame', 1], ['elec', 1], ['mortar', 3.5], ['disc', 3]],
+    brawler: [['charge', 3], ['chainsaw', 3], ['flame', 2], ['shock', 2], ['drill', 2], ['hook', 3], ['blink', 2]],
   };
   const special = k.specials.length ? r.pick(k.specials) : r.weighted(specialPool[role]);
-  const ultPool = { tank: [['meteor', 3], ['inferno', 1], ['storm', 1], ['barrage', 1]], assassin: [['frenzy', 4], ['storm', 2], ['beam', 1]], gunner: [['barrage', 3], ['beam', 3], ['storm', 1]], brawler: [['meteor', 3], ['frenzy', 2], ['inferno', 2]] };
+  const ultPool = {
+    tank: [['meteor', 3], ['inferno', 1], ['storm', 1], ['barrage', 1], ['glacier', 3], ['blackhole', 2], ['tornado', 2], ['orbital', 1.5]],
+    assassin: [['frenzy', 3], ['storm', 2], ['beam', 1], ['phantom', 4.5], ['tornado', 1.5], ['blackhole', 1.5]],
+    gunner: [['barrage', 3], ['beam', 3], ['storm', 1], ['orbital', 4], ['blackhole', 3], ['glacier', 2]],
+    brawler: [['meteor', 3], ['frenzy', 2], ['inferno', 2], ['tornado', 4], ['glacier', 2.5], ['phantom', 1.5]],
+  };
   let ult = r.weighted(ultPool[role]);
   if (special === 'flame' && r.chance(0.5)) ult = 'inferno';
   if (special === 'elec' && r.chance(0.5)) ult = 'storm';
   if (special === 'laser' && r.chance(0.4)) ult = 'beam';
   if (special === 'missile' && r.chance(0.5)) ult = 'barrage';
+  if (special === 'blink' && r.chance(0.45)) ult = 'phantom';
+  if (special === 'mortar' && r.chance(0.35)) ult = 'orbital';
+  if (/冰|霜|雪|寒|ice|frost|snow/i.test(prompt) && r.chance(0.6)) ult = 'glacier';
+  if (/黑洞|引力|奇点|虚空|blackhole|gravity|void/i.test(prompt) && r.chance(0.7)) ult = 'blackhole';
+  if (/卫星|轨道|天基|太空|orbital|satellite|space/i.test(prompt) && r.chance(0.7)) ult = 'orbital';
+  if (/旋风|龙卷|风暴|陀螺|tornado|cyclone|whirl/i.test(prompt) && r.chance(0.7)) ult = 'tornado';
+  if (/忍|影|分身|幻|ninja|shadow|phantom/i.test(prompt) && r.chance(0.5)) ult = 'phantom';
 
   // —— 数值：定位基准 × 随机 × 关键词，再按综合战力归一（有差异但不失衡）
   const v = (base, sp) => base * r.range(1 - sp, 1 + sp);
@@ -316,7 +333,7 @@ export function generateDesign(prompt, owner, opts = {}) {
     id: 'm' + seed.toString(36) + (Date.now() % 100000).toString(36),
     seed, prompt, owner, name, role, roleCn: info.cn, form, formCn: FORM_CN[form], range, main, special, ult,
     moves: { basic: MAIN_NAMES[main], special: SPECIAL_NAMES[special], ult: ULT_NAMES[ult] },
-    stats, scale: info.scale * look.height ** 0.5, palette, look,
+    stats, scale: info.scale * look.height ** 0.5 * (FORM_SCALE[form] || 1), palette, look,
     createdAt: Date.now(), wins: 0, losses: 0, day: todayKey(), fought: 0, lastFought: 0,
   };
 }

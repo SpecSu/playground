@@ -57,6 +57,7 @@ export function makePanelMaps(seed = 7, W = 512) {
 }
 
 // 擂台台面（帆布）贴图：中心徽标 + 边框文字 + 污渍
+const clampN = (v, a, b) => Math.max(a, Math.min(b, v));
 export function makeCanvasFloor(W = 1024) {
   const c = document.createElement('canvas'); c.width = c.height = W; const g = c.getContext('2d');
   const grd = g.createRadialGradient(W / 2, W / 2, W * 0.1, W / 2, W / 2, W * 0.72);
@@ -71,10 +72,23 @@ export function makeCanvasFloor(W = 1024) {
   g.strokeStyle = 'rgba(221, 255, 111, 0.5)'; g.lineWidth = 3; g.strokeRect(58, 58, W - 116, W - 116);
   // 中心徽标
   g.save(); g.translate(W / 2, W / 2);
-  g.strokeStyle = 'rgba(255,255,255,0.16)'; g.lineWidth = 6; g.beginPath(); g.arc(0, 0, W * 0.2, 0, 7); g.stroke();
-  g.strokeStyle = 'rgba(222, 255, 114, 0.35)'; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, W * 0.215, 0, 7); g.stroke();
-  g.fillStyle = 'rgba(255,255,255,0.2)'; g.font = `italic 400 ${W * 0.09}px ArenaCond, Impact, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText('UGC', 0, -W * 0.045); g.font = `italic 400 ${W * 0.045}px ArenaCond, Impact, sans-serif`; g.letterSpacing = '2px'; g.fillStyle = 'rgba(227, 255, 133, 0.35)'; g.fillText('ROBOT ARENA', 0, W * 0.05);
+  g.strokeStyle = 'rgba(255,255,255,0.16)'; g.lineWidth = 7; g.beginPath(); g.arc(0, 0, W * 0.3, 0, 7); g.stroke();
+  g.strokeStyle = 'rgba(222, 255, 114, 0.35)'; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, W * 0.318, 0, 7); g.stroke();
+  // FIGHT BOT CLUB：Anton 斜体纯文字（无描边/投影/发光），正放居中
+  g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.fillStyle = 'rgba(245, 244, 240, 0.4)';
+  const word = (txt, yBase, size, ls) => {
+    g.font = `italic 400 ${size}px ArenaCond, Impact, sans-serif`; g.letterSpacing = `${ls}px`;
+    g.fillText(txt, ls / 2, yBase); // letterSpacing 会在末尾多出一格，右移半格抵消
+  };
+  // FIGHT 字号按实测宽度反推：与第二行 BOT CLUB 视觉宽度接近（略宽 4%）；行间距 ≈ 第二行字高的 30%，不松不挤
+  const s2 = W * 0.09, ls2 = 8, ls1 = 9;
+  const mw = (txt, size, ls) => { g.font = `italic 400 ${size}px ArenaCond, Impact, sans-serif`; g.letterSpacing = `${ls}px`; const m = g.measureText(txt); return { w: m.width - ls, h: m.actualBoundingBoxAscent || size * 0.72 }; };
+  const m2 = mw('BOT CLUB', s2, ls2), u = mw('FIGHT', 100, ls1);
+  const s1 = clampN(100 * (m2.w * 1.04) / u.w, W * 0.12, W * 0.2), m1 = mw('FIGHT', s1, ls1);
+  const gap = m2.h * 0.3, top = -(m1.h + gap + m2.h) / 2;
+  word('FIGHT', top + m1.h, s1, ls1);
+  word('BOT CLUB', top + m1.h + gap + m2.h, s2, ls2);
+  g.letterSpacing = '0px';
   g.restore();
   // 角落标记
   g.fillStyle = 'rgba(255,255,255,0.07)'; g.font = `700 ${W * 0.026}px Arial, sans-serif`; g.textAlign = 'center';
