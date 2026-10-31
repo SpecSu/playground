@@ -432,10 +432,11 @@ export class VFX {
   }
   // 伤害数字
   number(pos, text, cls = '', combo = 0, key = -1) {
-    // v10.2 密度控制：同一目标同时最多 3 个数字（超出复用该目标最旧的那个）；全场活跃越多，寿命越短
-    const live = this.nums.filter((q) => q.life > 0), mine = key >= 0 ? live.filter((q) => q.key === key) : [];
-    const N = mine.length >= 3 ? mine.reduce((a, b) => (a.life < b.life ? a : b)) : (this.nums.find((q) => q.life <= 0) || this.nums.reduce((a, b) => (a.life < b.life ? a : b)));
-    N.key = key; const crowd = live.length > 5 ? 0.7 : 1;
+    // v10.2 密度控制：每次命中都单独弹数字；同屏最多 8 个，超出时最旧的几个加速消散（尺寸随镜头距离在 update 里缩放）
+    const MAXN = 8, live = this.nums.filter((q) => q.life > 0 && !q.dying);
+    if (live.length >= MAXN) { live.sort((a, b) => a.life - b.life); for (let i = 0; i <= live.length - MAXN; i++) { live[i].dying = true; live[i].life = Math.min(live[i].life, 0.18); } }
+    const N = this.nums.find((q) => q.life <= 0) || this.nums.reduce((a, b) => (a.life < b.life ? a : b));
+    N.key = key; N.dying = false; const crowd = 1;
     // v10.1：连击时数字左右交错、弹得更快更高，寿命更短 → 节奏感
     const ck = Math.min(1, Math.max(0, combo - 1) / 7);
     N.life = N.max = (cls.includes('big') ? 1.3 : 0.95 - ck * 0.2) * crowd; N.p = pos.clone(); N.p.x += combo > 1 ? (combo % 2 ? 1 : -1) * rnd(0.35, 1.0) : rnd(-0.9, 0.9); N.p.y += rnd(-0.3, 0.5) + ck * 0.4; N.vy = rnd(2.4, 3.6) * (1 + ck * 0.6); N.pop = 1 + ck * 0.5; N.el.textContent = text;
@@ -600,7 +601,7 @@ export class VFX {
       const ds = Math.min(1, Math.max(0.5, 14 / Math.max(1, cam.position.distanceTo(N.p))));
       const sc = (u < 0.1 ? 0.5 + u / 0.1 * (0.5 + pk) : 1 + pk - Math.min(pk, (u - 0.1) * 2.4)) * ds;
       N.el.style.transform = `translate3d(${((_v.x + 1) / 2 * W).toFixed(1)}px, ${((1 - _v.y) / 2 * H).toFixed(1)}px, 0) translate(-50%, -50%) scale(${sc.toFixed(2)})`;
-      N.el.style.opacity = Math.min(1, N.life / 0.3).toFixed(2);
+      N.el.style.opacity = Math.min(1, N.life / (N.dying ? 0.18 : 0.3)).toFixed(2);
     }
     if (this.ext) this.ext.update(dt, t, ctx); // v10 扩展特效（需在粒子 update 之后、flush 之前写入即时光点）
     this.add.flush(); this.smk.flush(); this.str.flush();

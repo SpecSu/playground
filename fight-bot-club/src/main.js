@@ -451,15 +451,7 @@ function onSimEvent(type, d) {
           // v10.1 连击：同一攻击者 0.9s 内连续命中累加，数字越打越大、越快弹出
           const cs = slot(f), C = (G.cb = G.cb || [{ n: 0, t: 0 }, { n: 0, t: 0 }])[cs], nowC = performance.now();
           C.n = nowC - C.t < 900 ? C.n + 1 : 1; C.t = nowC; if (!ult) comboHud(cs, C.n);
-          if (f.d.range === 'ranged' && !ult && !crit && !big) {
-            // 远程高频命中：同一目标 0.45s 内合并成一个数字（先显示首发，其余累计后一次性弹出），避免数字墙挡住机甲
-            const k = 'rg' + slot(o), A = (G[k] = G[k] || { sum: 0, n: 0, t: 0, h: 0 }); const now = performance.now();
-            if (now - A.t > 450 && !A.n) { A.t = now; vfx.number(P, `${Math.round(dmg)}`, '', 0, slot(o)); }
-            else {
-              A.sum += dmg; A.n++; A.p = P.clone();
-              if (!A.h) A.h = setTimeout(() => { if (A.n) vfx.number(A.p, `${Math.round(A.sum)}`, A.sum >= 1200 ? 'big' : '', 0, slot(o)); A.sum = 0; A.n = 0; A.h = 0; A.t = performance.now(); }, Math.max(120, 450 - (now - A.t)));
-            }
-          } else vfx.number(P, `${Math.round(dmg)}`, crit ? 'crit' : big ? 'big' : '', ult ? 0 : C.n, slot(o));
+          vfx.number(P, `${Math.round(dmg)}`, crit ? 'crit' : big ? 'big' : '', ult ? 0 : C.n, slot(o));
         }
         // 音效
         if (kind === 'bullet') audio.play('hitFast', { vol: 0.35, cd: 0.07 });
@@ -724,8 +716,7 @@ function finishVote() {
   if (AS.n[0] === AS.n[1]) AS.n[Math.random() < 0.5 ? 0 : 1]++;
   const w = AS.n[0] > AS.n[1] ? 0 : 1; AS.win = w;
   VT.orbs[w].classList.add('win'); VT.orbs[1 - w].classList.add('lose');
-  // 揭晓：两圈都留在原位作背景，胜者略大（直径约 64%），败者仍清晰可见（约 36%），不再把败者挤到几乎消失
-  const sw = clamp(AS.n[w] / Math.max(1, AS.n[0] + AS.n[1]), 0.55, 0.59); layoutOrbs(w === 0 ? sw : 1 - sw);
+  // 揭晓：两圈保持投票结束瞬间的大小与位置，不再重新缩放
   VT.orbs.forEach((o, i) => (o.querySelector('em').textContent = AS.n[i]));
   VT.clock.textContent = '0';
   const e = G.E[w];
@@ -785,6 +776,7 @@ function ultCut(name, e, side = -1) {
   u.querySelector('.uc-owner').innerHTML = e ? `<b>${pilotName(e)}${e.mine ? '（我）' : ''}</b> 的「${e.design.name}」` : '';
   u.querySelector('.uc-ava img').src = pilotThumb(e); u.style.setProperty('--uc', side >= 0 ? VOTE_COL[side] : e ? e.design.palette.emissive : '#fff');
   u.classList.remove('show'); void u.offsetWidth; u.classList.add('show');
+  document.body.classList.add('ulting'); clearTimeout(ultCut.t); ultCut.t = setTimeout(() => document.body.classList.remove('ulting'), 1650);
 }
 let toastT = 0;
 function toast(s, dur = 2600) { const t = $('#toast'); t.textContent = s; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), dur); }
@@ -868,7 +860,7 @@ function updateHud(dt) {
     if (UK.txt !== txt) { UK.txt = txt; UK.b.textContent = txt; }
     const k = busy ? 0 : clamp(L / (S.ultPeriod || 1), 0, 1);
     UK.s.style.transform = `scaleX(${(1 - k).toFixed(3)})`;
-    UK.el.classList.toggle('hot', !busy && L <= 3 || AS.on); UK.el.classList.toggle('show', live); UK.el.classList.toggle('yield', AS.on || S.voteOpen); // 投票面板有自己的 4 秒倒计时：顶部条上收让位，结束后回落
+    UK.el.classList.toggle('hot', !busy && L <= 3 || AS.on); UK.el.classList.toggle('show', live); UK.el.classList.toggle('yield', AS.on || S.voteOpen || busy); // 投票面板有自己的 4 秒倒计时：顶部条上收让位，结束后回落
   }
 }
 function swatch(p) { return [p.primary, p.secondary, p.accent, p.emissive].map((c) => `<i style="background:${c}"></i>`).join(''); }

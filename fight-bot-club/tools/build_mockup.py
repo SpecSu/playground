@@ -58,17 +58,17 @@ css += '''
 /* 副标题为空时不显示底板（K.O. 下方空四边形） */
 .b-sub:empty{display:none!important}
 /* 大招背景板：玫红纯色 */
-#ultcut{background:rgba(245,105,168,.72)!important}
+#ultcut{background:rgba(245,105,168,.75)!important}
 .uc-tag{color:#171719!important}
 .uc-name{color:#F5F4F0!important;-webkit-text-stroke-color:#3A0A20!important;text-shadow:3px 3px 0 #171719!important}
 .uc-owner{color:#F5F4F0!important;text-shadow:none!important}
 /* v10.1 投票模式：条幅跟随获胜方投票色——黄绿方深色字，粉方白字 */
-#ultcut.v0{background:rgba(222,255,114,.94)!important}
+#ultcut.v0{background:rgba(222,255,114,.75)!important}
 #ultcut.v0 .uc-tag{color:rgba(23,23,25,.7)!important}
 #ultcut.v0 .uc-name{color:#171719!important;-webkit-text-stroke:0!important;text-shadow:2px 2px 0 rgba(255,255,255,.55)!important}
 #ultcut.v0 .uc-owner{color:#171719!important}
 #ultcut.v0 .uc-ava{box-shadow:0 0 0 3px #171719,0 0 0 6px #F5F4F0,0 6px 18px rgba(0,0,0,.5)!important}
-#ultcut.v1{background:rgba(245,105,168,.92)!important}
+#ultcut.v1{background:rgba(245,105,168,.75)!important}
 /* READY / FIGHT：主体白字不变，发光 + 投影改玫红 */
 .b-main:not(.ko):not(.win):not(.vs){-webkit-text-stroke-color:#2A0A18!important;text-shadow:0 0 22px rgba(245,105,168,.95),0 0 48px rgba(245,105,168,.5),0 5px 0 #9E3A68,0 10px 26px #000!important}
 /* K.O. / WINNER：与 READY/FIGHT 同款样式（白字+细描边+单层发光+实色下投影），仅颜色为香蕉黄；光效收紧不发糊 */

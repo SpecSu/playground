@@ -100,17 +100,17 @@ button:active { transform: scale(0.96); }
 .vsrow .vsx { font-size: 44px; color: var(--gold); text-shadow: 0 0 20px rgba(255, 180, 40, .9), 0 4px 0 #7a4b00; }
 
 /* 大招切入 */
-#ultcut { position: absolute; z-index: 20; left: -10%; right: -10%; top: 54%; height: 112px; pointer-events: none; opacity: 0; transform: skewY(-6deg) translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 61, 110, 0.85) 18%, rgba(255, 122, 61, 0.85) 82%, transparent); }
+#ultcut { position: absolute; z-index: 20; left: -10%; right: -10%; top: calc(var(--sat) + 96px); height: 100px; pointer-events: none; opacity: 0; transform: skewY(-6deg) translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 61, 110, 0.75) 18%, rgba(255, 122, 61, 0.75) 82%, transparent); }
 #ultcut.show { animation: ultIn 1.6s cubic-bezier(.2,.9,.3,1) forwards; }
 @keyframes ultIn { 0% { opacity: 0; transform: skewY(-6deg) translateX(-60%); } 12% { opacity: 1; transform: skewY(-6deg) translateX(0); } 82% { opacity: 1; transform: skewY(-6deg) translateX(2%); } 100% { opacity: 0; transform: skewY(-6deg) translateX(40%); } }
 .uc-inner { position: absolute; inset: 0; display: flex; align-items: center; gap: 14px; padding-left: 15%; }
-.uc-ava { flex: none; width: 82px; height: 82px; border-radius: 50%; overflow: hidden; transform: skewY(6deg); background: #171719;
+.uc-ava { flex: none; width: 74px; height: 74px; border-radius: 50%; overflow: hidden; transform: skewY(6deg); background: #171719;
   box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--uc, #fff), 0 6px 18px rgba(0, 0, 0, 0.6); }
 .uc-ava img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .uc-txt { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .uc-tag { font-size: 13px; letter-spacing: 6px; font-weight: 900; color: #ffe2a8; }
-.uc-name { font-size: 44px; line-height: 1.05; font-weight: 900; font-style: italic; letter-spacing: 1px; color: #fff; -webkit-text-stroke: 1px #3a0012; paint-order: stroke fill; text-shadow: 3px 3px 0 #7a1030, 0 0 18px rgba(255, 230, 160, 0.6); }
+.uc-name { font-size: 40px; line-height: 1.05; font-weight: 900; font-style: italic; letter-spacing: 1px; color: #fff; -webkit-text-stroke: 1px #3a0012; paint-order: stroke fill; text-shadow: 3px 3px 0 #7a1030, 0 0 18px rgba(255, 230, 160, 0.6); }
 .uc-owner { font-size: 14px; font-weight: 800; text-shadow: 0 1px 3px #000; color: #ffe; opacity: 0.95; white-space: nowrap; }
 .uc-owner b { font-size: 17px; font-weight: 900; }
 
@@ -417,14 +417,15 @@ body.assisting #toast { opacity: 0; } /* 投票时提示条不压在 TAP 圈上 
 #bottom.intro #queueWrap { opacity: 0; transform: translateY(14px); pointer-events: none; }
 #introCard { bottom: calc(var(--sab) + 66px); }
 /* 子弹时间：大招字幕上移，避开 TAP */
-body.assisting #ultcut { top: 15%; }
+/* v10.2 大招条幅放到屏幕上方（血条下方），让出中间给大招特效；此时 ULT 倒计时避让隐藏 */
+body.ulting #ultClock { opacity: 0 !important; transform: translateY(-14px) scale(.85); transition: none; }
 /* 投票获胜方配色的大招条幅：黄绿方用深色字保证可读，粉方保持白字 */
-#ultcut.v0 { background: linear-gradient(90deg, transparent, rgba(222, 255, 114, 0.94) 18%, rgba(196, 240, 70, 0.94) 82%, transparent); }
+#ultcut.v0 { background: linear-gradient(90deg, transparent, rgba(222, 255, 114, 0.75) 18%, rgba(196, 240, 70, 0.75) 82%, transparent); }
 #ultcut.v0 .uc-tag { color: rgba(23, 23, 25, 0.7); }
 #ultcut.v0 .uc-name { color: #171719; -webkit-text-stroke: 0; text-shadow: 3px 3px 0 rgba(255, 255, 255, 0.55); }
 #ultcut.v0 .uc-owner { color: #171719; text-shadow: none; }
 #ultcut.v0 .uc-ava { box-shadow: 0 0 0 3px #171719, 0 0 0 6px #fff, 0 6px 18px rgba(0, 0, 0, 0.5); }
-#ultcut.v1 { background: linear-gradient(90deg, transparent, rgba(245, 105, 168, 0.92) 18%, rgba(232, 72, 150, 0.92) 82%, transparent); }
+#ultcut.v1 { background: linear-gradient(90deg, transparent, rgba(245, 105, 168, 0.75) 18%, rgba(232, 72, 150, 0.75) 82%, transparent); }
 #ultcut.v1 .uc-tag { color: #fff; opacity: .85; }
 #ultcut.v1 .uc-name { text-shadow: 3px 3px 0 rgba(90, 10, 50, 0.8); -webkit-text-stroke: 1px #4a0828; }
 body.assisting #tapHint { display: none; }
