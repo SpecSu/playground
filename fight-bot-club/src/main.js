@@ -26,6 +26,8 @@ import { AudioEngine } from './audio/audio.js';
 import { Director } from './game/director.js';
 import { AVATARS, avatarVisible, loadAvatar, makeRider, renderThumbs, riderHeadBox } from './avatar/avatars.js';
 import { clamp } from './core/util.js';
+// 阵营色（上场后全局统一：血槽 / 名牌 / 出场卡 / 投票圈 / 大招条幅 / WINNER）：左黄绿、右粉
+const VOTE_DUR = 4, VOTE_COL = ['#DEFF72', '#F569A8'], VOTE_INK = ['#171719', '#171719'];
 
 const $ = (s) => document.querySelector(s);
 const app = $('#app'), canvas = $('#scene');
@@ -322,7 +324,7 @@ function nextMatch() {
   if (!G.ann.quick) director.setMode('intro');
   setupHud();
   renderQueue();
-  arena.setScreen(champ.design.name, chall.design.name, champ.design.palette.emissive, chall.design.palette.emissive);
+  arena.setScreen(champ.design.name, chall.design.name, VOTE_COL[0], VOTE_COL[1]); // 上场即锁定阵营色：左黄绿 / 右粉
   if (chall.mine) toast(`⚡ 你的机器人「${chall.design.name}」登场挑战！`);
 }
 function makeView(entry) {
@@ -396,7 +398,7 @@ function celebrate() {
   G.phase = 'celebrate'; G.t = 0;
   v.cele = 1; f.act = { type: 'celebrate', t: 0, dur: 99, data: {}, fired: {} };
   director.setMode('winner', { f, v });
-  banner('WINNER', `${AVATARS[e.ava]?.name || e.owner} · ${e.design.name}${G.champStreak > 1 ? ` · ${G.champStreak} 连胜` : ''}`, 'win', 3.2);
+  banner('WINNER', `${AVATARS[e.ava]?.name || e.owner} · ${e.design.name}${G.champStreak > 1 ? ` · ${G.champStreak} 连胜` : ''}`, 'win s' + wi, 3.2);
   audio.play('voWinner', { vol: 1, force: true, bus: 'master', vary: false }); audio.play('cheer1', { vol: 0.55, force: true });
   // v10.1：胜利不再弹「你的机器人赢了」——WINNER 大字 + 胜者特写已表达，提示条只会挡脸
 }
@@ -590,7 +592,7 @@ function onSimEvent(type, d) {
     case 'ultVote': startVote(); break;
     case 'ult': {
       const v = views.get(d.f), e = G.E[slot(d.f)];
-      ultCut(ULT_TEXT[d.ult] || d.f.d.moves?.ult || '大招', e, G.sim && G.sim.voteMode ? slot(d.f) : -1);
+      ultCut(ULT_TEXT[d.ult] || d.f.d.moves?.ult || '大招', e, slot(d.f)); // 大招条幅底色始终跟随释放方阵营色
       director.setMode('ult', { f: d.f, v }, 2.8); director.shake(0.9); director.punch(0.3);
       slow(0.35, 0.5); addFlash();
       audio.play('braam', { vol: 0.85, force: true }); audio.play('cinhit', { vol: 0.8, force: true }); audio.play('voCombo', { vol: 0.5, delay: 0.1, bus: 'master' }); audio.duckMusic(0.5, 3.2);
@@ -605,7 +607,6 @@ function onSimEvent(type, d) {
 }
 
 // ———————————————————— v10.1 观众投票大招：双方共用倒计时 → 子弹时间 4 秒投票 → 票多者放大招 ————————————————————
-const VOTE_DUR = 4, VOTE_COL = ['#DEFF72', '#F569A8'], VOTE_INK = ['#171719', '#171719'];
 const AS = { on: false, t: 0, n: [0, 0], shown: [0, 0], crowd: [0, 0], rate: [0, 0], surge: [0, 0], side: -1, mine: 0, share: 0.5, done: false };
 const vtEl = document.createElement('div'); vtEl.id = 'vote';
 vtEl.innerHTML = `<div class="vt-glow"><i class="g0"></i><i class="g1"></i></div>
@@ -760,7 +761,7 @@ function banner(main, sub = '', cls = '', dur = 1.4, html = false) {
 function introCard(i, noCut) {
   const e = G.E[i], f = G.F[i], v = G.V[i]; if (!e || !v) return;
   if (!(noCut && director.mode === 'introCard' && director.focus?.f === f)) director.setMode('introCard', { f, v, side: i ? -1 : 1 }, 0, !noCut);
-  const c = $('#introCard'); const col = e.design.palette.emissive;
+  const c = $('#introCard'); const col = VOTE_COL[i]; // 出场介绍卡跟随阵营色（= 血槽 / 名牌 / 投票圈）
   c.style.setProperty('--ic', col); c.className = i ? 'b' : 'a';
   const champTag = i === 0 ? (G.champStreak > 0 ? `擂主 · ${G.champStreak} 连胜` : '擂主') : (e.mine ? '我的挑战者' : '新挑战者');
   c.innerHTML = `<div class="ic-ava"><img src="${e.thumb || thumbs[e.ava] || ''}" alt=""></div><div class="ic-main"><div class="ic-top"><span class="ic-tag">${champTag}</span><span class="ic-owner"><small>创造者</small>${AVATARS[e.ava]?.name || e.owner}${e.mine ? '（我）' : ''}</span></div><div class="ic-name">${e.design.name}</div><div class="ic-role">${e.design.formCn || '人形'} · ${e.design.roleCn} · 大招「${e.design.moves.ult}」</div></div>`;
@@ -800,7 +801,7 @@ function setupTags() {
   for (let i = 0; i < 2; i++) {
     const e = G.E[i], t = ntags[i]; if (!e) continue;
     t.b.textContent = pilotName(e); t.em.textContent = e.mine ? '我' : ''; t.em.style.display = e.mine ? '' : 'none';
-    t.el.style.setProperty('--c', e.design.palette.emissive); t.x = -1;
+    t.el.style.setProperty('--c', VOTE_COL[i]); t.x = -1; // 名牌阵营色 = 血槽色 = 投票圈色（左黄绿 / 右粉）
   }
 }
 function updateTags(rdt) {
@@ -837,7 +838,7 @@ function setupHud() {
     h.ava.src = e.thumb || thumbs[e.ava] || '';
     h.name.innerHTML = `<b>${AVATARS[e.ava]?.name || e.owner}</b><i>·</i>${e.design.name}`;
     h.sub.textContent = `大招 · ${e.design.moves.ult}`;
-    h.lagV = 1; h.ava.parentElement.style.setProperty('--qc', e.design.palette.emissive);
+    h.lagV = 1; h.ava.parentElement.style.setProperty('--qc', VOTE_COL[i]);
   }
   $('#round').textContent = `ROUND ${G.round}`;
 }

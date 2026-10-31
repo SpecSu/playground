@@ -467,7 +467,7 @@ body.assisting #queueWrap { opacity: 0; pointer-events: none; }
 .nt-in { position: absolute; left: 0; top: 4px; transform: translateX(-50%); display: flex; align-items: center; gap: 4px; white-space: nowrap; isolation: isolate;
   padding: 1px 10px; font-size: 11px; line-height: 14px; font-weight: 800; font-style: italic; color: rgba(255, 255, 255, 0.92); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); }
 /* 倾斜四边形底板（与 HUD/队列的斜切语言统一） */
-.nt-in::before { content: ''; position: absolute; inset: 0; z-index: -1; transform: skewX(-18deg); background: rgba(12, 12, 16, 0.5); border-bottom: 2px solid var(--c); border-left: 3px solid var(--c); }
+.nt-in::before { content: ''; position: absolute; inset: 0; z-index: -1; transform: skewX(-18deg); background: color-mix(in srgb, var(--c) 18%, rgba(12, 12, 16, 0.6)); border-bottom: 2px solid var(--c); border-left: 4px solid var(--c); }
 /* 「我」：与名字同字号同斜体（继承 .nt-in 的 italic），只换黄色 */
 .nt-in em { font-style: italic; font-size: 11px; line-height: 14px; color: #FFE135; font-weight: 900; }
 
@@ -499,10 +499,31 @@ body.assisting #queueWrap { opacity: 0; pointer-events: none; }
 #vote { position: absolute; inset: 0; z-index: 60; display: none; flex-direction: column; align-items: center; pointer-events: none;
   padding: calc(var(--sat) + 103px) 14px calc(var(--sab) + 14px); background: rgba(6, 6, 10, 0.5); }
 #vote.on, #vote.release { display: flex; }
-#vote.on { animation: vtIn .25s ease-out both; }
-#vote.release { animation: vtOut .24s ease-in forwards; } /* 快速让位给大招色带 */
+#vote.on { animation: vtIn .2s ease-out both; }
+#vote.release { animation: vtOut .26s ease-in forwards; } /* 快速让位给大招色带 */
 @keyframes vtIn { from { opacity: 0; } }
-@keyframes vtOut { to { opacity: 0; } }
+@keyframes vtOut { 40% { opacity: 1; } to { opacity: 0; } }
+/* v10.2 入场（总长 ≈0.45s，不占投票时间）：VOTE NOW 斜切甩入 → 副标/倒计时落下 → 两张选手卡从两侧飞入 → 票圈弹出 */
+#vote.on .vt-title { animation: vtTitleIn .32s cubic-bezier(.2, 1.3, .4, 1) both; }
+#vote.on .vt-sub { animation: vtDrop .24s ease-out .07s both; }
+#vote.on .vt-clock { animation: vtDrop .24s ease-out .1s both; }
+#vote.on .vt-card.s0 { animation: vtCardL .3s cubic-bezier(.2, 1.2, .4, 1) .08s both; }
+#vote.on .vt-card.s1 { animation: vtCardR .3s cubic-bezier(.2, 1.2, .4, 1) .08s both; }
+#vote.on .vt-vs { animation: vtVs .26s cubic-bezier(.2, 1.6, .4, 1) .16s both; }
+#vote.on .vt-arena { animation: vtArenaIn .34s cubic-bezier(.2, 1.35, .4, 1) .12s both; }
+#vote.on .vt-tip { animation: vtDrop .24s ease-out .2s both; }
+@keyframes vtTitleIn { from { opacity: 0; transform: translateX(-70px) skewX(-18deg) scale(1.25); } 60% { opacity: 1; } }
+@keyframes vtDrop { from { opacity: 0; transform: translateY(-14px); } }
+@keyframes vtCardL { from { opacity: 0; transform: translateX(-110%) skewX(-12deg); } }
+@keyframes vtCardR { from { opacity: 0; transform: translateX(110%) skewX(12deg); } }
+@keyframes vtVs { from { opacity: 0; transform: scale(2.2); } }
+@keyframes vtArenaIn { from { opacity: 0; transform: scale(.55); } 55% { opacity: 1; } }
+/* 退场（≈0.26s）：票圈向下收缩沉出、结果公告向右滑出，整体随后淡出 */
+#vote.release .vt-head, #vote.release .vt-cards, #vote.release .vt-tip { opacity: 0; } /* 揭晓时已退场的元素在 release 阶段保持隐藏，避免回闪 */
+#vote.release .vt-arena { animation: vtArenaOut .24s cubic-bezier(.5, 0, .9, .4) forwards; }
+#vote.release .vt-result.show { animation: vrOut .22s cubic-bezier(.5, 0, .9, .4) forwards; }
+@keyframes vtArenaOut { to { opacity: 0; transform: translateY(40px) scale(.7); } }
+@keyframes vrOut { from { opacity: 1; scale: 1; } to { opacity: 0; translate: 90px 0; scale: .92; } }
 /* 标题区：VOTE NOW 大字 + 中文副标 + 倒计时，三层上下排开，留足呼吸 */
 .vt-head { display: flex; flex-direction: column; align-items: center; overflow: visible; }
 .vt-title { font-family: 'ArenaCond', Impact, sans-serif; font-style: italic; font-weight: 400; font-size: 58px; line-height: 1.05; letter-spacing: 4px; padding: 0 .12em; color: #F5F4F0;

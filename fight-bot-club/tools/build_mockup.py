@@ -76,16 +76,21 @@ css += '''
   text-shadow:0 0 14px rgba(255,225,53,.85),0 5px 0 #9E8A12,0 10px 22px #000!important}
 .b-main.ko{font-size:120px!important}
 .b-main.win{font-size:88px!important}
+/* v10.2 WINNER 发光/投影跟随胜方阵营色（左黄绿 / 右粉），与血槽、名牌、投票圈统一 */
+.b-main.win.s0{-webkit-text-stroke:2px #1E2606!important;text-shadow:0 0 14px rgba(222,255,114,.85),0 5px 0 #7E9A12,0 10px 22px #000!important}
+.b-main.win.s1{-webkit-text-stroke:2px #2A0A18!important;text-shadow:0 0 14px rgba(245,105,168,.85),0 5px 0 #9E3A68,0 10px 22px #000!important}
+.b-main.win.s0+.b-sub{border-bottom:3px solid #DEFF72!important}
+.b-main.win.s1+.b-sub{border-bottom:3px solid #F569A8!important}
 /* VS 报幕：轻量斜切排版，无大块底色，透出场景 */
 .b-main.vs{text-shadow:none!important;-webkit-text-stroke:0!important;font-style:normal}
 .b-main.vs .vsrow{gap:14px;align-items:center;padding:0 14px}
-.b-main.vs .vsn{position:relative;flex:1;font-family:'ArenaCond',Impact,sans-serif;font-style:italic;font-weight:400;font-size:24px;letter-spacing:1px;color:#F5F4F0!important;
-  text-shadow:0 2px 0 #171719,0 0 12px rgba(23,23,25,.9)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:7px;transform:skewX(-8deg)}
+.b-main.vs .vsn{position:relative;flex:1;font-family:'ArenaCond',Impact,sans-serif;font-style:italic;font-weight:900;font-size:24px;letter-spacing:1px;color:#F5F4F0!important;
+  -webkit-text-stroke:1.4px #0B0B0D;paint-order:stroke fill;text-shadow:0 2px 0 #0B0B0D,0 0 10px rgba(11,11,13,.85)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:7px;transform:skewX(-8deg)}
 .b-main.vs .vsn::after{content:'';position:absolute;bottom:0;height:2px;width:72%;transform:skewX(-30deg)}
-.b-main.vs .vsn.a::after{right:0;background:#F569A8;box-shadow:-10px 0 0 -0.5px #F569A8,-16px 0 0 -0.5px rgba(245,105,168,.5)}
-.b-main.vs .vsn.b::after{left:0;background:#DEFF72}
+.b-main.vs .vsn.a::after{right:0;background:#DEFF72;box-shadow:-10px 0 0 -0.5px #DEFF72,-16px 0 0 -0.5px rgba(222,255,114,.5)}
+.b-main.vs .vsn.b::after{left:0;background:#F569A8}
 .b-main.vs .vsx{font-family:'ArenaCond',Impact,sans-serif;font-style:italic;font-size:52px;line-height:1;letter-spacing:0;color:#F5F4F0!important;
-  -webkit-text-stroke:1.5px #171719;paint-order:stroke fill;text-shadow:-3px 0 0 #F569A8,3px 0 0 #DEFF72,0 6px 14px rgba(0,0,0,.8)!important;transform:skewX(-8deg)}
+  -webkit-text-stroke:1.5px #171719;paint-order:stroke fill;text-shadow:-3px 0 0 #DEFF72,3px 0 0 #F569A8,0 6px 14px rgba(0,0,0,.8)!important;transform:skewX(-8deg)}
 .b-main.vs + .b-sub{display:table!important;margin:12px auto 0!important;padding:3px 12px!important;font-size:11px!important;font-weight:800;letter-spacing:3px;
   color:rgba(245,244,240,.85)!important;background:rgba(23,23,25,.45)!important;border:1px solid rgba(245,244,240,.18);text-shadow:none!important;
   clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);backdrop-filter:none!important}

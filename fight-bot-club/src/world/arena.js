@@ -119,13 +119,13 @@ export class Arena {
         people.push({ x: Math.cos(a) * rr, y, z: Math.sin(a) * rr, a, s: 0.85 + r() * 0.3, c: r(), ph: r() * 10 });
       }
     }
-    const stands = new THREE.Mesh(mergeGeometries(standGeo.map((g) => g.toNonIndexed())), new THREE.MeshStandardMaterial({ color: 0x10131d, roughness: 0.8, side: THREE.DoubleSide }));
+    const stands = new THREE.Mesh(mergeGeometries(standGeo.map((g) => g.toNonIndexed())), new THREE.MeshPhysicalMaterial({ color: 0x15161e, roughness: 1, metalness: 0, envMapIntensity: 0.12, sheen: 0.7, sheenRoughness: 0.85, sheenColor: new THREE.Color(0x2c2a38), side: THREE.DoubleSide }) /* v10.2 绒布座席：无镜面高光，仅柔和的绒面边缘光 */);
     scene.add(stands);
     // 人：身体 + 头合成一个几何体
     const body = new THREE.CylinderGeometry(0.28, 0.34, 1.0, 6); body.translate(0, 0.5, 0);
     const head = new THREE.SphereGeometry(0.22, 6, 5); head.translate(0, 1.2, 0);
     const pg = mergeGeometries([body.toNonIndexed(), head.toNonIndexed()]);
-    const pm = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+    const pm = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0, envMapIntensity: 0.25 });
     pm.onBeforeCompile = (sh) => {
       sh.uniforms.uTime = GLOBAL_TIME;
       sh.vertexShader = 'uniform float uTime;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
@@ -134,7 +134,7 @@ export class Arena {
     };
     const crowd = new THREE.InstancedMesh(pg, pm, people.length);
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), col = new THREE.Color();
-    const tints = [0x2a3350, 0x3a2440, 0x1f3a3a, 0x40302a, 0x262a36, 0x4a1f2e];
+    const tints = [0x2a3350, 0x3a2440, 0x1f3a3a, 0x40302a, 0x262a36, 0x4a1f2e].map((h) => { const c = new THREE.Color(h), hsl = {}; c.getHSL(hsl); return c.setHSL(hsl.h, hsl.s * 0.4, hsl.l * 0.95).getHex(); }); // v10.2 观众降饱和，退到背景
     people.forEach((p, i) => {
       q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -p.a - Math.PI / 2);
       m4.compose(new THREE.Vector3(p.x, p.y, p.z), q, new THREE.Vector3(p.s, p.s, p.s));
@@ -144,7 +144,7 @@ export class Arena {
     // 荧光棒 / 手机闪光（点精灵，着色器闪烁）
     const n = Math.floor(people.length * 0.55);
     const pos = new Float32Array(n * 3), cl = new Float32Array(n * 3), ph = new Float32Array(n);
-    const palette = [[0.961, 0.412, 0.659], [0.871, 1, 0.447], [1, 0.882, 0.208], [0.718, 0.643, 1], [0.498, 0.898, 0.804]];
+    const palette = [[0.961, 0.412, 0.659], [0.871, 1, 0.447], [1, 0.882, 0.208], [0.718, 0.643, 1], [0.498, 0.898, 0.804]].map((c) => { const m = (c[0] + c[1] + c[2]) / 3; return c.map((v) => (v + (m - v) * 0.45) * 0.8); }); // v10.2 荧光棒降饱和降亮，不抢战斗主视觉
     for (let i = 0; i < n; i++) {
       const p = people[Math.floor(r() * people.length)];
       pos.set([p.x * 0.985, p.y + 1.75 + r() * 0.4, p.z * 0.985], i * 3); cl.set(palette[Math.floor(r() * palette.length)], i * 3); ph[i] = r() * 100;
@@ -165,16 +165,8 @@ export class Arena {
   buildTruss(r) {
     const scene = this.scene;
     const Y = 15, W = 13;
+    // v10.2 去掉环形灯架围栏（常挡视线）：每盏射灯改为从屋顶垂下一根细吊杆 + 小 U 形支架
     const g = [];
-    for (let s = 0; s < 4; s++) {
-      const ang = s * Math.PI / 2;
-      for (const dy of [0, 0.9]) {
-        const bar = new THREE.BoxGeometry(W * 2 + 0.6, 0.12, 0.12); bar.translate(0, Y + dy, W); bar.rotateY(ang); g.push(bar);
-        const bar2 = new THREE.BoxGeometry(W * 2 + 0.6, 0.12, 0.12); bar2.translate(0, Y + dy, W + 0.8); bar2.rotateY(ang); g.push(bar2);
-      }
-    }
-    const truss = new THREE.Mesh(mergeGeometries(g), new THREE.MeshStandardMaterial({ color: 0x3a3f4c, metalness: 0.9, roughness: 0.4 }));
-    scene.add(truss);
     // 灯头 + 体积光锥（加色，不是真实光源）
     const headGeo = [], cones = [];
     const coneMat = new THREE.ShaderMaterial({
@@ -189,6 +181,9 @@ export class Arena {
       const ang = i / 8 * Math.PI * 2 + 0.39;
       const px = Math.cos(ang) * W, pz = Math.sin(ang) * W;
       const hg = new THREE.CylinderGeometry(0.35, 0.45, 0.8, 10); hg.translate(px, Y - 0.4, pz); headGeo.push(hg);
+      const rod = new THREE.CylinderGeometry(0.05, 0.05, 22, 6); rod.translate(px, Y + 11, pz); g.push(rod);
+      const yoke = new THREE.BoxGeometry(1.0, 0.08, 0.08); yoke.translate(px, Y + 0.12, pz); g.push(yoke);
+      for (const sx of [-0.5, 0.5]) { const arm = new THREE.BoxGeometry(0.07, 0.6, 0.07); arm.translate(px + sx, Y - 0.18, pz); g.push(arm); }
       const len = 19;
       const cg = new THREE.CylinderGeometry(0.3, 3.2, len, 20, 1, true); cg.translate(0, -len / 2, 0);
       const m = coneMat.clone(); m.uniforms.uCol.value = new THREE.Color(cols[i]);
@@ -200,6 +195,7 @@ export class Arena {
       lens.position.set(px, Y - 0.82, pz); lens.rotation.x = Math.PI / 2; scene.add(lens);
     }
     scene.add(new THREE.Mesh(mergeGeometries(headGeo), new THREE.MeshStandardMaterial({ color: 0x15171d, metalness: 0.7, roughness: 0.5 })));
+    scene.add(new THREE.Mesh(mergeGeometries(g), new THREE.MeshStandardMaterial({ color: 0x3a3f4c, metalness: 0.9, roughness: 0.4 })));
   }
 
   buildScreen() {
