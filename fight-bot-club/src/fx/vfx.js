@@ -431,11 +431,14 @@ export class VFX {
     }
   }
   // 伤害数字
-  number(pos, text, cls = '', combo = 0) {
-    const N = this.nums.find((q) => q.life <= 0) || this.nums.reduce((a, b) => (a.life < b.life ? a : b));
+  number(pos, text, cls = '', combo = 0, key = -1) {
+    // v10.2 密度控制：同一目标同时最多 3 个数字（超出复用该目标最旧的那个）；全场活跃越多，寿命越短
+    const live = this.nums.filter((q) => q.life > 0), mine = key >= 0 ? live.filter((q) => q.key === key) : [];
+    const N = mine.length >= 3 ? mine.reduce((a, b) => (a.life < b.life ? a : b)) : (this.nums.find((q) => q.life <= 0) || this.nums.reduce((a, b) => (a.life < b.life ? a : b)));
+    N.key = key; const crowd = live.length > 5 ? 0.7 : 1;
     // v10.1：连击时数字左右交错、弹得更快更高，寿命更短 → 节奏感
     const ck = Math.min(1, Math.max(0, combo - 1) / 7);
-    N.life = N.max = cls.includes('big') ? 1.3 : 0.95 - ck * 0.2; N.p = pos.clone(); N.p.x += combo > 1 ? (combo % 2 ? 1 : -1) * rnd(0.35, 1.0) : rnd(-0.9, 0.9); N.p.y += rnd(-0.3, 0.5) + ck * 0.4; N.vy = rnd(2.4, 3.6) * (1 + ck * 0.6); N.pop = 1 + ck * 0.5; N.el.textContent = text;
+    N.life = N.max = (cls.includes('big') ? 1.3 : 0.95 - ck * 0.2) * crowd; N.p = pos.clone(); N.p.x += combo > 1 ? (combo % 2 ? 1 : -1) * rnd(0.35, 1.0) : rnd(-0.9, 0.9); N.p.y += rnd(-0.3, 0.5) + ck * 0.4; N.vy = rnd(2.4, 3.6) * (1 + ck * 0.6); N.pop = 1 + ck * 0.5; N.el.textContent = text;
     N.el.className = 'dmg ' + cls; N.el.style.display = 'block';
     const v = parseFloat(text);
     if (!isNaN(v) && !/block|heal|tag/.test(cls)) {
@@ -592,7 +595,10 @@ export class VFX {
       _v.copy(N.p).project(cam);
       if (_v.z > 1) { N.el.style.display = 'none'; continue; }
       N.el.style.display = 'block';
-      const u = 1 - N.life / N.max; const pk = 0.4 * (N.pop || 1); const sc = u < 0.1 ? 0.5 + u / 0.1 * (0.5 + pk) : 1 + pk - Math.min(pk, (u - 0.1) * 2.4);
+      const u = 1 - N.life / N.max; const pk = 0.4 * (N.pop || 1);
+      // 透视缩放：数字是屏幕像素尺寸，镜头拉远时会相对机甲变得巨大 → 按相机距离缩小（近景 1，远景最小 0.5）
+      const ds = Math.min(1, Math.max(0.5, 14 / Math.max(1, cam.position.distanceTo(N.p))));
+      const sc = (u < 0.1 ? 0.5 + u / 0.1 * (0.5 + pk) : 1 + pk - Math.min(pk, (u - 0.1) * 2.4)) * ds;
       N.el.style.transform = `translate3d(${((_v.x + 1) / 2 * W).toFixed(1)}px, ${((1 - _v.y) / 2 * H).toFixed(1)}px, 0) translate(-50%, -50%) scale(${sc.toFixed(2)})`;
       N.el.style.opacity = Math.min(1, N.life / 0.3).toFixed(2);
     }

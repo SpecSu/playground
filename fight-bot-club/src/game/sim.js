@@ -36,10 +36,11 @@ export const ROLE_AI = {
 // engage：贴身缠斗时长；brk：脱离后要拉开到的距离；prowl：游走时长；mode：游走方式；hop：游走时左右 / 后跳概率（每次决策）
 // hopV / hopS：跳跃起跳竖直速度 / 水平速度；ground：不跳，用地面滑步；rush：冲刺速度倍率；leap：冲刺时飞扑概率；far：远程保持距离
 export const STYLE = {
-  kite:   { engage: [1.8, 3.0], brk: [8.5, 11], prowl: [1.2, 2.2], mode: 'orbit', hop: 0.4, hopV: 9.5, hopS: 8.5, rush: 1.75, leap: 0.55, far: [9, 12.5], mirror: 0.45 },
-  pounce: { engage: [2.6, 4.2], brk: [7.5, 10], prowl: [0.7, 1.3], mode: 'stalk', hop: 0.18, hopV: 10.5, hopS: 9.5, rush: 1.95, leap: 0.6, far: [7.5, 10], mirror: 0.6 },
-  heavy:  { engage: [3.6, 5.6], brk: [5.2, 7], prowl: [0.8, 1.4], mode: 'press', hop: 0.3, ground: true, rush: 1.35, leap: 0.12, far: [6.5, 8.5], mirror: 0.35 },
-  agile:  { engage: [2.0, 3.4], brk: [6.5, 9], prowl: [0.8, 1.5], mode: 'weave', hop: 0.32, hopV: 10, hopS: 8, rush: 1.7, leap: 0.4, far: [8, 11], mirror: 0.55 },
+  // v10.2b 收紧：手机竖屏里两台要始终够大 → 脱离只拉开到 4.5~6.5m、游走很短就冲回，大部分时间仍是中近距离缠斗
+  kite:   { engage: [2.4, 3.8], brk: [5.2, 6.8], prowl: [0.5, 1.0], mode: 'orbit', hop: 0.3, hopV: 8.5, hopS: 6.5, rush: 1.8, leap: 0.5, far: [5.5, 7.2], mirror: 0.3 },
+  pounce: { engage: [3.2, 5.0], brk: [4.8, 6.2], prowl: [0.4, 0.8], mode: 'stalk', hop: 0.15, hopV: 9.5, hopS: 7, rush: 2.0, leap: 0.6, far: [5, 6.5], mirror: 0.4 },
+  heavy:  { engage: [4.2, 6.2], brk: [4.2, 5.4], prowl: [0.4, 0.8], mode: 'press', hop: 0.25, ground: true, rush: 1.4, leap: 0.12, far: [5, 6], mirror: 0.25 },
+  agile:  { engage: [2.6, 4.0], brk: [4.6, 6.0], prowl: [0.4, 0.9], mode: 'weave', hop: 0.28, hopV: 9, hopS: 6.5, rush: 1.8, leap: 0.4, far: [5.5, 7], mirror: 0.35 },
 };
 const FORM_STYLE = { manta: 'kite', hover: 'kite', wraith: 'kite', flamingo: 'kite', spider: 'kite', trex: 'pounce', tiger: 'pounce', croc: 'pounce', tank: 'heavy', turtle: 'heavy', dog: 'agile', humanoid: 'agile', rabbit: 'agile', frog: 'agile' };
 
@@ -287,7 +288,7 @@ export class Sim {
       if (R() < p) {
         f.tact = rr(1.6, 3.0);
         const pick = R();
-        if (pick < 0.4) { f.move.mode = 'retreat'; f.move.t = rr(0.9, 1.6); }
+        if (pick < 0.4) { f.move.mode = 'retreat'; f.move.t = rr(0.5, 0.9); }
         else if (pick < 0.8) { f.move.mode = 'juke'; f.move.t = rr(1.4, 2.4); f.move.jt = 0; }
         else { f.move.mode = 'feint'; f.move.t = rr(1.0, 1.5); f.move.ft = 0; }
         f.cd.think = 0; return;
@@ -312,17 +313,16 @@ export class Sim {
     } else {
       if (d < 3.4) {
         if (R() < 0.45) return this.startBash(f, o);
-        if (R() < 0.6 && this.hop(f, o, R() < 0.6 ? 'back' : 'backside', 1.25)) return; // 被贴脸 → 大跳拉开
+        if (R() < 0.6 && this.hop(f, o, R() < 0.6 ? 'back' : 'backside', 1.0)) return; // 被贴脸 → 大跳拉开
         if (f.cd.dodge <= 0 && R() < 0.5) return this.doReaction(f, o, R() < 0.4 ? 'jumpback' : 'dodge');
         f.move.mode = 'retreat'; f.move.t = rr(0.6, 1.2); return;
       }
       // v10.2 远程：保持风格距离绕大圈，射击间隙左右跳 / 后跳；偶尔换一个远距离保持值，制造推拉
       if (R() < 0.12) f.farD = rr(...f.sty.far);
       if (d < f.farD - 3 && R() < 0.45 && this.hop(f, o, R() < 0.5 ? 'back' : 'backside')) return;
-      if (d <= 16 && R() < Math.min(1, aggr * 1.15) && f.facingErr(o) < 0.6) return this.startShoot(f, o);
+      if (d > f.farD + 2) { f.move.mode = 'chase'; f.move.t = rr(0.5, 0.9); return; } // 超出保持距离：先压回来再打，不在远处站桩输出
+      if (R() < Math.min(1, aggr * 1.15) && f.facingErr(o) < 0.6) return this.startShoot(f, o);
       if (R() < f.sty.hop && this.hop(f, o, 'side')) return;
-      if (d > 15) { f.move.mode = 'approach'; f.move.t = rr(0.6, 1.2); return; }
-      if (R() < 0.12) { f.move.mode = 'wander'; this.pickWander(f, o); f.move.t = rr(0.8, 1.4); return; }
       f.move.mode = 'orbit'; f.move.r = f.farD; f.move.t = rr(0.8, 1.6); if (R() < 0.3) f.move.dir *= -1;
     }
   }
@@ -337,8 +337,8 @@ export class Sim {
         if (now < rh.until || d > 5.5) return false;
         if (opHp < 0.18 && R() < 0.75) { rh.until = now + 1.5; return false; } // 对手残血：多半不撤，压上收割
         // 脱离：起跳后撤 / 斜后跳 / 重甲滑步
-        rh.ph = 'break'; rh.dist = rr(...S.brk); rh.until = now + 1.8;
-        this.hop(f, o, R() < 0.6 ? 'back' : 'backside', 1.35, true);
+        rh.ph = 'break'; rh.dist = rr(...S.brk); rh.until = now + 1.1;
+        this.hop(f, o, R() < 0.6 ? 'back' : 'backside', 1.0, true);
         m.mode = 'breakaway'; m.r = rh.dist; m.t = 2; if (R() < 0.5) m.dir *= -1;
         // 对手有概率也拉开进入对峙（而不是立刻追上去），形成「分开—对峙—对撞」的大节奏
         if (o.alive && o.d.range === 'melee' && o.rh && o.rh.ph === 'engage' && R() < S.mirror) { o.rh.ph = 'prowl'; o.rh.until = now + rr(0.8, 1.5); o.rh.dist = rh.dist; }
@@ -350,18 +350,18 @@ export class Sim {
         else { m.mode = 'breakaway'; m.r = rh.dist; m.t = 1; return true; }
       } // fallthrough
       case 'prowl': {
-        if (now > rh.until) { rh.ph = 'rush'; rh.until = now + 2.2; this.emit('tactic', { f, kind: 'rush' }); }
+        if (now > rh.until || d > S.brk[1] + 1.5) { rh.ph = 'rush'; rh.until = now + 2.2; this.emit('tactic', { f, kind: 'rush' }); }
         else {
           if (d < 3) { rh.ph = 'engage'; rh.until = now + rr(...S.engage); f.burstT = now + 1.2; return false; } // 被对手贴上来了 → 直接开打
           if (R() < S.hop) { if (this.hop(f, o, S.mode === 'orbit' && R() < 0.35 ? 'backside' : 'side')) return true; }
-          m.mode = S.mode; m.r = Math.max(rh.dist || 0, S.mode === 'press' ? 4.2 : S.mode === 'weave' ? 6 : S.brk[0]); m.t = 1.2;
+          m.mode = S.mode; m.r = Math.min(rh.dist || S.brk[0], S.mode === 'press' ? 4 : S.mode === 'weave' ? 4.8 : S.brk[0]); m.t = 1.2;
           if (S.mode !== 'weave' && R() < 0.25) m.dir *= -1;
           return true;
         }
       } // fallthrough
       case 'rush': {
         if (d <= f.reach + 0.4 || now > rh.until) { rh.ph = 'engage'; rh.until = now + rr(...S.engage); f.burstT = now + 1.8; if (d <= f.reach + 0.4) { this.startBasic(f, o); return true; } return false; }
-        if (d > 4.5 && d < 10 && f.cd.jump <= 0 && R() < S.leap) { rh.ph = 'engage'; f.burstT = now + 2.4; rh.until = now + rr(...S.engage) + 1.2; return this.startLeap(f, o), true; }
+        if (d > 4.2 && d < 9 && f.cd.jump <= 0 && R() < S.leap) { rh.ph = 'engage'; f.burstT = now + 2.4; rh.until = now + rr(...S.engage) + 1.2; return this.startLeap(f, o), true; }
         if (d > 3.2 && d < 5.8 && f.cd.jump <= 0 && R() < S.leap * 0.7) { rh.ph = 'engage'; f.burstT = now + 2.2; rh.until = now + rr(...S.engage) + 0.8; return this.startJumpPunch(f, o), true; }
         m.mode = 'rush'; m.t = 1; return true;
       }

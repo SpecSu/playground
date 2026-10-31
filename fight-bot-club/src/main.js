@@ -208,11 +208,16 @@ async function boot() {
   // 冷启动：4 台预设机器人 + 4 位模拟玩家
   // v10.2 开场 5 台（前 2 台对战、后 3 台候擂）：体型 5 选不重复、大招互不重复；
   // 第一轮对战两台大招固定「全弹发射」「万雷天罚」，体型随机；候擂 3 台大招从其余大招里随机且互不相同
-  const forms = [...FORM_LIST].sort(() => Math.random() - 0.5).slice(0, BOTS.length);
+  // 首轮看点约束：可以两近战 / 一远一近，不允许两远程 → 「万雷天罚」那台固定为近战体型 + 近战打法
+  const KITE = new Set(['manta', 'flamingo', 'spider']);
+  const meleeForms = FORM_LIST.filter((f) => !KITE.has(f));
+  const anchor = meleeForms[Math.floor(Math.random() * meleeForms.length)];
+  const forms = [anchor, ...[...FORM_LIST].filter((f) => f !== anchor).sort(() => Math.random() - 0.5)].slice(0, BOTS.length);
+  [forms[0], forms[1]] = [forms[1], forms[0]]; // forms[1] = 近战锚点（万雷天罚），forms[0] 随机（全弹发射）
   const usedUlt = new Set(['barrage', 'storm']);
   const opener = BOTS.map((b, i) => {
     const want = i === 0 ? 'barrage' : i === 1 ? 'storm' : null;
-    const d = pickDesign(b.name, () => ({ form: forms[i] }), (x) => (want ? x.ult === want : !usedUlt.has(x.ult)), null, 400);
+    const d = pickDesign(b.name, () => ({ form: forms[i] }), (x) => (want ? x.ult === want && (i !== 1 || x.range === 'melee') : !usedUlt.has(x.ult)), null, 600);
     usedUlt.add(d.ult); return d;
   });
   BOTS.forEach((b, i) => queue.push(makeEntry(opener[i], b.ava, b.name)));
@@ -446,7 +451,15 @@ function onSimEvent(type, d) {
           // v10.1 连击：同一攻击者 0.9s 内连续命中累加，数字越打越大、越快弹出
           const cs = slot(f), C = (G.cb = G.cb || [{ n: 0, t: 0 }, { n: 0, t: 0 }])[cs], nowC = performance.now();
           C.n = nowC - C.t < 900 ? C.n + 1 : 1; C.t = nowC; if (!ult) comboHud(cs, C.n);
-          vfx.number(P, `${Math.round(dmg)}`, crit ? 'crit' : big ? 'big' : '', ult ? 0 : C.n);
+          if (f.d.range === 'ranged' && !ult && !crit && !big) {
+            // 远程高频命中：同一目标 0.45s 内合并成一个数字（先显示首发，其余累计后一次性弹出），避免数字墙挡住机甲
+            const k = 'rg' + slot(o), A = (G[k] = G[k] || { sum: 0, n: 0, t: 0, h: 0 }); const now = performance.now();
+            if (now - A.t > 450 && !A.n) { A.t = now; vfx.number(P, `${Math.round(dmg)}`, '', 0, slot(o)); }
+            else {
+              A.sum += dmg; A.n++; A.p = P.clone();
+              if (!A.h) A.h = setTimeout(() => { if (A.n) vfx.number(A.p, `${Math.round(A.sum)}`, A.sum >= 1200 ? 'big' : '', 0, slot(o)); A.sum = 0; A.n = 0; A.h = 0; A.t = performance.now(); }, Math.max(120, 450 - (now - A.t)));
+            }
+          } else vfx.number(P, `${Math.round(dmg)}`, crit ? 'crit' : big ? 'big' : '', ult ? 0 : C.n, slot(o));
         }
         // 音效
         if (kind === 'bullet') audio.play('hitFast', { vol: 0.35, cd: 0.07 });
@@ -599,8 +612,8 @@ function onSimEvent(type, d) {
   }
 }
 
-// ———————————————————— v10.1 观众投票大招：双方共用倒计时 → 子弹时间 5 秒投票 → 票多者放大招 ————————————————————
-const VOTE_DUR = 5, VOTE_COL = ['#DEFF72', '#F569A8'], VOTE_INK = ['#171719', '#171719'];
+// ———————————————————— v10.1 观众投票大招：双方共用倒计时 → 子弹时间 4 秒投票 → 票多者放大招 ————————————————————
+const VOTE_DUR = 4, VOTE_COL = ['#DEFF72', '#F569A8'], VOTE_INK = ['#171719', '#171719'];
 const AS = { on: false, t: 0, n: [0, 0], shown: [0, 0], crowd: [0, 0], rate: [0, 0], surge: [0, 0], side: -1, mine: 0, share: 0.5, done: false };
 const vtEl = document.createElement('div'); vtEl.id = 'vote';
 vtEl.innerHTML = `<div class="vt-glow"><i class="g0"></i><i class="g1"></i></div>
@@ -711,7 +724,8 @@ function finishVote() {
   if (AS.n[0] === AS.n[1]) AS.n[Math.random() < 0.5 ? 0 : 1]++;
   const w = AS.n[0] > AS.n[1] ? 0 : 1; AS.win = w;
   VT.orbs[w].classList.add('win'); VT.orbs[1 - w].classList.add('lose');
-  layoutOrbs(w === 0 ? 0.84 : 0.16);
+  // 揭晓：两圈都留在原位作背景，胜者略大（直径约 64%），败者仍清晰可见（约 36%），不再把败者挤到几乎消失
+  const sw = clamp(AS.n[w] / Math.max(1, AS.n[0] + AS.n[1]), 0.55, 0.59); layoutOrbs(w === 0 ? sw : 1 - sw);
   VT.orbs.forEach((o, i) => (o.querySelector('em').textContent = AS.n[i]));
   VT.clock.textContent = '0';
   const e = G.E[w];
@@ -854,7 +868,7 @@ function updateHud(dt) {
     if (UK.txt !== txt) { UK.txt = txt; UK.b.textContent = txt; }
     const k = busy ? 0 : clamp(L / (S.ultPeriod || 1), 0, 1);
     UK.s.style.transform = `scaleX(${(1 - k).toFixed(3)})`;
-    UK.el.classList.toggle('hot', !busy && L <= 3 || AS.on); UK.el.classList.toggle('show', live); UK.el.classList.toggle('yield', AS.on || S.voteOpen); // 投票面板有自己的 5 秒倒计时：顶部条上收让位，结束后回落
+    UK.el.classList.toggle('hot', !busy && L <= 3 || AS.on); UK.el.classList.toggle('show', live); UK.el.classList.toggle('yield', AS.on || S.voteOpen); // 投票面板有自己的 4 秒倒计时：顶部条上收让位，结束后回落
   }
 }
 function swatch(p) { return [p.primary, p.secondary, p.accent, p.emissive].map((c) => `<i style="background:${c}"></i>`).join(''); }

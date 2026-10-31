@@ -570,16 +570,14 @@ body.assisting #ticker { opacity: 0 !important; }
 .vt-orb.deny { animation: voDeny .25s; }
 @keyframes voDeny { 25% { margin-left: -6px; } 75% { margin-left: 6px; } }
 .vt-orb.win { filter: none; }
-.vt-orb.lose { opacity: .25; }
+.vt-orb.lose { filter: saturate(.45) brightness(.62); } /* 败者圈：保留原位、清晰不虚化，只降饱和压暗 */
 .vt-tip { margin-top: 8px; font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.8); text-shadow: 0 1px 2px #000; }
 .vt-result { position: absolute; left: 0; right: 0; top: 50%; display: none; flex-direction: column; align-items: center; pointer-events: none; z-index: 5; }
 .vt-result.show { display: flex; animation: vrIn .4s ease-out both; }
-.vt-result { top: 44%; transform: translateY(-50%); z-index: 8; }
-/* 揭晓：标题 / 倒计时 / 选手卡 / 提示退场，圈压暗，公告独占中心 */
+.vt-result { top: 31%; transform: translateY(-50%); z-index: 8; } /* 落在 VOTE NOW 退场后腾出的上方，与下方两圈分层不重叠 */
+/* 揭晓：标题 / 倒计时 / 选手卡 / 提示退场；两个票圈保持清晰留在原位，公告落在腾出的上方区域 */
 #vote.reveal .vt-head, #vote.reveal .vt-cards, #vote.reveal .vt-tip { animation: vtLeave .3s cubic-bezier(.5, 0, .9, .4) forwards; }
 @keyframes vtLeave { to { opacity: 0; transform: translateY(-26px) scale(.94); } }
-#vote.reveal .vt-arena { animation: vtDim .35s ease-out forwards; }
-@keyframes vtDim { to { opacity: .45; filter: blur(1px); } }
 #vote.reveal .vt-orb::after, #vote.reveal .vt-orb.pick::before { display: none; }
 /* 结果公告：一体化斜切黑底板（头像 + 昵称 + 大招名），中性黑白，只用一条获胜色细边点题 */
 .vt-result { left: 50%; right: auto; transform: translate(-50%, -50%); width: max-content; max-width: calc(100% - 28px); }
