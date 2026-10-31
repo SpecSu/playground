@@ -59,7 +59,7 @@ css += '''
 .b-sub:empty{display:none!important}
 /* 大招背景板：玫红纯色 */
 #ultcut{background:rgba(245,105,168,.75)!important}
-.uc-tag{color:#171719!important}
+.uc-tag{color:#fff!important;opacity:1!important;text-shadow:0 1px 2px rgba(60,0,25,.55)!important} /* v10.3.1 粉/红条幅上 ULTIMATE 小字改白，保证可读 */
 .uc-name{color:#F5F4F0!important;-webkit-text-stroke-color:#3A0A20!important;text-shadow:3px 3px 0 #171719!important}
 .uc-owner{color:#F5F4F0!important;text-shadow:none!important}
 /* v10.1 投票模式：条幅跟随获胜方投票色——黄绿方深色字，粉方白字 */

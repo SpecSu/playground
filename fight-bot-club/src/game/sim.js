@@ -175,6 +175,8 @@ export class Sim {
 
     if (f.alive && f.energy < 100 && !this.voteMode) f.energy = Math.min(100, f.energy + ENERGY_PASSIVE * dt);
     // 投票胜出 → 落地即放大招（打断当前动作）
+    // v10.3.2 防锁死计时：轻击硬直冷却 / 累计硬直衰减 / 霸体剩余
+    f.flinchCD = Math.max(0, (f.flinchCD || 0) - dt); f.armorT = Math.max(0, (f.armorT || 0) - dt); f.stunAcc = Math.max(0, (f.stunAcc || 0) - dt * 0.45);
     if (f.forceUlt) {
       f.stun = 0; if (f.act && f.act.type === 'hitstun') f.act = null;
       if (f.grounded) { const b = f.forceUlt; f.forceUlt = 0; this.startUlt(f, o); f.ultBoost = b; return; }
@@ -916,7 +918,15 @@ export class Sim {
     if (!blocking) {
       const stun = (opt.stun || 0.15) * o.ai.poise;
       const interruptible = !o.act || !o.act.type.startsWith('ult_') || opt.ult;
-      if (interruptible && (opt.heavy || !o.act || ['jab', 'cross', 'shoot', 'block', 'hitstun', 'dodge'].includes(o.act?.type) || stun > 0.3)) {
+      // v10.3.2 防远程连射锁死：
+      //  · 轻击（机枪/脉冲等连发、非重击非大招）不再刷新已有硬直、不打断冲刺/闪避/出拳，且每 0.75s 最多触发一次小硬直
+      //  · 任意来源累计硬直过多 → 1.1s 霸体（只吃伤害不硬直，重击/大招除外），保证被压制方能冲上去反击
+      const light = !opt.heavy && !opt.ult && (opt.kind === 'bullet' || opt.kind === 'plasma' || (opt.multi && stun < 0.2));
+      const armored = o.armorT > 0 && !opt.heavy && !opt.ult;
+      const lightOk = !light || (o.flinchCD <= 0 && (!o.act || ['shoot', 'block'].includes(o.act.type)));
+      if (interruptible && !armored && lightOk && (opt.heavy || !o.act || ['jab', 'cross', 'shoot', 'block', 'hitstun', 'dodge'].includes(o.act?.type) || stun > 0.3)) {
+        if (light) o.flinchCD = 0.75;
+        o.stunAcc = (o.stunAcc || 0) + stun; if (o.stunAcc > 0.6) { o.stunAcc = 0; o.armorT = 1.1; }
         if (o.act && o.act.type.startsWith('sp_')) this.emit('interrupt', { f: o });
         if (o.act && (o.act.type === 'sp_flame' || o.act.type === 'ult_inferno')) this.emit('flame', { f: o, on: false });
         if (o.act && (o.act.type === 'sp_laser' || o.act.type === 'ult_beam')) this.emit('beam', { f: o, on: false });
@@ -1009,7 +1019,7 @@ export class Sim {
     this.emit('projHit', { p, direct, x: p.x, y: Math.max(0.1, p.y), z: p.z });
     if (!f || !o.alive) return;
     if (direct) {
-      this.applyDamage(f, o, p.m, { kb: p.kind === 'bigshell' ? 9 : p.kind === 'mortar' ? 5 : p.kind === 'shell' ? 4 : p.kind === 'missile' ? 2.5 : 0.7, stun: p.kind === 'bullet' ? 0.08 : 0.25, heavy: p.kind === 'bigshell', kind: p.kind, multi: p.kind === 'bullet' || p.kind === 'missile', ult: p.ult, from: { x: p.x - p.vx, z: p.z - p.vz } }, { x: p.x, y: p.y, z: p.z });
+      this.applyDamage(f, o, p.m, { kb: p.kind === 'bigshell' ? 9 : p.kind === 'mortar' ? 5 : p.kind === 'shell' ? 4 : p.kind === 'missile' ? 2.5 : p.kind === 'bullet' ? 0.3 : 0.7, stun: p.kind === 'bullet' ? 0.08 : p.kind === 'plasma' ? 0.18 : 0.25, heavy: p.kind === 'bigshell', kind: p.kind, multi: p.kind === 'bullet' || p.kind === 'missile', ult: p.ult, from: { x: p.x - p.vx, z: p.z - p.vz } }, { x: p.x, y: p.y, z: p.z });
     } else if (p.splash > 0) {
       const d = Math.hypot(o.x - p.x, o.z - p.z);
       if (d < p.splash + o.radius && o.y < 2.5) this.applyDamage(f, o, p.m * (p.kind === 'mortar' ? 1 - 0.4 * clamp(d / p.splash, 0, 1) : 0.5), { kb: 3, stun: 0.15, kind: p.kind, multi: true, ult: p.ult, from: { x: p.x, z: p.z } }, { x: o.x, y: o.y + 1, z: o.z });
