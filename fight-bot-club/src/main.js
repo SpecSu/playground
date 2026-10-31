@@ -763,7 +763,7 @@ function introCard(i, noCut) {
   if (!(noCut && director.mode === 'introCard' && director.focus?.f === f)) director.setMode('introCard', { f, v, side: i ? -1 : 1 }, 0, !noCut);
   const c = $('#introCard'); const col = VOTE_COL[i]; // 出场介绍卡跟随阵营色（= 血槽 / 名牌 / 投票圈）
   c.style.setProperty('--ic', col); c.className = i ? 'b' : 'a';
-  const champTag = i === 0 ? (G.champStreak > 0 ? `擂主 · ${G.champStreak} 连胜` : '擂主') : (e.mine ? '我的挑战者' : '新挑战者');
+  const champTag = i === 0 ? (G.champStreak > 0 ? `擂主 · ${G.champStreak} 连胜` : '擂主') : '新挑战者';
   c.innerHTML = `<div class="ic-ava"><img src="${e.thumb || thumbs[e.ava] || ''}" alt=""></div><div class="ic-main"><div class="ic-top"><span class="ic-tag">${champTag}</span><span class="ic-owner"><small>创造者</small>${AVATARS[e.ava]?.name || e.owner}${e.mine ? '（我）' : ''}</span></div><div class="ic-name">${e.design.name}</div><div class="ic-role">${e.design.formCn || '人形'} · ${e.design.roleCn} · 大招「${e.design.moves.ult}」</div></div>`;
   void c.offsetWidth; c.classList.add('show'); $('#bottom').classList.add('intro');
   audio.play('baydoor', { vol: 0.55 }); audio.play('hydr', { vol: 0.5, delay: 0.15 }); audio.play('crowdCharge', { vol: 0.35, delay: 0.3 });
