@@ -1,0 +1,334 @@
+{
+  "version": "v29.0-shop-polish-named-demo",
+  "animationLab": {
+    "entry": "?animationLab=1",
+    "speciesCount": 25,
+    "clipCount": 332,
+    "status": "provisional-Blender-skeletal-models",
+    "disclosure": "临时模型 · Blender 骨骼动画"
+  },
+  "animationLabPolish": {
+    "species": [
+      "dog",
+      "bear"
+    ],
+    "scope": "lab-only-proximal-leg-joins",
+    "preserved": "rigs-inverse-binds-and-authored-clips",
+    "evidence": "offline-Blender-and-actual-skinned-geometry-not-browser-acceptance"
+  },
+  "animationLabCatCoat": {
+    "species": "cat",
+    "scope": "lab-only-torso-conforming-markings",
+    "surfaceOffsetMeters": 0.0006,
+    "preserved": "rigs-inverse-binds-and-authored-clips",
+    "evidence": "offline-Blender-and-actual-skinned-geometry-not-browser-distance-acceptance"
+  },
+  "animationLabStartupCleanup": {
+    "scope": "lab-only-partial-startup-rollback",
+    "ownership": "idempotent-best-effort-owned-resource-release",
+    "errors": "preserve-original-startup-error-and-retry-ui",
+    "evidence": "fault-injected-controller-and-React-tests-not-real-browser-acceptance"
+  },
+  "defaultMode": "minimal",
+  "legacyMode": "?legacy",
+  "camera": "orthographic-manor-10.4-offset-9-13.8-18",
+  "viewport": "390x844",
+  "world": "continuous-land-4x4-owned-10x10-visible",
+  "storage": "browser-local-egg-v3-preserved-v2-backup-and-runtime-gated-account-D1",
+  "entry": "verified-UID-gate-explicit-local-or-cloud-no-auto-import",
+  "shop": "two-tiles-physical-walk-carry-confirm-sale",
+  "species": [
+    "sheep",
+    "pig",
+    "cow",
+    "bunny",
+    "duck"
+  ],
+  "sizes": [
+    "normal",
+    "large",
+    "giant"
+  ],
+  "breeding": "manual-adult-same-species-opposite-sex-one-farm-egg-per-UTC8-day",
+  "visualQA": "actual-skinned-geometry-and-offline-Blender-not-real-browser",
+  "generation": "fixed-sample-mock-workflow-no-live-generation-api",
+  "friends": "not-connected-in-minimal-mode",
+  "controls": "OrbitControls-left-drag-single-touch-rotate-pinch-wheel-zoom",
+  "walking": "farm-only-neutral-LX-eased-stroll-0.5cells-per-second",
+  "defaultZoom": 1.6,
+  "grounding": "farm-stride-actual-skin-sole-probes",
+  "carry": "anatomical-belly-support-head-contact",
+  "growth": "saved-random-monotone-baby-juvenile-adult-with-bounded-terrain-bonus",
+  "weather": "simulated-UTC8-day-night-sunny-cloudy-rain-snow-storm",
+  "audio": "gesture-unlocked-calm-and-wolf-crossfade",
+  "water": "pond-blocked-creek-walkable-bank-drink",
+  "cowAnimation": "blender-26bones-9clips-AnimationMixer",
+  "growthStages": [
+    "baby",
+    "juvenile",
+    "adult"
+  ],
+  "growthStageSeconds": 60,
+  "newAnimalAdultSeconds": 120,
+  "growthScaleBounds": [
+    0.6,
+    2.2
+  ],
+  "legacyGrowth": "preserve-v14-curve-and-adulthood",
+  "animalAnimation": "five-Blender-skinned-species-nine-authored-clips",
+  "animalDetails": "click-only-compact-nonmodal-card",
+  "hatching": "1800ms-nest-sized-shell-opening-low-hop-three-glints-no-auto-camera-pan",
+  "physicalActions": "explicit-revalidated-cancellable-approach",
+  "assetRecovery": "versioned-static-GLBs-coalesced-explicit-retry",
+  "animalMotion": "species-stride-scaled-cadence-stable-identity",
+  "drinking": "authoritative-bank-arrival-six-second-action-rotational-contact",
+  "animalTransfer": "650ms-presentation-only-lift-lower-safe-nearby-landing",
+  "animalGreeting": "900ms-explicit-wave-and-full-animal-response",
+  "animalTouch": "physical-44px-target-max14px-margin-ordinary-owned-ground-only",
+  "groundedTransitions": "limb-only-partial-grounded-mix-floor-correction-excludes-carry-and-airborne-hatch",
+  "animalTouchCache": "five-versioned-models-verified-template-data-dynamic-fallback",
+  "releaseStatus": "candidate-not-deployment-confirmation",
+  "growthTimingMeaning": "base-effective-age-new-profiles-terrain-can-shorten-real-time-legacy-unchanged",
+  "saleFeedback": {
+    "handoffMs": 850,
+    "reducedMotionMs": 180,
+    "audio": "accepted-sale-gesture-unlocked-three-note-WebAudio-chime",
+    "wallet": "actual-sale-price-receipt"
+  },
+  "audioQA": "programmatic-synthesis-checks-not-listening-verification",
+  "wishingPool": "trusted-account-authority-runtime-gated-escrow-exchange",
+  "atlas": "local-history-or-verified-UID-scoped-online-history",
+  "saveProtection": "preserved-local-keys-explicit-owner-import-canonical-receipts",
+  "terrain": {
+    "levels": [
+      1,
+      2,
+      3
+    ],
+    "qualityLabels": {
+      "1": "自然",
+      "2": "丰茂",
+      "3": "珍景"
+    },
+    "qualityMeaning": "cultivated-level-not-independent-random-rarity",
+    "upgradeCoins": [
+      30,
+      60
+    ],
+    "levelMultipliers": [
+      1,
+      1.5,
+      2
+    ],
+    "baseCapacity": {
+      "meadow": {
+        "food": 1,
+        "water": 0,
+        "rest": 0
+      },
+      "creek": {
+        "food": 0,
+        "water": 4,
+        "rest": 0
+      },
+      "pond": {
+        "food": 0,
+        "water": 6,
+        "rest": 0
+      },
+      "grove": {
+        "food": 0,
+        "water": 0,
+        "rest": 4
+      },
+      "hill": {
+        "food": 0,
+        "water": 0,
+        "rest": 2
+      },
+      "desert": {
+        "food": 0,
+        "water": 0,
+        "rest": 0
+      },
+      "glacier": {
+        "food": 0,
+        "water": 0,
+        "rest": 0
+      }
+    },
+    "freeBaseCapacity": {
+      "food": 2,
+      "water": 2,
+      "rest": 2
+    },
+    "maxGrowthBonusRate": 0.2,
+    "supplyMeaning": "reachable-owned-capacity-not-consumable-inventory"
+  },
+  "lifecycle": {
+    "hidden": "pause-periodic-simulation-save-and-World-render-loop",
+    "resume": "settle-offline-growth-once-before-resuming-audio",
+    "encounters": "no-repeated-unseen-wolf-encounters",
+    "transientEffects": "finish-hatch-sale-and-transfer-offscreen-without-replay",
+    "foregroundSave": "existing-250ms-cadence-unchanged"
+  },
+  "companionGift": {
+    "coins": 10,
+    "scope": "once-per-farm-per-UTC+8-calendar-day",
+    "trigger": "successful-explicit-adult-greeting",
+    "currency": "game-coins-not-Dreamina-credits",
+    "offline": "no-bank-or-auto-claim",
+    "clock": "local-date-guard-or-cloud-trusted-clock-when-enabled",
+    "feedback": "checked-commit-wallet-receipt-and-optional-two-note-gesture-unlocked-chime",
+    "salePrices": {
+      "normal": 40,
+      "large": 65,
+      "giant": 100
+    }
+  },
+  "interactionPolish": {
+    "tap": "release-displacement-checked-at-existing-6px-threshold",
+    "approach": "reachable-cardinal-then-diagonal-within-existing-1.6-cell-radius",
+    "nestSafety": "successful-ground-nest-clears-route-and-newly-unsafe-drink-anchors"
+  },
+  "playerPondClearance": {
+    "cells": 0.12,
+    "scope": "player-only-expanded-pond-boxes",
+    "legacy": "preserve-v2-cancel-unsafe-intent-checked-dry-center-retreat",
+    "evidence": "actual-weighted-shoe-CPU-sampling-not-continuous-proof"
+  },
+  "gamePanels": {
+    "layout": "compact-visual-status-and-actions",
+    "help": "labeled-question-modal-portal-focus-trap-Escape-inert-return-cleanup",
+    "evidence": "React-DOM-and-CSS-contracts-not-real-browser-acceptance"
+  },
+  "briskWalk": {
+    "cellsPerSecond": 0.5,
+    "strideScale": 1.1,
+    "scope": "farm-human-only-nonfarm-defaults-unchanged",
+    "evidence": "actual-weighted-shoe-and-frame-rate-tests-not-perceived-gait-acceptance"
+  },
+  "biomeExploration": {
+    "candidateFeature": "v26b-biomes-themed-eggs",
+    "themes": [
+      "grassland",
+      "forest",
+      "wetland",
+      "desert",
+      "glacier"
+    ],
+    "readyPools": {
+      "grassland": [
+        "sheep",
+        "pig",
+        "cow"
+      ],
+      "forest": [
+        "bunny"
+      ],
+      "wetland": [
+        "duck"
+      ],
+      "desert": [],
+      "glacier": []
+    },
+    "saveVersion": 3,
+    "unlock": "permanent-natural-owned-or-expanded-biome-with-explicit-legacy-no-target-grants",
+    "newAnimalAssets": "not-integrated-empty-pools-cannot-charge",
+    "groundMode": "continuous-ground-default-with-compatible-fallback"
+  },
+  "accounts": {
+    "sourceCapability": "trusted-Sites-identity-and-D1-authority-implemented",
+    "runtimeDefault": "disabled-unless-FARM_MINIMAL_ONLINE-is-1",
+    "accessPolicy": "existing-Sites-policy-unchanged",
+    "ownerBinding": "verified-canonical-UID-or-site-subject-never-first-visitor",
+    "ownerImport": "explicit-owner-only-once-no-overwrite",
+    "identity": "dispatcher-only-site-scoped-SHA256-UID",
+    "preservation": "original-local-farm-and-atlas-keys-unchanged"
+  },
+  "creative": {
+    "workflow": "fixed-sample-mock-no-live-generation-api",
+    "uniqueHunyuanModels": 6,
+    "environmentModels": 5,
+    "catalogModels": 4,
+    "sharedDerivatives": "tree-rock-bush-catalog-files-reuse-three-environment-models",
+    "newFarmAnimalModels": 0,
+    "verification": "actual-file-hashes-and-CPU-geometry-not-browser-rendering"
+  },
+  "sourceProvenance": {
+    "candidateCommit": "cb5125cc080dfe4dc76072902db2c88b5cdf93f6",
+    "baseSiteCommit": "437624707177bc64f2b5e20aed6e281d7f275720",
+    "releaseCommitAuthority": "Sites-source-workflow-result",
+    "initialCandidateCommit": "923fd79be5b061a37636e885013c7847aa71aee5",
+    "previousSiteCommit": "69952a467a3c9636150da2bb223b6fbbb2c5d07c",
+    "capabilityBaseline": "a4a174979429fe66cf89367718f68337f92c92e5"
+  },
+  "sourceCommit": "cb5125cc080dfe4dc76072902db2c88b5cdf93f6",
+  "configSha256": "94a6ee2595c3ca47b569554b9fda9eeaa49cc4eaccff884026ec40b8f4d27bf9",
+  "siteOrigin": "https://fluffy-farm-companions.tangguozhou.chatgpt.site",
+  "mobileGPUFPS": "unmeasured",
+  "namedDemo": {
+    "selector": "explicit ?name=twx or ?name=test",
+    "authentication": false,
+    "namespace": "trusted-signed-in-subject-partitioned-server-D1",
+    "localAndHostedSynchronized": false,
+    "noName": "unchanged trusted Sites account flow",
+    "runtimeRequires": [
+      "FARM_NAMED_DEMO=1",
+      "FARM_NAMED_REQUIRE_MODELS=1"
+    ],
+    "readyPools": {
+      "grassland": [
+        "sheep",
+        "pig",
+        "cow"
+      ],
+      "forest": [
+        "bunny"
+      ],
+      "wetland": [
+        "duck"
+      ],
+      "desert": [
+        "alpaca"
+      ],
+      "glacier": [
+        "penguin"
+      ]
+    },
+    "sharing": "public-entry-signed-in-required-no-query-authentication"
+  },
+  "shopPolish": {
+    "purchase": "shared-domain-availability-real-disabled-lock-short-reason",
+    "retainsAllEcologies": true,
+    "unavailableHatchTerrainDoesNotBanPurchase": true,
+    "retry": "same-durable-request-and-confirmed-placement-reconciliation",
+    "creationEntry": "egg-shop-only-with-collection-only-scene-details",
+    "customTerrain": "not-open-existing-land-edit-only"
+  },
+  "modelAdmission": {
+    "namedScope": "exact-approved-target-and-actual-static-SHA-plus-GLB-validation",
+    "ordinaryProviders": "unchanged-null-Sites-deployments",
+    "historicalFunctionalEvidence": "local-alpaca8-penguin4-retained-not-hosted-receipts",
+    "browserGPUFPS": "unmeasured"
+  },
+  "customAnimalLifecycle": {
+    "identity": "trusted-fixed-sample-paired-asset-and-animal",
+    "actions": "growth-care-pickup-putdown-sale",
+    "visual": "actual-static-GLB-with-procedural-root-actions-not-skeletal-gait",
+    "sale": "same-ordinary-value-no-added-adult-gate",
+    "customTerrain": "unavailable-existing-land-edit-only"
+  },
+  "commandRecovery": {
+    "confirmedPost": "unlocks-before-optional-background-read",
+    "unknownPost": "same-durable-request-id-until-explicit-retry",
+    "timeoutMs": 12000,
+    "movement": "latest-unsubmitted-target-and-ACK-gated-arrival",
+    "backgroundReads": "monotonic-canonical-state-no-active-walk-reset"
+  },
+  "localSaveCompatibility": {
+    "validV2Only": "read-only-copy-into-isolated-Hunyuan-key",
+    "invalidOrFuture": "still-blocked-no-original-key-overwrite",
+    "currentUserIncident": "raw-source-unconfirmed-not-claimed-fixed"
+  }
+}

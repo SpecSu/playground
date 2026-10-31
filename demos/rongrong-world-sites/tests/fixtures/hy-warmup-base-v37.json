@@ -1,0 +1,3163 @@
+{
+  "oldModelSha256": "029d83a7bc876a0172487a00beacc6ba175934fdfa95e8e534881a9c434103f6",
+  "oldBinBytes": 1696872,
+  "oldBinSha256": "e1c088fbf7d4273d9b9086c22d0ea0b82414c1fe23d7e4ab5fa456cc91dc4f24",
+  "sections": {
+    "nodes": "6851ca8fce4f6ab66b7e1ce32096fe634fe032da1c6081e7a66dddda4b70324d",
+    "meshes": "40b01f940836f8d009c2e964ccf35c18af8a0a03e264bac5354938ac00d0ed7a",
+    "skins": "946913d01140d4dbbe82e38d0339e87a0a22e6f7ab070749f361e7a8ce784bdf",
+    "materials": "820de4ce8e572c8350c14d4fe1dae9d9fc9b793a2ce22a121a862b37f720338a",
+    "textures": "84736edab84ba9d971d34036fac61014b90faf83f5ad3438debdc5c8fae95139",
+    "images": "5f9ad0fa7275dfc29cf476b98ecaa3ee4b69ff5c20354dbcbe0a8782c86707f8",
+    "samplers": "0f3273e4b92d4e98e3ee78749a96168498f4fee421d1a0c06c987583d57064e5"
+  },
+  "animations": [
+    {
+      "channels": [
+        {
+          "sampler": 1,
+          "target": {
+            "node": 30,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 4,
+          "target": {
+            "node": 28,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 7,
+          "target": {
+            "node": 4,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 10,
+          "target": {
+            "node": 3,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 13,
+          "target": {
+            "node": 2,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 16,
+          "target": {
+            "node": 0,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 19,
+          "target": {
+            "node": 1,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 22,
+          "target": {
+            "node": 9,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 25,
+          "target": {
+            "node": 8,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 28,
+          "target": {
+            "node": 7,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 31,
+          "target": {
+            "node": 5,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 34,
+          "target": {
+            "node": 6,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 37,
+          "target": {
+            "node": 26,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 40,
+          "target": {
+            "node": 25,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 43,
+          "target": {
+            "node": 24,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 46,
+          "target": {
+            "node": 14,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 49,
+          "target": {
+            "node": 13,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 52,
+          "target": {
+            "node": 12,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 55,
+          "target": {
+            "node": 11,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 58,
+          "target": {
+            "node": 10,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 61,
+          "target": {
+            "node": 17,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 64,
+          "target": {
+            "node": 16,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 67,
+          "target": {
+            "node": 15,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 70,
+          "target": {
+            "node": 23,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 73,
+          "target": {
+            "node": 22,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 76,
+          "target": {
+            "node": 21,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 79,
+          "target": {
+            "node": 20,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 82,
+          "target": {
+            "node": 18,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 85,
+          "target": {
+            "node": 19,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 88,
+          "target": {
+            "node": 27,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 91,
+          "target": {
+            "node": 29,
+            "path": "rotation"
+          }
+        }
+      ],
+      "name": "celebrate",
+      "samplers": [
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 8
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 9
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 10
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 11
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 12
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 13
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 14
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 15
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 16
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 17
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 18
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 19
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 20
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 21
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 22
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 23
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 24
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 25
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 26
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 27
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 28
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 29
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 30
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 31
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 32
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 33
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 34
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 35
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 36
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 37
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 38
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 39
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 40
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 41
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 42
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 43
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 44
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 45
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 46
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 47
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 49
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 50
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 51
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 52
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 53
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 54
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 55
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 56
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 57
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 58
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 59
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 60
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 61
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 62
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 63
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 64
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 65
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 66
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 67
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 68
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 69
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 70
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 71
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 72
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 73
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 74
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 75
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 76
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 77
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 78
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 79
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 80
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 81
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 82
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 83
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 84
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 85
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 86
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 87
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 88
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 89
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 90
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 91
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 92
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 93
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 94
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 95
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 96
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 97
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 98
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 99
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 100
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 101
+        }
+      ]
+    },
+    {
+      "channels": [
+        {
+          "sampler": 1,
+          "target": {
+            "node": 30,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 4,
+          "target": {
+            "node": 28,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 7,
+          "target": {
+            "node": 4,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 10,
+          "target": {
+            "node": 3,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 13,
+          "target": {
+            "node": 2,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 16,
+          "target": {
+            "node": 0,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 19,
+          "target": {
+            "node": 1,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 22,
+          "target": {
+            "node": 9,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 25,
+          "target": {
+            "node": 8,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 28,
+          "target": {
+            "node": 7,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 31,
+          "target": {
+            "node": 5,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 34,
+          "target": {
+            "node": 6,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 37,
+          "target": {
+            "node": 26,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 40,
+          "target": {
+            "node": 25,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 43,
+          "target": {
+            "node": 24,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 46,
+          "target": {
+            "node": 14,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 49,
+          "target": {
+            "node": 13,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 52,
+          "target": {
+            "node": 12,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 55,
+          "target": {
+            "node": 11,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 58,
+          "target": {
+            "node": 10,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 61,
+          "target": {
+            "node": 17,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 64,
+          "target": {
+            "node": 16,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 67,
+          "target": {
+            "node": 15,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 70,
+          "target": {
+            "node": 23,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 73,
+          "target": {
+            "node": 22,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 76,
+          "target": {
+            "node": 21,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 79,
+          "target": {
+            "node": 20,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 82,
+          "target": {
+            "node": 18,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 85,
+          "target": {
+            "node": 19,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 88,
+          "target": {
+            "node": 27,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 91,
+          "target": {
+            "node": 29,
+            "path": "rotation"
+          }
+        }
+      ],
+      "name": "dribble",
+      "samplers": [
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 102
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 103
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 104
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 105
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 106
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 107
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 108
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 109
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 110
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 111
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 112
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 113
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 114
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 115
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 116
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 117
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 118
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 119
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 120
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 121
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 122
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 123
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 124
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 125
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 126
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 127
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 128
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 129
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 130
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 131
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 132
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 133
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 134
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 135
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 136
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 137
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 138
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 139
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 140
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 141
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 142
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 143
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 144
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 145
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 146
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 147
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 148
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 149
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 150
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 151
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 152
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 153
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 154
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 155
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 156
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 157
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 158
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 159
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 160
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 161
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 162
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 163
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 164
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 165
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 166
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 167
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 168
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 169
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 170
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 171
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 172
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 173
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 174
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 175
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 176
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 177
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 178
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 179
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 180
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 181
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 182
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 183
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 184
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 185
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 186
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 187
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 188
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 189
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 190
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 191
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 192
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 193
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 194
+        }
+      ]
+    },
+    {
+      "channels": [
+        {
+          "sampler": 1,
+          "target": {
+            "node": 30,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 4,
+          "target": {
+            "node": 28,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 7,
+          "target": {
+            "node": 4,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 10,
+          "target": {
+            "node": 3,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 13,
+          "target": {
+            "node": 2,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 16,
+          "target": {
+            "node": 0,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 19,
+          "target": {
+            "node": 1,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 22,
+          "target": {
+            "node": 9,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 25,
+          "target": {
+            "node": 8,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 28,
+          "target": {
+            "node": 7,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 31,
+          "target": {
+            "node": 5,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 34,
+          "target": {
+            "node": 6,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 37,
+          "target": {
+            "node": 26,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 40,
+          "target": {
+            "node": 25,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 43,
+          "target": {
+            "node": 24,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 46,
+          "target": {
+            "node": 14,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 49,
+          "target": {
+            "node": 13,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 52,
+          "target": {
+            "node": 12,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 55,
+          "target": {
+            "node": 11,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 58,
+          "target": {
+            "node": 10,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 61,
+          "target": {
+            "node": 17,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 64,
+          "target": {
+            "node": 16,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 67,
+          "target": {
+            "node": 15,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 70,
+          "target": {
+            "node": 23,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 73,
+          "target": {
+            "node": 22,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 76,
+          "target": {
+            "node": 21,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 79,
+          "target": {
+            "node": 20,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 82,
+          "target": {
+            "node": 18,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 85,
+          "target": {
+            "node": 19,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 88,
+          "target": {
+            "node": 27,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 91,
+          "target": {
+            "node": 29,
+            "path": "rotation"
+          }
+        }
+      ],
+      "name": "idle",
+      "samplers": [
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 196
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 197
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 198
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 199
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 200
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 201
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 202
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 203
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 204
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 205
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 206
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 207
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 208
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 209
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 210
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 211
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 212
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 213
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 214
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 215
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 216
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 217
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 218
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 219
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 220
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 221
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 222
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 223
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 224
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 225
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 226
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 227
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 228
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 229
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 230
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 231
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 232
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 233
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 234
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 235
+        },
+        {
+          "input": 236,
+          "interpolation": "LINEAR",
+          "output": 237
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 238
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 239
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 240
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 241
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 242
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 243
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 244
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 245
+        },
+        {
+          "input": 236,
+          "interpolation": "LINEAR",
+          "output": 246
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 247
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 248
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 249
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 250
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 251
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 252
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 253
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 254
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 255
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 256
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 257
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 258
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 259
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 260
+        },
+        {
+          "input": 236,
+          "interpolation": "LINEAR",
+          "output": 261
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 262
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 263
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 264
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 265
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 266
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 267
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 268
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 269
+        },
+        {
+          "input": 236,
+          "interpolation": "LINEAR",
+          "output": 270
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 271
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 272
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 273
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 274
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 275
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 276
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 277
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 278
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 279
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 280
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 281
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 282
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 283
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 284
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 285
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 286
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 287
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 288
+        },
+        {
+          "input": 195,
+          "interpolation": "STEP",
+          "output": 289
+        }
+      ]
+    },
+    {
+      "channels": [
+        {
+          "sampler": 1,
+          "target": {
+            "node": 30,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 4,
+          "target": {
+            "node": 28,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 7,
+          "target": {
+            "node": 4,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 10,
+          "target": {
+            "node": 3,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 13,
+          "target": {
+            "node": 2,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 16,
+          "target": {
+            "node": 0,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 19,
+          "target": {
+            "node": 1,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 22,
+          "target": {
+            "node": 9,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 25,
+          "target": {
+            "node": 8,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 28,
+          "target": {
+            "node": 7,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 31,
+          "target": {
+            "node": 5,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 34,
+          "target": {
+            "node": 6,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 37,
+          "target": {
+            "node": 26,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 40,
+          "target": {
+            "node": 25,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 43,
+          "target": {
+            "node": 24,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 46,
+          "target": {
+            "node": 14,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 49,
+          "target": {
+            "node": 13,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 52,
+          "target": {
+            "node": 12,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 55,
+          "target": {
+            "node": 11,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 58,
+          "target": {
+            "node": 10,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 61,
+          "target": {
+            "node": 17,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 64,
+          "target": {
+            "node": 16,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 67,
+          "target": {
+            "node": 15,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 70,
+          "target": {
+            "node": 23,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 73,
+          "target": {
+            "node": 22,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 76,
+          "target": {
+            "node": 21,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 79,
+          "target": {
+            "node": 20,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 82,
+          "target": {
+            "node": 18,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 85,
+          "target": {
+            "node": 19,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 88,
+          "target": {
+            "node": 27,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 91,
+          "target": {
+            "node": 29,
+            "path": "rotation"
+          }
+        }
+      ],
+      "name": "shoot",
+      "samplers": [
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 290
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 291
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 292
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 293
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 294
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 295
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 296
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 297
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 298
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 299
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 300
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 301
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 302
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 303
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 304
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 305
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 306
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 307
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 308
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 309
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 310
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 311
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 312
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 313
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 314
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 315
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 316
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 317
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 318
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 319
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 320
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 321
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 322
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 323
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 324
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 325
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 326
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 327
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 328
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 329
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 330
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 331
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 332
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 333
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 334
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 335
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 336
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 337
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 338
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 339
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 340
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 341
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 342
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 343
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 344
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 345
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 346
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 347
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 348
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 349
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 350
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 351
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 352
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 353
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 354
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 355
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 356
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 357
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 358
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 359
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 360
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 361
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 362
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 363
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 364
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 365
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 366
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 367
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 368
+        },
+        {
+          "input": 48,
+          "interpolation": "LINEAR",
+          "output": 369
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 370
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 371
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 372
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 373
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 374
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 375
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 376
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 377
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 378
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 379
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 380
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 381
+        },
+        {
+          "input": 7,
+          "interpolation": "STEP",
+          "output": 382
+        }
+      ]
+    },
+    {
+      "name": "walk",
+      "channels": [
+        {
+          "sampler": 0,
+          "target": {
+            "node": 30,
+            "path": "translation"
+          }
+        },
+        {
+          "sampler": 1,
+          "target": {
+            "node": 30,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 2,
+          "target": {
+            "node": 28,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 3,
+          "target": {
+            "node": 4,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 4,
+          "target": {
+            "node": 3,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 5,
+          "target": {
+            "node": 2,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 6,
+          "target": {
+            "node": 0,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 7,
+          "target": {
+            "node": 1,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 8,
+          "target": {
+            "node": 9,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 9,
+          "target": {
+            "node": 8,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 10,
+          "target": {
+            "node": 7,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 11,
+          "target": {
+            "node": 5,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 12,
+          "target": {
+            "node": 6,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 13,
+          "target": {
+            "node": 26,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 14,
+          "target": {
+            "node": 25,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 15,
+          "target": {
+            "node": 24,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 16,
+          "target": {
+            "node": 14,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 17,
+          "target": {
+            "node": 13,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 18,
+          "target": {
+            "node": 12,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 19,
+          "target": {
+            "node": 11,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 20,
+          "target": {
+            "node": 10,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 21,
+          "target": {
+            "node": 17,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 22,
+          "target": {
+            "node": 16,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 23,
+          "target": {
+            "node": 15,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 24,
+          "target": {
+            "node": 23,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 25,
+          "target": {
+            "node": 22,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 26,
+          "target": {
+            "node": 21,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 27,
+          "target": {
+            "node": 20,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 28,
+          "target": {
+            "node": 18,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 29,
+          "target": {
+            "node": 19,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 30,
+          "target": {
+            "node": 27,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 31,
+          "target": {
+            "node": 29,
+            "path": "rotation"
+          }
+        }
+      ],
+      "samplers": [
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 384
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 386
+        },
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 387
+        },
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 388
+        },
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 389
+        },
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 390
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 391
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 392
+        },
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 393
+        },
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 394
+        },
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 395
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 396
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 397
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 398
+        },
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 399
+        },
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 400
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 401
+        },
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 402
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 403
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 404
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 405
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 406
+        },
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 407
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 408
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 409
+        },
+        {
+          "input": 383,
+          "interpolation": "LINEAR",
+          "output": 410
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 411
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 412
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 413
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 414
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 415
+        },
+        {
+          "input": 385,
+          "interpolation": "STEP",
+          "output": 416
+        }
+      ]
+    }
+  ]
+}

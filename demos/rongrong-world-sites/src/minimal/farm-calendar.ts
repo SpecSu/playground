@@ -1,0 +1,7 @@
+/** Farm days are UTC+8 calendar days, not rolling 24-hour timers. */
+export function dayKey(now:number):string{return new Date(now+8*3600000).toISOString().slice(0,10);}
+export function validCalendarDay(value:unknown):value is string{
+ if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;
+ const date=new Date(`${value}T00:00:00.000Z`);
+ return Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===value;
+}

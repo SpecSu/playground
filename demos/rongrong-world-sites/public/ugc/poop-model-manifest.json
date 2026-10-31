@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "source": "hunyuan-generated",
+  "original": {
+    "sha256": "902043d7bbd1a943e34e431c182bd21ed0550498274dc66b6261a88f9721fe57",
+    "bytes": 11183180,
+    "triangles": 50000,
+    "vertices": 29250,
+    "meshes": 1,
+    "materials": 1,
+    "images": [
+      {
+        "size": [
+          4096,
+          4096
+        ],
+        "mode": "RGB",
+        "mimeType": "image/png"
+      }
+    ],
+    "skins": 0,
+    "animations": 0,
+    "externalResources": false,
+    "hasUVs": true
+  },
+  "compressed": {
+    "sha256": "3b9533e8afc97ecd2efd86c6ab1d4cb07843d0882ac5f7d358c180a8ac3dd2e8",
+    "bytes": 1431924,
+    "triangles": 17500,
+    "vertices": 13027,
+    "meshes": 1,
+    "materials": 1,
+    "images": [
+      {
+        "size": [
+          1024,
+          1024
+        ],
+        "mode": "RGB",
+        "mimeType": "image/png"
+      }
+    ],
+    "skins": 0,
+    "animations": 0,
+    "externalResources": false,
+    "hasUVs": true
+  },
+  "renderComparison": {
+    "front": {
+      "renderRgbMeanAbsoluteError": 0.001373,
+      "orangeSilhouetteIoU": 0.996958
+    },
+    "three-quarter": {
+      "renderRgbMeanAbsoluteError": 0.001355,
+      "orangeSilhouetteIoU": 0.997823
+    },
+    "back": {
+      "renderRgbMeanAbsoluteError": 0.001091,
+      "orangeSilhouetteIoU": 0.998066
+    }
+  },
+  "notes": [
+    "Original GLB is byte-identical to received HY3D output.",
+    "Compressed GLB uses Blender collapse decimation and 1024 texture resampling; geometry/UV buffers are not byte-identical. Existing UV mapping and material appearance are visually substantially retained.",
+    "No rig or skeletal animation. Runtime may ground/scale the entire model and apply whole-root idle motion.",
+    "Proof images are actual CPU Cycles renders of the two GLBs, not generated illustrations."
+  ]
+}

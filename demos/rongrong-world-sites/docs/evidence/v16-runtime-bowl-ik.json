@@ -1,0 +1,133 @@
+{
+  "evidence": "Actual runtime mesh vertices after AnimationMixer and rotational IK; offline Blender lighting; not browser/WebGL evidence",
+  "scale": 0.6,
+  "rootY": 0,
+  "waterY": 0.177,
+  "sources": {
+    "cow": "a48d6664d9e8b1dc056fdf002bc73d5d60eec296e8e2c21babb6f4765a9ad0cd",
+    "sheep": "3efb4cb9de2481c821f61d212290409a1e10314aee7ed5b33e27e77f427c8f81",
+    "pig": "8fe32ed06a07e38593a895b0587459b118bd73b9570e3ed0a4c2be9b2cfe2876",
+    "bunny": "396af7275f678e06d8cdc4c30bca6d30c966531a14180864e0d7b1bf8fd4156a",
+    "duck": "b900bbee972bb1e29d3124ae6fab95bfc88edc403b0bec2408616338ab1cb6e6"
+  },
+  "contact": [
+    {
+      "species": "cow",
+      "mouth": [
+        -1.469629352258522e-14,
+        0.17858364578136038,
+        0.43199980136172955
+      ],
+      "water": [
+        0,
+        0.177,
+        0.432
+      ],
+      "IK": {
+        "reachable": true,
+        "errorWorld": 7.279115086020734e-08,
+        "pitchDegrees": 0,
+        "segmentLengths": [
+          0.20931309191824504,
+          0.12354744648243231
+        ]
+      }
+    },
+    {
+      "species": "sheep",
+      "mouth": [
+        -1.0019605886078965e-15,
+        0.1780557018799856,
+        0.4320000799914759
+      ],
+      "water": [
+        0,
+        0.177,
+        0.432
+      ],
+      "IK": {
+        "reachable": true,
+        "errorWorld": 1.2879769888807156e-09,
+        "pitchDegrees": 0,
+        "segmentLengths": [
+          0.14403122788731576,
+          0.1328495624249409
+        ]
+      }
+    },
+    {
+      "species": "pig",
+      "mouth": [
+        -1.3465303904066674e-14,
+        0.17805564972022006,
+        0.4739998862604927
+      ],
+      "water": [
+        0,
+        0.177,
+        0.474
+      ],
+      "IK": {
+        "reachable": true,
+        "errorWorld": 2.9625799360165376e-08,
+        "pitchDegrees": -8.846435546875002,
+        "segmentLengths": [
+          0.10816648407037806,
+          0.09674707433413339
+        ]
+      }
+    },
+    {
+      "species": "bunny",
+      "mouth": [
+        -1.0420283512372595e-14,
+        0.17832422336157872,
+        0.4320000566936846
+      ],
+      "water": [
+        0,
+        0.177,
+        0.432
+      ],
+      "IK": {
+        "reachable": true,
+        "errorWorld": 1.086915759148957e-08,
+        "pitchDegrees": -9.79296875,
+        "segmentLengths": [
+          0.11715373546745124,
+          0.14403122100003543
+        ]
+      }
+    },
+    {
+      "species": "duck",
+      "mouth": [
+        -7.353679610312125e-16,
+        0.1785781542005538,
+        0.29400027583351307
+      ],
+      "water": [
+        0,
+        0.177,
+        0.294
+      ],
+      "IK": {
+        "reachable": true,
+        "errorWorld": 1.0342910200037687e-07,
+        "pitchDegrees": -10.580200195312496,
+        "segmentLengths": [
+          0.1140393941091326,
+          0.1294179325473456
+        ]
+      }
+    }
+  ],
+  "runtimeSources": {
+    "src/minimal/animal-animation.ts": "bcc58cb6292cf6055b8b69b94e1320d49538715b40b93b8d2f9ec929496b27cc",
+    "src/minimal/animal-art.ts": "9721a167fedc970670ac5a6bd2fa51a919e358893207926fccebd1d06686931a",
+    "src/minimal/animal-assets.ts": "f3ff0ef68262c079df09f1e36ec2f554cab678d58f0ac7c6fb3351b3d36a2250",
+    "src/minimal/animal-motion.ts": "de897e3bb043f5ec7f0b35f66a13dbad5051a6b196755b4543fd2631cbd6bc67"
+  },
+  "exactRuntimePoseCaptureSHA256": "9c7ca20b7ce11c360ac8a879b3e93021e4a20d60cce9eb63616d420e818c3810",
+  "recaptureVerification": "After the final pendant-only cow change, all five actual runtime poses were recaptured and the cow image rerendered from a48d6664. Unchanged species images were preserved."
+}

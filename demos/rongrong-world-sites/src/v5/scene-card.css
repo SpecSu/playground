@@ -1,0 +1,18 @@
+/* Compact cards use the existing phone frame; no full-screen backdrop. */
+.estate-feed .scene-card-layer{position:absolute;inset:0;z-index:18;pointer-events:none}
+.estate-feed .scene-card{position:absolute;left:10px;right:10px;bottom:88px;max-height:min(280px,36%);overflow:auto;pointer-events:auto;padding:10px 12px 9px;border:1px solid #ffffff26;border-radius:18px;background:#19221df5;box-shadow:0 8px 24px #0005;scrollbar-width:thin;outline:none}
+.estate-feed .scene-card-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+.estate-feed .scene-card-heading h2{font-size:14px;font-weight:600;line-height:22px;margin:0}
+.estate-feed .scene-card-heading>button{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#ffffff0d;color:#cdd7ca}
+.estate-feed.has-scene-card .creator-caption,.estate-feed.has-scene-card .lower-controls{visibility:hidden;pointer-events:none}
+.estate-feed .compact-residents{display:flex;gap:6px;margin:0 0 9px}.estate-feed .compact-residents button{display:flex;align-items:center;justify-content:center;gap:5px;flex:1;padding:6px 3px;border:1px solid #ffffff12;background:#ffffff05;border-radius:8px;font-size:10px}.estate-feed .compact-residents button.selected{background:#d9e8cf20;border-color:#d9e8cf70}
+.estate-feed .compact-animal-state{display:flex;align-items:center;justify-content:space-between;gap:6px;line-height:20px}.estate-feed .compact-animal-state strong{font-size:12px;font-weight:500}.estate-feed .compact-animal-state small{font-size:10px;color:#a9b8a5}
+.estate-feed .compact-needs{display:flex;gap:18px;margin:6px 0 10px}.estate-feed .compact-needs>span{display:flex;align-items:center;gap:7px;flex:1;font-size:9px;color:#a8b6a1}.estate-feed .compact-needs progress{margin:0;flex:1;width:50px;height:3px}
+.estate-feed .compact-animal-actions{display:flex;gap:7px}.estate-feed .compact-animal-actions button{display:flex;justify-content:center;align-items:center;gap:5px;flex:1;min-height:42px;padding:7px 4px;border-radius:10px;background:#ffffff0d;font-size:11px;border:1px solid #ffffff13}.estate-feed .compact-animal-actions .compact-primary{background:#e6efdb;color:#172215;border-color:#e6efdb}
+.estate-feed .compact-more{display:flex;justify-content:center;align-items:center;gap:3px;width:100%;min-height:30px;font-size:10px;color:#a8b5a2;margin-top:3px}
+.estate-feed .estate-next-main{min-height:54px}.estate-feed .estate-next-details{display:none}.estate-feed .estate-next-main strong{font-size:11px}
+.estate-feed .estate-map button{position:relative}.estate-feed .estate-map .estate-map-name{position:absolute;left:50%;top:50%;z-index:1;transform:translate(-50%,-50%);white-space:nowrap;padding:3px 4px;background:#514f3de8;border-radius:4px;font-size:8px;pointer-events:none}
+.estate-feed .estate-scene-feedback{position:absolute;left:50%;bottom:230px;transform:translateX(-50%);padding:8px 13px;border-radius:20px;background:#283d24e8;color:#eef5d3;font-size:12px;z-index:5;pointer-events:none;white-space:nowrap}
+
+/* Keep uncertain-save recovery above, never behind, an open compact card. */
+.estate-feed.has-scene-card .farm-toast{bottom:calc(100px + min(280px,36%));z-index:20}

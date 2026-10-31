@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "source": "Real HY3D3.1 image-to-3D originals; mobile copies derived in Blender 4.3.2",
+  "assets": [
+    {
+      "asset": "pine",
+      "model": "hy-3d-3.1",
+      "job_id": "1505968804525539328",
+      "generation_parameters": {
+        "model": "hy-3d-3.1",
+        "face_count": 50000,
+        "generate_type": "Normal",
+        "enable_pbr": false
+      },
+      "byte_reduction_percent": 98.2,
+      "normalization": "No vertex normalization in stored GLB. Runtime wrapper centers XZ and grounds minY.",
+      "original_sha256": "4c25e8c9ebc1aa9ae743fd1c6b269ca6a453576abd0bf79198695828609f2e13",
+      "original_triangles": 50000,
+      "original_bytes": 19005452,
+      "mobile_sha256": "c111d109a0c64b4074ad494349a5d992c9ca78668fc20972682d579d91a5cb33",
+      "mobile_triangles": 5000,
+      "mobile_bytes": 342080,
+      "reference_sha256": "0a4188bfe12899f5aca82a9b5beeb679a0534915e1f2f031de6b33f99f179c10"
+    },
+    {
+      "asset": "rounded-rock",
+      "model": "hy-3d-3.1",
+      "job_id": "1505970190864629760",
+      "generation_parameters": {
+        "model": "hy-3d-3.1",
+        "face_count": 50000,
+        "generate_type": "Normal",
+        "enable_pbr": false
+      },
+      "byte_reduction_percent": 98.89,
+      "normalization": "No vertex normalization in stored GLB. Runtime wrapper centers XZ and grounds minY.",
+      "original_sha256": "4e16e07bcac0a1cdd6ec4a59e839d9c59a10558354d4e988065b97322666571c",
+      "original_triangles": 50000,
+      "original_bytes": 11869692,
+      "mobile_sha256": "bda09d449197b71bdfaefd296eb06a601c3e07b410e1c3a3d8252064f020d281",
+      "mobile_triangles": 3000,
+      "mobile_bytes": 131976,
+      "reference_sha256": "4e7bb651974c89dd0833795ba078fb6ad46b967854ac57f54b4d30d9f6c7ac3c"
+    },
+    {
+      "asset": "rounded-bush",
+      "model": "hy-3d-3.1",
+      "job_id": "1505971950811381760",
+      "generation_parameters": {
+        "model": "hy-3d-3.1",
+        "face_count": 50000,
+        "generate_type": "Normal",
+        "enable_pbr": false
+      },
+      "byte_reduction_percent": 97.03,
+      "normalization": "No vertex normalization in stored GLB. Runtime wrapper centers XZ and grounds minY.",
+      "original_sha256": "549a8cbe26ec0fc8bad6848a51167fa8473e290c492d8a46b00d89782e19961b",
+      "original_triangles": 47944,
+      "original_bytes": 17132072,
+      "mobile_sha256": "555c87f147b455fa79186f756b1410de38631b8952cde39dd340796ff6471329",
+      "mobile_triangles": 8000,
+      "mobile_bytes": 508036,
+      "reference_sha256": "2b1508e7e0b128dfd61b1649093af749db5dd6a6534cd1fc4459f54820838d6f"
+    },
+    {
+      "asset": "desert-dunes",
+      "model": "hy-3d-3.1",
+      "job_id": "1505973796741201920",
+      "generation_parameters": {
+        "model": "hy-3d-3.1",
+        "face_count": 50000,
+        "generate_type": "Normal",
+        "enable_pbr": false
+      },
+      "byte_reduction_percent": 98.07,
+      "normalization": "No vertex normalization in stored GLB. Runtime wrapper centers XZ and grounds minY.",
+      "original_sha256": "7503171efd5316921383b159e76b6b862a0243ad4b417df884fdef2f4b92f653",
+      "original_triangles": 50000,
+      "original_bytes": 8742836,
+      "mobile_sha256": "f0c7d5eb36204036e3e4ec3ebb41e752946569226da97274bc72a5abd231a4d3",
+      "mobile_triangles": 5000,
+      "mobile_bytes": 168396,
+      "reference_sha256": "e1e4660d512791d24e014ae8885145ce69a4a85db9fd01068591b9e0ed767f5b"
+    },
+    {
+      "asset": "glacier-outcrop",
+      "model": "hy-3d-3.1",
+      "job_id": "1505974717491593216",
+      "generation_parameters": {
+        "model": "hy-3d-3.1",
+        "face_count": 50000,
+        "generate_type": "Normal",
+        "enable_pbr": false
+      },
+      "byte_reduction_percent": 97.28,
+      "normalization": "No vertex normalization in stored GLB. Runtime wrapper centers XZ and grounds minY.",
+      "original_sha256": "a35fbaca6f21916968b5e8cb43911ed99ec81c6730dd074e334eb9131d1a9c12",
+      "original_triangles": 49992,
+      "original_bytes": 14399912,
+      "mobile_sha256": "1d4cefee0921aa748e0395f16a471d5bfef4f1586162f3e4e94079e099079248",
+      "mobile_triangles": 8000,
+      "mobile_bytes": 391324,
+      "reference_sha256": "7bc970a45518308caa3613552771cecc73077d0d47d77be2e0c0265974ebc53e"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "bytes": 131976,
+  "sha256": "bda09d449197b71bdfaefd296eb06a601c3e07b410e1c3a3d8252064f020d281",
+  "triangles": 3000,
+  "vertices": 2133,
+  "meshes": 1,
+  "primitives": 1,
+  "materials": 1,
+  "images": [
+    {
+      "width": 1024,
+      "height": 1024,
+      "mimeType": "image/jpeg",
+      "bytes": 44169
+    }
+  ],
+  "skins": 0,
+  "animations": 0,
+  "extensionsRequired": [],
+  "generator": "Khronos glTF Blender I/O v4.3.47",
+  "positionAccessorBounds": [
+    {
+      "min": [
+        -0.5134727358818054,
+        -0.49413827061653137,
+        -0.6819767951965332
+      ],
+      "max": [
+        0.4955071806907654,
+        0.5151888728141785,
+        -4.0087499655783176e-05
+      ]
+    }
+  ]
+}

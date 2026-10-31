@@ -1,0 +1,35 @@
+{
+  "beforeSHA256": "ac189c399c0f050c182807eefa06c754dc1ccb77922d3a3be116c4fedb21f12f",
+  "afterSHA256": "a48d6664d9e8b1dc056fdf002bc73d5d60eec296e8e2c21babb6f4765a9ad0cd",
+  "changedMeshAttributes": [
+    [
+      "Cow_Batch_sage_pendant",
+      "JOINTS_0"
+    ],
+    [
+      "Cow_Batch_sage_pendant",
+      "WEIGHTS_0"
+    ]
+  ],
+  "unchanged": "All vertex positions, normals, UV/colors, indices, materials, scene/bone transforms, and every sampled channel in all nine clips are byte-identical. Only pendant skin joint indices and weights changed.",
+  "attachmentWeights": {
+    "cow_body": 0.191296,
+    "cow_neck_01": 0.808704
+  },
+  "method": "The editable frozen Blender source has a pendant-only vertex-group edit. Only the corrected pendant JOINTS_0/WEIGHTS_0 accessors from a real Blender export were transplanted into the frozen GLB, avoiding unrelated remesh/tessellation changes.",
+  "discardedFullRebuild": {
+    "scope": "Discarded full rebuild vs accepted frozen hide; final delivered patch does not contain these changes",
+    "maxIndexedPositionDifference": 2.6656007498500226e-07,
+    "maxNearestSurfaceVertexDistance": 2.6656007498500226e-07,
+    "conclusion": "The rebuild is not byte-identical. Actual position changes are limited to floating-point roundoff (0.267 micrometres local); triangle connectivity is equivalent after nearest-vertex correspondence; raw index changes are ordering only. The entire rebuild was discarded, so none of those changes enter the delivered narrow patch.",
+    "trianglesDifferingAfterNearestVertexCorrespondence": 0
+  },
+  "reproducibility": {
+    "exportScript": "art-source/cow-animation/export_pendant_binding.py",
+    "patchScript": "art-source/cow-animation/apply_pendant_binding.py",
+    "baselineSHA256": "ac189c399c0f050c182807eefa06c754dc1ccb77922d3a3be116c4fedb21f12f",
+    "baselineStorage": "No duplicate GLB is shipped. Its original neck-only pendant accessors can be restored losslessly from the delivered artifact and accepted only after matching the exact frozen baseline SHA256.",
+    "verifiedOutputSHA256": "a48d6664d9e8b1dc056fdf002bc73d5d60eec296e8e2c21babb6f4765a9ad0cd",
+    "checks": "Candidate pendant vertex count/order and all nonweight vertex attributes match exactly; joint ordering, rest transforms and inverse bind matrices match; output compares byte-for-byte with the delivered a48d6664 asset."
+  }
+}

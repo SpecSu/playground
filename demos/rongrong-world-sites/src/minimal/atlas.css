@@ -1,0 +1,41 @@
+/* Standalone, user-opened album. World and existing compact animal cards are untouched. */
+.animal-atlas-shade{position:absolute;inset:0;z-index:12;display:flex;align-items:flex-end;background:#283a2d35;backdrop-filter:blur(3px)}
+.animal-atlas-sheet{width:100%;max-height:75%;display:flex;flex-direction:column;overflow:hidden;border:1px solid #fffdf2;border-bottom:0;border-radius:28px 28px 0 0;background:#fbf7ec;box-shadow:0 -10px 40px #35432d24;padding:19px 19px max(18px,env(safe-area-inset-bottom));color:#546b4b;animation:egg-card-in .22s ease-out}
+.animal-atlas-header{display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:10px;margin-bottom:10px}
+.animal-atlas-eyebrow{display:flex;align-items:center;gap:6px;color:#8c997c;font-size:max(10px,calc(10px / var(--phone-scale,1)))}
+.animal-atlas-header h2{display:flex;align-items:center;gap:11px;font-size:max(21px,calc(18px / var(--phone-scale,1)));line-height:1.5;margin:3px 0 0;font-weight:750}
+.animal-atlas-header h2 span{font-size:max(13px,calc(12px / var(--phone-scale,1)));font-weight:650;color:#899971}
+.egg-farm .animal-atlas-close{flex-shrink:0;align-self:flex-start;width:var(--farm-tap,44px);min-height:var(--farm-tap,44px);padding:10px;border:0;border-radius:50%;background:#f0eddf;box-shadow:none;color:#829171}
+.animal-atlas-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;color:#819171;font-size:max(10px,calc(10px / var(--phone-scale,1)));line-height:1.6}
+.animal-atlas-summary span:last-child{white-space:nowrap}
+.animal-atlas-progress{height:5px;flex-shrink:0;border-radius:10px;overflow:hidden;background:#e6e9d8;margin:10px 0 14px}
+.animal-atlas-progress>span{display:block;height:100%;background:#9cb181;border-radius:inherit}
+.animal-atlas-body{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#ccd6bb transparent;padding:0 1px 2px}
+.animal-atlas-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.animal-atlas-card{min-width:0;border:1px solid #e7e6d5;border-radius:21px;padding:8px 9px 11px;background:#fffdf4;text-align:center}
+.animal-atlas-card.is-unknown{background:#f0f0e4;border-color:#e2e5d5}
+.animal-atlas-portrait{position:relative;margin:0 auto 1px;width:100%;height:101px;display:flex;align-items:center;justify-content:center;border-radius:15px;background:radial-gradient(ellipse at 50% 65%,#e4ebce80,transparent 70%)}
+.animal-atlas-portrait img{display:block;max-width:100%;width:120px;height:112px;object-fit:contain;pointer-events:none;user-select:none}
+.animal-atlas-unknown{filter:brightness(0);opacity:.16}
+.animal-atlas-question{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:23px;font-weight:700;line-height:1;color:#f8f8ec;text-shadow:0 1px 3px #6e7f5e30}
+.animal-atlas-stamp{position:absolute;right:2px;top:3px;display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:#e7eed9;color:#7c9a61}
+.animal-atlas-card h3{font-size:max(15px,calc(13px / var(--phone-scale,1)));line-height:1.5;margin:2px 0 2px;color:#617753}
+.animal-atlas-card.is-unknown h3{color:#8e9b7d}
+.animal-atlas-owned{font-size:max(10px,calc(10px / var(--phone-scale,1)));line-height:1.6;margin:0;color:#869578}
+.animal-atlas-memories{display:flex;justify-content:center;gap:3px 6px;flex-wrap:wrap;margin-top:5px;min-height:15px;font-size:max(9px,calc(9px / var(--phone-scale,1)));color:#8a9676}
+.animal-atlas-memories>span{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.animal-atlas-memories svg{width:11px;height:11px}
+.animal-atlas-footer{flex-shrink:0;padding-top:13px}
+.egg-farm .animal-atlas-footer button{display:flex;justify-content:space-between;width:100%;min-height:var(--farm-tap,44px);border:1px solid #d9e3cb;border-radius:16px;background:#ebf0de;color:#6c865b;padding:11px 13px;font-size:max(11px,calc(11px / var(--phone-scale,1)));box-shadow:none}
+.animal-atlas-footer button span{flex:1;text-align:left}
+@media(prefers-reduced-motion:reduce){.animal-atlas-sheet{animation:none}}
+
+.animal-atlas-body:focus-visible{outline:2px solid #a8b98a;outline-offset:-2px;border-radius:10px}
+.animal-atlas-header-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.animal-atlas-header-actions>.animal-atlas-close{order:2}
+.animal-atlas-header h2{gap:6px;font-size:max(18px,calc(16px / var(--phone-scale,1)))}
+.animal-atlas-header h2>svg{flex-shrink:0}
+.animal-atlas-summary>span{display:flex;align-items:center;gap:5px;padding:7px 9px;border-radius:11px;background:#edf0e1}
+.animal-atlas-summary b{font-size:max(15px,calc(12px / var(--phone-scale,1)));color:#546b4b}
+.animal-atlas-progress{margin:9px 0 12px}
+@media(max-height:540px){.animal-atlas-sheet{max-height:90%;padding-top:12px}.animal-atlas-portrait{height:78px}.animal-atlas-portrait img{height:86px}.animal-atlas-footer{padding-top:8px}}

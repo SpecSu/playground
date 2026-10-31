@@ -1,0 +1,67 @@
+{
+  "source": "Blender 4.3.2 deterministic Python construction",
+  "species": "bunny",
+  "asset_contract_version": 2,
+  "bones": 27,
+  "mesh_objects": 5,
+  "clips": {
+    "idle": 3.0,
+    "walk": 0.9166666666666666,
+    "drink_enter": 1.1666666666666667,
+    "drink_loop": 2.75,
+    "drink_exit": 1.2083333333333333,
+    "eat": 2.0,
+    "rest": 3.0,
+    "carried": 2.5,
+    "react": 1.25
+  },
+  "walk_stride_m": 0.42,
+  "gait": "paired rabbit hop, not a quadruped trot",
+  "game_coordinates": {
+    "up": "+Y",
+    "forward": "+Z",
+    "ground_y": 0
+  },
+  "bones_for_runtime": {
+    "head": "bunny_head",
+    "neck": [
+      "bunny_neck_01",
+      "bunny_neck_02"
+    ],
+    "mouth": "feeding-mouth",
+    "support": "animal-support",
+    "ground": "animal-ground",
+    "head_anchor": "animal-head"
+  },
+  "mouth_idle": [
+    0.0,
+    0.5600000023841858,
+    0.43299999833106995
+  ],
+  "mouth_drink": [
+    0.0,
+    0.04500000178813934,
+    0.7200000286102295
+  ],
+  "support_idle": [
+    0.0,
+    0.11500000208616257,
+    -0.10000000149011612
+  ],
+  "scale_range": [
+    0.6,
+    2.2
+  ],
+  "drink_pose": {
+    "upper_body_forward_lean": 0.255,
+    "additional_crouch": 0.02,
+    "feet": "Fixed planted targets through enter, loop and exit",
+    "reason": "Keep baby bunny feet on the dry shore while mouth contacts actual rendered water"
+  },
+  "standing_foot_envelope": {
+    "forward": 0.345,
+    "rear": 0.325,
+    "half_width": 0.307
+  },
+  "carry": "Root never lifts. All paws fold upward around body; central belly has body-only weights. Support follows belly."
+}

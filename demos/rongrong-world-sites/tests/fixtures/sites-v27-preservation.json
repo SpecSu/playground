@@ -1,0 +1,281 @@
+{
+  "baseCommit": "437624707177bc64f2b5e20aed6e281d7f275720",
+  "candidateCommit": "923fd79be5b061a37636e885013c7847aa71aee5",
+  "oldModels": {
+    "public/avatars/cast-v1/banana-cat.glb": "6c0a08bb6d7388b78aa87909bff1ecbbc409cdbc33aaae341d7c216d15a266e6",
+    "public/avatars/cast-v1/human-lx.glb": "c2678958b323d8bc5f66897485a606a97c9380a95df0fbbbabd3ad5c8ff63090",
+    "public/avatars/cast-v1/miaocuijiao.glb": "b4d18acbd03b510564f2bed9a393086cf28e7e3ee1abbf7cf1a8096cdb6fba9e",
+    "public/avatars/cast-v1/milk-frog.glb": "55d0c7ad79288822fe39f73d1ff5af8a6e82afdcde6a207ef1b66901a7b55454",
+    "public/avatars/cast-v1/sword-shield-dog.glb": "28a1deb2c3c76bfb4bb35e81258d6cab01b799602df6d540170f3d902b1fb99a",
+    "public/models/animation-lab/alpaca.glb": "28b7eefbbc31471d94f10ef4b9ebf0bbc0aa9f74ea1b0ec678419c8bb1dc7087",
+    "public/models/animation-lab/bear.glb": "95630c9538314b734596d1c3fbfcce0c46c362a2bfe903fe29755a055283a749",
+    "public/models/animation-lab/bunny.glb": "5730f6578fb3d57916aa1178206fee432dda95a0557d61cb423fcff1027aa681",
+    "public/models/animation-lab/capybara.glb": "97b572934f31fcea6a2e8c9352046c85cb64f5b4e7037c9c739f19b648fa5bce",
+    "public/models/animation-lab/cat.glb": "d1dc3d62a151e8411f21a1cde282df4d0bf61c1a3dbe33f1ee6acbeb285ee2ae",
+    "public/models/animation-lab/chicken.glb": "206dd862f8d580cfb9b0c4103eedfefc158658fc6f13c6d70dc98dcb5cbaef0f",
+    "public/models/animation-lab/cow.glb": "19e980fd0e6a6712d87d0b1d7d96d77c4be889b3e6371f5ba472a182d3f1b835",
+    "public/models/animation-lab/crocodile.glb": "e76da6065bae40c08b9ed74f2ea26f12fc3887bab5e7e72357d771120d53efb1",
+    "public/models/animation-lab/deer.glb": "6d573b8639a4fad3e0390af53023d7add062566e2f116b78a5b9b5f4e86110ad",
+    "public/models/animation-lab/dog.glb": "3ba3ca23d81e4b2b5bd426ba2f00fc5101d20e8be1a32deceb66d6e62f968372",
+    "public/models/animation-lab/duck.glb": "fe006e715474e192b3d2123fab9d881b88be14bb5ea638a12a4a8fd6527df57c",
+    "public/models/animation-lab/fox.glb": "26928668595ea688d95a297237c61351e44ee09686bc6b0b51664a313e10e64f",
+    "public/models/animation-lab/hedgehog.glb": "0c62cd60f43fda8a299ecb43110523647395f5f583fcabbf754f453430da2dba",
+    "public/models/animation-lab/lion.glb": "e89581303a0c35c2a29d44beaea4f75fe2d1d1ca699539eb151023896a7cf16c",
+    "public/models/animation-lab/owl.glb": "6fb6d1d809c1bb06f3c646ac8a7a4a36b90065a02a2ee0829386e624285e0238",
+    "public/models/animation-lab/parrot.glb": "79210a4bfa21a2bf321b9637a0c47fce13f0615def57612a4363851e5d9a1b1e",
+    "public/models/animation-lab/penguin.glb": "3490a49c7a782cfec065693e88d51f08c197e06739610f4d7b45815a61ac24ff",
+    "public/models/animation-lab/pig.glb": "88215c676cf76183e39bcaef22ab78775c0b486416a7ed83ae1f9aeb7f1afa82",
+    "public/models/animation-lab/raccoon.glb": "84e729a35e2f6434eb97a5a38f43a4e04fa63c972e63e5de2d61e4dea694aa05",
+    "public/models/animation-lab/sheep.glb": "6f38f4ec00c23d8b8d7d2120f2cf73dd52e8315fe6cc3d63f5bd395fc3158618",
+    "public/models/animation-lab/tiger.glb": "47bcd50c27220469ff867f43952ce50c129d40f3918c648f5d86d7cbfd95e35d",
+    "public/models/animation-lab/tit.glb": "d09af959ee1ee25ae78066872bb290d1f18612ff81b2d350a6cb770116166fc2",
+    "public/models/animation-lab/toucan.glb": "297f56efb3f2098a998b29abeafc61e33d70e1adcd464e4842490929011c0eb1",
+    "public/models/animation-lab/wolf.glb": "b1a6545f0d55de5367b6155327be957a077ad4907bda5cfd10a54fbfc2a92314",
+    "public/models/animation-lab/woodpecker.glb": "2dbfd20c3568827f3a2920ce7b54ad911a9e76719a7a49fa925e5882c2d85f7c",
+    "public/models/farm/bunny-animated.glb": "396af7275f678e06d8cdc4c30bca6d30c966531a14180864e0d7b1bf8fd4156a",
+    "public/models/farm/cow-animated.glb": "a48d6664d9e8b1dc056fdf002bc73d5d60eec296e8e2c21babb6f4765a9ad0cd",
+    "public/models/farm/duck-animated.glb": "b900bbee972bb1e29d3124ae6fab95bfc88edc403b0bec2408616338ab1cb6e6",
+    "public/models/farm/pig-animated.glb": "8fe32ed06a07e38593a895b0587459b118bd73b9570e3ed0a4c2be9b2cfe2876",
+    "public/models/farm/sheep-animated.glb": "3efb4cb9de2481c821f61d212290409a1e10314aee7ed5b33e27e77f427c8f81"
+  },
+  "protectedFiles": {
+    "app/account-info/page.tsx": "71ecadfc2b8ad39eb4cce38dabc77b52a7f65ff0f3796e782485309608f1ff43",
+    "app/api/account-info/route.ts": "ec2f0db07eb3c567c6c3a18ca208eafe3ab87b4a128e07e99ded840226278c89",
+    "worker/index.ts": "deb51f531324f17f91cb57d00b0e2d53376f8c1c5258a9417a98076dc32c567d",
+    "lib/sites-auth-access.ts": "04f3c00281213e20d3b4ef8b7bff4acad702bd931b77424415f9ada9f8d1f2ab",
+    ".openai/hosting.json": "1969ce57e123349afe43d53fe621a515568b795e7142a774a897881f672d0bb0",
+    "drizzle/0000_panoramic_miracleman.sql": "d06abbf449217de43b5dda3f1507892279bd715f10b6d33180f6f047256fcc47",
+    "drizzle/0001_orange_slyde.sql": "54eb0ca1dc61a8a114307434a5a96130f0aadac4d0144e3064d9ee5253388911",
+    "drizzle/meta/0000_snapshot.json": "dc3f07c7dadecfe4eabccffcfbdb3562b34a31b1216371048ebb0785d2e27637",
+    "drizzle/meta/0001_snapshot.json": "d2fe8fba0fc74b753d44ff93f7f710fb7fb3a49ca37cf651ccc5854bb5a3e619",
+    "app/api/convoy/route.ts": "89d11690da180defb786bfde6c30dde001ba9fbbd93f6be43c228b0dc4fc6528",
+    "app/api/diagnostics/route.ts": "ef0c0bc72103c0a278631db928cbc2dae765ba5344d028d3c8ee55d6a20b80b1",
+    "app/api/estate/route.ts": "36ad7420963dd9c375231e7416f4f11452d56f702f4dd4fae4c89954f7c0cb10",
+    "app/api/farm/route.ts": "fe3af016cd2f8069bd8373eb5d3f52b0626eda954b6366bd3c23fe38d4949545",
+    "app/api/harvest/route.ts": "693e4f2fa60d906ef533a2f98f84adb67c15edfd4aee5e2fb18cf7742c3d9310",
+    "src/model.ts": "3237afdb19448e282ed72d7f75714b04b338c14392a9435e8caff9cb9a08c9a7",
+    "src/sites-http.ts": "3b7cc143cc5b3ea17fac99ca23c771398b1d50d521ee186ae6201cbfb966cf5b",
+    "src/v5/EstateApp.tsx": "b357fce06fcdaa09186198e5d26780f26c7f154f721686dca8362811e15567d2",
+    "src/v5/EstateView.tsx": "d995359c879b40bde2261270b7adb2f6febb74b85cef0fed32ba749a6e0bc021",
+    "src/v7/ConvoyApp.tsx": "54aa282aa1185300739644dc3237fc612f66280ba98d834f74e37b0a022593da",
+    "src/v7/HarvestPanel.tsx": "dd175188660f09cc60efe6613a01ce90e7bb2ffab4889591fe891ee9476f7d15",
+    "src/v7/MarketPanel.tsx": "4b027fee6c432e6e0a9d4ab4c60fe3c9c44fc6992cc21bf1ae96ec33ff4cea98"
+  },
+  "oldJournalEntries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1792590465716,
+      "tag": "0000_panoramic_miracleman",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792736520258,
+      "tag": "0001_orange_slyde",
+      "breakpoints": true
+    }
+  ],
+  "oldBuildMetadata": {
+    "version": "v25.0-game-panels-brisk-walk",
+    "animationLab": {
+      "entry": "?animationLab=1",
+      "speciesCount": 25,
+      "clipCount": 332,
+      "status": "provisional-Blender-skeletal-models",
+      "disclosure": "\u4e34\u65f6\u6a21\u578b \u00b7 Blender \u9aa8\u9abc\u52a8\u753b"
+    },
+    "animationLabPolish": {
+      "species": [
+        "dog",
+        "bear"
+      ],
+      "scope": "lab-only-proximal-leg-joins",
+      "preserved": "rigs-inverse-binds-and-authored-clips",
+      "evidence": "offline-Blender-and-actual-skinned-geometry-not-browser-acceptance"
+    },
+    "animationLabCatCoat": {
+      "species": "cat",
+      "scope": "lab-only-torso-conforming-markings",
+      "surfaceOffsetMeters": 0.0006,
+      "preserved": "rigs-inverse-binds-and-authored-clips",
+      "evidence": "offline-Blender-and-actual-skinned-geometry-not-browser-distance-acceptance"
+    },
+    "animationLabStartupCleanup": {
+      "scope": "lab-only-partial-startup-rollback",
+      "ownership": "idempotent-best-effort-owned-resource-release",
+      "errors": "preserve-original-startup-error-and-retry-ui",
+      "evidence": "fault-injected-controller-and-React-tests-not-real-browser-acceptance"
+    },
+    "defaultMode": "minimal",
+    "legacyMode": "?legacy",
+    "camera": "orthographic-manor-10.4-offset-9-13.8-18",
+    "viewport": "390x844",
+    "world": "continuous-land-4x4-owned-10x10-visible",
+    "storage": "browser-local-egg-v2",
+    "entry": "welcome-coins-random-egg-place-hatch",
+    "shop": "two-tiles-physical-walk-carry-confirm-sale",
+    "species": [
+      "sheep",
+      "pig",
+      "cow",
+      "bunny",
+      "duck"
+    ],
+    "sizes": [
+      "normal",
+      "large",
+      "giant"
+    ],
+    "breeding": "manual-adult-same-species-opposite-sex-one-farm-egg-per-UTC8-day",
+    "visualQA": "actual-skinned-geometry-and-offline-Blender-not-real-browser",
+    "generation": "not-connected-in-minimal-mode",
+    "friends": "not-connected-in-minimal-mode",
+    "controls": "OrbitControls-left-drag-single-touch-rotate-pinch-wheel-zoom",
+    "walking": "farm-only-neutral-LX-eased-stroll-0.5cells-per-second",
+    "defaultZoom": 1.6,
+    "grounding": "farm-stride-actual-skin-sole-probes",
+    "carry": "anatomical-belly-support-head-contact",
+    "growth": "saved-random-monotone-baby-juvenile-adult-with-bounded-terrain-bonus",
+    "weather": "simulated-UTC8-day-night-sunny-cloudy-rain-snow-storm",
+    "audio": "gesture-unlocked-calm-and-wolf-crossfade",
+    "water": "pond-blocked-creek-walkable-bank-drink",
+    "cowAnimation": "blender-26bones-9clips-AnimationMixer",
+    "growthStages": [
+      "baby",
+      "juvenile",
+      "adult"
+    ],
+    "growthStageSeconds": 60,
+    "newAnimalAdultSeconds": 120,
+    "growthScaleBounds": [
+      0.6,
+      2.2
+    ],
+    "legacyGrowth": "preserve-v14-curve-and-adulthood",
+    "animalAnimation": "five-Blender-skinned-species-nine-authored-clips",
+    "animalDetails": "click-only-compact-nonmodal-card",
+    "hatching": "1800ms-nest-sized-shell-opening-low-hop-three-glints-no-auto-camera-pan",
+    "physicalActions": "explicit-revalidated-cancellable-approach",
+    "assetRecovery": "versioned-static-GLBs-coalesced-explicit-retry",
+    "animalMotion": "species-stride-scaled-cadence-stable-identity",
+    "drinking": "authoritative-bank-arrival-six-second-action-rotational-contact",
+    "animalTransfer": "650ms-presentation-only-lift-lower-safe-nearby-landing",
+    "animalGreeting": "900ms-explicit-wave-and-full-animal-response",
+    "animalTouch": "physical-44px-target-max14px-margin-ordinary-owned-ground-only",
+    "groundedTransitions": "limb-only-partial-grounded-mix-floor-correction-excludes-carry-and-airborne-hatch",
+    "animalTouchCache": "five-versioned-models-verified-template-data-dynamic-fallback",
+    "releaseStatus": "candidate-not-deployment-confirmation",
+    "growthTimingMeaning": "base-effective-age-new-profiles-terrain-can-shorten-real-time-legacy-unchanged",
+    "saleFeedback": {
+      "handoffMs": 850,
+      "reducedMotionMs": 180,
+      "audio": "accepted-sale-gesture-unlocked-three-note-WebAudio-chime",
+      "wallet": "actual-sale-price-receipt"
+    },
+    "audioQA": "programmatic-synthesis-checks-not-listening-verification",
+    "wishingPool": "shop-rule-preview-real-online-exchange-off",
+    "atlas": "browser-local-actual-observation-history",
+    "saveProtection": "observed-foreign-raw-write-guard-not-atomic-cross-process-transaction",
+    "terrain": {
+      "levels": [
+        1,
+        2,
+        3
+      ],
+      "qualityLabels": {
+        "1": "\u81ea\u7136",
+        "2": "\u4e30\u8302",
+        "3": "\u73cd\u666f"
+      },
+      "qualityMeaning": "cultivated-level-not-independent-random-rarity",
+      "upgradeCoins": [
+        30,
+        60
+      ],
+      "levelMultipliers": [
+        1,
+        1.5,
+        2
+      ],
+      "baseCapacity": {
+        "meadow": {
+          "food": 1,
+          "water": 0,
+          "rest": 0
+        },
+        "creek": {
+          "food": 0,
+          "water": 4,
+          "rest": 0
+        },
+        "pond": {
+          "food": 0,
+          "water": 6,
+          "rest": 0
+        },
+        "grove": {
+          "food": 0,
+          "water": 0,
+          "rest": 4
+        },
+        "hill": {
+          "food": 0,
+          "water": 0,
+          "rest": 2
+        }
+      },
+      "freeBaseCapacity": {
+        "food": 2,
+        "water": 2,
+        "rest": 2
+      },
+      "maxGrowthBonusRate": 0.2,
+      "supplyMeaning": "reachable-owned-capacity-not-consumable-inventory"
+    },
+    "lifecycle": {
+      "hidden": "pause-periodic-simulation-save-and-World-render-loop",
+      "resume": "settle-offline-growth-once-before-resuming-audio",
+      "encounters": "no-repeated-unseen-wolf-encounters",
+      "transientEffects": "finish-hatch-sale-and-transfer-offscreen-without-replay",
+      "foregroundSave": "existing-250ms-cadence-unchanged"
+    },
+    "companionGift": {
+      "coins": 10,
+      "scope": "once-per-farm-per-UTC+8-calendar-day",
+      "trigger": "successful-explicit-adult-greeting",
+      "currency": "game-coins-not-Dreamina-credits",
+      "offline": "no-bank-or-auto-claim",
+      "clock": "local-date-guard-not-secure-clock-enforcement",
+      "feedback": "checked-commit-wallet-receipt-and-optional-two-note-gesture-unlocked-chime",
+      "salePrices": {
+        "normal": 40,
+        "large": 65,
+        "giant": 100
+      }
+    },
+    "interactionPolish": {
+      "tap": "release-displacement-checked-at-existing-6px-threshold",
+      "approach": "reachable-cardinal-then-diagonal-within-existing-1.6-cell-radius",
+      "nestSafety": "successful-ground-nest-clears-route-and-newly-unsafe-drink-anchors"
+    },
+    "playerPondClearance": {
+      "cells": 0.12,
+      "scope": "player-only-expanded-pond-boxes",
+      "legacy": "preserve-v2-cancel-unsafe-intent-checked-dry-center-retreat",
+      "evidence": "actual-weighted-shoe-CPU-sampling-not-continuous-proof"
+    },
+    "gamePanels": {
+      "layout": "compact-visual-status-and-actions",
+      "help": "labeled-question-modal-portal-focus-trap-Escape-inert-return-cleanup",
+      "evidence": "React-DOM-and-CSS-contracts-not-real-browser-acceptance"
+    },
+    "briskWalk": {
+      "cellsPerSecond": 0.5,
+      "strideScale": 1.1,
+      "scope": "farm-human-only-nonfarm-defaults-unchanged",
+      "evidence": "actual-weighted-shoe-and-frame-rate-tests-not-perceived-gait-acceptance"
+    }
+  }
+}

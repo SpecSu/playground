@@ -1,0 +1,108 @@
+{
+  "species": "pig",
+  "revision": "v05",
+  "source": "Blender 4.3.2, deterministic editable Python construction",
+  "bones": 26,
+  "mesh_objects": 11,
+  "connected_body_vertices": 9602,
+  "connected_body_faces": 9600,
+  "clips": {
+    "idle": 3.0,
+    "walk": 1.2083333333333333,
+    "drink_enter": 1.0833333333333333,
+    "drink_loop": 2.5833333333333335,
+    "drink_exit": 1.2916666666666667,
+    "eat": 2.0,
+    "rest": 3.0,
+    "carried": 3.0,
+    "react": 1.0
+  },
+  "walk_stride_m": 0.34,
+  "game_coordinates": {
+    "up": "+Y",
+    "forward": "+Z",
+    "ground_y": 0
+  },
+  "bones_for_runtime": {
+    "root": "pig_root",
+    "body": "pig_body",
+    "head": "pig_head",
+    "neck": [
+      "pig_neck_01",
+      "pig_neck_02"
+    ],
+    "mouth": "feeding-mouth",
+    "support": "animal-support",
+    "ground": "animal-ground"
+  },
+  "mouth_idle": [
+    0.0,
+    0.4050000011920929,
+    0.8370000123977661
+  ],
+  "mouth_drink": [
+    0.0,
+    0.04500000178813934,
+    0.7900000214576721
+  ],
+  "support_idle": [
+    0.0,
+    0.2027801275253296,
+    -0.07999999821186066
+  ],
+  "foot_centers_idle": {
+    "front_L": [
+      -0.27000001072883606,
+      0.06499999761581421,
+      0.28200000524520874
+    ],
+    "front_R": [
+      0.27000001072883606,
+      0.06499999761581421,
+      0.28200000524520874
+    ],
+    "back_L": [
+      -0.27000001072883606,
+      0.06499999761581421,
+      -0.3580000102519989
+    ],
+    "back_R": [
+      0.27000001072883606,
+      0.06499999761581421,
+      -0.3580000102519989
+    ]
+  },
+  "carry_pose": "All folded hoof geometry above the true central belly support. No runtime upper-leg rotation patch required.",
+  "loop_clips": [
+    "idle",
+    "walk",
+    "drink_loop",
+    "eat",
+    "rest",
+    "carried",
+    "react"
+  ],
+  "entry_exit": "drink_enter starts at idle frame zero, drink_exit ends there; crossfade to rest/carried/eat/react.",
+  "dimensions_idle": [
+    0.7711492776870728,
+    0.8932199366390705,
+    1.6321905851364136
+  ],
+  "bounds_idle": {
+    "min": [
+      -0.38557469844818115,
+      0.0039999596774578094,
+      -0.7566652894020081
+    ],
+    "max": [
+      0.3855745792388916,
+      0.8972198963165283,
+      0.8755252957344055
+    ]
+  },
+  "carry_support_min_clearance": 0.0,
+  "glb_sha256": "8fe32ed06a07e38593a895b0587459b118bd73b9570e3ed0a4c2be9b2cfe2876",
+  "glb_size_bytes": 1284012,
+  "source_blend_sha256": "f139fc6e1e6f029788e72a5eb11bca5c6c942614bef757049dfbbd123a511fcd",
+  "source_blend_size_bytes": 1426469
+}

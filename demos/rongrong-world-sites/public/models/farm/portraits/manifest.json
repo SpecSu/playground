@@ -1,0 +1,95 @@
+{
+  "description": "Actual shipped animal GLB idle-pose asset portraits. Not browser screenshots.",
+  "generator": "art-source/animal-atlas/render_portraits.py",
+  "blender_version": "4.3.2",
+  "renderer": "Cycles CPU",
+  "samples": 32,
+  "resolution": [
+    256,
+    256
+  ],
+  "transparent_background": true,
+  "view": "Consistent front three-quarter orthographic view",
+  "portraits": [
+    {
+      "species": "sheep",
+      "file": "public/models/farm/portraits/sheep.png",
+      "source_glb": "public/models/farm/sheep-animated.glb",
+      "source_sha256": "3efb4cb9de2481c821f61d212290409a1e10314aee7ed5b33e27e77f427c8f81",
+      "png_sha256": "1bb9339c94bec122abbb9235e099c2a9ba5d7089ab7a5eb1815f1a1972c73117",
+      "idle_actions": [
+        "idle_Sheep_Armature"
+      ],
+      "frame": 0,
+      "orthographic_scale": 1.549264,
+      "projected_model_size": [
+        1.140819,
+        1.270397
+      ]
+    },
+    {
+      "species": "pig",
+      "file": "public/models/farm/portraits/pig.png",
+      "source_glb": "public/models/farm/pig-animated.glb",
+      "source_sha256": "8fe32ed06a07e38593a895b0587459b118bd73b9570e3ed0a4c2be9b2cfe2876",
+      "png_sha256": "7b5f03951d9a17d7da71c9b86bdd716d8c2d92a08ac2bdad74d4444871831662",
+      "idle_actions": [
+        "idle_Pig_Armature"
+      ],
+      "frame": 0,
+      "orthographic_scale": 1.407817,
+      "projected_model_size": [
+        1.15441,
+        1.065708
+      ]
+    },
+    {
+      "species": "cow",
+      "file": "public/models/farm/portraits/cow.png",
+      "source_glb": "public/models/farm/cow-animated.glb",
+      "source_sha256": "a48d6664d9e8b1dc056fdf002bc73d5d60eec296e8e2c21babb6f4765a9ad0cd",
+      "png_sha256": "83b371c5c7660c9451304f328893a2ebf946fa545f44d148f3d8a2840214c23c",
+      "idle_actions": [
+        "idle_Cow_Armature"
+      ],
+      "frame": 0,
+      "orthographic_scale": 1.598568,
+      "projected_model_size": [
+        1.07808,
+        1.310826
+      ]
+    },
+    {
+      "species": "bunny",
+      "file": "public/models/farm/portraits/bunny.png",
+      "source_glb": "public/models/farm/bunny-animated.glb",
+      "source_sha256": "396af7275f678e06d8cdc4c30bca6d30c966531a14180864e0d7b1bf8fd4156a",
+      "png_sha256": "9848e7206b03352575a44996064ca57167bd3138c9ce04eaa9dad53885026d57",
+      "idle_actions": [
+        "idle_Bunny_Armature"
+      ],
+      "frame": 0,
+      "orthographic_scale": 1.504879,
+      "projected_model_size": [
+        0.771357,
+        1.234
+      ]
+    },
+    {
+      "species": "duck",
+      "file": "public/models/farm/portraits/duck.png",
+      "source_glb": "public/models/farm/duck-animated.glb",
+      "source_sha256": "b900bbee972bb1e29d3124ae6fab95bfc88edc403b0bec2408616338ab1cb6e6",
+      "png_sha256": "f77ec07f29e6ab7b379148637d4b29b2a05ce947ed1f8bb1bf4371ccea903139",
+      "idle_actions": [
+        "idle_Duck_Armature"
+      ],
+      "frame": 0,
+      "orthographic_scale": 1.023885,
+      "projected_model_size": [
+        0.754394,
+        0.839585
+      ]
+    }
+  ]
+}

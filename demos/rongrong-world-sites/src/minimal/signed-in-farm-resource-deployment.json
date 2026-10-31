@@ -1,0 +1,18 @@
+{
+  "schema": "farm-signed-in-resources/v1",
+  "scope": "signed-in-farm",
+  "target": {"kind":"hosted","id":"https://fluffy-farm-companions.tangguozhou.chatgpt.site"},
+  "evidenceReuse": {
+    "kind": "reuse-verified-artifacts",
+    "sourceScope": "named-demo",
+    "sourceCodeCommit": "cb5125cc080dfe4dc76072902db2c88b5cdf93f6",
+    "materializationSha256": "77fcbbcee7fc73cba90d8c5ff5828afbbae12e74a9b4452865f5440c95f4d567",
+    "candidates": {
+      "cow": "fa3ab7f7e29d28d2a2f79c9a44856f561748a10c4933b897c1fd90469ee6a13a",
+      "bunny": "acaeb7453e9a47ea1d6583b649465a5e00345a5da026bef4e06e611299ca4ecf",
+      "alpaca": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+      "penguin": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f"
+    },
+    "purpose": "Explicit signed-in farm use of the same verified bytes and profiles; original local/named receipts remain unchanged. Mobile performance remains unmeasured, not a production-quality claim."
+  }
+}

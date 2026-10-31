@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {parseDemoName} from '../src/minimal/demo-name.ts';
+test('name selector is explicit, normalized and bounded',()=>{assert.deepEqual(parseDemoName(''),{kind:'none'});assert.deepEqual(parseDemoName('?x=1'),{kind:'none'});for(const s of ['?name=twx','?name=%20TWX%20'])assert.deepEqual(parseDemoName(s),{kind:'demo',name:'twx'});assert.deepEqual(parseDemoName('?name=a_b-2'),{kind:'demo',name:'a_b-2'});assert.equal(parseDemoName('?name='+'a'.repeat(24)).kind,'demo');});
+test('invalid explicit name never falls back to no-name or a different account',()=>{for(const s of ['?name=','?name=%20','?name=a&name=b','?name=a&name=a','?name='+ 'a'.repeat(25),'?name=%00a','?name=../twx','?name=twx/x','?name=ＴＷＸ','?name=名','?name=_a','?name=a%0Ab'])assert.equal(parseDemoName(s).kind,'invalid',s);});

@@ -1,0 +1,39 @@
+{
+  "species": "sheep",
+  "sha256": "3efb4cb9de2481c821f61d212290409a1e10314aee7ed5b33e27e77f427c8f81",
+  "size_bytes": 1176784,
+  "skins": 1,
+  "joints": 26,
+  "visible_mesh_nodes": 10,
+  "triangles": 25312,
+  "all_meshes_skinned": true,
+  "skinned_vertices": 13439,
+  "max_weight_sum_error": 1.1490192264318466e-07,
+  "clip_durations_seconds": {
+    "carried": 3.0,
+    "drink_enter": 1.0833333730697632,
+    "drink_exit": 1.2916666269302368,
+    "drink_loop": 2.5833332538604736,
+    "eat": 2.0,
+    "idle": 3.0,
+    "react": 1.0,
+    "rest": 3.0,
+    "walk": 1.2083333730697632
+  },
+  "max_animation_seam_errors": {
+    "idle_loop": 0,
+    "walk_loop": 1.9566461081574338e-18,
+    "drink_loop_loop": 0,
+    "eat_loop": 0,
+    "rest_loop": 0,
+    "carried_loop": 0,
+    "react_loop": 0,
+    "idle->drink_enter": 0,
+    "drink_enter->drink_loop": 0,
+    "drink_loop->drink_exit": 0,
+    "drink_exit->idle": 0
+  },
+  "scope": "Binary GLB structure, skin normalization, geometry budget, authored pose seams. Offline pose/render and runtime checks reported separately.",
+  "revision": "v04",
+  "runtime_file": "public/models/farm/sheep-animated.glb"
+}

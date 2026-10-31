@@ -1,0 +1,659 @@
+{
+  "version": 2,
+  "terrainGrowthAt": 1800000000000,
+  "coins": 430,
+  "welcomeClaimed": true,
+  "tiles": [
+    {
+      "x": -3,
+      "z": -3,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": -3,
+      "z": -2,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": -3,
+      "z": -1,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": -3,
+      "z": 0,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": -3,
+      "z": 1,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -3,
+      "z": 2,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -3,
+      "z": 3,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -3,
+      "z": 4,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -3,
+      "z": 5,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -3,
+      "z": 6,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -2,
+      "z": -3,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": -2,
+      "z": -2,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": -2,
+      "z": -1,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": -2,
+      "z": 0,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": -2,
+      "z": 1,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -2,
+      "z": 2,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -2,
+      "z": 3,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -2,
+      "z": 4,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -2,
+      "z": 5,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -2,
+      "z": 6,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -1,
+      "z": -3,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": -1,
+      "z": -2,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": -1,
+      "z": -1,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": -1,
+      "z": 0,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": -1,
+      "z": 1,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -1,
+      "z": 2,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -1,
+      "z": 3,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -1,
+      "z": 4,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -1,
+      "z": 5,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": -1,
+      "z": 6,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": 0,
+      "z": -3,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 0,
+      "z": -2,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 0,
+      "z": -1,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 0,
+      "z": 0,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 0,
+      "z": 1,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 0,
+      "z": 2,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 0,
+      "z": 3,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 0,
+      "z": 4,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": 0,
+      "z": 5,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": 0,
+      "z": 6,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": 1,
+      "z": -3,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 1,
+      "z": -2,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 1,
+      "z": -1,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 1,
+      "z": 0,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 1,
+      "z": 1,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 1,
+      "z": 2,
+      "terrain": "meadow",
+      "owned": true,
+      "level": 3
+    },
+    {
+      "x": 1,
+      "z": 3,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 1,
+      "z": 4,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": 1,
+      "z": 5,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": 1,
+      "z": 6,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": 2,
+      "z": -3,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 2,
+      "z": -2,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 2,
+      "z": -1,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 2,
+      "z": 0,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 2,
+      "z": 1,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 2,
+      "z": 2,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 2,
+      "z": 3,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 2,
+      "z": 4,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": 2,
+      "z": 5,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": 2,
+      "z": 6,
+      "terrain": "grove",
+      "owned": false
+    },
+    {
+      "x": 3,
+      "z": -3,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 3,
+      "z": -2,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 3,
+      "z": -1,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 3,
+      "z": 0,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 3,
+      "z": 1,
+      "terrain": "meadow",
+      "owned": true
+    },
+    {
+      "x": 3,
+      "z": 2,
+      "terrain": "creek",
+      "owned": true
+    },
+    {
+      "x": 3,
+      "z": 3,
+      "terrain": "creek",
+      "owned": true
+    },
+    {
+      "x": 3,
+      "z": 4,
+      "terrain": "creek",
+      "owned": false
+    },
+    {
+      "x": 3,
+      "z": 5,
+      "terrain": "creek",
+      "owned": false
+    },
+    {
+      "x": 3,
+      "z": 6,
+      "terrain": "creek",
+      "owned": false
+    },
+    {
+      "x": 4,
+      "z": -3,
+      "terrain": "creek",
+      "owned": false
+    },
+    {
+      "x": 4,
+      "z": -2,
+      "terrain": "creek",
+      "owned": false
+    },
+    {
+      "x": 4,
+      "z": -1,
+      "terrain": "creek",
+      "owned": false
+    },
+    {
+      "x": 4,
+      "z": 0,
+      "terrain": "creek",
+      "owned": false
+    },
+    {
+      "x": 4,
+      "z": 1,
+      "terrain": "creek",
+      "owned": false
+    },
+    {
+      "x": 4,
+      "z": 2,
+      "terrain": "pond",
+      "owned": false
+    },
+    {
+      "x": 4,
+      "z": 3,
+      "terrain": "pond",
+      "owned": false
+    },
+    {
+      "x": 4,
+      "z": 4,
+      "terrain": "creek",
+      "owned": false
+    },
+    {
+      "x": 4,
+      "z": 5,
+      "terrain": "creek",
+      "owned": false
+    },
+    {
+      "x": 4,
+      "z": 6,
+      "terrain": "creek",
+      "owned": false
+    },
+    {
+      "x": 5,
+      "z": -3,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 5,
+      "z": -2,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 5,
+      "z": -1,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 5,
+      "z": 0,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 5,
+      "z": 1,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 5,
+      "z": 2,
+      "terrain": "pond",
+      "owned": false
+    },
+    {
+      "x": 5,
+      "z": 3,
+      "terrain": "pond",
+      "owned": false
+    },
+    {
+      "x": 5,
+      "z": 4,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 5,
+      "z": 5,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 5,
+      "z": 6,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 6,
+      "z": -3,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 6,
+      "z": -2,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 6,
+      "z": -1,
+      "terrain": "hill",
+      "owned": false
+    },
+    {
+      "x": 6,
+      "z": 0,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 6,
+      "z": 1,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 6,
+      "z": 2,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 6,
+      "z": 3,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 6,
+      "z": 4,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 6,
+      "z": 5,
+      "terrain": "meadow",
+      "owned": false
+    },
+    {
+      "x": 6,
+      "z": 6,
+      "terrain": "meadow",
+      "owned": false
+    }
+  ],
+  "animals": [
+    {
+      "id": "animal-1",
+      "name": "旧牛牛",
+      "species": "cow",
+      "sex": "female",
+      "size": "normal",
+      "position": {
+        "x": 2,
+        "z": 2
+      },
+      "activity": "idle",
+      "energy": 80,
+      "bond": 2,
+      "bornAt": 1799999800000,
+      "activityUntil": 1800000009000
+    }
+  ],
+  "eggs": [
+    {
+      "id": "egg-2",
+      "source": "shop",
+      "species": "duck",
+      "sex": "male",
+      "size": "normal",
+      "location": "bag",
+      "boughtAt": 1800000000000
+    }
+  ],
+  "carriedAnimalId": null,
+  "guardian": "dog",
+  "player": {
+    "x": 1,
+    "z": 3
+  },
+  "playerPath": [],
+  "gifts": [],
+  "collection": [],
+  "createdAt": 1800000000000,
+  "updatedAt": 1800000000000,
+  "nextWolfAt": 1800000300000,
+  "expansions": 2,
+  "wolfEvent": null,
+  "notice": "收下开园金币，去小店挑一颗惊喜蛋",
+  "sequence": 2,
+  "placedEggCount": 0,
+  "hatchedCount": 1,
+  "breedingDay": null,
+  "lastHatch": null,
+  "lastBreeding": null
+}

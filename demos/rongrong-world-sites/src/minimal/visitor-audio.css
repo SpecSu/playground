@@ -1,0 +1,3 @@
+/* One small visitor-only control; no panel, autoplay prompt or bottom HUD. */
+.egg-farm .visitor-audio-control{position:absolute;z-index:1;right:12px;top:197px;display:flex;align-items:center;justify-content:center;gap:5px;min-width:var(--farm-tap,44px);min-height:var(--farm-tap,44px);padding:8px 10px;border:0;border-radius:18px;background:#fffbedf5;color:#36553b;font-size:12px;box-shadow:0 3px 14px #253b3018}
+.egg-farm .visitor-audio-control:focus-visible{outline:3px solid #7c9b66;outline-offset:2px}.egg-farm .visitor-audio-control:disabled{color:#78806a}

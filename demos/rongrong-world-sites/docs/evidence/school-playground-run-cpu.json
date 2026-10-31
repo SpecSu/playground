@@ -1,0 +1,118 @@
+{
+  "scope": "actual GLB / CPU Three, injected renderer; no GPU visual or mobile performance claim",
+  "modelSha256": "ec15c61b3fbb3c899aebd1d08c01d7224f761cae3f20879d55f8a4e872c81a21",
+  "run": {
+    "sha": "ec15c61b3fbb3c899aebd1d08c01d7224f761cae3f20879d55f8a4e872c81a21",
+    "bytes": 1792648,
+    "loads": 1,
+    "actors": 8,
+    "activeSeconds": 266.6666666667528,
+    "minSkinY": 4.683243844411447e-05,
+    "maxRadius": 0.31193226499286014,
+    "minPairGap": 0.4999999999999979,
+    "maxStanceDrift": 0.0039057265480622193,
+    "flightSamples": 25672,
+    "maxFlightHeight": 0.017156513735656482,
+    "frames": 16000,
+    "shapeSamples": 1072,
+    "footCounts": [
+      {
+        "side": "L",
+        "count": 684
+      },
+      {
+        "side": "R",
+        "count": 728
+      }
+    ],
+    "worst": {
+      "step": 9119,
+      "runner": 1,
+      "foot": "L",
+      "phase": 0.27994266346989477,
+      "progress": 113.4735955128275,
+      "drift": 0.0039057265480622193
+    },
+    "laps": 3.2265696767590346
+  },
+  "world": {
+    "sha": "ec15c61b3fbb3c899aebd1d08c01d7224f761cae3f20879d55f8a4e872c81a21",
+    "actualSkinPicks": 96,
+    "minHeightPixels": 27.76713916889466,
+    "measurements": [
+      {
+        "stage": 0,
+        "width": 320,
+        "height": 568,
+        "zoom": 1.548942914529424
+      },
+      {
+        "stage": 0,
+        "width": 390,
+        "height": 844,
+        "zoom": 1.5798335139644835
+      },
+      {
+        "stage": 0,
+        "width": 1280,
+        "height": 720,
+        "zoom": 0.8814333472302847
+      },
+      {
+        "stage": 1,
+        "width": 320,
+        "height": 568,
+        "zoom": 1.548942914529424
+      },
+      {
+        "stage": 1,
+        "width": 390,
+        "height": 844,
+        "zoom": 1.5798335139644835
+      },
+      {
+        "stage": 1,
+        "width": 1280,
+        "height": 720,
+        "zoom": 0.8814333472302851
+      },
+      {
+        "stage": 2,
+        "width": 320,
+        "height": 568,
+        "zoom": 1.5489429145294233
+      },
+      {
+        "stage": 2,
+        "width": 390,
+        "height": 844,
+        "zoom": 1.579833513964483
+      },
+      {
+        "stage": 2,
+        "width": 1280,
+        "height": 720,
+        "zoom": 0.8814333472302847
+      },
+      {
+        "stage": 3,
+        "width": 320,
+        "height": 568,
+        "zoom": 1.5489429145294233
+      },
+      {
+        "stage": 3,
+        "width": 390,
+        "height": 844,
+        "zoom": 1.579833513964483
+      },
+      {
+        "stage": 3,
+        "width": 1280,
+        "height": 720,
+        "zoom": 0.8814333472302847
+      }
+    ],
+    "storageWrites": 0
+  }
+}

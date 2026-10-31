@@ -1,0 +1,33 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {registerHooks} from 'node:module';import {fileURLToPath} from 'node:url';
+const R=fileURLToPath(new URL('..',import.meta.url)).replace(/\/$/,'');
+const T=await import(R+'/node_modules/three/build/three.module.js'),ts=(await import(R+'/node_modules/typescript/lib/typescript.js')).default;
+const {installFixture}=await import(R+'/tests/helpers/network-motion-fixture.mjs');
+const {vertices,deformedMeshes}=await import(R+'/tests/v16-qa-geometry.ts'),{firstPenetration}=await import(R+'/tests/v16-qa-clearance.ts');
+test('five actual lunar skins are pickable and four temporary lifts clear the real LX mesh without canonical state mutation',async t=>{
+const f=await installFixture();const hook=registerHooks({load(url,c,next){if(url.endsWith('/avatars/club-avatar-rig.ts'))return {format:'module',shortCircuit:true,source:ts.transpileModule(readFileSync(new URL(url),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText};return next(url,c);}});
+const {LUNAR_SHOWCASE_CATALOG:records}=await import(R+'/src/minimal/lunar-showcase-catalog.ts'),{LunarShowcaseAssetLibrary}=await import(R+'/src/minimal/lunar-showcase-assets.ts'),{createLunarShowcaseScope}=await import(R+'/src/minimal/lunar-showcase-resources.ts'),{createApprovedSignedInFarmResourceContext}=await import(R+'/src/minimal/signed-in-farm-resources.ts');
+const formal=JSON.parse(readFileSync(R+'/src/minimal/signed-in-farm-resource-deployment.json'));
+const library=new LunarShowcaseAssetLibrary(createLunarShowcaseScope(createApprovedSignedInFarmResourceContext(formal,formal.target.id),formal.target.id),records,{textureMode:'headers-only',loadBytes:async url=>readFileSync(R+'/public'+url.split('?')[0])});
+let world;try{
+ const {MinimalWorld}=await import(R+'/src/minimal/World.ts'),{sampleFarm}=await import(R+'/src/minimal/sample-farms.ts');const farm=sampleFarm('lunar',f.now);farm.state.animals=[];farm.pendingDIY=[];const before=JSON.stringify(farm.state),host=f.w.document.createElement('div');f.w.document.body.append(host);
+ world=new MinimalWorld(host,farm.state,{select(){},arrive(){}});world.setVisitorScenery(farm);world.setLunarShowcase(library);await world.showcase.ready;await world.player.ready;for(let i=0;i<10;i++){await new Promise(r=>setTimeout(r,0));f.advance(17);world.animate(f.mono);}
+ for(const a of world.showcase.actors.values())a.life?.rest(1000);assert.ok(world.playerPose,'actual LX loaded');let lxVertices=0;vertices(world.player.root,(p,n)=>{if(n.isSkinnedMesh)lxVertices++});assert.ok(lxVertices>1000);t.diagnostic('actual LX skin vertices: '+lxVertices);
+ const rows=[];for(const record of records){const root=world.showcase.rootFor(record.id);assert.ok(root);const scale=root.children[0].scale.x;assert.equal(scale,record.profile.normalizationScale);let minY=Infinity,count=0;vertices(root,(p,n)=>{if(n.isSkinnedMesh){minY=Math.min(minY,p.y-world.groundHeight(p));count++;}});assert.ok(minY>=-.005,record.id+' initial ground '+minY);assert.ok(count>1000);rows.push({id:record.id,scale,count,minY});}
+ t.diagnostic(JSON.stringify(rows));
+ world.focusTile({x:2,z:3});world.zoom(-.45);world.renderer.domElement.getBoundingClientRect=()=>({left:0,top:0,width:390,height:844,right:390,bottom:844});world.scene.updateMatrixWorld(true);world.camera.updateMatrixWorld(true);
+ for(const record of records){const root=world.showcase.rootFor(record.id),box=new T.Box3();vertices(root,p=>box.expandByPoint(p));let picked=false;for(const h of [.5,.7,.3,.9]){const p=box.getCenter(new T.Vector3());p.y=box.min.y+(box.max.y-box.min.y)*h;const ndc=p.project(world.camera);assert.ok(Math.abs(ndc.x)<1&&Math.abs(ndc.y)<1,record.id+' outside camera');const target=world.targetFromPointer({clientX:(ndc.x+1)*195,clientY:(1-ndc.y)*422},true);if(target?.kind==='showcase'&&target.id===record.id){picked=true;break;}}assert.ok(picked,record.id+' actual skin picking');}assert.equal(records.length,5);
+ // Compact selected menu uses176px, not the removed220px permanent dock.
+ for(const [width,height] of [[390,844],[360,640],[1280,720],[1440,900]]){
+  Object.defineProperties(host,{clientWidth:{get:()=>width,configurable:true},clientHeight:{get:()=>height,configurable:true}});world.frameLunarShowcase();if(width===390)assert.ok(world.camera.zoom>.5,'removed dock leaves a closer usable overview');
+  const bounds=[];for(const r of records){const box=new T.Box3();vertices(world.showcase.rootFor(r.id),p=>box.expandByPoint(p));bounds.push(box);}world.visitorScenery.court.root.traverse(o=>{if(o.isMesh&&o!==world.visitorScenery.court.ball)bounds.push(new T.Box3().setFromObject(o,true));});
+  for(const box of bounds)for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z]){const ndc=new T.Vector3(x,y,z).project(world.camera),sx=(1+ndc.x)*width/2,sy=(1-ndc.y)*height/2;assert.ok(sx>=12&&sx<=width-12&&sy>=96&&sy<=height-176,`showcase obscured by HUD ${width}x${height}: ${sx},${sy}`);}
+ }
+
+ const hits=[];for(const record of records){if(!record.verification.carry)continue;const root=world.showcase.rootFor(record.id);world.cancelWalk();world.playerRoot.position.copy(root.position).add(new T.Vector3(0,0,1.5));world.playerRoot.rotation.y=0;f.advance(17);world.animate(f.mono);assert.equal(world.showcaseAction(record.id,'pickup').accepted,true,record.id+' pickup');
+ for(let i=0;i<55;i++){f.advance(1000/60);world.animate(f.mono);if(![0,1,5,12,22,38,54].includes(i))continue;const points=[];vertices(world.player.root,(p,n)=>{if(n.isSkinnedMesh)points.push(p.clone())});const skin=deformedMeshes(root);try{const hit=firstPenetration(points,skin.meshes);if(hit.count)hits.push({id:record.id,frame:i,...hit,locations:hit.locations.map(p=>p.toArray())});}finally{skin.dispose();}}
+ assert.equal(world.showcaseAction(record.id,'putdown').accepted,true,record.id+' landing');for(let i=0;i<45;i++){f.advance(1000/60);world.animate(f.mono);if(![0,1,5,12,22,38,44].includes(i))continue;const points=[];vertices(world.player.root,(p,n)=>{if(n.isSkinnedMesh)points.push(p.clone())});const skin=deformedMeshes(root);try{const hit=firstPenetration(points,skin.meshes);if(hit.count)hits.push({id:record.id,lowerFrame:i,...hit,locations:hit.locations.map(p=>p.toArray())});}finally{skin.dispose();}}assert.equal(world.showcase.carriedId(),null);
+ }
+ t.diagnostic('confirmed skin penetrations: '+hits.length);assert.deepEqual(hits,[]);assert.equal(JSON.stringify(farm.state),before);
+}finally{world?.dispose();hook.deregister();await f.dispose();}
+
+});

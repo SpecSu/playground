@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {FarmSaveGuard,readableAtlasSchema} from '../src/minimal/save-guard.ts';
+import {createMinimalState,MINIMAL_STORAGE_KEY} from '../src/minimal/model.ts';
+const now=1_793_000_000_000;
+function fixture(){let raw:string|null=JSON.stringify(createMinimalState(now)),writes=0,throws=false;const storage={getItem(){if(throws)throw new Error('unavailable');return raw;},setItem(_key:string,value:string){writes++;raw=value;}};const guard=new FarmSaveGuard(storage,MINIMAL_STORAGE_KEY,raw);return {storage,guard,get raw(){return raw;},set raw(value:string|null){raw=value;},get writes(){return writes;},set throws(value:boolean){throws=value;}};}
+test('foreign bytes with identical timestamp stop all future writes, including after bytes return',()=>{const f=fixture(),original=f.raw,next=createMinimalState(now);next.coins=999;f.raw=JSON.stringify(next);assert.equal(f.guard.check(),false);f.raw=original;assert.equal(f.guard.persist(createMinimalState(now)),'conflict');assert.equal(f.writes,0);});
+test('own committed bytes and subsequent valid commands are allowed',()=>{const f=fixture(),next=createMinimalState(now);next.coins=90;assert.equal(f.guard.persist(next),'saved');assert.equal(f.guard.check(),true);next.coins=60;assert.equal(f.guard.persist(next),'saved');assert.equal(f.writes,2);assert.equal(JSON.parse(f.raw!).coins,60);});
+test('observed removal is conflict rather than permission to recreate a farm',()=>{const f=fixture();f.raw=null;assert.equal(f.guard.persist(createMinimalState(now)),'conflict');assert.equal(f.raw,null);assert.equal(f.writes,0);});
+test('read error preserves memory-only play and never overwrites later readable data',()=>{const f=fixture(),before=f.raw;f.throws=true;assert.equal(f.guard.check(),true);assert.equal(f.guard.persist(createMinimalState(now)),'unavailable');f.throws=false;assert.equal(f.guard.persist(createMinimalState(now)),'unavailable');assert.equal(f.raw,before);assert.equal(f.writes,0);});
+test('unsupported farm JSON remains unchanged rather than persisted as a fresh farm',()=>{const raw='{"version":77,"animals":["keep"]}';let writes=0;const guard=new FarmSaveGuard({getItem:()=>raw,setItem:()=>{writes++;}},MINIMAL_STORAGE_KEY,raw);assert.equal(guard.persist(createMinimalState(now)),'unavailable');assert.equal(writes,0);});
+test('interleaved read before commit detects foreign bytes and never calls setItem',()=>{const initial=JSON.stringify(createMinimalState(now)),foreign=initial.replace('"coins":0','"coins":999');let reads=0,writes=0;const guard=new FarmSaveGuard({getItem:()=>++reads===1?initial:foreign,setItem:()=>{writes++;}},MINIMAL_STORAGE_KEY,initial);assert.equal(guard.persist(createMinimalState(now)),'conflict');assert.equal(writes,0);});
+test('atlas supports known ledger only, not parsable unknown objects',()=>{assert.equal(readableAtlasSchema(null),false);assert.equal(readableAtlasSchema({version:1,records:{},receivedReceiptIds:[]}),true);for(const unknown of [{version:2,records:{},receivedReceiptIds:[]},{},[],true,3,{version:1,records:null,receivedReceiptIds:[]}])assert.equal(readableAtlasSchema(unknown),false);});
+test('post-write verification read failure is reported unavailable rather than durable success',()=>{
+ let raw=JSON.stringify(createMinimalState(now)),written=false;
+ const guard=new FarmSaveGuard({getItem:()=>{if(written)throw Error('verification unavailable');return raw;},setItem:(_key,value)=>{raw=value;written=true;}},MINIMAL_STORAGE_KEY,raw);
+ assert.equal(guard.persist(createMinimalState(now)),'unavailable');assert.equal(guard.persist(createMinimalState(now)),'unavailable');
+});

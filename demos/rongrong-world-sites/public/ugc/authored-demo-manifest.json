@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "provenance": "Original hand-authored low-poly demo geometry. No model-generation service used.",
+  "assets": {
+    "wish-tree": {
+      "url": "/ugc/wish-tree.glb",
+      "sha256": "9b32d0a0b6f5945c8fd01e700f57492696a464dd31f381ee9731e89409071ec4",
+      "source": "authored-demo",
+      "bytes": 45368,
+      "triangles": 474,
+      "meshes": 14,
+      "materials": 14,
+      "textures": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.7100000071525574,
+          -0.09462772995086541,
+          -0.6156000065803529
+        ],
+        "max": [
+          0.6800000071525574,
+          1.8000000050663947,
+          0.47560000658035284
+        ]
+      }
+    },
+    "moon-rock": {
+      "url": "/ugc/moon-rock.glb",
+      "sha256": "2d1c644699e2c63e09976502f2905cf21942df1cf9dd245844ed50d91419f7f3",
+      "source": "authored-demo",
+      "bytes": 15656,
+      "triangles": 144,
+      "meshes": 6,
+      "materials": 6,
+      "textures": 0,
+      "skins": 0,
+      "animations": 0,
+      "bounds": {
+        "min": [
+          -0.6496757251024246,
+          -0.09000869058199373,
+          -0.49893454328440007
+        ],
+        "max": [
+          0.5763183211016971,
+          0.7496594855898813,
+          0.49893454328440007
+        ]
+      }
+    }
+  }
+}

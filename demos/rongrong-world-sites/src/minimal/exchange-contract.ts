@@ -1,0 +1,14 @@
+import type {AnimalRarity} from './animal-rarity.ts';
+import type {MinimalAnimal,FarmEgg} from './model.ts';
+import type {MinimalOrigin} from './cloud-contract.ts';
+import type {CreativeAsset} from './creative-assets.ts';
+export const EXCHANGE_KINDS=['animal','egg','custom-egg','custom-creature','prop'] as const;
+export type ExchangeKind=typeof EXCHANGE_KINDS[number];
+export type ExchangeAssetRef={kind:ExchangeKind;id:string};
+export type ExchangeAsset={kind:'animal';data:MinimalAnimal;origin:MinimalOrigin;creativeAsset?:CreativeAsset}|{kind:'egg';data:FarmEgg;origin:MinimalOrigin}|{kind:'custom-egg'|'custom-creature'|'prop';data:CreativeAsset;origin:'mock'};
+export type PublicExchangeAsset={kind:ExchangeKind;id:string;name:string;portraitUrl:string;detail:string;origin:MinimalOrigin|'mock';templateId?:string;rarity?:AnimalRarity};
+export type AssetWishingCommand={type:'depositAsset';asset:ExchangeAssetRef;accepts:ExchangeKind[];consent:'listed-kinds'}|{type:'acceptAsset';offerId:string;offerRevision:number;asset:ExchangeAssetRef};
+export type AssetWishingRequest={requestId:string;expectedRevision:number;command:AssetWishingCommand};
+export type ExchangeOfferData={asset:ExchangeAssetRef;preview:PublicExchangeAsset;accepts:ExchangeKind[]};
+export type PublicExchangeOffer={offerId:string;revision:number;expiresAt:number;own:boolean;asset:PublicExchangeAsset;accepts:ExchangeKind[];differentSpeciesOnly:boolean};
+export type ExchangePage={serverTime:number;offers:PublicExchangeOffer[];nextCursor:string|null};

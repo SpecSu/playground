@@ -1,0 +1,1235 @@
+{
+  "schema": "farm-named-demo-resources/v1",
+  "targets": [
+    {
+      "scope": "named-demo",
+      "codeCommit": "cb5125cc080dfe4dc76072902db2c88b5cdf93f6",
+      "materialization": {
+        "kind": "verified-static-package",
+        "manifestSha256": "77fcbbcee7fc73cba90d8c5ff5828afbbae12e74a9b4452865f5440c95f4d567",
+        "reportRef": "named-demo-static-identity-20261026: actual85 assets verified from Library backup; a784 CPU evidence retained; no hosted runtime receipt minted"
+      },
+      "localAnimals": {
+        "schema": "local-existing-animal-deployment/v1",
+        "revision": "cow-v5-bunny-v6-mobile-local-1",
+        "selected": {
+          "cow": {
+            "species": "cow",
+            "sha256": "fa3ab7f7e29d28d2a2f79c9a44856f561748a10c4933b897c1fd90469ee6a13a",
+            "bytes": 2915572,
+            "portrait": {
+              "url": "/models/farm/local/cow-fa3ab7f7e29d28d2a2f79c9a44856f561748a10c4933b897c1fd90469ee6a13a.png",
+              "sha256": "f374eb5547ea760a91bd78a98b1ef9352355782b2b98125efd3340b31bbd7e20",
+              "bytes": 64098
+            },
+            "url": "/models/farm/local/cow-fa3ab7f7e29d28d2a2f79c9a44856f561748a10c4933b897c1fd90469ee6a13a.glb",
+            "profile": {
+              "motion": {
+                "reachAdjustment": {
+                  "back": 0.01,
+                  "forward": 0.01
+                },
+                "stride": 0.337722051,
+                "cyclesPerSecond": 1.7173885989458235,
+                "muzzleReach": 0.37128060029579757,
+                "feet": {
+                  "side": 0.21656918,
+                  "front": 0.197435719,
+                  "back": 0.384801487
+                },
+                "walkFeet": {
+                  "side": 0.21657232921897315,
+                  "front": 0.30374665617441887,
+                  "back": 0.5034723252024784
+                },
+                "walkContactFeet": {
+                  "side": 0.21571058426519876,
+                  "front": 0.302280232018611,
+                  "back": 0.47320761488360724
+                }
+              },
+              "drinkDatum": {
+                "x": -1.652310076954988e-10,
+                "y": 0.03564951178554567,
+                "z": 0.37128060029579757
+              },
+              "interactionRadius": 0.8,
+              "transferUnderside": 0.38,
+              "water": {
+                "bowlAvailable": false,
+                "bowlMinimumScale": 0.6,
+                "bowlNearSideOffsetWorld": 0.21375,
+                "bowlWaterHeight": 0.183
+              },
+              "provenance": {
+                "kind": "measured plus explicit retained design, not universal collision certification",
+                "sourceMobileDatumReport": "9b8b6d78737bcd9e4ad4a18e1a9b9ce4c3232c1f0cb242f0c6ddfcfbfd798dfc",
+                "bowlRestriction": "All scales disabled by explicit conservative policy after actual bowl-body overlap at .75/1/2.2; not a claim every scale failed",
+                "sourcePlacementReport": "3312d0058331ecc19d0a37fe4cb20f6404fb3c8eda9cd3acbf4f7923ad356225",
+                "footPaddingLocal": 0.003,
+                "retainedIdleRadius": 0.8,
+                "measuredIdleRadius": 0.588959702,
+                "retainedTransferUnderside": 0.38,
+                "observedSupportMaximum": 0.22151667921236948,
+                "strideFitRms": 0.002789285,
+                "authoredWalkPeriod": 1.208333373,
+                "keepGameplayWorldSpeedAtScaleOne": 0.58,
+                "waterPolicy": "constant measured center and +/- .01 requested envelope; continuous growth is design coverage requiring representative tests"
+              }
+            }
+          },
+          "bunny": {
+            "species": "bunny",
+            "sha256": "acaeb7453e9a47ea1d6583b649465a5e00345a5da026bef4e06e611299ca4ecf",
+            "bytes": 2401948,
+            "portrait": {
+              "url": "/models/farm/local/bunny-acaeb7453e9a47ea1d6583b649465a5e00345a5da026bef4e06e611299ca4ecf.png",
+              "sha256": "2dbcb0eb9903f9a880acfbda67f409ed5f12a7c6c8044ba63318d9973439686d",
+              "bytes": 49788
+            },
+            "url": "/models/farm/local/bunny-acaeb7453e9a47ea1d6583b649465a5e00345a5da026bef4e06e611299ca4ecf.glb",
+            "profile": {
+              "motion": {
+                "reachAdjustment": {
+                  "back": 0.01,
+                  "forward": 0.01
+                },
+                "stride": 0.283975169,
+                "cyclesPerSecond": 2.5143043404615417,
+                "muzzleReach": 0.3810290685250772,
+                "feet": {
+                  "side": 0.25037154699999997,
+                  "front": 0.214741486,
+                  "back": 0.322310961
+                },
+                "walkFeet": {
+                  "side": 0.2503804018355159,
+                  "front": 0.2786845914523926,
+                  "back": 0.3922016059583079
+                },
+                "walkContactFeet": {
+                  "side": 0.2439191055706428,
+                  "front": 0.2601203812483292,
+                  "back": 0.3406114009417995
+                }
+              },
+              "drinkDatum": {
+                "x": 4.4810300665909e-09,
+                "y": 0.03471420913230572,
+                "z": 0.3810290685250772
+              },
+              "interactionRadius": 0.57,
+              "transferUnderside": 0.15,
+              "water": {
+                "bowlAvailable": false,
+                "bowlMinimumScale": 1,
+                "bowlNearSideOffsetWorld": 0.2205,
+                "bowlWaterHeight": 0.183
+              },
+              "provenance": {
+                "kind": "measured plus explicit retained design, not universal collision certification",
+                "sourceMobileDatumReport": "3838c07e04bc2ca1b379e277aa8cbeee18e0bbf487f9f34b6728cc332fdeb704",
+                "sourcePlacementReport": "bcf967ac68e04be09a987f6b5d431ea82f27f07069bf56971cd42f147a7843eb",
+                "footPaddingLocal": 0.003,
+                "retainedIdleRadius": 0.57,
+                "measuredIdleRadius": 0.422223808,
+                "retainedTransferUnderside": 0.15,
+                "observedSupportMaximum": 0.1295443710400881,
+                "strideFitRms": 0.000738797,
+                "authoredWalkPeriod": 0.916666687,
+                "keepGameplayWorldSpeedAtScaleOne": 0.714,
+                "bowlRestriction": "All scales disabled by explicit conservative compatibility policy: .6 unreachable, .75 and2.2 actual prop overlap; scale1 was clear in8samples but is deliberately not separately enabled",
+                "waterPolicy": "constant measured center and +/- .01 requested envelope; continuous growth is design coverage requiring representative tests"
+              }
+            }
+          }
+        }
+      },
+      "hunyuan": {
+        "alpaca": {
+          "mode": "demo",
+          "target": {
+            "kind": "local",
+            "id": "http://127.0.0.1:5190",
+            "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+          },
+          "manifest": {
+            "hunyuan:alpaca": {
+              "schema": 1,
+              "variant": "hunyuan:alpaca",
+              "species": "alpaca",
+              "source": {
+                "kind": "hunyuan-download",
+                "species": "alpaca",
+                "originalSha256": "87952ef2dc70b2629319728da78bf0a2582d89e059e9cb48e5158fc0e578828d",
+                "reducedSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                "identityConfirmed": true,
+                "identityReportRef": "evidence:sha256:9e30ee08e17189db20a9c9397fd63d667acf70e3d4ace4a964f930a50a79936b",
+                "reductionReportRef": "evidence:sha256:9e30ee08e17189db20a9c9397fd63d667acf70e3d4ace4a964f930a50a79936b"
+              },
+              "artifact": {
+                "sha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                "bytes": 2134420,
+                "triangles": 17905,
+                "bones": 31,
+                "draws": 1,
+                "maxTextureDimension": 512
+              },
+              "rig": {
+                "clips": [
+                  "idle",
+                  "walk",
+                  "drink_enter",
+                  "drink_loop",
+                  "drink_exit",
+                  "eat",
+                  "rest",
+                  "carried",
+                  "react",
+                  "alert",
+                  "celebrate",
+                  "pet"
+                ],
+                "anchors": [
+                  "feeding-mouth",
+                  "animal-support",
+                  "animal-head",
+                  "animal-ground",
+                  "alpaca_head"
+                ],
+                "neckChain": [
+                  "alpaca_neck_01",
+                  "alpaca_neck_02",
+                  "alpaca_head"
+                ],
+                "footChains": [
+                  {
+                    "upper": "alpaca_front_L_upper",
+                    "lower": "alpaca_front_L_lower",
+                    "foot": "alpaca_front_L_foot"
+                  },
+                  {
+                    "upper": "alpaca_front_R_upper",
+                    "lower": "alpaca_front_R_lower",
+                    "foot": "alpaca_front_R_foot"
+                  },
+                  {
+                    "upper": "alpaca_back_L_upper",
+                    "lower": "alpaca_back_L_lower",
+                    "foot": "alpaca_back_L_foot"
+                  },
+                  {
+                    "upper": "alpaca_back_R_upper",
+                    "lower": "alpaca_back_R_lower",
+                    "foot": "alpaca_back_R_foot"
+                  }
+                ],
+                "rigidSoleVertices": {
+                  "alpaca_front_L_foot": 45,
+                  "alpaca_front_R_foot": 54,
+                  "alpaca_back_L_foot": 57,
+                  "alpaca_back_R_foot": 58
+                },
+                "skinnedMeshes": 1,
+                "unskinnedMeshes": 0,
+                "maxInfluences": 4,
+                "normalizedWeights": true
+              },
+              "checks": {
+                "export-preservation": {
+                  "status": "passed",
+                  "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                  "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                  "reportRef": "evidence:sha256:87f036e33f0239ec597b845880e715c619c592433dd6648ddd166b3773dd6852"
+                },
+                "production-rig": {
+                  "status": "passed",
+                  "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                  "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                  "reportRef": "evidence:sha256:5fbb4d04b2bf8af18802d7c6bd358e0afaff27065b63f443afabc7dd33da7de4"
+                },
+                "visual-anatomy": {
+                  "status": "passed",
+                  "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                  "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                  "reportRef": "evidence:sha256:e5ef924ba4235baea667b526393a35a536119a2321662040cf9616a2ba656951"
+                }
+              },
+              "targets": [
+                {
+                  "kind": "local",
+                  "id": "http://127.0.0.1:5190",
+                  "runtimeRevision": "farm-alpaca-main-v28-contract-8",
+                  "materializedPath": "/evidence/sha256/4d97a2af78d8bb0e20b521f945bc704e312d17f7f5425e0aa01a4a0723b366f1",
+                  "assetUrl": "/models/farm/hunyuan/alpaca-bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344.glb",
+                  "observedSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                  "observedBytes": 2134420,
+                  "verificationRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                  "checks": {
+                    "runtime-integration": {
+                      "status": "passed",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "reportRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+                    },
+                    "terrain-contact": {
+                      "status": "passed",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "reportRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+                    },
+                    "carry-placement": {
+                      "status": "passed",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "reportRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+                    },
+                    "picking": {
+                      "status": "passed",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "reportRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+                    },
+                    "care-interruption": {
+                      "status": "passed",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "reportRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+                    },
+                    "save-compatibility": {
+                      "status": "passed",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "reportRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+                    },
+                    "mobile-performance": {
+                      "status": "unmeasured",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8",
+                      "reportRef": "evidence:sha256:a1ea2330407f54506645288095c682f51041b7846c1a31b0fe85a923905789b9",
+                      "reason": "No real browser/mobile GPU or FPS measurement; CPU geometry, triangle/texture/byte budgets are not FPS evidence."
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "profile": {
+            "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+            "motion": {
+              "stride": 0.20289596394117954,
+              "muzzleReach": 0.4289039356945823,
+              "cyclesPerSecond": 1.0909090672642736,
+              "feet": {
+                "side": 0.1194929438948044,
+                "front": 0.15819895846003562,
+                "back": 0.2830082195193516
+              },
+              "walkFeet": {
+                "side": 0.11949295353797279,
+                "front": 0.22819898140391423,
+                "back": 0.3530045548391446
+              },
+              "walkContactFeet": {
+                "side": 0.11949294929135797,
+                "front": 0.22819898140391415,
+                "back": 0.34396997255951195
+              },
+              "reachAdjustment": {
+                "back": 0,
+                "forward": 0,
+                "pondForward": 0
+              },
+              "bowlStanding": {
+                "kind": "sampled-center-distance",
+                "localSlack": 0.02,
+                "samples": [
+                  {
+                    "scale": 0.6,
+                    "centerDistance": 0.43
+                  },
+                  {
+                    "scale": 0.75,
+                    "centerDistance": 0.5370591224919239
+                  },
+                  {
+                    "scale": 1,
+                    "centerDistance": 0.6294121633225651
+                  },
+                  {
+                    "scale": 2.2,
+                    "centerDistance": 1.0727067593096433
+                  }
+                ]
+              },
+              "pondStanding": {
+                "kind": "sampled-local-reach",
+                "localSlack": 0.02,
+                "samples": [
+                  {
+                    "scale": 0.6,
+                    "reach": 0.4289039356945823
+                  },
+                  {
+                    "scale": 0.75,
+                    "reach": 0.4289039356945823
+                  },
+                  {
+                    "scale": 1,
+                    "reach": 0.4289039356945823
+                  },
+                  {
+                    "scale": 2.2,
+                    "reach": 0.2890932582913418
+                  }
+                ]
+              }
+            },
+            "drinkDatum": {
+              "x": -1.979068174016507e-09,
+              "y": 0.06398271154496565,
+              "z": 0.4289039356945823
+            },
+            "height": 1.0779045936813896,
+            "interactionRadius": 0.3694121633225651,
+            "transferUnderside": 0.27775184404624464,
+            "portraitUrl": "/models/farm/hunyuan/portraits/alpaca-bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344.png"
+          }
+        },
+        "penguin": {
+          "mode": "demo",
+          "target": {
+            "kind": "local",
+            "id": "http://127.0.0.1:5190",
+            "runtimeRevision": "farm-penguin-main-v28-contract-4"
+          },
+          "manifest": {
+            "hunyuan:penguin": {
+              "schema": 1,
+              "variant": "hunyuan:penguin",
+              "species": "penguin",
+              "source": {
+                "kind": "hunyuan-download",
+                "species": "penguin",
+                "originalSha256": "010670a2346c0ffc41d7ed84103466cbc1318d1e52b8bf19c6d36bec05b44cde",
+                "reducedSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                "identityConfirmed": true,
+                "identityReportRef": "evidence:sha256:8f9e33e5c7c7142b6eef9dcac4e8ed76d646697b7538d5a49d5638cb77687a3b",
+                "reductionReportRef": "evidence:sha256:2fd40929414d3922248decba2aee99962fd34b4b13cf887a7e121711f39fd461"
+              },
+              "artifact": {
+                "sha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                "bytes": 1705532,
+                "triangles": 17910,
+                "bones": 27,
+                "draws": 1,
+                "maxTextureDimension": 512
+              },
+              "rig": {
+                "clips": [
+                  "idle",
+                  "walk",
+                  "drink_enter",
+                  "drink_loop",
+                  "drink_exit",
+                  "eat",
+                  "rest",
+                  "carried",
+                  "react",
+                  "alert",
+                  "celebrate",
+                  "pet"
+                ],
+                "anchors": [
+                  "feeding-mouth",
+                  "animal-support",
+                  "animal-head",
+                  "animal-ground",
+                  "penguin_head"
+                ],
+                "neckChain": [
+                  "penguin_neck_01",
+                  "penguin_neck_02",
+                  "penguin_head"
+                ],
+                "footChains": [
+                  {
+                    "upper": "penguin_L_upper",
+                    "lower": "penguin_L_lower",
+                    "foot": "penguin_L_foot"
+                  },
+                  {
+                    "upper": "penguin_R_upper",
+                    "lower": "penguin_R_lower",
+                    "foot": "penguin_R_foot"
+                  }
+                ],
+                "rigidSoleVertices": {
+                  "penguin_L_foot": 221,
+                  "penguin_R_foot": 217
+                },
+                "skinnedMeshes": 1,
+                "unskinnedMeshes": 0,
+                "maxInfluences": 4,
+                "normalizedWeights": true
+              },
+              "checks": {
+                "export-preservation": {
+                  "status": "passed",
+                  "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                  "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                  "reportRef": "evidence:sha256:b6304262f82299b370487c53fb805d6cdb822f898681d70f1dd03bf76ec7cd4d"
+                },
+                "production-rig": {
+                  "status": "passed",
+                  "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                  "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                  "reportRef": "evidence:sha256:676e80fcd2feb1ce8bb7355edbabf9a1a81e02cc9bb627bad3d22ab96b7dd8cb"
+                },
+                "visual-anatomy": {
+                  "status": "passed",
+                  "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                  "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                  "reportRef": "evidence:sha256:9477462ecb8b02b144ca3eb0e51b4af10cfc5db74e792b15dcf75a70c12dbb47"
+                }
+              },
+              "targets": [
+                {
+                  "kind": "local",
+                  "id": "http://127.0.0.1:5190",
+                  "runtimeRevision": "farm-penguin-main-v28-contract-4",
+                  "materializedPath": "/evidence/sha256/a01f209e7b34ad06b2291f1325d80ab572ce4522b3df4e18d8c4685ca1898a18",
+                  "assetUrl": "/models/farm/hunyuan/penguin-d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f.glb",
+                  "observedSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                  "observedBytes": 1705532,
+                  "verificationRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                  "checks": {
+                    "runtime-integration": {
+                      "status": "passed",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "reportRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4"
+                    },
+                    "terrain-contact": {
+                      "status": "passed",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "reportRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4"
+                    },
+                    "carry-placement": {
+                      "status": "passed",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "reportRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4"
+                    },
+                    "picking": {
+                      "status": "passed",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "reportRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4"
+                    },
+                    "care-interruption": {
+                      "status": "passed",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "reportRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4"
+                    },
+                    "save-compatibility": {
+                      "status": "passed",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "reportRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4"
+                    },
+                    "mobile-performance": {
+                      "status": "unmeasured",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4",
+                      "reportRef": "evidence:sha256:a1ea2330407f54506645288095c682f51041b7846c1a31b0fe85a923905789b9",
+                      "reason": "No real browser/mobile GPU or FPS measurement; CPU geometry, triangle/texture/byte budgets are not FPS evidence."
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "profile": {
+            "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+            "motion": {
+              "stride": 0.1141748787,
+              "muzzleReach": 0.307144871,
+              "cyclesPerSecond": 0.8275861796604052,
+              "feet": {
+                "side": 0.2533194423,
+                "front": 0.1530022593,
+                "back": 0.0743852327
+              },
+              "walkFeet": {
+                "side": 0.253334589,
+                "front": 0.19316874750000002,
+                "back": 0.1146098574
+              },
+              "walkContactFeet": {
+                "side": 0.253334589,
+                "front": 0.1925688234,
+                "back": 0.1131462262
+              },
+              "reachAdjustment": {
+                "back": 0.08,
+                "forward": 0.08,
+                "pondForward": 0.08
+              }
+            },
+            "drinkDatum": {
+              "x": -6.1e-09,
+              "y": 0.0501469669,
+              "z": 0.307144871
+            },
+            "height": 1.075704896278926,
+            "interactionRadius": 0.4067455506,
+            "transferUnderside": 0.1341112298,
+            "portraitUrl": "/models/farm/hunyuan/portraits/penguin-d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f.png"
+          }
+        }
+      },
+      "target": {
+        "kind": "local",
+        "id": "http://127.0.0.1:5190"
+      }
+    },
+    {
+      "scope": "named-demo",
+      "codeCommit": "cb5125cc080dfe4dc76072902db2c88b5cdf93f6",
+      "materialization": {
+        "kind": "verified-static-package",
+        "manifestSha256": "77fcbbcee7fc73cba90d8c5ff5828afbbae12e74a9b4452865f5440c95f4d567",
+        "reportRef": "named-demo-static-identity-20261026: actual85 assets verified from Library backup; a784 CPU evidence retained; no hosted runtime receipt minted"
+      },
+      "localAnimals": {
+        "schema": "local-existing-animal-deployment/v1",
+        "revision": "cow-v5-bunny-v6-mobile-local-1",
+        "selected": {
+          "cow": {
+            "species": "cow",
+            "sha256": "fa3ab7f7e29d28d2a2f79c9a44856f561748a10c4933b897c1fd90469ee6a13a",
+            "bytes": 2915572,
+            "portrait": {
+              "url": "/models/farm/local/cow-fa3ab7f7e29d28d2a2f79c9a44856f561748a10c4933b897c1fd90469ee6a13a.png",
+              "sha256": "f374eb5547ea760a91bd78a98b1ef9352355782b2b98125efd3340b31bbd7e20",
+              "bytes": 64098
+            },
+            "url": "/models/farm/local/cow-fa3ab7f7e29d28d2a2f79c9a44856f561748a10c4933b897c1fd90469ee6a13a.glb",
+            "profile": {
+              "motion": {
+                "reachAdjustment": {
+                  "back": 0.01,
+                  "forward": 0.01
+                },
+                "stride": 0.337722051,
+                "cyclesPerSecond": 1.7173885989458235,
+                "muzzleReach": 0.37128060029579757,
+                "feet": {
+                  "side": 0.21656918,
+                  "front": 0.197435719,
+                  "back": 0.384801487
+                },
+                "walkFeet": {
+                  "side": 0.21657232921897315,
+                  "front": 0.30374665617441887,
+                  "back": 0.5034723252024784
+                },
+                "walkContactFeet": {
+                  "side": 0.21571058426519876,
+                  "front": 0.302280232018611,
+                  "back": 0.47320761488360724
+                }
+              },
+              "drinkDatum": {
+                "x": -1.652310076954988e-10,
+                "y": 0.03564951178554567,
+                "z": 0.37128060029579757
+              },
+              "interactionRadius": 0.8,
+              "transferUnderside": 0.38,
+              "water": {
+                "bowlAvailable": false,
+                "bowlMinimumScale": 0.6,
+                "bowlNearSideOffsetWorld": 0.21375,
+                "bowlWaterHeight": 0.183
+              },
+              "provenance": {
+                "kind": "measured plus explicit retained design, not universal collision certification",
+                "sourceMobileDatumReport": "9b8b6d78737bcd9e4ad4a18e1a9b9ce4c3232c1f0cb242f0c6ddfcfbfd798dfc",
+                "bowlRestriction": "All scales disabled by explicit conservative policy after actual bowl-body overlap at .75/1/2.2; not a claim every scale failed",
+                "sourcePlacementReport": "3312d0058331ecc19d0a37fe4cb20f6404fb3c8eda9cd3acbf4f7923ad356225",
+                "footPaddingLocal": 0.003,
+                "retainedIdleRadius": 0.8,
+                "measuredIdleRadius": 0.588959702,
+                "retainedTransferUnderside": 0.38,
+                "observedSupportMaximum": 0.22151667921236948,
+                "strideFitRms": 0.002789285,
+                "authoredWalkPeriod": 1.208333373,
+                "keepGameplayWorldSpeedAtScaleOne": 0.58,
+                "waterPolicy": "constant measured center and +/- .01 requested envelope; continuous growth is design coverage requiring representative tests"
+              }
+            }
+          },
+          "bunny": {
+            "species": "bunny",
+            "sha256": "acaeb7453e9a47ea1d6583b649465a5e00345a5da026bef4e06e611299ca4ecf",
+            "bytes": 2401948,
+            "portrait": {
+              "url": "/models/farm/local/bunny-acaeb7453e9a47ea1d6583b649465a5e00345a5da026bef4e06e611299ca4ecf.png",
+              "sha256": "2dbcb0eb9903f9a880acfbda67f409ed5f12a7c6c8044ba63318d9973439686d",
+              "bytes": 49788
+            },
+            "url": "/models/farm/local/bunny-acaeb7453e9a47ea1d6583b649465a5e00345a5da026bef4e06e611299ca4ecf.glb",
+            "profile": {
+              "motion": {
+                "reachAdjustment": {
+                  "back": 0.01,
+                  "forward": 0.01
+                },
+                "stride": 0.283975169,
+                "cyclesPerSecond": 2.5143043404615417,
+                "muzzleReach": 0.3810290685250772,
+                "feet": {
+                  "side": 0.25037154699999997,
+                  "front": 0.214741486,
+                  "back": 0.322310961
+                },
+                "walkFeet": {
+                  "side": 0.2503804018355159,
+                  "front": 0.2786845914523926,
+                  "back": 0.3922016059583079
+                },
+                "walkContactFeet": {
+                  "side": 0.2439191055706428,
+                  "front": 0.2601203812483292,
+                  "back": 0.3406114009417995
+                }
+              },
+              "drinkDatum": {
+                "x": 4.4810300665909e-09,
+                "y": 0.03471420913230572,
+                "z": 0.3810290685250772
+              },
+              "interactionRadius": 0.57,
+              "transferUnderside": 0.15,
+              "water": {
+                "bowlAvailable": false,
+                "bowlMinimumScale": 1,
+                "bowlNearSideOffsetWorld": 0.2205,
+                "bowlWaterHeight": 0.183
+              },
+              "provenance": {
+                "kind": "measured plus explicit retained design, not universal collision certification",
+                "sourceMobileDatumReport": "3838c07e04bc2ca1b379e277aa8cbeee18e0bbf487f9f34b6728cc332fdeb704",
+                "sourcePlacementReport": "bcf967ac68e04be09a987f6b5d431ea82f27f07069bf56971cd42f147a7843eb",
+                "footPaddingLocal": 0.003,
+                "retainedIdleRadius": 0.57,
+                "measuredIdleRadius": 0.422223808,
+                "retainedTransferUnderside": 0.15,
+                "observedSupportMaximum": 0.1295443710400881,
+                "strideFitRms": 0.000738797,
+                "authoredWalkPeriod": 0.916666687,
+                "keepGameplayWorldSpeedAtScaleOne": 0.714,
+                "bowlRestriction": "All scales disabled by explicit conservative compatibility policy: .6 unreachable, .75 and2.2 actual prop overlap; scale1 was clear in8samples but is deliberately not separately enabled",
+                "waterPolicy": "constant measured center and +/- .01 requested envelope; continuous growth is design coverage requiring representative tests"
+              }
+            }
+          }
+        }
+      },
+      "hunyuan": {
+        "alpaca": {
+          "mode": "demo",
+          "target": {
+            "kind": "local",
+            "id": "http://127.0.0.1:5190",
+            "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+          },
+          "manifest": {
+            "hunyuan:alpaca": {
+              "schema": 1,
+              "variant": "hunyuan:alpaca",
+              "species": "alpaca",
+              "source": {
+                "kind": "hunyuan-download",
+                "species": "alpaca",
+                "originalSha256": "87952ef2dc70b2629319728da78bf0a2582d89e059e9cb48e5158fc0e578828d",
+                "reducedSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                "identityConfirmed": true,
+                "identityReportRef": "evidence:sha256:9e30ee08e17189db20a9c9397fd63d667acf70e3d4ace4a964f930a50a79936b",
+                "reductionReportRef": "evidence:sha256:9e30ee08e17189db20a9c9397fd63d667acf70e3d4ace4a964f930a50a79936b"
+              },
+              "artifact": {
+                "sha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                "bytes": 2134420,
+                "triangles": 17905,
+                "bones": 31,
+                "draws": 1,
+                "maxTextureDimension": 512
+              },
+              "rig": {
+                "clips": [
+                  "idle",
+                  "walk",
+                  "drink_enter",
+                  "drink_loop",
+                  "drink_exit",
+                  "eat",
+                  "rest",
+                  "carried",
+                  "react",
+                  "alert",
+                  "celebrate",
+                  "pet"
+                ],
+                "anchors": [
+                  "feeding-mouth",
+                  "animal-support",
+                  "animal-head",
+                  "animal-ground",
+                  "alpaca_head"
+                ],
+                "neckChain": [
+                  "alpaca_neck_01",
+                  "alpaca_neck_02",
+                  "alpaca_head"
+                ],
+                "footChains": [
+                  {
+                    "upper": "alpaca_front_L_upper",
+                    "lower": "alpaca_front_L_lower",
+                    "foot": "alpaca_front_L_foot"
+                  },
+                  {
+                    "upper": "alpaca_front_R_upper",
+                    "lower": "alpaca_front_R_lower",
+                    "foot": "alpaca_front_R_foot"
+                  },
+                  {
+                    "upper": "alpaca_back_L_upper",
+                    "lower": "alpaca_back_L_lower",
+                    "foot": "alpaca_back_L_foot"
+                  },
+                  {
+                    "upper": "alpaca_back_R_upper",
+                    "lower": "alpaca_back_R_lower",
+                    "foot": "alpaca_back_R_foot"
+                  }
+                ],
+                "rigidSoleVertices": {
+                  "alpaca_front_L_foot": 45,
+                  "alpaca_front_R_foot": 54,
+                  "alpaca_back_L_foot": 57,
+                  "alpaca_back_R_foot": 58
+                },
+                "skinnedMeshes": 1,
+                "unskinnedMeshes": 0,
+                "maxInfluences": 4,
+                "normalizedWeights": true
+              },
+              "checks": {
+                "export-preservation": {
+                  "status": "passed",
+                  "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                  "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                  "reportRef": "evidence:sha256:87f036e33f0239ec597b845880e715c619c592433dd6648ddd166b3773dd6852"
+                },
+                "production-rig": {
+                  "status": "passed",
+                  "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                  "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                  "reportRef": "evidence:sha256:5fbb4d04b2bf8af18802d7c6bd358e0afaff27065b63f443afabc7dd33da7de4"
+                },
+                "visual-anatomy": {
+                  "status": "passed",
+                  "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                  "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                  "reportRef": "evidence:sha256:e5ef924ba4235baea667b526393a35a536119a2321662040cf9616a2ba656951"
+                }
+              },
+              "targets": [
+                {
+                  "kind": "local",
+                  "id": "http://127.0.0.1:5190",
+                  "runtimeRevision": "farm-alpaca-main-v28-contract-8",
+                  "materializedPath": "/evidence/sha256/4d97a2af78d8bb0e20b521f945bc704e312d17f7f5425e0aa01a4a0723b366f1",
+                  "assetUrl": "/models/farm/hunyuan/alpaca-bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344.glb",
+                  "observedSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                  "observedBytes": 2134420,
+                  "verificationRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                  "checks": {
+                    "runtime-integration": {
+                      "status": "passed",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "reportRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+                    },
+                    "terrain-contact": {
+                      "status": "passed",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "reportRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+                    },
+                    "carry-placement": {
+                      "status": "passed",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "reportRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+                    },
+                    "picking": {
+                      "status": "passed",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "reportRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+                    },
+                    "care-interruption": {
+                      "status": "passed",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "reportRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+                    },
+                    "save-compatibility": {
+                      "status": "passed",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "reportRef": "evidence:sha256:0b1fc2c8c6c75d7f9a5f18314fbb271f096aa14d52190c3c7731565683a340d2",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8"
+                    },
+                    "mobile-performance": {
+                      "status": "unmeasured",
+                      "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+                      "sourceSha256": "44b4321f3803912ec3137299ed8df47bafb3005c38926159c23e0a76e147f61e",
+                      "runtimeRevision": "farm-alpaca-main-v28-contract-8",
+                      "reportRef": "evidence:sha256:a1ea2330407f54506645288095c682f51041b7846c1a31b0fe85a923905789b9",
+                      "reason": "No real browser/mobile GPU or FPS measurement; CPU geometry, triangle/texture/byte budgets are not FPS evidence."
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "profile": {
+            "candidateSha256": "bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344",
+            "motion": {
+              "stride": 0.20289596394117954,
+              "muzzleReach": 0.4289039356945823,
+              "cyclesPerSecond": 1.0909090672642736,
+              "feet": {
+                "side": 0.1194929438948044,
+                "front": 0.15819895846003562,
+                "back": 0.2830082195193516
+              },
+              "walkFeet": {
+                "side": 0.11949295353797279,
+                "front": 0.22819898140391423,
+                "back": 0.3530045548391446
+              },
+              "walkContactFeet": {
+                "side": 0.11949294929135797,
+                "front": 0.22819898140391415,
+                "back": 0.34396997255951195
+              },
+              "reachAdjustment": {
+                "back": 0,
+                "forward": 0,
+                "pondForward": 0
+              },
+              "bowlStanding": {
+                "kind": "sampled-center-distance",
+                "localSlack": 0.02,
+                "samples": [
+                  {
+                    "scale": 0.6,
+                    "centerDistance": 0.43
+                  },
+                  {
+                    "scale": 0.75,
+                    "centerDistance": 0.5370591224919239
+                  },
+                  {
+                    "scale": 1,
+                    "centerDistance": 0.6294121633225651
+                  },
+                  {
+                    "scale": 2.2,
+                    "centerDistance": 1.0727067593096433
+                  }
+                ]
+              },
+              "pondStanding": {
+                "kind": "sampled-local-reach",
+                "localSlack": 0.02,
+                "samples": [
+                  {
+                    "scale": 0.6,
+                    "reach": 0.4289039356945823
+                  },
+                  {
+                    "scale": 0.75,
+                    "reach": 0.4289039356945823
+                  },
+                  {
+                    "scale": 1,
+                    "reach": 0.4289039356945823
+                  },
+                  {
+                    "scale": 2.2,
+                    "reach": 0.2890932582913418
+                  }
+                ]
+              }
+            },
+            "drinkDatum": {
+              "x": -1.979068174016507e-09,
+              "y": 0.06398271154496565,
+              "z": 0.4289039356945823
+            },
+            "height": 1.0779045936813896,
+            "interactionRadius": 0.3694121633225651,
+            "transferUnderside": 0.27775184404624464,
+            "portraitUrl": "/models/farm/hunyuan/portraits/alpaca-bc31856677949756d99b1d57735199a52ddc20d45f3b9676e64dfa8a8b899344.png"
+          }
+        },
+        "penguin": {
+          "mode": "demo",
+          "target": {
+            "kind": "local",
+            "id": "http://127.0.0.1:5190",
+            "runtimeRevision": "farm-penguin-main-v28-contract-4"
+          },
+          "manifest": {
+            "hunyuan:penguin": {
+              "schema": 1,
+              "variant": "hunyuan:penguin",
+              "species": "penguin",
+              "source": {
+                "kind": "hunyuan-download",
+                "species": "penguin",
+                "originalSha256": "010670a2346c0ffc41d7ed84103466cbc1318d1e52b8bf19c6d36bec05b44cde",
+                "reducedSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                "identityConfirmed": true,
+                "identityReportRef": "evidence:sha256:8f9e33e5c7c7142b6eef9dcac4e8ed76d646697b7538d5a49d5638cb77687a3b",
+                "reductionReportRef": "evidence:sha256:2fd40929414d3922248decba2aee99962fd34b4b13cf887a7e121711f39fd461"
+              },
+              "artifact": {
+                "sha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                "bytes": 1705532,
+                "triangles": 17910,
+                "bones": 27,
+                "draws": 1,
+                "maxTextureDimension": 512
+              },
+              "rig": {
+                "clips": [
+                  "idle",
+                  "walk",
+                  "drink_enter",
+                  "drink_loop",
+                  "drink_exit",
+                  "eat",
+                  "rest",
+                  "carried",
+                  "react",
+                  "alert",
+                  "celebrate",
+                  "pet"
+                ],
+                "anchors": [
+                  "feeding-mouth",
+                  "animal-support",
+                  "animal-head",
+                  "animal-ground",
+                  "penguin_head"
+                ],
+                "neckChain": [
+                  "penguin_neck_01",
+                  "penguin_neck_02",
+                  "penguin_head"
+                ],
+                "footChains": [
+                  {
+                    "upper": "penguin_L_upper",
+                    "lower": "penguin_L_lower",
+                    "foot": "penguin_L_foot"
+                  },
+                  {
+                    "upper": "penguin_R_upper",
+                    "lower": "penguin_R_lower",
+                    "foot": "penguin_R_foot"
+                  }
+                ],
+                "rigidSoleVertices": {
+                  "penguin_L_foot": 221,
+                  "penguin_R_foot": 217
+                },
+                "skinnedMeshes": 1,
+                "unskinnedMeshes": 0,
+                "maxInfluences": 4,
+                "normalizedWeights": true
+              },
+              "checks": {
+                "export-preservation": {
+                  "status": "passed",
+                  "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                  "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                  "reportRef": "evidence:sha256:b6304262f82299b370487c53fb805d6cdb822f898681d70f1dd03bf76ec7cd4d"
+                },
+                "production-rig": {
+                  "status": "passed",
+                  "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                  "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                  "reportRef": "evidence:sha256:676e80fcd2feb1ce8bb7355edbabf9a1a81e02cc9bb627bad3d22ab96b7dd8cb"
+                },
+                "visual-anatomy": {
+                  "status": "passed",
+                  "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                  "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                  "reportRef": "evidence:sha256:9477462ecb8b02b144ca3eb0e51b4af10cfc5db74e792b15dcf75a70c12dbb47"
+                }
+              },
+              "targets": [
+                {
+                  "kind": "local",
+                  "id": "http://127.0.0.1:5190",
+                  "runtimeRevision": "farm-penguin-main-v28-contract-4",
+                  "materializedPath": "/evidence/sha256/a01f209e7b34ad06b2291f1325d80ab572ce4522b3df4e18d8c4685ca1898a18",
+                  "assetUrl": "/models/farm/hunyuan/penguin-d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f.glb",
+                  "observedSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                  "observedBytes": 1705532,
+                  "verificationRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                  "checks": {
+                    "runtime-integration": {
+                      "status": "passed",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "reportRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4"
+                    },
+                    "terrain-contact": {
+                      "status": "passed",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "reportRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4"
+                    },
+                    "carry-placement": {
+                      "status": "passed",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "reportRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4"
+                    },
+                    "picking": {
+                      "status": "passed",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "reportRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4"
+                    },
+                    "care-interruption": {
+                      "status": "passed",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "reportRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4"
+                    },
+                    "save-compatibility": {
+                      "status": "passed",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "reportRef": "evidence:sha256:bb3f02128ab9ff8c8ea4ef19972d64bf834946ee15df76219bd2f902797dc66f",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4"
+                    },
+                    "mobile-performance": {
+                      "status": "unmeasured",
+                      "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+                      "sourceSha256": "6a616ec733faa8321fa906c5486d2cef598717bf810e212d2ff2cea0c3d605cb",
+                      "runtimeRevision": "farm-penguin-main-v28-contract-4",
+                      "reportRef": "evidence:sha256:a1ea2330407f54506645288095c682f51041b7846c1a31b0fe85a923905789b9",
+                      "reason": "No real browser/mobile GPU or FPS measurement; CPU geometry, triangle/texture/byte budgets are not FPS evidence."
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "profile": {
+            "candidateSha256": "d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f",
+            "motion": {
+              "stride": 0.1141748787,
+              "muzzleReach": 0.307144871,
+              "cyclesPerSecond": 0.8275861796604052,
+              "feet": {
+                "side": 0.2533194423,
+                "front": 0.1530022593,
+                "back": 0.0743852327
+              },
+              "walkFeet": {
+                "side": 0.253334589,
+                "front": 0.19316874750000002,
+                "back": 0.1146098574
+              },
+              "walkContactFeet": {
+                "side": 0.253334589,
+                "front": 0.1925688234,
+                "back": 0.1131462262
+              },
+              "reachAdjustment": {
+                "back": 0.08,
+                "forward": 0.08,
+                "pondForward": 0.08
+              }
+            },
+            "drinkDatum": {
+              "x": -6.1e-09,
+              "y": 0.0501469669,
+              "z": 0.307144871
+            },
+            "height": 1.075704896278926,
+            "interactionRadius": 0.4067455506,
+            "transferUnderside": 0.1341112298,
+            "portraitUrl": "/models/farm/hunyuan/portraits/penguin-d876b82ef3aa9da1cd27e270cd22e1c9d1951d9e7dd94e2c5229e3088765919f.png"
+          }
+        }
+      },
+      "target": {
+        "kind": "hosted",
+        "id": "https://fluffy-farm-companions.tangguozhou.chatgpt.site"
+      },
+      "targetRebinding": {
+        "kind": "reuse-verified-demo-evidence",
+        "sourceTarget": {
+          "kind": "local",
+          "id": "http://127.0.0.1:5190"
+        },
+        "approvalRef": "named-demo-site-mapping-20261026: explicit owner approval for exact private Site demo, retaining local8/4 functional evidence and unmeasured mobile performance"
+      }
+    }
+  ],
+  "publicEvidenceReferences": {
+    "kind": "opaque-audit-aliases",
+    "description": "Historical evidence locations are private. evidence: and /evidence/ entries are audit identifiers, not served URLs, new file observations or hosted runtime receipts."
+  }
+}

@@ -1,0 +1,10 @@
+import {useEffect,useState} from 'react';
+import type {AccountClient,NamedDemoVisit} from './account-client.ts';
+const speciesName={sheep:'绵羊',pig:'小猪',cow:'奶牛',bunny:'兔子',duck:'小鸭',alpaca:'羊驼',penguin:'企鹅'};
+/** Read-only visit projection. Never mounts a writable foreign farm or borrows its UID. */
+export default function NamedDemoTools({client}:{client:AccountClient}){
+ const [target,setTarget]=useState(client.demoName==='twx'?'test':'twx'),[visit,setVisit]=useState<NamedDemoVisit|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(false),[request,setRequest]=useState<{name:string;sequence:number}|null>(null);
+ useEffect(()=>{if(!request)return;let alive=true;setLoading(true);setError('');setVisit(null);void client.visit(request.name).then(result=>{if(alive)setVisit(result);}).catch(reason=>{if(alive)setError(reason instanceof Error?reason.message:'暂时无法访问');}).finally(()=>{if(alive)setLoading(false);});return()=>{alive=false;};},[request,client]);
+ if(!client.demoName)return null;
+ return <section className="named-demo-tools" aria-label="测试账号与只读互访"><p>测试名称：<strong>{client.demoName}</strong> · 服务端独立保存。名称不是身份认证；远端仅在同一登录账号内互访测试名称。不同登录账号隔离，本机与远端各自存档，不是实时同场。</p><nav aria-label="切换测试账号"><a href="?name=twx">切换 twx</a><span> · </span><a href="?name=test">切换 test</a></nav><label>访问测试牧场 <input aria-label="访问测试名称" maxLength={24} value={target} disabled={loading} onChange={event=>setTarget(event.target.value)}/></label><button type="button" disabled={loading} onClick={()=>setRequest(previous=>({name:target,sequence:(previous?.sequence??0)+1}))}>{loading?'读取中…':'只读访问'}</button>{error&&<p role="status">{error}</p>}{visit&&<div role="status"><b>{visit.target.handle} · 只读概览</b>{visit.farm?<><p>已开辟 {visit.farm.state.tiles.filter(tile=>tile.owned).length} 块地 · {visit.farm.state.animals.length} 只动物 · {visit.farm.state.eggs.length} 颗蛋</p><ul>{visit.farm.state.animals.map(animal=><li key={animal.id}>{animal.name} · {animal.creative?'自定义小伙伴':speciesName[animal.species]}</li>)}</ul><p>这里只查看，不会替对方操作。交换请使用商店里的许愿池。</p></>:<p>这个测试名称还没有创建牧场；切换到该名称后可另建测试牧场。</p>}</div>}</section>;
+}

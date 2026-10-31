@@ -1,0 +1,4497 @@
+{
+  "schemaVersion": 1,
+  "coordinateSystem": {
+    "up": "+Y",
+    "forward": "+Z",
+    "groundY": 0,
+    "units": "meters"
+  },
+  "assets": [
+    {
+      "id": "cow",
+      "label": "奶牛",
+      "family": "fourfoot",
+      "profile": "hoof",
+      "status": "prototype",
+      "url": "/models/animation-lab/cow.glb",
+      "source": "art-source/animation-lab/generated/cow/cow.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.58,
+      "gaitDescription": "Heavy alternating four-beat steps, small dewlap lag; slow grazing jaw.",
+      "silhouette": "Broad muzzle, cocoa/dark patches and small horns",
+      "anchors": {
+        "root": "cow_root",
+        "body": "cow_body",
+        "head": "cow_head",
+        "neck": [
+          "cow_neck_01",
+          "cow_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "cow_front_L_contact",
+          "cow_front_R_contact",
+          "cow_back_L_contact",
+          "cow_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.2083333333333333,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0833333333333333,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.5833333333333335,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.2916666666666667,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "sheep",
+      "label": "绵羊",
+      "family": "fourfoot",
+      "profile": "hoof",
+      "status": "prototype",
+      "url": "/models/animation-lab/sheep.glb",
+      "source": "art-source/animation-lab/generated/sheep/sheep.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.48,
+      "gaitDescription": "Short springy four-beat steps; compact leg flex and ear flick.",
+      "silhouette": "Wool silhouette, narrow face, cloven hooves",
+      "anchors": {
+        "root": "sheep_root",
+        "body": "sheep_body",
+        "head": "sheep_head",
+        "neck": [
+          "sheep_neck_01",
+          "sheep_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "sheep_front_L_contact",
+          "sheep_front_R_contact",
+          "sheep_back_L_contact",
+          "sheep_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.2083333333333333,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0833333333333333,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.5833333333333335,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.2916666666666667,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "pig",
+      "label": "小猪",
+      "family": "fourfoot",
+      "profile": "hoof",
+      "status": "prototype",
+      "url": "/models/animation-lab/pig.glb",
+      "source": "art-source/animation-lab/generated/pig/pig.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.34,
+      "gaitDescription": "Low short stride, wider stance; snout rooting and curled-tail twitch.",
+      "silhouette": "Pink round torso, disc snout and curled tail",
+      "anchors": {
+        "root": "pig_root",
+        "body": "pig_body",
+        "head": "pig_head",
+        "neck": [
+          "pig_neck_01",
+          "pig_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "pig_front_L_contact",
+          "pig_front_R_contact",
+          "pig_back_L_contact",
+          "pig_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.2083333333333333,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0833333333333333,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.5833333333333335,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.2916666666666667,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "bunny",
+      "label": "兔子",
+      "family": "fourfoot",
+      "profile": "hopper",
+      "status": "prototype",
+      "url": "/models/animation-lab/bunny.glb",
+      "source": "art-source/animation-lab/generated/bunny/bunny.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.42,
+      "gaitDescription": "Paired hind-leg launch, forepaw landing, flight phase; ears lag.",
+      "silhouette": "Long ears, large hind feet and small tail",
+      "anchors": {
+        "root": "bunny_root",
+        "body": "bunny_body",
+        "head": "bunny_head",
+        "neck": [
+          "bunny_neck_01",
+          "bunny_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "bunny_front_L_contact",
+          "bunny_front_R_contact",
+          "bunny_back_L_contact",
+          "bunny_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hopper",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 0.9166666666666666,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hopper",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.1666666666666667,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hopper",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.75,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hopper",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.2083333333333333,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hopper",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hopper",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hopper",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hopper",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hopper",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hopper",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hopper",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hopper",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "duck",
+      "label": "鸭子",
+      "family": "bird",
+      "profile": "groundbird",
+      "status": "prototype",
+      "url": "/models/animation-lab/duck.glb",
+      "source": "art-source/animation-lab/generated/duck/duck.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.32,
+      "gaitDescription": "Alternating flat-foot waddle and head stabilization; bill dipping.",
+      "silhouette": "Broad bill, webbed feet and compact folded wings",
+      "anchors": {
+        "root": "duck_root",
+        "body": "duck_body",
+        "head": "duck_head",
+        "neck": [
+          "duck_neck_01",
+          "duck_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "duck_L_contact",
+          "duck_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.2083333333333333,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.2083333333333333,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "chicken",
+      "label": "小鸡",
+      "family": "bird",
+      "profile": "groundbird",
+      "status": "prototype",
+      "url": "/models/animation-lab/chicken.glb",
+      "source": "art-source/animation-lab/generated/chicken/chicken.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.26,
+      "gaitDescription": "Toe-first alternating steps, neck counter-motion; rapid peck/recover.",
+      "silhouette": "Comb, short beak, clawed feet and raised tail",
+      "anchors": {
+        "root": "chicken_root",
+        "body": "chicken_body",
+        "head": "chicken_head",
+        "neck": [
+          "chicken_neck_01",
+          "chicken_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "chicken_L_contact",
+          "chicken_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 0.8,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "groundbird",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "cat",
+      "label": "猫咪",
+      "family": "fourfoot",
+      "profile": "pawed",
+      "status": "prototype",
+      "url": "/models/animation-lab/cat.glb",
+      "source": "art-source/animation-lab/generated/cat/cat.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.4,
+      "gaitDescription": "Soft diagonal trot with flexed wrists, tail balance; crouch/pounce.",
+      "silhouette": "Triangular ears, short muzzle, long curved tail",
+      "anchors": {
+        "root": "cat_root",
+        "body": "cat_body",
+        "head": "cat_head",
+        "neck": [
+          "cat_neck_01",
+          "cat_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "cat_front_L_contact",
+          "cat_front_R_contact",
+          "cat_back_L_contact",
+          "cat_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "pounce",
+          "durationSeconds": 1.5,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "recoil",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        }
+      ]
+    },
+    {
+      "id": "dog",
+      "label": "狗狗",
+      "family": "fourfoot",
+      "profile": "pawed",
+      "status": "prototype",
+      "url": "/models/animation-lab/dog.glb",
+      "source": "art-source/animation-lab/generated/dog/dog.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.48,
+      "gaitDescription": "Open diagonal trot, ear bounce and tail wag; play bow.",
+      "silhouette": "Floppy ears, longer muzzle, stout paws",
+      "anchors": {
+        "root": "dog_root",
+        "body": "dog_body",
+        "head": "dog_head",
+        "neck": [
+          "dog_neck_01",
+          "dog_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "dog_front_L_contact",
+          "dog_front_R_contact",
+          "dog_back_L_contact",
+          "dog_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "alpaca",
+      "label": "羊驼",
+      "family": "fourfoot",
+      "profile": "hoof",
+      "status": "prototype",
+      "url": "/models/animation-lab/alpaca.glb",
+      "source": "art-source/animation-lab/generated/alpaca/alpaca.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.52,
+      "gaitDescription": "Measured lateral pacing tendency with long-neck stabilization.",
+      "silhouette": "Long neck, rounded fleece and upright ears",
+      "anchors": {
+        "root": "alpaca_root",
+        "body": "alpaca_body",
+        "head": "alpaca_head",
+        "neck": [
+          "alpaca_neck_01",
+          "alpaca_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "alpaca_front_L_contact",
+          "alpaca_front_R_contact",
+          "alpaca_back_L_contact",
+          "alpaca_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.4,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "capybara",
+      "label": "水豚",
+      "family": "fourfoot",
+      "profile": "pawed",
+      "status": "prototype",
+      "url": "/models/animation-lab/capybara.glb",
+      "source": "art-source/animation-lab/generated/capybara/capybara.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.3,
+      "gaitDescription": "Low slow four-beat walk; heavy hip shift, tiny ear flick.",
+      "silhouette": "Blunt rectangular muzzle, tiny ears, no visible tail",
+      "anchors": {
+        "root": "capybara_root",
+        "body": "capybara_body",
+        "head": "capybara_head",
+        "neck": [
+          "capybara_neck_01",
+          "capybara_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "capybara_front_L_contact",
+          "capybara_front_R_contact",
+          "capybara_back_L_contact",
+          "capybara_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.4,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "deer",
+      "label": "鹿",
+      "family": "fourfoot",
+      "profile": "hoof",
+      "status": "prototype",
+      "url": "/models/animation-lab/deer.glb",
+      "source": "art-source/animation-lab/generated/deer/deer.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.58,
+      "gaitDescription": "Light high-knee diagonal trot; alert long-neck lift and ear rotation.",
+      "silhouette": "Slender legs, pale spots and branching antlers",
+      "anchors": {
+        "root": "deer_root",
+        "body": "deer_body",
+        "head": "deer_head",
+        "neck": [
+          "deer_neck_01",
+          "deer_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "deer_front_L_contact",
+          "deer_front_R_contact",
+          "deer_back_L_contact",
+          "deer_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "hoof",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "fox",
+      "label": "狐狸",
+      "family": "fourfoot",
+      "profile": "pawed",
+      "status": "prototype",
+      "url": "/models/animation-lab/fox.glb",
+      "source": "art-source/animation-lab/generated/fox/fox.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.46,
+      "gaitDescription": "Light narrow diagonal trot; bushy tail counter-swing and small pounce.",
+      "silhouette": "Pointed muzzle, black socks, oversized white-tipped tail",
+      "anchors": {
+        "root": "fox_root",
+        "body": "fox_body",
+        "head": "fox_head",
+        "neck": [
+          "fox_neck_01",
+          "fox_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "fox_front_L_contact",
+          "fox_front_R_contact",
+          "fox_back_L_contact",
+          "fox_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 0.9,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "pounce",
+          "durationSeconds": 1.5,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "recoil",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        }
+      ]
+    },
+    {
+      "id": "raccoon",
+      "label": "浣熊",
+      "family": "fourfoot",
+      "profile": "pawed",
+      "status": "prototype",
+      "url": "/models/animation-lab/raccoon.glb",
+      "source": "art-source/animation-lab/generated/raccoon/raccoon.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.34,
+      "gaitDescription": "Crouched alternating steps with mobile forepaws; food held to muzzle.",
+      "silhouette": "Dark face mask and ringed tail",
+      "anchors": {
+        "root": "raccoon_root",
+        "body": "raccoon_body",
+        "head": "raccoon_head",
+        "neck": [
+          "raccoon_neck_01",
+          "raccoon_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "raccoon_front_L_contact",
+          "raccoon_front_R_contact",
+          "raccoon_back_L_contact",
+          "raccoon_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.2,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "hedgehog",
+      "label": "刺猬",
+      "family": "fourfoot",
+      "profile": "pawed",
+      "status": "prototype",
+      "url": "/models/animation-lab/hedgehog.glb",
+      "source": "art-source/animation-lab/generated/hedgehog/hedgehog.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.18,
+      "gaitDescription": "Rapid tiny alternating steps; nose sniff and cautious spine/body tuck.",
+      "silhouette": "Spiky dorsal silhouette, small exposed face and short feet",
+      "anchors": {
+        "root": "hedgehog_root",
+        "body": "hedgehog_body",
+        "head": "hedgehog_head",
+        "neck": [
+          "hedgehog_neck_01",
+          "hedgehog_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "hedgehog_front_L_contact",
+          "hedgehog_front_R_contact",
+          "hedgehog_back_L_contact",
+          "hedgehog_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 0.8,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "penguin",
+      "label": "企鹅",
+      "family": "bird",
+      "profile": "penguin",
+      "status": "prototype",
+      "url": "/models/animation-lab/penguin.glb",
+      "source": "art-source/animation-lab/generated/penguin/penguin.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.24,
+      "gaitDescription": "Short alternating lateral waddle, flippers balance; chest settling.",
+      "silhouette": "Upright black-white torso, flippers and orange feet",
+      "anchors": {
+        "root": "penguin_root",
+        "body": "penguin_body",
+        "head": "penguin_head",
+        "neck": [
+          "penguin_neck_01",
+          "penguin_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "penguin_L_contact",
+          "penguin_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "penguin",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.2,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "penguin",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "penguin",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "penguin",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "penguin",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "penguin",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "penguin",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "penguin",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "penguin",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "penguin",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "penguin",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "penguin",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "wolf",
+      "label": "狼",
+      "family": "fourfoot",
+      "profile": "pawed",
+      "status": "prototype",
+      "url": "/models/animation-lab/wolf.glb",
+      "source": "art-source/animation-lab/generated/wolf/wolf.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.6,
+      "gaitDescription": "Long economical diagonal trot, low tail; alert and non-contact pounce.",
+      "silhouette": "Grey ruff, tall ears, long muzzle and straight tail",
+      "anchors": {
+        "root": "wolf_root",
+        "body": "wolf_body",
+        "head": "wolf_head",
+        "neck": [
+          "wolf_neck_01",
+          "wolf_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "wolf_front_L_contact",
+          "wolf_front_R_contact",
+          "wolf_back_L_contact",
+          "wolf_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "pounce",
+          "durationSeconds": 1.5,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "recoil",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        }
+      ]
+    },
+    {
+      "id": "tiger",
+      "label": "老虎",
+      "family": "fourfoot",
+      "profile": "pawed",
+      "status": "prototype",
+      "url": "/models/animation-lab/tiger.glb",
+      "source": "art-source/animation-lab/generated/tiger/tiger.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.62,
+      "gaitDescription": "Heavy stalking four-beat walk with shoulder roll; deep crouch pounce.",
+      "silhouette": "Orange stripes, broad paws and long striped tail",
+      "anchors": {
+        "root": "tiger_root",
+        "body": "tiger_body",
+        "head": "tiger_head",
+        "neck": [
+          "tiger_neck_01",
+          "tiger_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "tiger_front_L_contact",
+          "tiger_front_R_contact",
+          "tiger_back_L_contact",
+          "tiger_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.2,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "pounce",
+          "durationSeconds": 1.5,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "recoil",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        }
+      ]
+    },
+    {
+      "id": "lion",
+      "label": "狮子",
+      "family": "fourfoot",
+      "profile": "pawed",
+      "status": "prototype",
+      "url": "/models/animation-lab/lion.glb",
+      "source": "art-source/animation-lab/generated/lion/lion.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.6,
+      "gaitDescription": "Deliberate four-beat walk and mane lag; chest-leading alert/pounce.",
+      "silhouette": "Round mane, tan body and tufted tail",
+      "anchors": {
+        "root": "lion_root",
+        "body": "lion_body",
+        "head": "lion_head",
+        "neck": [
+          "lion_neck_01",
+          "lion_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "lion_front_L_contact",
+          "lion_front_R_contact",
+          "lion_back_L_contact",
+          "lion_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.3,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "pounce",
+          "durationSeconds": 1.5,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "recoil",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        }
+      ]
+    },
+    {
+      "id": "bear",
+      "label": "熊",
+      "family": "fourfoot",
+      "profile": "pawed",
+      "status": "prototype",
+      "url": "/models/animation-lab/bear.glb",
+      "source": "art-source/animation-lab/generated/bear/bear.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.5,
+      "gaitDescription": "Plantigrade wide four-beat amble; broad shoulder motion and paw lift.",
+      "silhouette": "Rounded ears, heavy torso and short tail",
+      "anchors": {
+        "root": "bear_root",
+        "body": "bear_body",
+        "head": "bear_head",
+        "neck": [
+          "bear_neck_01",
+          "bear_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "bear_front_L_contact",
+          "bear_front_R_contact",
+          "bear_back_L_contact",
+          "bear_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "pounce",
+          "durationSeconds": 1.5,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "recoil",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "pawed",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        }
+      ]
+    },
+    {
+      "id": "crocodile",
+      "label": "鳄鱼",
+      "family": "fourfoot",
+      "profile": "sprawlingreptile",
+      "status": "prototype",
+      "url": "/models/animation-lab/crocodile.glb",
+      "source": "art-source/animation-lab/generated/crocodile/crocodile.blend",
+      "referencePack": "animal-reference-pack-v1",
+      "strideMeters": 0.38,
+      "gaitDescription": "Splayed alternating limbs, low belly, lateral tail wave; slow jaw open.",
+      "silhouette": "Long armored body, flat snout and tapered tail",
+      "anchors": {
+        "root": "crocodile_root",
+        "body": "crocodile_body",
+        "head": "crocodile_head",
+        "neck": [
+          "crocodile_neck_01",
+          "crocodile_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "crocodile_front_L_contact",
+          "crocodile_front_R_contact",
+          "crocodile_back_L_contact",
+          "crocodile_back_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "sprawlingreptile",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.6,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "sprawlingreptile",
+            "locomotion"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "sprawlingreptile",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "sprawlingreptile",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "sprawlingreptile",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "sprawlingreptile",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "sprawlingreptile",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "sprawlingreptile",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "sprawlingreptile",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "sprawlingreptile",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "sprawlingreptile",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "sprawlingreptile",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "owl",
+      "label": "猫头鹰",
+      "family": "bird",
+      "profile": "flyingbird",
+      "status": "prototype",
+      "url": "/models/animation-lab/owl.glb",
+      "source": "art-source/animation-lab/generated/owl/owl.blend",
+      "referencePack": "forest-bird-reference-pack-v1",
+      "strideMeters": 0.2,
+      "gaitDescription": "Ground toe steps; broad measured wing downstroke and folded perch pose.",
+      "silhouette": "Round facial disc, large eyes and broad wings",
+      "anchors": {
+        "root": "owl_root",
+        "body": "owl_body",
+        "head": "owl_head",
+        "neck": [
+          "owl_neck_01",
+          "owl_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "owl_L_contact",
+          "owl_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1.1,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "takeoff",
+          "durationSeconds": 1.2,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "fly",
+          "durationSeconds": 1.2,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "airborne"
+        },
+        {
+          "name": "land",
+          "durationSeconds": 1.2,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "perch",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        }
+      ]
+    },
+    {
+      "id": "parrot",
+      "label": "鹦鹉",
+      "family": "bird",
+      "profile": "flyingbird",
+      "status": "prototype",
+      "url": "/models/animation-lab/parrot.glb",
+      "source": "art-source/animation-lab/generated/parrot/parrot.blend",
+      "referencePack": "forest-bird-reference-pack-v1",
+      "strideMeters": 0.2,
+      "gaitDescription": "Climbing-style toe steps; curved-beak food handling and asymmetric head tilt.",
+      "silhouette": "Curved beak, colorful wings and long tail",
+      "anchors": {
+        "root": "parrot_root",
+        "body": "parrot_body",
+        "head": "parrot_head",
+        "neck": [
+          "parrot_neck_01",
+          "parrot_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "parrot_L_contact",
+          "parrot_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 0.9,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "takeoff",
+          "durationSeconds": 1.2,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "fly",
+          "durationSeconds": 1.2,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "airborne"
+        },
+        {
+          "name": "land",
+          "durationSeconds": 1.2,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "perch",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        }
+      ]
+    },
+    {
+      "id": "woodpecker",
+      "label": "啄木鸟",
+      "family": "bird",
+      "profile": "flyingbird",
+      "status": "prototype",
+      "url": "/models/animation-lab/woodpecker.glb",
+      "source": "art-source/animation-lab/generated/woodpecker/woodpecker.blend",
+      "referencePack": "forest-bird-reference-pack-v1",
+      "strideMeters": 0.18,
+      "gaitDescription": "Paired ground hops; tail-supported perch and sharp controlled peck.",
+      "silhouette": "Pointed beak, red crest and stiff tail",
+      "anchors": {
+        "root": "woodpecker_root",
+        "body": "woodpecker_body",
+        "head": "woodpecker_head",
+        "neck": [
+          "woodpecker_neck_01",
+          "woodpecker_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "woodpecker_L_contact",
+          "woodpecker_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 0.8,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "takeoff",
+          "durationSeconds": 1.2,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "fly",
+          "durationSeconds": 1.2,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "airborne"
+        },
+        {
+          "name": "land",
+          "durationSeconds": 1.2,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "perch",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        }
+      ]
+    },
+    {
+      "id": "tit",
+      "label": "山雀",
+      "family": "bird",
+      "profile": "flyingbird",
+      "status": "prototype",
+      "url": "/models/animation-lab/tit.glb",
+      "source": "art-source/animation-lab/generated/tit/tit.blend",
+      "referencePack": "forest-bird-reference-pack-v1",
+      "strideMeters": 0.14,
+      "gaitDescription": "Quick paired hops, brisk wing beats and tiny head saccades.",
+      "silhouette": "Small round body, short beak and contrasting cap",
+      "anchors": {
+        "root": "tit_root",
+        "body": "tit_body",
+        "head": "tit_head",
+        "neck": [
+          "tit_neck_01",
+          "tit_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "tit_L_contact",
+          "tit_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 0.6,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "takeoff",
+          "durationSeconds": 1.2,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "fly",
+          "durationSeconds": 0.8,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "airborne"
+        },
+        {
+          "name": "land",
+          "durationSeconds": 1.2,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "perch",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        }
+      ]
+    },
+    {
+      "id": "toucan",
+      "label": "巨嘴鸟",
+      "family": "bird",
+      "profile": "flyingbird",
+      "status": "prototype",
+      "url": "/models/animation-lab/toucan.glb",
+      "source": "art-source/animation-lab/generated/toucan/toucan.blend",
+      "referencePack": "forest-bird-reference-pack-v1",
+      "strideMeters": 0.22,
+      "gaitDescription": "Paired short hops with beak counterbalance; broad wings and slower flaps.",
+      "silhouette": "Oversized bright bill and dark compact body",
+      "anchors": {
+        "root": "toucan_root",
+        "body": "toucan_body",
+        "head": "toucan_head",
+        "neck": [
+          "toucan_neck_01",
+          "toucan_neck_02"
+        ],
+        "mouth": "feeding-mouth",
+        "support": "animal-support",
+        "ground": "animal-ground",
+        "headTarget": "animal-head",
+        "feet": [
+          "toucan_L_contact",
+          "toucan_R_contact"
+        ]
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "walk",
+          "durationSeconds": 1,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "drink_enter",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_loop",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "drink_exit",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "eat",
+          "durationSeconds": 2.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "rest",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "carried",
+          "durationSeconds": 2.5,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "carried"
+        },
+        {
+          "name": "react",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "pet",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "interaction"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "alert",
+          "durationSeconds": 1.25,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        },
+        {
+          "name": "celebrate",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "takeoff",
+          "durationSeconds": 1.2,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "fly",
+          "durationSeconds": 1.2,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "airborne"
+        },
+        {
+          "name": "land",
+          "durationSeconds": 1.2,
+          "loop": false,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "locomotion"
+          ],
+          "contactMode": "mixed"
+        },
+        {
+          "name": "perch",
+          "durationSeconds": 3.0,
+          "loop": true,
+          "rootMotion": false,
+          "tags": [
+            "flyingbird",
+            "expression"
+          ],
+          "contactMode": "grounded"
+        }
+      ]
+    }
+  ]
+}

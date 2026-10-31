@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {sampleFarm} from '../src/minimal/sample-farms.ts';
+import {lunarPlayerRoute,lunarPlayerRouteSafe} from '../src/minimal/lunar-player-path.ts';
+const farm=()=>sampleFarm('lunar',0).state;
+test('player passes exact open space inside a giant-touched grid cell but routes around its real circle',()=>{const s=farm(),circles=[{x:3,z:3.8,radius:1.4}];assert.deepEqual(lunarPlayerRoute(s,{x:1,z:3},{x:2,z:3},circles),[{x:2,z:3}]);const route=lunarPlayerRoute(s,{x:1,z:3},{x:4,z:3},circles);assert.ok(route&&route.length>1);assert.ok(lunarPlayerRouteSafe(s,{x:1,z:3},route,circles));assert.equal(lunarPlayerRouteSafe(s,{x:1,z:3},[{x:4,z:3}],circles),false);});
+test('dynamic precise circles do not weaken terrain, shop, static props, or endpoint clearance',()=>{const s=farm(),from={x:1,z:3},before=JSON.stringify(s);assert.equal(lunarPlayerRoute(s,from,{x:5,z:5},[]),null);assert.equal(lunarPlayerRoute(s,from,{x:0,z:0},[]),null);assert.equal(lunarPlayerRoute(s,from,{x:6,z:3},[]),null);s.staticObstacles=[{x:2,z:3}];assert.equal(lunarPlayerRoute(s,from,{x:2,z:3},[]),null);delete s.staticObstacles;assert.equal(lunarPlayerRoute(s,from,{x:3,z:3.4},[{x:3,z:3.8,radius:1.4}]),null);assert.equal(JSON.stringify(s),before);assert.equal(lunarPlayerRouteSafe(s,from,[{x:2,z:3}],[{x:0,z:3,radius:.5}]),false);});

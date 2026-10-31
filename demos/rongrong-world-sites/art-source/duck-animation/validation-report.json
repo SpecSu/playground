@@ -1,0 +1,66 @@
+{
+  "sha256": "b900bbee972bb1e29d3124ae6fab95bfc88edc403b0bec2408616338ab1cb6e6",
+  "size_bytes": 922484,
+  "skins": 1,
+  "joints": 19,
+  "visible_mesh_nodes": 6,
+  "triangles": 22160,
+  "all_meshes_skinned": true,
+  "skinned_vertices": 11910,
+  "max_weight_sum_error": 1.0360963642597198e-07,
+  "anchors": {
+    "feeding-mouth": {
+      "node": 1,
+      "is_skin_joint": true
+    },
+    "animal-support": {
+      "node": 15,
+      "is_skin_joint": true
+    },
+    "animal-head": {
+      "node": 2,
+      "is_skin_joint": true
+    },
+    "animal-ground": {
+      "node": 17,
+      "is_skin_joint": true
+    }
+  },
+  "asset_metadata": {
+    "species": "duck",
+    "asset_contract_version": 2,
+    "walk_stride_m": 0.32,
+    "walk_cycle_seconds": 1.0,
+    "gait": "two-foot land waddle",
+    "drink_contact_game": [
+      0.0,
+      0.04500000178813934,
+      0.49000000953674316
+    ]
+  },
+  "clip_durations_seconds": {
+    "carried": 2.5,
+    "drink_enter": 1.2083333730697632,
+    "drink_exit": 1.2083333730697632,
+    "drink_loop": 2.5,
+    "eat": 2.0,
+    "idle": 3.0,
+    "react": 1.25,
+    "rest": 3.0,
+    "walk": 1.0
+  },
+  "max_animation_seam_errors": {
+    "idle_loop": 0,
+    "walk_loop": 4.365607810148664e-18,
+    "drink_loop_loop": 0,
+    "eat_loop": 0,
+    "rest_loop": 0,
+    "carried_loop": 0,
+    "react_loop": 0,
+    "idle->drink_enter": 0,
+    "drink_enter->drink_loop": 0,
+    "drink_loop->drink_exit": 0,
+    "drink_exit->idle": 0
+  },
+  "scope": "Binary GLB structure, skin normalization and authored pose seams only. Runtime geometry and rendering need separate checks."
+}

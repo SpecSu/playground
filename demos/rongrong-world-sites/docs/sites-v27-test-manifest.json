@@ -1,0 +1,100 @@
+{
+  "scope": "local Sites V27 integration; not deployment confirmation",
+  "baseSiteCommit": "437624707177bc64f2b5e20aed6e281d7f275720",
+  "sourceCopyCommit": "7ef1f3a73e27651182cc5274aef70b427b77fa4b",
+  "initialCandidateCommit": "923fd79be5b061a37636e885013c7847aa71aee5",
+  "upstreamAggregateCandidate": "3cd5d2fe9966af0397aa4cfccb10dc6913dae6c7",
+  "upstreamAggregateStatus": "recorded separately; this manifest covers the Sites checks only",
+  "upstreamFinalRuntimeMatch": {
+    "comparedFiles": 118,
+    "mismatches": 0,
+    "method": "sha256 of src/server/public copied files versus git show of upstreamAggregateCandidate"
+  },
+  "completedAtUtc": "2026-10-25T17:41:27Z",
+  "inputDigest": {
+    "algorithm": "SHA256 of sorted path + NUL + SHA256(file) + LF; tracked non-doc files plus docs/sites-v27-source-sync.json",
+    "fileCount": 517,
+    "sha256": "eac5714f97cfb9c05335d0429c717264243eb05dca819d7adafec537d143cd47"
+  },
+  "checks": [
+    {
+      "command": "npm run typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "testFiles": 71,
+      "tests": 725,
+      "passed": 725,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "durationMs": 119508.35477
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "route": "/api/minimal/:action",
+      "preservedD1Binding": "DB"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "sourcePreservation": {
+    "copiedFilesHashVerified": 183,
+    "oldGLBsHashVerified": 35,
+    "accountInfo": "unchanged",
+    "legacyRoutesAndClients": "unchanged",
+    "hostingIdentityAndBindings": "unchanged",
+    "priorMigrationsAndSnapshots": "unchanged"
+  },
+  "migration": {
+    "file": "drizzle/0002_spooky_the_fallen.sql",
+    "newJsonTables": 8,
+    "newTransactionGateTables": 1,
+    "schemaOnly": true,
+    "requestDDL": false,
+    "concurrentInitializationRequests": 8,
+    "existingGateRevision": 37,
+    "existingGateTokenUnchanged": true,
+    "legacyRowsPreserved": true
+  },
+  "assets": {
+    "hunyuanPaths": 9,
+    "uniqueHunyuanModels": 6,
+    "verification": "exact hashes and CPU parser/geometry; no browser or GPU acceptance"
+  },
+  "review": {
+    "critical": 0,
+    "important": 0,
+    "minor": 0,
+    "boundaryTestsPassed": 8,
+    "identityAndAccessTestsPassed": 9,
+    "supplementalStorageReview": "denied getters resolve; denied outbox writes send no POST; local read/write errors preserve source bytes; no duplicate aggregate"
+  },
+  "warnings": [
+    "Build emits an advisory >500 kB client chunk warning.",
+    "Vinext static route classification reports unknown page routes; build succeeds.",
+    "npm reports an existing http-proxy environment config warning."
+  ],
+  "notPerformed": [
+    "hosted database mutations",
+    "runtime environment changes",
+    "owner binding or owner save import",
+    "source remote pushes",
+    "Sites save or deployment",
+    "browser/CUA/Chromium/Playwright automation",
+    "GPU/mobile FPS/audio listening acceptance"
+  ],
+  "publicationPrerequisites": [
+    "root verifies upstream final aggregate terminal",
+    "root receives and independently verifies actual owner canonical UID if owner binding is desired",
+    "root configures runtime through native Sites tools within authorization",
+    "root uses official Sites workflow to synchronize/package/deploy, preserving existing audience"
+  ],
+  "log": "docs/evidence/sites-v27/local-validation.log"
+}

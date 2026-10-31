@@ -1,0 +1,31 @@
+import * as T from 'three';
+import type {LunarFootContact} from './lunar-showcase-stance.ts';
+type FootPose={position:T.Vector3;rotation:T.Quaternion;clearance:number};
+type Stage={from:FootPose[];to:FootPose[];moving:number[];duration:number;lift:number};
+export type LunarReplantPlan={stages:Stage[];duration:number};
+/** Temporary step placement, not a planted gait phase. Foot transforms, rather
+ * than joint interpolation, define the visible arc; every solve rotates bones only. */
+export function createLunarFootReplant(root:T.Group,contacts:readonly LunarFootContact[],ground:(p:T.Vector3)=>number){
+ const legs=contacts.map(spec=>{const upper=root.getObjectByName(spec.upper),lower=root.getObjectByName(spec.lower),foot=root.getObjectByName(spec.foot);if(!(upper instanceof T.Bone)||!(lower instanceof T.Bone)||!(foot instanceof T.Bone))throw Error('Missing replant chain');return {spec,upper,lower,foot,sole:[]as T.Vector3[]};});
+ root.updateMatrixWorld(true);root.traverse(mesh=>{if(!(mesh instanceof T.SkinnedMesh))return;const p=mesh.geometry.attributes.position,w=mesh.geometry.attributes.skinWeight,j=mesh.geometry.attributes.skinIndex;for(const leg of legs){const bi=mesh.skeleton.bones.indexOf(leg.foot);if(bi<0)continue;const bind=new T.Matrix4().multiplyMatrices(mesh.skeleton.boneInverses[bi],mesh.bindMatrix);for(let i=0;i<p.count;i++){let weight=0;for(let k=0;k<4;k++)if(j.getComponent(i,k)===bi)weight+=w.getComponent(i,k);if(weight>.999)leg.sole.push(new T.Vector3().fromBufferAttribute(p,i).applyMatrix4(bind));}}});
+ const point=new T.Vector3(),scale=new T.Vector3(),hip=new T.Vector3(),knee=new T.Vector3(),ankle=new T.Vector3(),axis=new T.Vector3(),sourceAxis=new T.Vector3(),pole=new T.Vector3(),desired=new T.Vector3(),origin=new T.Vector3(),before=new T.Vector3(),after=new T.Vector3(),deltaQ=new T.Quaternion(),worldQ=new T.Quaternion(),parentQ=new T.Quaternion();
+ function clearance(i:number,p:T.Vector3,q:T.Quaternion){const leg=legs[i];leg.foot.getWorldScale(scale);let low=leg.sole.length?Infinity:p.y;for(const v of leg.sole)low=Math.min(low,point.copy(v).multiply(scale).applyQuaternion(q).y+p.y);return low-ground(p);}
+ const copy=(poses:FootPose[])=>poses.map(p=>({position:p.position.clone(),rotation:p.rotation.clone(),clearance:p.clearance}));
+ function capture(){root.updateMatrixWorld(true);return legs.map((leg,i)=>{const position=leg.foot.getWorldPosition(new T.Vector3()),rotation=leg.foot.getWorldQuaternion(new T.Quaternion());return {position,rotation,clearance:clearance(i,position,rotation)};});}
+ function plan(from:FootPose[],to:FootPose[]):LunarReplantPlan{
+  const stages:Stage[]=[];let current=copy(from);const add=(moving:number[],targets:FootPose[],duration:number,lift:number)=>{if(!moving.length)return;const next=copy(current);for(const i of moving)next[i]=copy([targets[i]])[0];stages.push({from:copy(current),to:next,moving,duration,lift});current=copy(next);};
+  // Put an already airborne foot down before moving its sole support. This is
+  // needed when the new forward phase ends with that same foot in swing.
+  const airborne=from.flatMap((p,i)=>p.clearance>.001?[i]:[]),landed=copy(from);for(const i of airborne){landed[i].position.y-=landed[i].clearance;landed[i].clearance=0;}add(airborne,landed,.08,0);
+  const grounded=to.flatMap((p,i)=>p.clearance<=.001?[i]:[]);for(const group of [0,1]){const moving=grounded.filter(i=>(legs[i].spec.phase<.5?0:1)===group&&(current[i].position.distanceTo(to[i].position)>.0001||current[i].rotation.angleTo(to[i].rotation)>.001));add(moving,to,.16,.025*root.scale.x);}
+  add(to.flatMap((p,i)=>p.clearance>.001?[i]:[]),to,.12,.015*root.scale.x);
+  if(!stages.length)stages.push({from:copy(from),to:copy(to),moving:[],duration:.18,lift:0});return {stages,duration:stages.reduce((n,s)=>n+s.duration,0)};
+ }
+ function rotate(bone:T.Bone,child:T.Bone,to:T.Vector3){bone.getWorldPosition(origin);child.getWorldPosition(before).sub(origin).normalize();after.copy(to).sub(origin).normalize();deltaQ.setFromUnitVectors(before,after);bone.getWorldQuaternion(worldQ);bone.parent!.getWorldQuaternion(parentQ);bone.quaternion.copy(parentQ.invert()).multiply(deltaQ).multiply(worldQ).normalize();bone.updateWorldMatrix(false,true);}
+ function apply(plan:LunarReplantPlan,elapsed:number){let time=Math.min(plan.duration,Math.max(0,elapsed)),stage=plan.stages.at(-1)!;for(let i=0;i<plan.stages.length;i++){const s=plan.stages[i];stage=s;if(time<=s.duration||i===plan.stages.length-1)break;time-=s.duration;}const u=Math.min(1,time/stage.duration),t=u*u*(3-2*u);let reachable=true,maxError=0;const failures:string[]=[];
+  root.updateMatrixWorld(true);for(let i=0;i<legs.length;i++){const leg=legs[i],moving=stage.moving.includes(i),from=stage.from[i],to=stage.to[i],target=from.position.clone().lerp(to.position,moving?t:0),rotation=from.rotation.clone().slerp(to.rotation,moving?t:0);if(moving){const h=T.MathUtils.lerp(from.clearance,to.clearance,t)+stage.lift*16*u*u*(1-u)*(1-u);target.y+=h-clearance(i,target,rotation);}
+   leg.upper.getWorldPosition(hip);leg.lower.getWorldPosition(knee);leg.foot.getWorldPosition(ankle);const a=hip.distanceTo(knee),b=knee.distanceTo(ankle),d=hip.distanceTo(target);if(d>=a+b-1e-7||d<=Math.abs(a-b)+1e-7){reachable=false;failures.push(leg.spec.foot);continue;}axis.copy(target).sub(hip).normalize();sourceAxis.copy(ankle).sub(hip).normalize();pole.copy(knee).sub(hip).addScaledVector(sourceAxis,-point.copy(knee).sub(hip).dot(sourceAxis));if(pole.lengthSq()<1e-12){reachable=false;failures.push(leg.spec.foot);continue;}pole.normalize().applyQuaternion(deltaQ.setFromUnitVectors(sourceAxis,axis));const along=(a*a-b*b+d*d)/(2*d),side=Math.sqrt(Math.max(0,a*a-along*along));desired.copy(hip).addScaledVector(axis,along).addScaledVector(pole,side);rotate(leg.upper,leg.lower,desired);rotate(leg.lower,leg.foot,target);leg.foot.parent!.getWorldQuaternion(parentQ);leg.foot.quaternion.copy(parentQ.invert()).multiply(rotation).normalize();leg.foot.updateWorldMatrix(false,true);maxError=Math.max(maxError,leg.foot.getWorldPosition(ankle).distanceTo(target));
+  }const result={reachable,maxError,failures,elapsed,duration:plan.duration};root.userData.lunarReplant=result;return result;
+ }
+ return {capture,plan,apply};
+}

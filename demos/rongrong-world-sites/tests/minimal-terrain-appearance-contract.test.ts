@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {createMinimalState,validateMinimalSave,type Tile} from '../src/minimal/model.ts';
+import {TERRAIN_APPEARANCES,isTerrainAppearance,terrainAppearanceIssue,tileAppearance} from '../src/minimal/terrain-appearance.ts';
+test('finite saved cosmetic contract defaults old tiles to natural and accepts dry lunar sample tiles',()=>{const s=createMinimalState(1);assert.deepEqual(TERRAIN_APPEARANCES,['natural','lunar','slate','rose']);assert.equal(tileAppearance(s.tiles[0]),'natural');const t=s.tiles.find(t=>t.x===1&&t.z===3)!;assert.equal(terrainAppearanceIssue(t),null);t.appearance='lunar';assert.equal(validateMinimalSave(s),true);for(const invalid of ['future',{},null,[]]){assert.equal(isTerrainAppearance(invalid),false);t.appearance=invalid as Tile['appearance'];assert.equal(validateMinimalSave(s),false);}});

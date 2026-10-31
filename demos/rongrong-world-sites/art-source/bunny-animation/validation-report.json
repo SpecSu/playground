@@ -1,0 +1,66 @@
+{
+  "sha256": "396af7275f678e06d8cdc4c30bca6d30c966531a14180864e0d7b1bf8fd4156a",
+  "size_bytes": 1290464,
+  "skins": 1,
+  "joints": 27,
+  "visible_mesh_nodes": 5,
+  "triangles": 30852,
+  "all_meshes_skinned": true,
+  "skinned_vertices": 16646,
+  "max_weight_sum_error": 1.2293457984924316e-07,
+  "anchors": {
+    "feeding-mouth": {
+      "node": 5,
+      "is_skin_joint": true
+    },
+    "animal-support": {
+      "node": 23,
+      "is_skin_joint": true
+    },
+    "animal-head": {
+      "node": 6,
+      "is_skin_joint": true
+    },
+    "animal-ground": {
+      "node": 25,
+      "is_skin_joint": true
+    }
+  },
+  "asset_metadata": {
+    "species": "bunny",
+    "asset_contract_version": 2,
+    "walk_stride_m": 0.42,
+    "walk_cycle_seconds": 0.9166666666666666,
+    "gait": "paired rabbit hop",
+    "drink_contact_game": [
+      0.0,
+      0.04500000178813934,
+      0.7200000286102295
+    ]
+  },
+  "clip_durations_seconds": {
+    "carried": 2.5,
+    "drink_enter": 1.1666666269302368,
+    "drink_exit": 1.2083333730697632,
+    "drink_loop": 2.75,
+    "eat": 2.0,
+    "idle": 3.0,
+    "react": 1.25,
+    "rest": 3.0,
+    "walk": 0.9166666865348816
+  },
+  "max_animation_seam_errors": {
+    "idle_loop": 0,
+    "walk_loop": 0,
+    "drink_loop_loop": 0,
+    "eat_loop": 0,
+    "rest_loop": 0,
+    "carried_loop": 0,
+    "react_loop": 0,
+    "idle->drink_enter": 0,
+    "drink_enter->drink_loop": 0,
+    "drink_loop->drink_exit": 0,
+    "drink_exit->idle": 0
+  },
+  "scope": "Binary GLB structure, skin normalization and authored pose seams only. Runtime geometry and rendering need separate checks."
+}

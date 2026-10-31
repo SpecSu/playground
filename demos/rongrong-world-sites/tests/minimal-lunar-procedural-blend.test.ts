@@ -1,0 +1,14 @@
+import test from 'node:test';import assert from 'node:assert/strict';import * as THREE from 'three';
+import formal from '../src/minimal/signed-in-farm-resource-deployment.json' with {type:'json'};
+import {createApprovedSignedInFarmResourceContext} from '../src/minimal/signed-in-farm-resources.ts';import {createLunarShowcaseScope} from '../src/minimal/lunar-showcase-resources.ts';import {LunarShowcaseAssetLibrary} from '../src/minimal/lunar-showcase-assets.ts';import {LunarShowcaseScene} from '../src/minimal/lunar-showcase-scene.ts';import type {LunarLife} from '../src/minimal/lunar-showcase-life.ts';import {lunarLoaderFixture} from './helpers/lunar-showcase-fixture.ts';
+// Explicit synthetic procedural-target seam: tests display-pipeline ordering, not
+// an asset/foot-contact admission. Actual five GLBs have a separate skin oracle.
+test('a new procedural target and mode reversal blend from the displayed post-IK pose, then converge',async()=>{
+ const f=await lunarLoaderFixture({walking:true}),scope=createLunarShowcaseScope(createApprovedSignedInFarmResourceContext(formal,formal.target.id),formal.target.id),library=new LunarShowcaseAssetLibrary(scope,[f.record],{loadBytes:async()=>f.bytes,textureMode:'headers-only'}),scene=new LunarShowcaseScene(new THREE.Group(),library,{player:()=>new THREE.Vector3(7,0,7),carrySupport:()=>new THREE.Vector3(7,2,7),playerHeading:()=>0,groundHeight:()=>0,landing:()=>null});await scene.ready;
+ try{const root=scene.rootFor('yellow-long-ear')!,head=root.getObjectByName('test-head')!,actor=(scene as unknown as {actors:Map<string,{life:LunarLife;stance:unknown}>}).actors.get('yellow-long-ear')!;scene.tick(.25);let turn=false,clears=0;
+ actor.life.advance=dt=>({position:{x:root.position.x,z:root.position.z},heading:root.rotation.y,travelled:turn?0:dt*.1,turnRadians:turn?dt:0,walking:true});
+ actor.stance={clear(){clears++;},release(){},solve(){head.quaternion.setFromAxisAngle(new THREE.Vector3(0,1,0),turn?1.3:-1.3);}};
+ const before=head.quaternion.clone();scene.tick(.0001);assert.equal(root.userData.lunarContactStage,'replant');assert.equal(root.userData.lunarContactEpoch,1);assert.ok(before.angleTo(head.quaternion)<.002,'initial IK must not override the existing display fade');scene.tick(.2);assert.ok(head.quaternion.angleTo(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),-1.3))<1e-7);
+ assert.equal(root.userData.lunarContactStage,'contact');turn=true;const reversal=head.quaternion.clone();scene.tick(.0001);assert.ok(reversal.angleTo(head.quaternion)<.003,'turn/forward mode change must not reset the visible pose');scene.tick(.2);assert.ok(head.quaternion.angleTo(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),1.3))<1e-7);assert.equal(clears,2);assert.equal(root.userData.lunarContactEpoch,2);assert.equal(root.userData.lunarContactStage,'contact');
+ }finally{scene.dispose();}
+});

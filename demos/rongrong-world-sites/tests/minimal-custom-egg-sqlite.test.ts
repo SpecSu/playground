@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {MinimalD1Repository,type MinimalD1Database,type MinimalD1Statement} from '../server/minimal-d1.ts';
+import {MinimalAuthority} from '../src/minimal/authority.ts';
+
+test('real SQLite-backed D1 rolls back purchase receipt failure and concurrent hatch settles one product',async t=>{
+ const sql=new DatabaseSync(':memory:');t.after(()=>sql.close());sql.exec(readFileSync(new URL('../server/minimal-schema.sql',import.meta.url),'utf8'));let failReceipt=false;
+ const prepare=(query:string):MinimalD1Statement=>{let args:(string|number|null)[]=[];const statement:MinimalD1Statement={bind(...values){args=values;return statement;},async first<T>(){return (sql.prepare(query).get(...args)??null) as T|null;},async all<T>(){return {results:sql.prepare(query).all(...args) as T[]};},async run(){if(failReceipt&&query.startsWith('INSERT INTO minimal_receipts')){failReceipt=false;throw new Error('injected final receipt failure');}return {meta:{changes:Number(sql.prepare(query).run(...args).changes)}};}};return statement;};
+ let queue:Promise<unknown>=Promise.resolve();const db:MinimalD1Database={prepare,batch(statements){const run=queue.then(async()=>{sql.exec('BEGIN IMMEDIATE');try{const results=[];for(const statement of statements)results.push(await statement.run());sql.exec('COMMIT');return results;}catch(error){sql.exec('ROLLBACK');throw error;}});queue=run.catch(()=>{});return run;}};
+ const repository=new MinimalD1Repository(db);let now=1793000000000,id=0,request=0;const authority=new MinimalAuthority(repository,{clock:()=>now,newId:()=>`sql_egg_${++id}`,fingerprint:async v=>createHash('sha256').update(v).digest('hex')});
+ const send=async(route:'creative'|'command',command:unknown)=>authority[route]('alice',{requestId:`r${++request}`,expectedRevision:(await authority.get('alice')).farm!.revision,command});await authority.bootstrap('alice',{requestId:'new',mode:'new'});await send('command',{type:'welcome'});await repository.transaction(async tx=>{const farm=(await tx.get('farms','alice'))!;farm.state.player={x:1,z:1};await tx.put('farms','alice',farm);});
+ const before=(await authority.get('alice')).farm!,buyRequest={requestId:'purchase',expectedRevision:before.revision,command:{type:'buy-egg'}};failReceipt=true;await assert.rejects(authority.creative('alice',buyRequest),/final receipt failure/);assert.deepEqual((await authority.get('alice')).farm,before);assert.equal(await authority.receipt('alice','purchase'),null);
+ const bought=await authority.creative('alice',buyRequest);assert.equal(bought.accepted,true);assert.deepEqual(await authority.creative('alice',buyRequest),bought);assert.equal(bought.farm!.state.coins,90);const assetId=bought.farm!.creative!.assets[0].id;
+ const configured=await send('creative',{type:'create',assetId,templateId:'poop-pal',name:'SQLite伙伴',prompt:'固定样例'});now+=2500;const claim=await send('creative',{type:'claim',jobId:configured.job!.id});assert.equal(claim.accepted,true);await send('creative',{type:'place',assetId,at:{x:2,z:2}});now+=15000;
+ const ready=(await authority.get('alice')).farm!,hatch={requestId:'hatch-fail',expectedRevision:ready.revision,command:{type:'hatch',assetId}};failReceipt=true;await assert.rejects(authority.creative('alice',hatch),/final receipt failure/);assert.deepEqual((await authority.get('alice')).farm,ready);
+ const replies=await Promise.all(['hatch1','hatch2'].map(requestId=>authority.creative('alice',{...hatch,requestId})));assert.equal(replies.filter(r=>r.accepted).length,1);assert.equal(replies.find(r=>!r.accepted)!.code,'stale-farm');const farm=(await authority.get('alice')).farm!;assert.equal(farm.state.coins,90);assert.equal(farm.state.hatchedCount,1);assert.equal(farm.state.animals.length,1);assert.equal(farm.creative!.assets.length,1);assert.equal(farm.creative!.assets[0].id,assetId);assert.equal(farm.state.animals[0].id,assetId);
+});

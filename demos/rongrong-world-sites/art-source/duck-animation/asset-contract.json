@@ -1,0 +1,57 @@
+{
+  "source": "Blender 4.3.2 deterministic Python construction",
+  "species": "duck",
+  "asset_contract_version": 2,
+  "bones": 19,
+  "mesh_objects": 6,
+  "clips": {
+    "idle": 3.0,
+    "walk": 1.0,
+    "drink_enter": 1.2083333333333333,
+    "drink_loop": 2.5,
+    "drink_exit": 1.2083333333333333,
+    "eat": 2.0,
+    "rest": 3.0,
+    "carried": 2.5,
+    "react": 1.25
+  },
+  "walk_stride_m": 0.32,
+  "gait": "two-foot land waddle, not a quadruped trot",
+  "game_coordinates": {
+    "up": "+Y",
+    "forward": "+Z",
+    "ground_y": 0
+  },
+  "bones_for_runtime": {
+    "head": "duck_head",
+    "neck": [
+      "duck_neck_01",
+      "duck_neck_02"
+    ],
+    "mouth": "feeding-mouth",
+    "support": "animal-support",
+    "ground": "animal-ground",
+    "head_anchor": "animal-head"
+  },
+  "mouth_idle": [
+    0.0,
+    0.5950000286102295,
+    0.5299999713897705
+  ],
+  "mouth_drink": [
+    0.0,
+    0.04500000178813934,
+    0.49000000953674316
+  ],
+  "support_idle": [
+    0.0,
+    0.12999999523162842,
+    -0.07000000029802322
+  ],
+  "scale_range": [
+    0.6,
+    2.2
+  ],
+  "carry": "Root never lifts. Webbed feet fold upward and outward around body. Belly has body-only weights.",
+  "navigation": "Land only; no swimming, water entry, or deep-pond traversal."
+}

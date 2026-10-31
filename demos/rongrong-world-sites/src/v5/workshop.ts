@@ -1,0 +1,58 @@
+/** Deterministic workshop; only the aggregate commits this profile and its receipt. */
+import type {Profile,EstateCommand} from './estate.ts';
+import {consumeWool,restoreWool,createHerdEconomy,type WoolLot,type MaterialTier} from './herd-economy.ts';
+import {SHIELD_ANCHORS,type ShieldTactic} from './tactical-shield.ts';
+import {isOwned,isWalkable,type GridPoint} from './layout.ts';
+export type WorkshopRecipe='cape'|'banner'|'signpost'|'shield'|'signature';
+export type WorkshopPattern={motif:'star'|'leaf'|'sheep';color:string;scale:number;rotation:number;crop:{x:number;y:number;width:number;height:number}};
+export type WorkshopAsset={id:string;version:number;source:'official'|'user-edit';pattern:WorkshopPattern;animalId?:string;eventId?:string;signatureAnimalId?:string;parentVersion?:number;createdAt:number};
+export type WorkshopItem={id:string;recipe:WorkshopRecipe;assetId:string;assetVersion:number;animalId?:string;createdAt:number;paid:{materials:number;wool:WoolLot[]};gift:boolean;destroyed:boolean};
+export type WorkshopDraft={recipe:WorkshopRecipe;pattern:WorkshopPattern;animalId?:string;eventId?:string};
+export type GenerationJob={id:string;prompt:string;status:'unavailable';createdAt:number;message:string};
+/** Future jobs and moderation must arrive through an authenticated server adapter, never commands. */
+export interface WorkshopGenerationAdapter {request(input:{requestId:string;prompt:string;animalId?:string;eventId?:string}):Promise<{jobId:string;status:'queued'|'rejected'}>; read(jobId:string):Promise<{status:'queued'|'rejected'|'approved';persistentAssetId?:string;moderationReceipt?:string}>;}
+export type WorkshopState={version:number;assets:WorkshopAsset[];items:WorkshopItem[];draft:WorkshopDraft|null;trialUsed:boolean;signatures:string[];equipment:{cape?:string;shield?:string};tacticalAnchor?:GridPoint;placements:Record<string,GridPoint>;jobs:GenerationJob[];capability:{generation:'unavailable';budget:'unknown';message:string};receipts:Record<string,{accepted:boolean;message:string}>};
+type WorkshopProfile=Profile&{workshop?:WorkshopState};
+export const WORKSHOP_RECIPES:Record<WorkshopRecipe,{materials:number;tier:MaterialTier}>={cape:{materials:4,tier:'white'},banner:{materials:4,tier:'white'},signpost:{materials:8,tier:'green'},shield:{materials:16,tier:'blue'},signature:{materials:8,tier:'gold'}};
+export const DEFAULT_PATTERN:WorkshopPattern={motif:'star',color:'#e6c467',scale:1,rotation:0,crop:{x:0,y:0,width:1,height:1}};
+export function ensureWorkshop(p:WorkshopProfile,_now:number):WorkshopState{return p.workshop??=( {version:0,assets:[],items:[],draft:null,trialUsed:false,signatures:[],equipment:{},placements:{},jobs:[],capability:{generation:'unavailable',budget:'unknown',message:'生成服务未连接；预算未知。可使用官方图案。'},receipts:{}});}
+function pattern(value:unknown):WorkshopPattern|null{if(!value||typeof value!=='object')return null;const v=value as WorkshopPattern,c=v.crop;if(!['star','leaf','sheep'].includes(v.motif)||!/^#[0-9a-f]{6}$/i.test(v.color)||![v.scale,v.rotation,c?.x,c?.y,c?.width,c?.height].every(Number.isFinite)||c.width<=0||c.height<=0)return null;const clamp=(n:number,a:number,b:number)=>Math.max(a,Math.min(b,n));const x=clamp(c.x,0,.95),y=clamp(c.y,0,.95);return {motif:v.motif,color:v.color.toLowerCase(),scale:clamp(v.scale,.5,2),rotation:((v.rotation%360)+360)%360,crop:{x,y,width:clamp(c.width,.05,1-x),height:clamp(c.height,.05,1-y)}};}
+export function workshopPatternSvg(input:WorkshopPattern):string{const p=pattern(input)??DEFAULT_PATTERN;const shape=p.motif==='star'?'<path d="M50 8 61 36 92 37 68 57 76 88 50 70 24 88 32 57 8 37 39 36Z"/>':p.motif==='leaf'?'<path d="M18 82Q8 12 84 16Q92 88 18 82ZM20 80 70 30"/>':'<ellipse cx="50" cy="48" rx="32" ry="25"/><circle cx="77" cy="50" r="15"/><path d="M29 66V86M60 66V86" stroke="currentColor" stroke-width="8"/>';return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${p.crop.x*100} ${p.crop.y*100} ${p.crop.width*100} ${p.crop.height*100}"><g fill="${p.color}" color="${p.color}" transform="translate(50 50) rotate(${p.rotation}) scale(${p.scale}) translate(-50 -50)">${shape}</g></svg>`;}
+export function workshopCommand(p:WorkshopProfile,c:EstateCommand,now:number):{accepted:boolean;message:string}|null{
+ if(!c.type.startsWith('workshop-'))return null;const s=ensureWorkshop(p,now);if(typeof c.id!=='string'||!c.id||c.id.length>160)return {accepted:false,message:'事务编号无效'};if(Object.hasOwn(s.receipts,c.id))return {...s.receipts[c.id]};
+ const done=(accepted:boolean,message:string)=>{const r={accepted,message};Object.defineProperty(s.receipts,c.id,{value:r,writable:true,enumerable:true,configurable:true});return r;};const changed=(message:string)=>{s.version++;return done(true,message);};
+ const animal=(id:unknown)=>typeof id==='string'&&p.animals.some(a=>a.id===id&&!a.memorial);
+ const event=(id:unknown)=>typeof id==='string'&&p.events.some(e=>e.id===id);
+ const versions=()=>c.workshopVersion===s.version&&c.worldVersion===p.layout.version;
+ const active=p.threat&&p.threat.phase!=='complete';
+ if(c.type==='workshop-generate'){s.jobs.push({id:`job:${c.id}`,prompt:typeof c.prompt==='string'?c.prompt.slice(0,500):'',status:'unavailable',createdAt:now,message:s.capability.message});return done(false,s.capability.message);}
+ if(c.type==='workshop-draft'){
+  if(typeof c.recipe!=='string'||!Object.hasOwn(WORKSHOP_RECIPES,c.recipe))return done(false,'未知配方');const pat=pattern(c.pattern??DEFAULT_PATTERN);if(!pat)return done(false,'图案参数无效');if(c.animalId!==undefined&&!animal(c.animalId)||c.eventId!==undefined&&!event(c.eventId))return done(false,'所选动物或事件不存在');if(c.recipe==='signature'&&!animal(c.animalId))return done(false,'请选择真实动物');
+  s.draft={recipe:c.recipe as WorkshopRecipe,pattern:pat,...(c.animalId?{animalId:String(c.animalId)}:{}),...(c.eventId?{eventId:String(c.eventId)}:{})};return changed('草稿已保存，尚未扣料');
+ }
+ if(c.type==='workshop-borrow-shield'){if(p.id!=='lab'||active)return done(false,'仅独立演示档和平期可借用狗盾');if(s.items.some(i=>i.id==='borrowed-shield'))return done(false,'演示狗盾已借用');s.assets.push({id:'borrowed-shield-art',version:1,source:'official',pattern:structuredClone(DEFAULT_PATTERN),createdAt:now});s.items.push({id:'borrowed-shield',recipe:'shield',assetId:'borrowed-shield-art',assetVersion:1,createdAt:now,paid:{materials:0,wool:[]},gift:true,destroyed:false});return changed('已借用演示狗盾（赠品，无退款）');}
+ if(!versions())return done(false,'版本已变化，请重新预览');
+ if(c.type==='workshop-craft'){
+  const d=s.draft;if(!d)return done(false,'请先选择配方和图案');if(d.animalId&&!animal(d.animalId)||d.eventId&&!event(d.eventId))return done(false,'作品来源已失效');if(d.recipe==='signature'&&s.signatures.includes(d.animalId!))return done(false,'该动物已永久解锁签名');
+  const gift=!s.trialUsed&&(d.recipe==='cape'||d.recipe==='banner'),cost=WORKSHOP_RECIPES[d.recipe];if(p.materials<(gift?0:cost.materials))return done(false,'金币不足');const paid=gift?{accepted:true,economy:p.economy??createHerdEconomy(),consumed:[] as WoolLot[],message:''}:consumeWool(p.economy??createHerdEconomy(),{[cost.tier]:1});if(!paid.accepted)return done(false,paid.message);
+  const assetId=`asset:${c.id}`,itemId=`item:${c.id}`;p.economy=paid.economy;p.materials-=gift?0:cost.materials;s.assets.push({id:assetId,version:1,source:JSON.stringify(d.pattern)===JSON.stringify(DEFAULT_PATTERN)?'official':'user-edit',pattern:structuredClone(d.pattern),animalId:d.animalId,eventId:d.eventId,createdAt:now});s.items.push({id:itemId,recipe:d.recipe,assetId,assetVersion:1,animalId:d.animalId,createdAt:now,paid:{materials:gift?0:cost.materials,wool:paid.consumed},gift,destroyed:false});if(gift)s.trialUsed=true;if(d.recipe==='signature')s.signatures.push(d.animalId!);s.draft=null;return changed(gift?'首件试制已完成（赠品不可拆回金币）':'作品已制作');
+ }
+ const item=s.items.find(i=>i.id===c.itemId&&!i.destroyed);
+ if(c.type==='workshop-unequip'){if(c.slot!=='cape'&&c.slot!=='shield')return done(false,'无效槽位');if(c.slot==='shield'&&active)return done(false,'事件期间不能更换战术');delete s.equipment[c.slot];if(c.slot==='shield')delete s.tacticalAnchor;return changed('已卸装');}
+ if(!item)return done(false,'作品不存在');
+ if(c.type==='workshop-dismantle'){if(item.recipe==='signature')return done(false,'永久签名不可拆解');if(active&&s.equipment.shield===item.id)return done(false,'事件期间不能更换战术');p.materials+=Math.floor(item.paid.materials*.8);p.economy=restoreWool(p.economy??createHerdEconomy(),item.paid.wool);item.destroyed=true;delete s.placements[item.id];if(s.equipment.cape===item.id)delete s.equipment.cape;if(s.equipment.shield===item.id){delete s.equipment.shield;delete s.tacticalAnchor;}return changed('已按实付账本拆解');}
+ if(c.type==='workshop-unplace'){delete s.placements[item.id];return changed('已收起作品');}
+ if(c.type==='workshop-use-signature'){if(!['cape','banner'].includes(item.recipe)||typeof c.signatureAnimalId!=='string'||!s.signatures.includes(c.signatureAnimalId)||!animal(c.signatureAnimalId))return done(false,'请选择已永久解锁签名的真实动物与披风或旗面');const signature=s.items.find(i=>i.recipe==='signature'&&i.animalId===c.signatureAnimalId);const origin=signature&&s.assets.find(a=>a.id===signature.assetId&&a.version===signature.assetVersion);if(!origin)return done(false,'签名来源不存在');const hash=Array.from(c.signatureAnimalId).reduce((h,ch)=>(h*31+ch.charCodeAt(0))>>>0,7),pat={...structuredClone(origin.pattern),rotation:hash%360,scale:.75+(hash%75)/100};const latest=Math.max(...s.assets.filter(a=>a.id===item.assetId).map(a=>a.version));s.assets.push({...structuredClone(origin),id:item.assetId,version:latest+1,pattern:pat,signatureAnimalId:c.signatureAnimalId,parentVersion:item.assetVersion,createdAt:now});item.assetVersion=latest+1;return changed('已免费应用动物专属签名纹样');}
+ if(c.type==='workshop-update-pattern'||c.type==='workshop-revert'){
+  const previous=c.type==='workshop-revert'?s.assets.find(a=>a.id===item.assetId&&a.version===c.assetVersion):undefined;const pat=pattern(previous?.pattern??(c.type==='workshop-update-pattern'?c.pattern:null));if(!pat)return done(false,'图案版本不存在或参数无效');const latest=Math.max(...s.assets.filter(a=>a.id===item.assetId).map(a=>a.version));const lineage=previous??s.assets.find(a=>a.id===item.assetId&&a.version===item.assetVersion);s.assets.push({...structuredClone(lineage),id:item.assetId,version:latest+1,source:'user-edit',pattern:pat,animalId:lineage?.animalId??item.animalId,parentVersion:item.assetVersion,createdAt:now});item.assetVersion=latest+1;return changed('图案已更新，库存不变');
+ }
+ if(c.type==='workshop-apply'){
+  if(item.recipe==='shield'){if(active)return done(false,'事件期间不能更换战术或锚点');const q=c.position as GridPoint;if(!q||!SHIELD_ANCHORS.some(a=>a.x===q.x&&a.z===q.z)||!isOwned(p.layout,q)||!isWalkable(p.layout,q))return done(false,'请选择合法的预设狗盾锚点');s.equipment.shield=item.id;s.tacticalAnchor={x:q.x,z:q.z};}
+  else if(item.recipe==='cape'){if(c.animalId!==undefined&&!animal(c.animalId))return done(false,'动物不存在');item.animalId=typeof c.animalId==='string'?c.animalId:item.animalId;s.equipment.cape=item.id;}
+  else if(item.recipe==='banner'||item.recipe==='signpost'){const q=c.position as GridPoint;if(!q||!Number.isInteger(q.x)||!Number.isInteger(q.z)||!isOwned(p.layout,q)||!isWalkable(p.layout,q))return done(false,'请选择已拥有的合法陆地');s.placements[item.id]={x:q.x,z:q.z};}
+  else return done(false,'签名已永久解锁，可在该动物的作品中选择纹样');return changed('作品已装配');
+ }
+ return done(false,'未知工坊操作');
+}
+
+export function workshopTactic(p:WorkshopProfile):ShieldTactic|undefined{const s=p.workshop;if(p.guardian!=='dog'||!s?.equipment.shield||!s.tacticalAnchor||!s.items.some(i=>i.id===s.equipment.shield&&!i.destroyed&&i.recipe==='shield'))return;return {kind:'folding-shield',anchor:{...s.tacticalAnchor}};}
