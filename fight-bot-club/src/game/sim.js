@@ -62,11 +62,29 @@ const ULT_RANGE = { meteor: [0, 13], barrage: [3, 20], beam: [2, 18], frenzy: [0
 
 let PID = 0;
 
+// v11 参战策略：同一台机器人可按局切换打法（不改原始设计数值，只在上场时派生）
+//  · 均衡 balanced：原始数值
+//  · 进攻 attack：攻击↑ 欲望↑ 出手更密，但防御↓、更少格挡
+//  · 防守 defense：防御↑ 格挡/闪避↑ 反应更快，但攻击↓、更少主动出手
+//  石头剪刀布式克制：进攻 克 均衡 · 防守 克 进攻 · 均衡 克 防守（克制方伤害 × ctr）
+export const STRATEGY = {
+  balanced: { cn: '均衡', icon: '⚖️', ctr: 1.08, atk: 1, def: 1, aggr: 1, block: 1, dodge: 1, react: 1, think: 1, poise: 1 },
+  attack: { cn: '进攻', icon: '⚔️', ctr: 1, atk: 1.06, def: 0.85, aggr: 1.08, block: 0.75, dodge: 0.8, react: 1.1, think: 0.95, poise: 1 },
+  defense: { cn: '防守', icon: '🛡️', ctr: 1.16, atk: 0.97, def: 1.3, aggr: 0.9, block: 1.4, dodge: 1.2, react: 0.85, think: 1.08, poise: 0.9 },
+};
+export const STRAT_COUNTER = { attack: 'balanced', defense: 'attack', balanced: 'defense' }; // key 克制 value
+export function strategyStats(stats, strat) {
+  const S = STRATEGY[strat] || STRATEGY.balanced;
+  return { ...stats, atk: Math.round(stats.atk * S.atk), def: Math.round(stats.def * S.def) };
+}
+
 export class Fighter {
-  constructor(design, side) {
+  constructor(design, side, strat) {
     this.d = design; this.side = side; this.id = design.id;
-    this.ai = ROLE_AI[design.role];
-    this.st = design.stats;
+    this.strat = STRATEGY[strat] ? strat : 'balanced';
+    const S = STRATEGY[this.strat], A = ROLE_AI[design.role];
+    this.ai = this.strat === 'balanced' ? A : { ...A, aggr: A.aggr * S.aggr, block: Math.min(0.88, A.block * S.block), dodge: Math.min(0.85, A.dodge * S.dodge), react: A.react * S.react, think: A.think * S.think, poise: A.poise * S.poise };
+    this.st = this.strat === 'balanced' ? design.stats : strategyStats(design.stats, this.strat);
     this.scale = design.scale || 1;
     const fs = this.fs = FORM_SIM[design.form] || FORM_SIM.humanoid;
     this.radius = 1.42 * this.scale * fs.r;
@@ -902,6 +920,7 @@ export class Sim {
     const crit = !opt.multi && Math.random() < 0.09;
     if (crit) dmg *= 1.6;
     if (opt.ult) dmg *= f.ultBoost || 1;
+    if (STRAT_COUNTER[f.strat] === o.strat) dmg *= STRATEGY[f.strat].ctr; // v11 策略克制
     if (blocking) dmg *= opt.ult ? 0.55 : opt.noBlockFull ? 0.5 : 0.25;
     dmg = Math.max(1, Math.round(dmg));
     o.hp = Math.max(0, o.hp - dmg); f.dealt += dmg; o.hitFlash = 1;

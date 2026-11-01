@@ -91,6 +91,10 @@ css += '''
 .b-main.vs .vsn.b::after{left:0;background:#F569A8}
 .b-main.vs .vsx{font-family:'ArenaCond',Impact,sans-serif;font-style:italic;font-size:52px;line-height:1;letter-spacing:0;color:#F5F4F0!important;
   -webkit-text-stroke:1.5px #171719;paint-order:stroke fill;text-shadow:-3px 0 0 #DEFF72,3px 0 0 #F569A8,0 6px 14px rgba(0,0,0,.8)!important;transform:skewX(-8deg)}
+.b-main.vs .vsc{flex:1;min-width:0}
+.b-main.vs .vss{margin-top:7px;font-size:13px;font-weight:900;letter-spacing:2px;color:#FFE135!important;-webkit-text-stroke:0;text-shadow:0 1px 0 #0B0B0D,0 0 8px rgba(11,11,13,.9)!important;transform:skewX(-8deg);white-space:nowrap}
+.b-main.vs .vsc.a .vss{text-align:right}.b-main.vs .vsc.b .vss{text-align:left}
+.fc-sub b.stg,.fc-sub em.up{color:#FFE135!important}.fc-sub em.dn{color:#F569A8!important}
 .b-main.vs + .b-sub{display:table!important;margin:12px auto 0!important;padding:3px 12px!important;font-size:11px!important;font-weight:800;letter-spacing:3px;
   color:rgba(245,244,240,.85)!important;background:rgba(23,23,25,.45)!important;border:1px solid rgba(245,244,240,.18);text-shadow:none!important;
   clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);backdrop-filter:none!important}
@@ -108,6 +112,19 @@ css += '''
 .slowmo{box-shadow:inset 0 0 160px rgba(245,105,168,.45)!important}
 /* WINNER：驾驶员脸在上 1/3，胜利字幕放到下 1/3，互不遮挡 */
 #banner:has(.b-main.win){top:47%}
+/* v11.2 主按钮禁用态：半透明不可点（压过上面 !important 的亮黄绿底） */
+button.primary:disabled{background:#DEFF72!important;opacity:.38!important;pointer-events:none!important;filter:none!important}
+.fc-name em.me-tag{background:#FFE135!important;color:#171719!important}
+/* v11.1 参战策略：斜切分段，选中 = 亮黄绿实色（同主按钮），数值涨 = 亮黄绿 / 跌 = 玫红 */
+.sg.sel{background:#DEFF72!important;outline-color:transparent!important;color:rgba(23,23,25,.75)!important}
+.sg.sel em{color:#171719!important}
+.fx.up i,.fx.ctr b{color:#DEFF72!important}
+.fx.dn i,.fx.ctr.dn b{color:#F569A8!important}
+.hg-card.sel{outline-color:#DEFF72!important;background:rgba(222,255,114,.1)!important}
+.hg-card b{background:#DEFF72!important;color:#171719!important}
+.hg-new i{color:#DEFF72!important;background:rgba(222,255,114,.08)!important}
+.hg-new span{color:#DEFF72!important}
+.rr .rn em.live{background:rgba(245,105,168,.22)!important;color:#F569A8!important}
 '''
 open(f'{M}/assets/{css_f}', 'w').write(css)
 

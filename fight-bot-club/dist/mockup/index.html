@@ -19,8 +19,8 @@
   <link rel="preload" as="image" href="./avatars/thumb/a10.webp" fetchpriority="high">
   <link rel="preload" as="image" href="./avatars/thumb/a11.webp" fetchpriority="high">
   <link rel="preload" as="image" href="./avatars/thumb/a12.webp" fetchpriority="high">
-  <script>Promise.race([Promise.all([document.fonts.load("italic 40px ArenaCond"),document.fonts.load("40px ArenaCond")]),new Promise(r=>setTimeout(r,2500))]).finally(()=>import("./assets/m454442-CA7Mw5HP.js"))</script>
-  <link rel="stylesheet" crossorigin href="./assets/m454442-BSkG68Sl.css">
+  <script>Promise.race([Promise.all([document.fonts.load("italic 40px ArenaCond"),document.fonts.load("40px ArenaCond")]),new Promise(r=>setTimeout(r,2500))]).finally(()=>import("./assets/m525172-COA7oxHm.js"))</script>
+  <link rel="stylesheet" crossorigin href="./assets/m525172-CaBSPiAP.css">
 </head>
 <body>
   <div id="app">
@@ -58,8 +58,8 @@
         <div id="queue"></div>
       </div>
       <div class="actions">
-        <button id="btnRoster" class="ghost"><svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 0 1-10 0V4zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8M9.5 17h5"/></svg><span>战绩</span></button>
-        <button id="btnCreate" class="primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>创造机器人</span></button>
+        <button id="btnRoster" class="ghost"><svg viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 0 1-10 0V4zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8M9.5 17h5"/></svg><span>排行</span></button>
+        <button id="btnCreate" class="primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span id="btnCreateTxt">创造机器人</span></button>
         <button id="btnSound" class="ghost icon"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
       </div>
     </div>
@@ -83,32 +83,48 @@
       </div>
     </div>
 
-    <!-- 创造机器人 -->
+    <!-- 我的机器人（v11：本机机库 + 创造 + 参战策略，同一面板） -->
     <div id="create" class="sheet hidden">
-      <div class="sh-head"><div class="sh-title"><small>BUILD</small>创造你的机器人</div><button id="pilotChip" title="更换分身"><img alt=""><span>更换</span></button><button class="sh-close" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="sh-head"><button id="btnBack" class="sh-back hidden" title="返回我的机器人"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="sh-title"><small id="shKicker">HANGAR</small><span id="shTitle">我的机器人</span></div><button id="pilotChip" title="更换分身"><img alt=""><span>更换</span></button><button class="sh-close" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
       <div class="sh-body">
         <div id="pvRow"><div id="previewBox"><div id="genFx"><div class="scanline"></div><div class="gen-text">AI 正在设计机甲…</div></div><div id="previewHint">描述外观、武器、风格，生成后可预览</div></div><div id="piStats" class="pi-stats"></div></div>
         <div id="previewInfo" class="hidden">
           <div class="pi-row"><div class="pi-name"></div><div class="pi-role"></div><div class="pi-sw"></div></div>
           <div class="pi-moves"></div>
         </div>
-        <div class="field">
-          <textarea id="prompt" maxlength="60" rows="2" placeholder="例如：霓虹赛博刺客，双刀，闪电般的速度"></textarea>
-          <label class="ref" title="参考图（占位）"><input id="refFile" type="file" accept="image/*" /><span class="ref-ico"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4"/><circle cx="15.5" cy="9" r="1.5"/></svg></span><img id="refImg" alt="" /></label>
+        <!-- 机库：已保存的机器人 -->
+        <div id="hangar" class="hidden">
+          <div class="hg-h"><b>已保存 <em id="hgCount">0</em> 台</b><span id="hgRec"></span><button id="btnDel" class="hg-del">删除</button></div>
+          <div id="hgStrip"></div>
         </div>
-        <div id="refNote" class="hidden">参考图已附加 · 当前版本以文字描述为主，参考图生成 3D 即将开放</div>
-        <div class="sh-actions">
-          <button id="btnRand" class="ghost" title="随机灵感"><span class="dice">🎲</span><span>随机</span></button>
-          <button id="btnGen" class="ghost"><svg viewBox="0 0 24 24"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg><span>生成设计</span></button>
-          <button id="btnJoin" class="primary" disabled>加入挑战队列</button>
+        <!-- 创造：描述生成 -->
+        <div id="build">
+          <div class="field">
+            <textarea id="prompt" maxlength="60" rows="2" placeholder="例如：霓虹赛博刺客，双刀，闪电般的速度"></textarea>
+            <label class="ref" title="参考图（占位）"><input id="refFile" type="file" accept="image/*" /><span class="ref-ico"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4"/><circle cx="15.5" cy="9" r="1.5"/></svg></span><img id="refImg" alt="" /></label>
+          </div>
+          <div id="refNote" class="hidden">参考图已附加 · 当前版本以文字描述为主，参考图生成 3D 即将开放</div>
+          <div class="sh-actions">
+            <button id="btnRand" class="ghost" title="随机灵感"><span class="dice">🎲</span><span>随机</span></button>
+            <button id="btnGen" class="ghost"><svg viewBox="0 0 24 24"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg><span>生成设计</span></button>
+          </div>
+        </div>
+        <!-- 参战策略 -->
+        <div id="stratBox">
+          <div class="sg-h"><b>参战策略</b><small>STRATEGY</small></div>
+          <div id="stratSeg"></div>
+          <div id="stratFx"></div>
+        </div>
+        <div class="dock">
+          <button id="btnJoin" class="primary" disabled>出战</button>
         </div>
       </div>
     </div>
 
-    <!-- 战绩榜 -->
+    <!-- 今日排行（用户维度） -->
     <div id="roster" class="sheet hidden">
-      <div class="sh-head"><div class="sh-title"><small>RANKING</small>今日战绩</div><button class="sh-close" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-      <div class="sh-body"><div id="rosterList"></div></div>
+      <div class="sh-head"><div class="sh-title"><small>RANKING</small>今日排行</div><button class="sh-close" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+      <div class="sh-body"><div class="rk-rule">按用户排名 · 综合分 = 胜率 60% + 人气 40%</div><div id="rosterList"></div></div>
     </div>
 
     <div id="toast"></div>

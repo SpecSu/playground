@@ -15,7 +15,8 @@ const SanitizeShader = {
       c.rgb = clamp(c.rgb, 0.0, 24.0); c.a = clamp(c.a, 0.0, 1.0);
       gl_FragColor = c; }`,
 };
-import { Sim, Fighter, RING } from './game/sim.js';
+import { Sim, Fighter, RING, STRATEGY, STRAT_COUNTER, strategyStats } from './game/sim.js';
+import { League, DAILY_MAX } from './game/league.js';
 import { generateDesign, EXAMPLE_PROMPTS, ratings, ROLE_CN, FORM_LIST, ULT_NAMES } from './mech/design.js';
 import { createView } from './mech/forms.js';
 import { GLOBAL_TIME } from './render/materials.js';
@@ -79,7 +80,8 @@ let arena, director;
 // 分身头像：静态预烘焙 WebP（每张约 7KB，HTML 头部已 preload），无需等 GLB 加载与离屏渲染
 let thumbs = Array.from({ length: 12 }, (_, i) => `/avatars/thumb/a${String(i + 1).padStart(2, '0')}.webp`);
 const VISIBLE_AVAS = AVATARS.map((_, i) => i).filter(avatarVisible);
-let myAva = Math.max(0, AVATARS.findIndex((a) => a.id === 'a08')); // v10.1：默认分身 a08，在创造页点「更换」再换
+const league = new League(); // v11：本机存档（我的机器人 / 分身 / 今日战绩）+ NPC 账号
+let myAva = Number.isInteger(league.d.ava) && avatarVisible(league.d.ava) ? league.d.ava : Math.max(0, AVATARS.findIndex((a) => a.id === 'a08')); // v10.1：默认分身 a08，在创造页点「更换」再换；v11 记住本机选择
 const roster = [];      // 所有参赛机器人
 const queue = [];       // 待战队列（roster 引用）
 const G = {
@@ -94,15 +96,37 @@ const BOTS = [
   { ava: 0, name: '奶蛙', prompt: '黄金重装坦克，巨型铁拳，能震地', role: 'tank', form: 'humanoid' },
   // { ava: 5, name: '外星猫', prompt: '霓虹赛博刺客猎犬，双刀，闪电般的速度', role: 'assassin', form: 'dog' }, // 外星猫暂时隐藏
   { ava: 3, name: '喵脆角', prompt: '霓虹赛博刺客猎犬，双刀，闪电般的速度', role: 'assassin', form: 'dog' },
-  { ava: 7, name: '苏贝壳', prompt: '深海鲨鱼浮游炮台，蜂群导弹', role: 'gunner', form: 'hover' },
+  { ava: 11, name: '吉吉', prompt: '深海鲨鱼浮游炮台，蜂群导弹', role: 'gunner', form: 'hover' }, // v11.1：原「苏贝壳」与用户本人重名，换成吉吉
   { ava: 6, name: '刀盾狗', prompt: '废土拼装多足蜘蛛，电锯手臂，锈迹斑斑', role: 'brawler', form: 'spider' },
   { ava: 1, name: '牛来', prompt: '', role: '', form: '' }, // v10.2：开场共 5 台（2 台对战 + 3 台候擂）
 ];
 
-function makeEntry(design, ava, owner, mine = false) {
-  const e = { id: design.id, design, ava, owner, mine, wins: 0, losses: 0, best: 0, created: performance.now(), thumb: null };
+function makeEntry(design, ava, owner, mine = false, extra = {}) {
+  const e = { id: design.id, design, ava, owner, mine, uid: mine ? 'me' : owner, strat: 'balanced', wins: 0, losses: 0, best: 0, created: performance.now(), thumb: null, ...extra };
   roster.push(e); queueThumb(e); return e;
 }
+// —— v11 联赛：NPC 账号（最多 5 个，= 开场 5 位）/ 兜底补位 / 退场 ——
+const NPCS = BOTS.map((b) => ({ uid: b.name, ava: b.ava }));
+const MIN_WAIT = 2; // 候场至少保留 2 位（不够就由 NPC 兜底补位）
+function randStrat() { const r = Math.random(); return r < 0.5 ? 'balanced' : r < 0.75 ? 'attack' : 'defense'; }
+function activeEntries() { return [...queue, ...G.E.filter((e) => e && !e.out)]; }
+function myActive() { return activeEntries().find((e) => e.mine) || null; }
+function retire(e) { e.out = true; const k = roster.indexOf(e); if (k >= 0) roster.splice(k, 1); }
+// NPC 兜底：优先挑今天还没打满的空闲 NPC；都打满了就把其中一个的今日战绩清零重新计（不新增账号）
+function addFallback() {
+  const busy = new Set(activeEntries().map((e) => e.uid));
+  const idle = NPCS.filter((n) => !busy.has(n.uid));
+  if (!idle.length) return false;
+  const fresh = idle.filter((n) => league.canPlay(n.uid));
+  const n = (fresh.length ? fresh : idle)[Math.floor(Math.random() * (fresh.length || idle.length))];
+  if (!fresh.length) league.resetNpc(n.uid);
+  const used = new Set(activeEntries().map((e) => e.design.form));
+  const forms = FORM_LIST.filter((f) => !used.has(f));
+  const form = (forms.length ? forms : FORM_LIST)[Math.floor(Math.random() * (forms.length || FORM_LIST.length))];
+  const e = makeEntry(generateDesign(randomPrompt(), n.uid, { form }), n.ava, n.uid, false, { strat: randStrat() });
+  queue.push(e); return true;
+}
+function refill(need) { let guard = 8; while (queue.length < need + MIN_WAIT && guard-- > 0) if (!addFallback()) break; }
 function designForRole(prompt, owner, role, form) {
   for (let i = 0; i < 40; i++) { const d = generateDesign(prompt, owner, form ? { form } : undefined); if (d.role === role) return d; }
   return generateDesign(prompt, owner, form ? { form } : undefined);
@@ -123,6 +147,8 @@ async function pumpThumbs() {
   try {
     while (mthumb.jobs.length) {
       const e = mthumb.jobs.shift();
+      if (e.hg) { try { hgThumbs.set(e.hg, await renderBodyThumb(e.design)); if (!$('#create').classList.contains('hidden') && HG.mode === 'hangar') renderHangar(); } catch (err) { console.warn('thumb', err); } await nextFrame(); continue; }
+      if (e.out) continue; // 已退场的不再出图
       try { e.thumb = await renderMechThumb(e); refreshThumbs(); } catch (err) { console.warn('thumb', err); }
       await nextFrame();
     }
@@ -134,6 +160,24 @@ const FACE_FIX = { // z = 放大倍数（按头部含耳角饰的可见宽高统
   0: { z: 0.66, dy: 0.02 }, 1: { z: 0.95, dy: 0.04 }, 2: { z: 1.1, dy: 0.08 }, 3: { z: 0.9, dy: 0.02 }, 4: { z: 1.35, dy: 0.05 }, 5: { z: 1.25, dy: 0.0 },
   6: { z: 1.5, dy: -0.02, dx: 0.02 }, 7: { z: 1.25, dy: 0.04 }, 8: { z: 1.35, dy: 0.04 }, 9: { z: 1.35, dy: 0.04 }, 10: { z: 1.2, dy: 0.04 }, 11: { z: 0.95, dy: 0.04 },
 };
+// v11 机库缩略图：机甲全身 3/4 侧视（区分不同机器人；候场头像仍是分身脸）
+async function renderBodyThumb(design, size = 160) {
+  if (!mthumb.scene) { mthumb.scene = new THREE.Scene(); mthumb.scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x2a2430, 1.4)); const k = new THREE.DirectionalLight(0xffffff, 2.2); k.position.set(2, 4, 5); mthumb.scene.add(k); const rim = new THREE.DirectionalLight(0x88bbff, 1.6); rim.position.set(-4, 3, -3); mthumb.scene.add(rim); mthumb.cam = new THREE.PerspectiveCamera(30, 1, 0.1, 200); }
+  if (!mthumb.brt) { mthumb.brt = new THREE.WebGLRenderTarget(size, size, { samples: 4 }); mthumb.brt.texture.colorSpace = THREE.SRGBColorSpace; mthumb.bcv = document.createElement('canvas'); mthumb.bcv.width = mthumb.bcv.height = size; mthumb.bbuf = new Uint8Array(size * size * 4); }
+  mthumb.scene.environment = scene.environment; mthumb.scene.environmentIntensity = 0.6;
+  const v = createView(design); v.root.rotation.y = -0.55; mthumb.scene.add(v.root); v.root.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(v.root), c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
+  const cam = mthumb.cam, H = Math.max(sz.y, sz.x * 0.9, sz.z * 0.7) * 1.12, dist = (H / 2) / Math.tan(THREE.MathUtils.degToRad(15));
+  cam.position.set(c.x + dist * 0.12, c.y + dist * 0.18, c.z + dist); cam.lookAt(c); cam.near = dist * 0.2; cam.far = dist * 4; cam.updateProjectionMatrix();
+  const R = renderer, prevT = R.getRenderTarget(), prevC = R.getClearColor(new THREE.Color()), prevA = R.getClearAlpha();
+  R.setRenderTarget(mthumb.brt); R.setClearColor(0x000000, 0); R.clear(); R.render(mthumb.scene, cam); R.readRenderTargetPixels(mthumb.brt, 0, 0, size, size, mthumb.bbuf);
+  R.setRenderTarget(prevT); R.setClearColor(prevC, prevA);
+  mthumb.scene.remove(v.root); v.dispose && v.dispose();
+  const ctx = mthumb.bcv.getContext('2d'), img = ctx.createImageData(size, size), buf = mthumb.bbuf;
+  for (let y = 0; y < size; y++) img.data.set(buf.subarray((size - 1 - y) * size * 4, (size - y) * size * 4), y * size * 4); // 上下翻转
+  ctx.putImageData(img, 0, 0);
+  return mthumb.bcv.toDataURL('image/webp', 0.85);
+}
 async function renderMechThumb(e, size = 192) {
   if (!mthumb.scene) {
     mthumb.rt = new THREE.WebGLRenderTarget(size, size, { samples: 4 }); mthumb.rt.texture.colorSpace = THREE.SRGBColorSpace;
@@ -222,7 +266,10 @@ async function boot() {
     const d = pickDesign(b.name, () => ({ form: forms[i] }), (x) => (want ? x.ult === want && (i !== 1 || x.range === 'melee') : !usedUlt.has(x.ult)), null, 600);
     usedUlt.add(d.ult); return d;
   });
-  BOTS.forEach((b, i) => queue.push(makeEntry(opener[i], b.ava, b.name)));
+  league.syncNpcs(BOTS.map((b) => b.name)); // 旧存档里已不在名单的 NPC（如苏贝壳）剔除
+  BOTS.forEach((b) => { league.addNpc(b.name); if (!league.canPlay(b.name)) league.resetNpc(b.name); });
+  BOTS.forEach((b, i) => queue.push(makeEntry(opener[i], b.ava, b.name, false, { strat: i < 2 ? 'balanced' : randStrat() })));
+  syncCreateBtn();
   // 预编译 + 首帧
   tip.textContent = '正在生成机甲…'; await nextFrame();
   renderOnce();
@@ -234,7 +281,7 @@ async function boot() {
   // 先开打（开始页后面就能看到擂台）
   nextMatch();
   requestAnimationFrame(loop);
-  if (TEST) window.__G = { G, roster, queue, director, renderer, scene, camera, audio, vfx, vfx2, renderThumbs, getThumbs: () => thumbs, makeRider, riderHeadBox, renderMechThumb, makeEntry, generateDesign, AS, startFight, renderQueue, introCard, finishVote, createView, THREE };
+  if (TEST) window.__G = { G, roster, queue, director, renderer, scene, camera, audio, vfx, vfx2, renderThumbs, getThumbs: () => thumbs, makeRider, riderHeadBox, renderMechThumb, makeEntry, generateDesign, AS, startFight, setupHud, league, joinWith, myActive, openCreate, renderRoster, NPCS, demoKO, activeEntries, renderQueue, introCard, finishVote, createView, THREE };
 }
 function renderOnce() { if (composer) composer.render(); else renderer.render(scene, camera); }
 
@@ -262,10 +309,11 @@ function enterArena() {
 function openPilot() { buildAvaGrid(); $('#create').classList.add('hidden'); closePreview(); $('#pilot').classList.remove('hidden'); }
 $('#btnPilot').onclick = () => {
   pilotPicked = true; audio.unlock(); audio.play('baydoor', { vol: 0.35 });
+  league.d.ava = myAva; league.save();
   $('#pilot').classList.add('hidden');
   toast(`分身「${AVATARS[myAva].name}」已就位`);
   if (pv.view) makeRider(myAva).then((r) => { if (pv.view) pv.view.setRider(r); }).catch(() => {});
-  openCreate();
+  if (HG.mode === 'build' && pv.design) { $('#create').classList.remove('hidden'); pv.on = true; } else openCreate(); // 创造中换分身：保留当前未保存的设计
 };
 $('#pilotChip').onclick = () => { audio.play('servo1', { vol: 0.4 }); openPilot(); };
 // 首次触摸解锁音频（移动端浏览器策略）
@@ -281,7 +329,7 @@ async function attachRider(view, entry) {
   try { const r = await makeRider(entry.ava); if (view.root.parent) view.setRider(r); } catch (e) { console.warn('rider', e); }
 }
 function spawn(entry, side, x, z, drop = true) {
-  const f = new Fighter(entry.design, side);
+  const f = new Fighter(entry.design, side, entry.strat);
   f.x = x; f.z = z; f.yaw = Math.atan2(-x, -z);
   if (drop) { f.grounded = false; f.y = 15 + side * 2; f.vy = -4; }
   return f;
@@ -290,10 +338,9 @@ function nextMatch() {
   G.round++;
   const prevChamp = G.E[0] && G.phase !== 'boot' ? G.E[0] : null;
   let champ = prevChamp, champF = null;
-  if (champ && G.champStreak >= 4) {
-    toast(`🏆 ${champ.design.name} 四连胜卫冕，荣誉下场休息`);
-    queue.push(champ); disposeSlot(0); champ = null; G.champStreak = 0;
-  }
+  // v11：连胜不再强制下场；只有擂主所属用户今日局数打满才退场（finishRound 里标记 out）
+  if (champ && champ.out) { disposeSlot(0); champ = null; G.champStreak = 0; }
+  refill(champ ? 1 : 2);
   if (vfx2) vfx2.reset();
   const sim = new Sim(); G.sim = sim; projSeen.clear();
   sim.muzzle = (f, slot) => { const v = views.get(f); return v ? v.muzzleWorld(slot) : null; };
@@ -325,7 +372,7 @@ function nextMatch() {
   setupHud();
   renderQueue();
   arena.setScreen(champ.design.name, chall.design.name, VOTE_COL[0], VOTE_COL[1]); // 上场即锁定阵营色：左黄绿 / 右粉
-  if (chall.mine) toast(`⚡ 你的机器人「${chall.design.name}」登场挑战！`);
+  if (chall.mine) toast(`⚡ 你的机器人「${chall.design.name}」登场挑战！· ${STRATEGY[chall.strat].cn}策略`);
 }
 function makeView(entry) {
   const v = createView(entry.design);
@@ -342,6 +389,10 @@ function startFight() {
   for (const v of G.V) if (v) v.cele = 0;
   G.phase = 'fight'; G.t = 0;
   for (const f of G.F) f.frozen = false;
+  fitHudSub();
+  // v11：策略克制提示
+  const [a, b] = G.F; const k = STRAT_COUNTER[a.strat] === b.strat ? 0 : STRAT_COUNTER[b.strat] === a.strat ? 1 : -1;
+  if (k >= 0) { const x = G.F[k], y = G.F[1 - k]; const pct = Math.round((STRATEGY[x.strat].ctr - 1) * 100); ticker(`策略克制！${pilotName(G.E[k])} 的「${STRATEGY[x.strat].cn}」克「${STRATEGY[y.strat].cn}」${pct ? ` · 伤害 +${pct}%` : ''}`); }
   director.setMode('fight');
 }
 function judge() {
@@ -377,6 +428,9 @@ function onKO(loser, winner) {
   audio.duckMusic(0.35, 1.6); audio.setExcite(1);
   const we = G.E[wi], le = G.E[li];
   we.wins++; le.losses++;
+  league.record(we.uid, le.uid); // v11：用户维度今日战绩（双方各计 1 局）
+  if (we.rid) league.robotResult(we.rid, true); if (le.rid) league.robotResult(le.rid, false);
+  if (!$('#roster').classList.contains('hidden')) renderRoster();
   G.champStreak = wi === 0 ? G.champStreak + 1 : 1;
   we.best = Math.max(we.best, G.champStreak);
   addFlash();
@@ -404,10 +458,20 @@ function celebrate() {
 }
 function finishRound() {
   const li = G.loserIdx, wi = 1 - li;
-  const loser = G.E[li];
-  // 败者回到队尾（残骸已清理，下一轮重新组装）
-  queue.push(loser);
+  const loser = G.E[li], winner = G.E[wi];
+  // v11：败者直接退场（不再自动回队尾）；想再战需手动再次出战（每人每天最多 DAILY_MAX 局）
+  retire(loser);
   disposeSlot(li);
+  if (loser.mine) {
+    const n = league.left('me');
+    toast(n > 0 ? `「${loser.design.name}」败下阵来，已退场 · 可在「我的机器人」再次出战` : `「${loser.design.name}」已退场 · 今日 ${DAILY_MAX} 局已打满，明天再来`, 3400);
+  }
+  // 胜者卫冕继续守擂；但所属用户今日局数打满 → 自动退场
+  if (!league.canPlay(winner.uid)) {
+    retire(winner);
+    if (winner.mine) toast(`🏆「${winner.design.name}」卫冕成功！今日 ${DAILY_MAX} 局已打满，自动退场`, 3400);
+  }
+  syncCreateBtn(); if (!$('#create').classList.contains('hidden')) renderDock();
   // 擂主固定在 0 号位
   if (wi === 1) { G.V[0] = G.V[1]; G.V[1] = null; G.F[0] = G.F[1]; G.E[0] = G.E[1]; }
   G.V[0].cele = 0;
@@ -613,7 +677,7 @@ vtEl.innerHTML = `<div class="vt-glow"><i class="g0"></i><i class="g1"></i></div
   <div class="vt-head"><div class="vt-title">VOTE NOW</div><div class="vt-sub"><i></i>谁来放大招<i></i></div>
   <div class="vt-clock"><b>5</b><i><s></s></i></div></div>
   <div class="vt-cards">${[0, 1].map((i) => `<div class="vt-card s${i}"><div class="vc-ava"><img alt=""></div><div class="vc-t"><div class="vc-pilot"><span></span><em>我</em></div><div class="vc-ult"></div></div></div>`).join('<div class="vt-vs">VS</div>')}</div>
-  <div class="vt-arena">${[0, 1].map((i) => `<button class="vt-orb s${i}" data-s="${i}"><span class="vo-in"><b>TAP</b><em>0</em></span></button>`).join('')}</div>
+  <div class="vt-arena">${[0, 1].map((i) => `<button class="vt-orb s${i}" data-s="${i}"><span class="vo-in"><b><i class="vo-ava"><img alt=""></i>VOTE</b><em>0</em></span></button>`).join('')}</div>
   <div class="vt-tip">只能支持一边 · 狂点你支持的圈</div><div class="vt-result"></div>`;
 app.appendChild(vtEl);
 const VT = {
@@ -631,6 +695,7 @@ function fillVoteCards() {
     c.querySelector('.vc-pilot span').textContent = pilotName(e);
     c.querySelector('.vc-pilot em').style.display = e.mine ? '' : 'none';
     c.querySelector('.vc-ult').textContent = `大招 · ${e.design.moves.ult}`;
+    VT.orbs[i].querySelector('.vo-ava img').src = pilotThumb(e); // v11.4：投票圈内 VOTE 上方显示该方用户头像
   }
 }
 function startVote() {
@@ -716,6 +781,7 @@ function finishVote() {
   AS.done = true; AS.endT = AS.t + 0.9; // 结果公告只做「投票揭晓」0.9s 快闪；谁放什么大招交给随后的大招色带完整展示（1.6s），两者不再叠加
   if (AS.n[0] === AS.n[1]) AS.n[Math.random() < 0.5 ? 0 : 1]++;
   const w = AS.n[0] > AS.n[1] ? 0 : 1; AS.win = w;
+  for (let i = 0; i < 2; i++) if (G.E[i]) league.addPop(G.E[i].uid, AS.n[i]); // v11：人气 = 观众投票数
   VT.orbs[w].classList.add('win'); VT.orbs[1 - w].classList.add('lose');
   // 揭晓：两圈保持投票结束瞬间的大小与位置，不再重新缩放
   VT.orbs.forEach((o, i) => (o.querySelector('em').textContent = AS.n[i]));
@@ -764,7 +830,7 @@ function introCard(i, noCut) {
   const c = $('#introCard'); const col = VOTE_COL[i]; // 出场介绍卡跟随阵营色（= 血槽 / 名牌 / 投票圈）
   c.style.setProperty('--ic', col); c.className = i ? 'b' : 'a';
   const champTag = i === 0 ? (G.champStreak > 0 ? `擂主 · ${G.champStreak} 连胜` : '擂主') : '新挑战者';
-  c.innerHTML = `<div class="ic-ava"><img src="${e.thumb || thumbs[e.ava] || ''}" alt=""></div><div class="ic-main"><div class="ic-top"><span class="ic-tag">${champTag}</span><span class="ic-owner"><small>创造者</small>${AVATARS[e.ava]?.name || e.owner}${e.mine ? '（我）' : ''}</span></div><div class="ic-name">${e.design.name}</div><div class="ic-role">${e.design.formCn || '人形'} · ${e.design.roleCn} · 大招「${e.design.moves.ult}」</div></div>`;
+  c.innerHTML = `<div class="ic-ava"><img src="${e.thumb || thumbs[e.ava] || ''}" alt=""></div><div class="ic-main"><div class="ic-top"><span class="ic-tag">${champTag}</span><span class="ic-owner"><small>创造者</small>${AVATARS[e.ava]?.name || e.owner}${e.mine ? '（我）' : ''}</span></div><div class="ic-name">${e.design.name}</div><div class="ic-role">${e.design.formCn || '人形'} · ${e.design.roleCn} · 大招「${e.design.moves.ult}」</div><div class="ic-strat">${stratChip(e.strat)}</div></div>`;
   void c.offsetWidth; c.classList.add('show'); $('#bottom').classList.add('intro');
   audio.play('baydoor', { vol: 0.55 }); audio.play('hydr', { vol: 0.5, delay: 0.15 }); audio.play('crowdCharge', { vol: 0.35, delay: 0.3 });
 }
@@ -831,17 +897,29 @@ function updateTags(rdt) {
   if (pos[0] && pos[1] && Math.abs(pos[0].x - pos[1].x) < 96 && Math.abs(pos[0].y - pos[1].y) < 24) { const dn = pos[0].y < pos[1].y ? 1 : 0; oy[dn] = 24 - Math.abs(pos[0].y - pos[1].y); }
   for (let i = 0; i < 2; i++) { const t = ntags[i]; if (t.on) t.el.style.transform = `translate3d(${t.x.toFixed(1)}px, ${(t.y + oy[i]).toFixed(1)}px, 0)`; }
 }
+// 血槽上方小字：「进攻 · 克制｜大招 · 万雷天罚」，策略名黄字
+function stratHud(e, o) {
+  const k = e.strat || 'balanced', ok = (o && o.strat) || 'balanced', cn = STRATEGY[k]?.cn || '均衡';
+  const st = STRAT_COUNTER[k] === ok ? '<em class="up">克制</em>' : STRAT_COUNTER[ok] === k ? '<em class="dn">被克</em>' : '';
+  return `<b class="stg">${cn}</b>${st ? `<s>·</s>${st}` : ''}`; // v11.0：「进攻 · 克制」/「防守 · 被克」/ 无克制只显示策略
+}
 function setupHud() {
   setupTags();
   for (let i = 0; i < 2; i++) {
     const e = G.E[i], h = hud[i];
     h.ava.src = e.thumb || thumbs[e.ava] || '';
-    h.name.innerHTML = `<b>${AVATARS[e.ava]?.name || e.owner}</b><i>·</i>${e.design.name}`;
-    h.sub.textContent = `大招 · ${e.design.moves.ult}`;
+    h.name.innerHTML = `<b>${AVATARS[e.ava]?.name || e.owner}</b>${e.mine ? '<em class="me-tag">我</em>' : ''}<i>·</i>${e.design.name}`; // v11.2：我的机器人 → 名字后黄色「我」
+    h.sub.innerHTML = `<span class="s1">${stratHud(e, G.E[1 - i])}</span><i>｜</i><span class="s2">大招<s>·</s>${e.design.moves.ult}</span>`; // v11.3：策略 + 克制状态｜大招
     h.lagV = 1; h.ava.parentElement.style.setProperty('--qc', VOTE_COL[i]);
   }
   $('#round').textContent = `ROUND ${G.round}`;
+  requestAnimationFrame(fitHudSub);
 }
+// 名牌下小字放不下一行时，在「｜」处折成两行（头像高 46px，可容纳 名字 + 两行小字，不撑高 HUD）
+function fitHudSub() {
+  for (const h of hud) { h.sub.classList.remove('wrap'); if (!h.sub.clientWidth || h.sub.scrollWidth > h.sub.clientWidth + 1) h.sub.classList.add('wrap'); }
+}
+addEventListener('resize', () => requestAnimationFrame(fitHudSub));
 const UK = { el: $('#ultClock'), s: $('#ultClock s'), b: $('#ultClock b'), txt: '' };
 function updateHud(dt) {
   for (let i = 0; i < 2; i++) {
@@ -875,10 +953,18 @@ function renderQueue() {
   });
   $('#qCount').textContent = queue.length;
 }
+// v11 今日排行：按用户聚合（我 + NPC 账号），综合分 = 平滑胜率 60% + 人气 40%
+const fmtPop = (n) => (n >= 10000 ? (n / 10000).toFixed(1) + 'w' : n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n));
+function userAva(uid) { return uid === 'me' ? myAva : (NPCS.find((n) => n.uid === uid)?.ava ?? 0); }
 function renderRoster() {
-  const list = $('#rosterList');
-  const arr = [...roster].sort((a, b) => b.wins - a.wins || a.losses - b.losses);
-  list.innerHTML = arr.map((e, i) => `<div class="rr${e.mine ? ' mine' : ''}"><div class="rk">${i + 1}</div><img class="mt" src="${e.thumb || thumbs[e.ava] || ''}" alt=""><div class="rm"><div class="rn">${AVATARS[e.ava]?.name || e.owner}${e.mine ? '<em class="me">我</em>' : ''}</div><div class="rs">${e.design.name} · ${e.design.formCn || ''}${e.design.roleCn} · 最高 ${e.best} 连胜</div></div><div class="rw">${e.wins}<small>${e.losses} 负</small></div></div>`).join('');
+  const list = $('#rosterList'); let k = 0;
+  list.innerHTML = league.ranking().map((u) => {
+    const me = u.uid === 'me', ava = userAva(u.uid), played = u.matches > 0;
+    const name = me ? AVATARS[myAva].name : u.uid;
+    const live = activeEntries().some((e) => e.uid === u.uid) ? '<em class="live">出战中</em>' : '';
+    const sub = played ? `胜率 ${Math.round(u.raw * 100)}% · ${u.wins}胜${u.losses}负 · 人气 ${fmtPop(u.pop)}` : '今日未参赛';
+    return `<div class="rr${me ? ' mine' : ''}${played ? '' : ' idle'}"><div class="rk">${played ? ++k : '—'}</div><img class="mt av" src="${thumbs[ava] || ''}" alt=""><div class="rm"><div class="rn">${name}${me ? '<em class="me">我</em>' : ''}${live}</div><div class="rs">${sub}</div></div><div class="rw">${played ? u.score : '—'}<small>综合分</small></div></div>`;
+  }).join('');
 }
 $('#btnRoster').onclick = () => { renderRoster(); $('#roster').classList.remove('hidden'); audio.play('servo1', { vol: 0.4 }); };
 $('#btnSound').onclick = () => { audio.unlock(); audio.setMuted(!audio.muted); $('#btnSound').innerHTML = audio.muted ? '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM17 9l5 6M22 9l-5 6"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>'; $('#btnSound').classList.toggle('off', audio.muted); if (!audio.muted) audio.startMusic(); };
@@ -905,11 +991,124 @@ const RP = {
   d: ['双刀', '巨型铁拳', '电锯手臂', '加特林', '激光枪', '重锤', '螺旋钻头', '火焰喷射', '蜂群导弹', '利爪', '雷电', '臂炮'],
 };
 function randomPrompt() { const p = (a) => a[Math.floor(Math.random() * a.length)]; return `${p(RP.a)}${p(RP.b)}${p(RP.c)}，${p(RP.d)}`; }
+// —— v11 我的机器人：同一面板两种状态 ——
+//  · 机库 hangar：本机已保存的机器人（3D 预览 + 横向列表），选一台 + 选策略 → 出战
+//  · 创造 build：一句话生成；新用户直接进入此状态；生成后「保存并出战」
+const HG = { mode: 'build', sel: null, strat: league.d.lastStrat || 'balanced' };
+const hgThumbs = new Map(); // rid -> dataURL（本次会话缓存）
+const STRAT_EN = { balanced: 'BALANCE', attack: 'ATTACK', defense: 'DEFENSE' };
+const STRAT_TAG = { balanced: 'BAL', attack: 'ATK', defense: 'DEF' };
+function stratChip(k) { const S = STRATEGY[k] || STRATEGY.balanced; return `<span class="sc ${k}"><em>${STRAT_TAG[k] || 'BAL'}</em>${S.cn}策略</span>`; }
+const pct = (x) => { const v = Math.round((x - 1) * 100); return (v > 0 ? '+' : '−') + Math.abs(v) + '%'; };
+function stratFx(k) {
+  const S = STRATEGY[k], beat = STRAT_COUNTER[k], by = Object.keys(STRAT_COUNTER).find((x) => STRAT_COUNTER[x] === k);
+  const st = k === 'balanced' ? '<span class="fx">攻防<i>原始数值</i></span>' : `<span class="fx ${S.atk > 1 ? 'up' : 'dn'}">攻击<i>${pct(S.atk)}</i></span><span class="fx ${S.def > 1 ? 'up' : 'dn'}">防御<i>${pct(S.def)}</i></span>`;
+  return `${st}<span class="fx ctr">克<b>${STRATEGY[beat].cn}</b></span><span class="fx ctr dn">被<b>${STRATEGY[by].cn}</b>克</span>`;
+}
+function designOf(rec) { return generateDesign(rec.prompt, '我', { seed: rec.seed, form: rec.form, name: rec.name }); }
+function syncCreateBtn() { $('#btnCreateTxt').textContent = league.robots().length ? '我的机器人' : '创造机器人'; }
+function setMode(m) {
+  HG.mode = m; const has = league.robots().length > 0;
+  $('#hangar').classList.toggle('hidden', m !== 'hangar');
+  $('#build').classList.toggle('hidden', m !== 'build');
+  $('#btnBack').classList.toggle('hidden', !(m === 'build' && has));
+  $('#shKicker').textContent = m === 'hangar' ? 'HANGAR' : 'BUILD';
+  $('#shTitle').textContent = m === 'hangar' ? '我的机器人' : has ? '创造新机器人' : '创造机器人';
+  if (m === 'build') resetPreview();
+  renderDock();
+}
+function resetPreview() {
+  pv.tok = (pv.tok || 0) + 1;
+  if (pv.view) { pv.scene.remove(pv.view.root); pv.view.dispose(); pv.view = null; }
+  pv.design = null; $('#previewBox').classList.remove('show'); $('#previewInfo').classList.add('hidden'); $('#previewHint').classList.remove('hidden'); $('#genFx').classList.remove('on');
+  $('#piStats').innerHTML = ''; $('#btnGen').disabled = false;
+  $('#btnGen').innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg><span>生成设计</span>';
+}
+function showDesign(d) {
+  if (pv.view) { pv.scene.remove(pv.view.root); pv.view.dispose(); pv.view = null; }
+  const v = createView(d); v.fxCol = hex3(d.palette.emissive);
+  pv.design = d; pv.view = v; pv.f = new Fighter(d, 0); pv.f.x = 0; pv.f.z = 0; pv.f.yaw = 0; pv.rot = -0.6; pv.genT = 0;
+  v.cele = 0; pv.scene.add(v.root);
+  makeRider(myAva).then((r) => { if (pv.view === v) v.setRider(r); }).catch(() => {});
+  $('#previewBox').classList.add('show'); $('#previewHint').classList.add('hidden'); $('#genFx').classList.remove('on');
+  showInfo(stratView(d));
+}
+const stratView = (d) => (HG.strat === 'balanced' ? d : { ...d, stats: strategyStats(d.stats, HG.strat) }); // 预览数值随策略实时变化
+function renderHangar() {
+  const rs = league.robots(); const act = myActive();
+  $('#hgCount').textContent = rs.length;
+  const strip = $('#hgStrip');
+  strip.innerHTML = `<button class="hg-card hg-new" data-new><i><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></i><span>创造新机器人</span></button>` + rs.map((r) => {
+    const on = act && act.rid === r.id;
+    return `<button class="hg-card${r.id === HG.sel ? ' sel' : ''}${on ? ' on' : ''}" data-rid="${r.id}"><i>${hgThumbs.get(r.id) ? `<img src="${hgThumbs.get(r.id)}" alt="">` : ''}</i><span>${r.name}</span>${on ? '<b>出战中</b>' : ''}</button>`;
+  }).join('');
+  strip.querySelectorAll('.hg-card').forEach((b) => (b.onclick = () => {
+    audio.play('servo1', { vol: 0.4 });
+    if (b.dataset.new != null) { setMode('build'); return; }
+    selectRobot(b.dataset.rid);
+  }));
+  const sel = league.robot(HG.sel);
+  $('#hgRec').textContent = sel ? `「${sel.name}」战绩 ${sel.wins || 0}胜${sel.losses || 0}负` : '';
+  $('#btnDel').classList.toggle('hidden', !sel || !!(act && act.rid === sel.id));
+  // 缩略图：后台逐张离屏渲染（与候场头像同一套），完成后刷新
+  for (const r of rs) {
+    const key = r.id; if (hgThumbs.has(key)) continue; hgThumbs.set(key, '');
+    const job = { design: designOf(r), hg: key };
+    mthumb.jobs.push(job);
+  }
+  pumpThumbs();
+}
+function selectRobot(rid) {
+  const rec = league.robot(rid); if (!rec) return;
+  HG.sel = rid;
+  const act = myActive(); HG.strat = act && act.rid === rid ? act.strat : rec.strat || 'balanced';
+  showDesign(act && act.rid === rid ? act.design : designOf(rec));
+  renderHangar(); renderStrat(); renderDock();
+}
+function renderStrat() {
+  $('#stratSeg').innerHTML = Object.keys(STRATEGY).map((k) => `<button class="sg ${k}${HG.strat === k ? ' sel' : ''}" data-k="${k}"><span class="sg-in"><em>${STRAT_EN[k]}</em><b>${STRATEGY[k].cn}</b></span></button>`).join('');
+  $('#stratFx').innerHTML = stratFx(HG.strat);
+  $('#stratSeg').querySelectorAll('.sg').forEach((b) => (b.onclick = () => {
+    if (HG.strat === b.dataset.k) return;
+    HG.strat = b.dataset.k; audio.play('servo1', { vol: 0.45 }); renderStrat(); if (pv.design) showInfo(stratView(pv.design));
+    if (HG.mode === 'hangar' && HG.sel) {
+      league.touchRobot(HG.sel, HG.strat);
+      const act = myActive(); // 出战中的机器人：策略可随时改，下一局生效（擂主每局重新上场）
+      if (act && act.rid === HG.sel) { act.strat = HG.strat; toast(`策略已切换为「${STRATEGY[HG.strat].cn}」· 下一局生效`); }
+    } else { league.d.lastStrat = HG.strat; league.save(); }
+  }));
+}
+// 底部：今日剩余局数 + 主按钮（出战 / 保存并出战 / 保存到我的机器人 / 出战中）
+function renderDock() {
+  const left = league.left('me'), act = myActive(), btn = $('#btnJoin');
+  let txt = '出战', dis = false; btn.dataset.act = 'join';
+  if (HG.mode === 'build') {
+    if (!pv.design) { txt = left > 0 && !act ? '保存并出战' : '保存到我的机器人'; dis = true; }
+    else if (left > 0 && !act) txt = '保存并出战';
+    else { txt = '保存到我的机器人'; btn.dataset.act = 'save'; }
+  } else if (!HG.sel) { dis = true; }
+  else if (act) { txt = act.rid === HG.sel ? '出战中 · 改策略下一局生效' : '已有机器人在出战'; dis = true; }
+  else if (left <= 0) { txt = `今日 ${DAILY_MAX} 局已打满 · 明天再来`; dis = true; } // 只在到上限时提醒
+  btn.textContent = txt; btn.disabled = dis;
+}
 function openCreate() {
   $('#create').classList.remove('hidden');
   pv.on = true;
+  const rs = league.robots();
+  if (rs.length) {
+    const act = myActive();
+    setMode('hangar');
+    selectRobot(act && act.rid ? act.rid : (league.robot(HG.sel) ? HG.sel : league.d.lastRobot && league.robot(league.d.lastRobot) ? league.d.lastRobot : rs[0].id));
+  } else { HG.strat = league.d.lastStrat || 'balanced'; setMode('build'); renderStrat(); }
 }
 function closePreview() { pv.on = false; }
+$('#btnBack').onclick = () => { audio.play('servo1', { vol: 0.4 }); openCreate(); };
+$('#btnDel').onclick = () => {
+  const rec = league.robot(HG.sel); if (!rec) return;
+  if (!confirm(`删除「${rec.name}」？删除后无法恢复`)) return;
+  league.removeRobot(rec.id); HG.sel = null; syncCreateBtn(); toast(`已删除「${rec.name}」`);
+  if (league.robots().length) openCreate(); else { resetPreview(); HG.strat = 'balanced'; setMode('build'); renderStrat(); }
+};
 $('#btnCreate').onclick = () => { audio.unlock(); audio.play('baydoor', { vol: 0.35 }); openCreate(); }; // v10.1：不再首次弹选分身页，直接进创造页
 $('#refFile').onchange = (e) => {
   const f = e.target.files[0]; if (!f) return;
@@ -938,12 +1137,9 @@ function generate(gopt) {
     if (tk !== pv.tok) return;
     if (pv.view) { pv.scene.remove(pv.view.root); pv.view.dispose(); pv.view = null; }
     const d = generateDesign(prompt, '我', gopt && gopt.form ? { form: gopt.form } : undefined);
-    const v = createView(d); v.fxCol = hex3(d.palette.emissive);
-    pv.design = d; pv.view = v; pv.f = new Fighter(d, 0); pv.f.x = 0; pv.f.z = 0; pv.f.yaw = 0; pv.rot = -0.6; pv.genT = 0;
-    v.cele = 0; pv.scene.add(v.root);
-    makeRider(myAva).then((r) => { if (pv.view === v) v.setRider(r); }).catch(() => {});
-    $('#genFx').classList.remove('on'); $('#btnJoin').disabled = false; $('#btnGen').disabled = false; $('#btnGen').innerHTML = '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 4v4h-4M20 12a8 8 0 0 1-14 5.3M4 20v-4h4"/></svg><span>换一个</span>';
-    showInfo(d);
+    showDesign(d);
+    $('#btnGen').disabled = false; $('#btnGen').innerHTML = '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 4v4h-4M20 12a8 8 0 0 1-14 5.3M4 20v-4h4"/></svg><span>换一个</span>';
+    renderDock();
     audio.play('hydr', { vol: 0.5 }); audio.play('steam', { vol: 0.4, delay: 0.1 });
   }, 700);
 }
@@ -961,20 +1157,39 @@ function showInfo(d) {
   $('#piStats').innerHTML = row('atk', '攻击', S.atk, R.atk) + row('def', '防御', S.def, R.def) + row('hp', '耐久', S.hp, R.hp) + row('aspd', '攻速', S.aspd.toFixed(2), R.aspd) + row('mspd', '移速', S.mspd.toFixed(1), R.mspd);
   el.querySelector('.pi-moves').innerHTML = `<span>普攻 · ${d.moves.basic}</span><span>技能 · ${d.moves.special}</span><span class="u">大招 · ${d.moves.ult}</span>`;
 }
+// 出战：我的机器人进入候场队首（同一用户同时只能有 1 台在场 / 候场；每天最多 DAILY_MAX 局）
+function joinWith(rec, strat, design) {
+  if (myActive() || league.left('me') <= 0) return null;
+  const e = makeEntry(design || designOf(rec), myAva, '我', true, { rid: rec.id, strat });
+  league.touchRobot(rec.id, strat);
+  queue.unshift(e);
+  renderQueue(); syncCreateBtn();
+  return e;
+}
+function saveDesign(d) {
+  const rec = { id: 'r' + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36), prompt: d.prompt, seed: d.seed, form: d.form, name: d.name, strat: HG.strat, created: Date.now(), wins: 0, losses: 0 };
+  return league.addRobot(rec);
+}
 $('#btnJoin').onclick = () => {
-  if (!pv.design) return;
-  const e = makeEntry(pv.design, myAva, '我', true);
-  // 玩家机器人插到队列中「其他玩家作品」之后、预设机器人之前 → 尽快登场
-  let pos = 0; while (pos < queue.length && queue[pos].mine) pos++;
-  queue.splice(pos, 0, e);
-  renderQueue();
-  $('#create').classList.add('hidden'); closePreview();
-  if (pv.view) { pv.scene.remove(pv.view.root); pv.view.dispose(); pv.view = null; }
-  pv.design = null; $('#previewBox').classList.remove('show'); $('#previewInfo').classList.add('hidden'); $('#previewHint').classList.remove('hidden'); $('#btnJoin').disabled = true; $('#btnGen').innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg><span>生成设计</span>';
-  $('#prompt').value = '';
-  toast(pos === 0 ? `「${e.design.name}」加入队列 · 下一场登场！` : `「${e.design.name}」加入队列 · 前面还有 ${pos} 台`);
-  audio.play('baydoor', { vol: 0.5 }); audio.play('crowdCharge', { vol: 0.35, delay: 0.2 });
+  if (HG.mode === 'build') {
+    if (!pv.design) return;
+    const d = pv.design, rec = saveDesign(d); syncCreateBtn();
+    $('#prompt').value = '';
+    if ($('#btnJoin').dataset.act === 'save') { // 今日打满 / 已有机器人出战：只保存
+      toast(league.left('me') <= 0 ? `「${rec.name}」已保存 · 今日 ${DAILY_MAX} 局已打满，明天再出战` : `「${rec.name}」已保存到我的机器人`); audio.play('baydoor', { vol: 0.4 });
+      HG.sel = rec.id; setMode('hangar'); selectRobot(rec.id); return;
+    }
+    const e = joinWith(rec, HG.strat, d); HG.sel = rec.id;
+    if (e) afterJoin(e); return;
+  }
+  const rec = league.robot(HG.sel); if (!rec) return;
+  const e = joinWith(rec, HG.strat); if (e) afterJoin(e);
 };
+function afterJoin(e) {
+  $('#create').classList.add('hidden'); closePreview(); resetPreview();
+  toast(`「${e.design.name}」以「${STRATEGY[e.strat].cn}」策略出战 · 下一场登场！`);
+  audio.play('baydoor', { vol: 0.5 }); audio.play('crowdCharge', { vol: 0.35, delay: 0.2 });
+}
 let pvR = null;
 function ensurePreviewRenderer() {
   if (pvR) return pvR;
@@ -1087,7 +1302,7 @@ function updateGame(dt, rdt) {
       if (Q && !A.pre) { A.pre = 1; const f = G.F[1]; director.setMode('introCard', { f, v: G.V[1], side: -1 }, 0, false); }
       if (!Q && !A.c0 && t > T1) { A.c0 = 1; introCard(0); }
       if (!A.c1 && t > T2) { A.c1 = 1; introCard(1, Q); }
-      if (!A.vs && t > T3) { A.vs = 1; hideIntroCard(); director.setMode('intro'); banner(`<div class="vsrow"><div class="vsn a">${G.E[0].design.name}</div><div class="vsx">VS</div><div class="vsn b">${G.E[1].design.name}</div></div>`, `${AVATARS[G.E[0].ava]?.name || G.E[0].owner} vs ${AVATARS[G.E[1].ava]?.name || G.E[1].owner}`, 'vs', 1.5, true); audio.play('voPrepare', { vol: 0.8, bus: 'master' }); audio.play('drum', { vol: 0.5 }); }
+      if (!A.vs && t > T3) { A.vs = 1; hideIntroCard(); director.setMode('intro'); banner(`<div class="vsrow"><div class="vsc a"><div class="vsn a">${G.E[0].design.name}</div><div class="vss">${STRATEGY[G.E[0].strat]?.cn || '均衡'}策略</div></div><div class="vsx">VS</div><div class="vsc b"><div class="vsn b">${G.E[1].design.name}</div><div class="vss">${STRATEGY[G.E[1].strat]?.cn || '均衡'}策略</div></div></div>`, `${AVATARS[G.E[0].ava]?.name || G.E[0].owner} vs ${AVATARS[G.E[1].ava]?.name || G.E[1].owner}`, 'vs', 1.5, true); audio.play('voPrepare', { vol: 0.8, bus: 'master' }); audio.play('drum', { vol: 0.5 }); }
       if (!A.ready && t > T4) { A.ready = 1; banner('READY', '', '', 0.8); audio.play('voReady', { vol: 0.9, bus: 'master' }); }
       if (!A.fight && t > T5) { A.fight = 1; banner('FIGHT!', '', '', 0.9); audio.play('voFight', { vol: 1, bus: 'master', force: true }); audio.play('bell', { vol: 0.6 }); audio.play('crowdCharge', { vol: 0.4 }); startFight(); }
       break;

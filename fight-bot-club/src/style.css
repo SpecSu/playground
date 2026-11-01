@@ -14,7 +14,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--txt); 
 .hidden { display: none !important; }
 button { font: inherit; color: inherit; border: 0; cursor: pointer; }
 button.primary { background: linear-gradient(135deg, #ff3d6e, #ff7a3d); color: #fff; font-weight: 800; border-radius: 14px; padding: 12px 18px; box-shadow: 0 6px 24px rgba(255, 61, 110, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3); letter-spacing: 0.5px; }
-button.primary:disabled { filter: grayscale(0.8) brightness(0.6); box-shadow: none; }
+button.primary:disabled { filter: grayscale(0.8) brightness(0.6); box-shadow: none; opacity: .45; pointer-events: none; cursor: default; }
 button.primary.big { font-size: 18px; padding: 15px 0; width: 100%; }
 button.ghost { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--line); border-radius: 14px; padding: 11px 14px; font-weight: 700; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 button.icon { width: 46px; padding: 11px 0; }
@@ -97,6 +97,10 @@ button:active { transform: scale(0.96); }
 .vsrow { display: flex; align-items: center; justify-content: center; gap: 10px; }
 .vsrow .vsn { flex: 1; font-size: 18px; font-weight: 900; text-shadow: 0 2px 6px #000; }
 .vsrow .vsn.a { text-align: right; color: #ff86a2; } .vsrow .vsn.b { text-align: left; color: #86dcff; }
+.vsrow .vsc { flex: 1; min-width: 0; }
+.vsrow .vsc .vsn { display: block; }
+.vsrow .vss { margin-top: 6px; font-size: 13px; font-weight: 900; letter-spacing: 2px; color: #FFE135; text-shadow: 0 1px 0 #000, 0 0 6px rgba(0,0,0,.9); white-space: nowrap; }
+.vsrow .vsc.a .vss { text-align: right; } .vsrow .vsc.b .vss { text-align: left; }
 .vsrow .vsx { font-size: 44px; color: var(--gold); text-shadow: 0 0 20px rgba(255, 180, 40, .9), 0 4px 0 #7a4b00; }
 
 /* 大招切入 */
@@ -344,7 +348,13 @@ button.primary.big { clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 
 .fc-name b { font-weight: 900; }
 .fc-name i { font-style: normal; margin: 0 4px; color: var(--pink); }
 .fcard.right .fc-name i { color: var(--cyan); }
-.fc-sub { font-size: 10.5px; font-weight: 700; letter-spacing: 1px; color: #b9c6dc; margin-top: 1px; }
+/* v11.2：我的机器人出战 → 名字后黄色「我」标（实色块，不吃名牌描边阴影） */
+.fc-name em.me-tag { display: inline-block; font-style: normal; font-size: 11px; font-weight: 900; line-height: 1; padding: 2px 4px 2px; margin-left: 4px; vertical-align: 1px; background: #FFE135; color: #171719; text-shadow: none; letter-spacing: 0; transform: skewX(-10deg); }
+.fc-sub { font-size: 10.5px; font-weight: 700; letter-spacing: .5px; color: #b9c6dc; margin-top: 1px; }
+.fc-sub b.stg { color: #FFE135; font-weight: 900; }
+.fc-sub em { font-style: normal; font-weight: 900; }
+.fc-sub em.up { color: #FFE135; } .fc-sub em.dn { color: #ff8fa8; }
+.fc-sub > i { font-style: normal; margin: 0 3px; opacity: .55; }
 
 /* ———————— 观众助力大招 ———————— */
 #assist { position: absolute; inset: 0; z-index: 60; pointer-events: none; opacity: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; --c: #ff3d8b; transition: opacity .2s; }
@@ -628,3 +638,79 @@ body.ulting #ticker { opacity: 0 !important; transition: opacity .12s; }
 body.assisting #bottom { opacity: 0; pointer-events: none; }
 body.assisting #bottom > * { pointer-events: none; }
 .vo-in em { margin-top: 6px; }
+/* v11.4：VOTE 字上方圆形用户头像（绝对定位，不挤动 VOTE / 票数的位置） */
+.vo-in b { position: relative; }
+.vo-ava { position: absolute; left: 50%; bottom: 100%; width: calc(var(--d, 160px) * 0.26); height: calc(var(--d, 160px) * 0.26); margin-bottom: calc(var(--d, 160px) * 0.025); transform: translateX(-50%); border-radius: 50%; overflow: hidden;
+  background: rgba(23, 23, 25, 0.18); box-shadow: 0 0 0 2px #171719; transition: width .14s linear, height .14s linear; }
+.vo-ava img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.vo-ava img:not([src]), .vo-ava img[src=''] { visibility: hidden; }
+
+/* ═════════════ v11 我的机器人 / 参战策略 / 用户排行 ═════════════ */
+#create .sh-head { gap: 8px; }
+.sh-back { width: 34px; height: 34px; flex: none; background: transparent; outline: 1px solid var(--edge); outline-offset: -1px; display: flex; align-items: center; justify-content: center; color: #cfe8ff; }
+.sh-back svg { width: 16px; height: 16px; }
+.sh-back.hidden { display: none; }
+#create .sh-title { flex: 1; min-width: 0; }
+#create .sh-body { display: flex; flex-direction: column; }
+#hangar { margin-top: 10px; }
+#hangar.hidden, #build.hidden { display: none; }
+.hg-h { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--dim); margin-bottom: 6px; }
+.hg-h b { color: #cfe8ff; font-weight: 800; white-space: nowrap; }
+.hg-h b em { font-style: normal; color: var(--gold); }
+#hgRec { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+.hg-del { flex: none; font-size: 11px; font-weight: 700; padding: 3px 9px; background: transparent; color: #ff8fa8; outline: 1px solid rgba(255, 61, 110, 0.45); outline-offset: -1px; }
+.hg-del.hidden { display: none; }
+#hgStrip { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+#hgStrip::-webkit-scrollbar { display: none; }
+.hg-card { position: relative; flex: none; width: 74px; padding: 0 0 6px; background: rgba(150, 220, 255, 0.05); outline: 1px solid var(--edge); outline-offset: -1px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%); color: #dfe9ff; }
+.hg-card i { width: 74px; height: 70px; display: flex; align-items: center; justify-content: center; background: #1a1f2c; }
+.hg-card i img { width: 100%; height: 100%; object-fit: cover; }
+.hg-card span { font-size: 11px; font-weight: 800; max-width: 68px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic; }
+.hg-card.sel { outline: 2px solid var(--pink); outline-offset: -2px; background: rgba(255, 61, 110, 0.12); }
+.hg-card.sel span { color: #fff; }
+.hg-card b { position: absolute; left: 0; top: 0; font-size: 9px; font-weight: 900; padding: 1px 6px; background: var(--gold); color: #1a1200; letter-spacing: 1px; }
+.hg-new i { background: rgba(255, 61, 110, 0.08); color: var(--pink); }
+.hg-new i svg { width: 26px; height: 26px; stroke-width: 2.4; }
+.hg-new span { color: #ffb3c6; }
+#stratBox { margin-top: 12px; }
+.sg-h { display: flex; align-items: baseline; gap: 8px; margin-bottom: 7px; }
+.sg-h b { font-size: 13px; font-weight: 900; font-style: italic; letter-spacing: 1px; }
+.sg-h small { font-family: 'ArenaCond', Impact, sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--dim); }
+/* 策略：斜切分段选择器（与 HUD 斜切标签 / 出场卡同一语言），选中整块实色填充 */
+#stratSeg { display: flex; gap: 5px; padding: 0 7px; }
+.sg { flex: 1; height: 48px; padding: 0; transform: skewX(-14deg); background: rgba(150, 220, 255, 0.05); outline: 1px solid var(--edge); outline-offset: -1px; color: #8d93ad;
+  display: flex; align-items: center; justify-content: center; transition: background .15s, color .15s, outline-color .15s; }
+.sg-in { transform: skewX(14deg); display: flex; flex-direction: column; align-items: center; gap: 4px; line-height: 1; }
+.sg em { font-family: 'ArenaCond', Impact, sans-serif; font-style: italic; font-weight: 400; font-size: 17px; letter-spacing: 1.5px; color: #cfd6ea; }
+.sg b { font-size: 10px; font-weight: 800; letter-spacing: 3px; padding-left: 3px; }
+.sg:active { transform: skewX(-14deg) scale(.97); }
+.sg.sel { background: var(--pink); outline-color: transparent; color: rgba(255, 255, 255, .85); }
+.sg.sel em { color: #fff; }
+#stratFx { display: flex; gap: 5px; margin-top: 8px; padding: 0 2px; overflow: hidden; }
+.fx { flex: none; font-size: 10.5px; color: var(--dim); padding: 3px 7px; background: rgba(150, 220, 255, 0.05); white-space: nowrap; line-height: 1.2; }
+.fx i { font-style: normal; font-weight: 800; margin-left: 4px; color: #cfd6ea; }
+.fx b { font-weight: 800; color: #cfd6ea; margin: 0 2px; }
+.fx.up i { color: var(--gold); } .fx.dn i { color: #ff8fa8; }
+.fx.ctr { margin-left: auto; } .fx.ctr + .fx.ctr { margin-left: 0; }
+.fx.ctr b { color: var(--gold); } .fx.ctr.dn b { color: #ff8fa8; }
+.dock { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+#btnJoin { flex: 1; height: 50px; font-size: 16px; }
+#create .sh-actions button#btnGen { flex: 1; }
+/* 出场卡：策略标签（中性黑底白描边，英文缩写跟随阵营色） */
+.ic-strat { margin-top: 5px; }
+#introCard.b .ic-strat { text-align: right; }
+.sc { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 800; padding: 1px 8px 1px 6px; letter-spacing: 1px; color: #fff; background: rgba(0, 0, 0, .45); outline: 1px solid rgba(255, 255, 255, .45); outline-offset: -1px; transform: skewX(-12deg); }
+.sc em { font-family: 'ArenaCond', Impact, sans-serif; font-style: normal; font-weight: 400; font-size: 13px; letter-spacing: 1.5px; color: var(--ic, #fff); }
+/* 用户排行 */
+.rk-rule { font-size: 11px; color: var(--dim); margin: 0 0 10px; padding: 6px 10px; background: rgba(150, 220, 255, .05); border-left: 2px solid var(--cyan); }
+.rr img.mt.av { object-fit: contain; }
+.rr .rn em.live { font-style: normal; font-size: 10px; margin-left: 6px; padding: 1px 6px; background: rgba(255, 61, 110, .2); color: #ff9db5; display: inline-block; transform: skewX(-10deg); vertical-align: 2px; }
+.rr.idle { opacity: .7; }
+.rr.idle .rk { color: #4c5670 !important; text-shadow: none !important; }
+.vt-orb.pick::before { top: -20px; } /* v11.4：「已支持」上移，不压住头像 */
+.fc-sub > s { text-decoration: none; margin: 0 3px; opacity: .7; } /* v11.0：圆点分隔 */
+.fc-sub { line-height: 1.25; }
+.fc-sub.wrap { white-space: normal; }
+.fc-sub.wrap > i { display: none; }
+.fc-sub.wrap .s1, .fc-sub.wrap .s2 { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
