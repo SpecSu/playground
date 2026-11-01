@@ -677,7 +677,7 @@ vtEl.innerHTML = `<div class="vt-glow"><i class="g0"></i><i class="g1"></i></div
   <div class="vt-head"><div class="vt-title">VOTE NOW</div><div class="vt-sub"><i></i>谁来放大招<i></i></div>
   <div class="vt-clock"><b>5</b><i><s></s></i></div></div>
   <div class="vt-cards">${[0, 1].map((i) => `<div class="vt-card s${i}"><div class="vc-ava"><img alt=""></div><div class="vc-t"><div class="vc-pilot"><span></span><em>我</em></div><div class="vc-ult"></div></div></div>`).join('<div class="vt-vs">VS</div>')}</div>
-  <div class="vt-arena">${[0, 1].map((i) => `<button class="vt-orb s${i}" data-s="${i}"><span class="vo-in"><b><i class="vo-ava"><img alt=""></i>VOTE</b><em>0</em></span></button>`).join('')}</div>
+  <div class="vt-arena">${[0, 1].map((i) => `<button class="vt-orb s${i}" data-s="${i}"><span class="vo-in"><b>VOTE</b><em>0</em></span></button>`).join('')}</div>
   <div class="vt-tip">只能支持一边 · 狂点你支持的圈</div><div class="vt-result"></div>`;
 app.appendChild(vtEl);
 const VT = {
@@ -695,7 +695,6 @@ function fillVoteCards() {
     c.querySelector('.vc-pilot span').textContent = pilotName(e);
     c.querySelector('.vc-pilot em').style.display = e.mine ? '' : 'none';
     c.querySelector('.vc-ult').textContent = `大招 · ${e.design.moves.ult}`;
-    VT.orbs[i].querySelector('.vo-ava img').src = pilotThumb(e); // v11.4：投票圈内 VOTE 上方显示该方用户头像
   }
 }
 function startVote() {
@@ -901,7 +900,7 @@ function updateTags(rdt) {
 function stratHud(e, o) {
   const k = e.strat || 'balanced', ok = (o && o.strat) || 'balanced', cn = STRATEGY[k]?.cn || '均衡';
   const st = STRAT_COUNTER[k] === ok ? '<em class="up">克制</em>' : STRAT_COUNTER[ok] === k ? '<em class="dn">被克</em>' : '';
-  return `<b class="stg">${cn}</b>${st ? `<s>·</s>${st}` : ''}`; // v11.0：「进攻 · 克制」/「防守 · 被克」/ 无克制只显示策略
+  return `<b class="stg">${cn}</b>${st ? `<i class="dt">·</i>${st}` : ''}`; // v11.0：「进攻 · 克制」/「防守 · 被克」/ 无克制只显示策略
 }
 function setupHud() {
   setupTags();
@@ -909,7 +908,7 @@ function setupHud() {
     const e = G.E[i], h = hud[i];
     h.ava.src = e.thumb || thumbs[e.ava] || '';
     h.name.innerHTML = `<b>${AVATARS[e.ava]?.name || e.owner}</b>${e.mine ? '<em class="me-tag">我</em>' : ''}<i>·</i>${e.design.name}`; // v11.2：我的机器人 → 名字后黄色「我」
-    h.sub.innerHTML = `<span class="s1">${stratHud(e, G.E[1 - i])}</span><i>｜</i><span class="s2">大招<s>·</s>${e.design.moves.ult}</span>`; // v11.3：策略 + 克制状态｜大招
+    h.sub.innerHTML = `<span class="s1">${stratHud(e, G.E[1 - i])}</span><i>｜</i><span class="s2">大招<i class="dt">·</i>${e.design.moves.ult}</span>`; // v11.3：策略 + 克制状态｜大招
     h.lagV = 1; h.ava.parentElement.style.setProperty('--qc', VOTE_COL[i]);
   }
   $('#round').textContent = `ROUND ${G.round}`;
