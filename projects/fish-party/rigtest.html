@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#9cd}</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script></head><body>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from './vendor/addons/loaders/GLTFLoader.js';
+import { Character } from './src/rig.js';
+import { makeRod } from './src/characters.js';
+const W = 900, H = 500;
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); r.setSize(W, H); document.body.appendChild(r.domElement);
+r.outputColorSpace = THREE.SRGBColorSpace;
+const sc = new THREE.Scene(); sc.background = new THREE.Color('#9cd');
+sc.add(new THREE.HemisphereLight('#fff', '#678', 2.2)); const dl = new THREE.DirectionalLight('#fff', 2); dl.position.set(2, 4, 3); sc.add(dl);
+const grid = new THREE.GridHelper(10, 20); sc.add(grid);
+const cam = new THREE.PerspectiveCamera(35, W / H, 0.1, 50);
+const q = new URLSearchParams(location.search);
+const modes = (q.get('modes') || 'free,rod,cast,wait,fight,hold,cheer,wave').split(',');
+const L = new GLTFLoader();
+const g = await L.loadAsync('./assets/crew/' + (q.get('who') || 'subeike') + '.glb');
+const { SkeletonUtils } = { SkeletonUtils: await import('./vendor/addons/utils/SkeletonUtils.js') };
+const chars = [];
+modes.forEach((m, i) => {
+  const model = SkeletonUtils.clone(g.scene);
+  const c = new Character(model, { rod: makeRod() });
+  c.root.position.x = (i - (modes.length - 1) / 2) * 1.0;
+  c.root.rotation.y = +(q.get('ry') || 0.5);
+  sc.add(c.root); c.setMode(m); c.modeT = +(q.get('mt') || 0.2);
+  if (m === 'hold') {
+    const fish = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.3, 0.12), new THREE.MeshStandardMaterial({ color: 'orange' }));
+    c.root.add(fish); c.held = { obj: fish, len: 0.9, h: 0.3, w: 0.12, belly: 0.15 };
+  }
+  if (m === 'fight') c.tension = 0.7;
+  chars.push(c);
+});
+const dist = modes.length * 0.9 + 1.5;
+cam.position.set(0, 1.1, dist); cam.lookAt(0, 0.8, 0);
+let t = 0;
+for (let i = 0; i < 40; i++) { t += 0.03; for (const c of chars) { if (c.mode === 'cast') c.modeT = +(q.get('ct') || 0.3) - 0.03; c.update(0.03, t); } }
+r.render(sc, cam);
+window.done = true;
+window.rest = chars[0].rig.restPos; window.armLen = chars[0].rig.armLen; window.info = chars.map((c) => ({ m: c.mode, rd: c.rodDir.toArray().map((x) => +x.toFixed(2)), rq: c.rod.group.quaternion.toArray().map((x) => +x.toFixed(2)), tip: c.rod.tip.getWorldPosition(new THREE.Vector3()).toArray().map((x) => +x.toFixed(2)), hR: c.handW.R.toArray().map((x) => +x.toFixed(2)), hL: c.handW.L.toArray().map((x) => +x.toFixed(2)) }));
+</script></body></html>
