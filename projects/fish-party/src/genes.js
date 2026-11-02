@@ -266,7 +266,7 @@ function rollItemMut(r, R) {
 // 把道具按类别分组（保留点选顺序）
 function groupItems(ids) {
   const g = { deco: [], dye: [], essence: [], wonder: [] };
-  for (const id of ids) g[ITEM_BY_ID[id].cat].push(ITEM_BY_ID[id]);
+  for (const id of ids) (g[ITEM_BY_ID[id].cat] ||= []).push(ITEM_BY_ID[id]);   // v0.9：新分类（衣物/日用…）不在旧四类里 → 旧逻辑忽略，不崩
   return g;
 }
 // 精华优先级：matP 高 > 稀有度高 > 先选

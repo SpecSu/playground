@@ -407,7 +407,7 @@ export function buildExtra(kind, A, seed, ctx = {}) {
     }
     case 'jellyTentacles': {
       const col = pick(r, ['#ff8fc4', '#b69cff', '#7fe3ff', '#ffb38a']);
-      const m = mat(col, { transparent: true, opacity: 0.78, emissive: col, emissiveIntensity: 0.35, roughness: 0.25 });
+      const m = mat(col, { emissive: col, emissiveIntensity: 0.35, roughness: 0.25 });
       const tip = mat('#ffffff', { emissive: col, emissiveIntensity: 0.6 });
       const ten = [];
       const n = 5, segL = THREE.MathUtils.clamp(S * 0.38, 0.05, 0.15), R = segL * 0.36;
@@ -454,7 +454,7 @@ export function buildExtra(kind, A, seed, ctx = {}) {
       const stalk = new THREE.Group(); stalk.position.copy(top).add(V(0, -S * 0.04, 0)); g.add(stalk);
       stalk.add(tube([V(0, 0, 0), V(-K * 0.05, K * 0.6, 0), V(K * 0.4, K * 1.05, 0), tip], Math.max(0.006, K * 0.035), mat('#3a2f5a'), 16, 5));
       const bulb = mesh(SPH(), emi(col, 1.2), stalk, [tip.x + K * 0.04, tip.y - K * 0.12, 0], K * 0.15);
-      const glow = mesh(SPH_LO(), shared(new THREE.MeshBasicMaterial({ color: muteColor(col), transparent: true, opacity: 0.22, depthWrite: false })), stalk, bulb.position.toArray(), K * 0.3);
+      const glow = mesh(SPH_LO(), shared(new THREE.MeshBasicMaterial({ color: muteColor(col), transparent: true, opacity: 0.22, depthWrite: false })), stalk, bulb.position.toArray(), K * 0.3); glow.name = 'fx-glow';
       glow.userData.noOutline = true;
       anim = (t) => { stalk.rotation.z = Math.sin(t * 2.2) * 0.1; const k = 0.5 + 0.5 * Math.sin(t * 3.4); glow.scale.setScalar(K * (0.26 + k * 0.1)); bulb.scale.setScalar(K * (0.14 + k * 0.02)); };
       break;
@@ -517,8 +517,8 @@ export function buildExtra(kind, A, seed, ctx = {}) {
       const R = THREE.MathUtils.clamp(Math.max(A.th * 0.62, A.headW * 1.1, S * 0.55), 0.1, 0.45);
       const C = A.headC.clone().add(V(-R * 0.05, A.th * 0.05, 0));
       g.position.copy(C);
-      const glass = mesh(SPH(), shared(new THREE.MeshStandardMaterial({ color: '#d6f3ff', transparent: true, opacity: 0.3, emissive: '#9fdcff', emissiveIntensity: 0.15, roughness: 0.3, metalness: 0.1, depthWrite: false })), g, null, R);
-      mesh(SPH_LO(), shared(new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.75, depthWrite: false })), g, [R * 0.35, R * 0.55, R * 0.45], [R * 0.16, R * 0.09, R * 0.05], [0, -0.7, 0.5]);
+      const glass = mesh(SPH(), shared(new THREE.MeshStandardMaterial({ color: '#d6f3ff', transparent: true, opacity: 0.3, emissive: '#9fdcff', emissiveIntensity: 0.15, roughness: 0.3, metalness: 0.1, depthWrite: false })), g, null, R); glass.name = 'fx-helmet-glass';
+      mesh(SPH_LO(), shared(new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.75, depthWrite: false })), g, [R * 0.35, R * 0.55, R * 0.45], [R * 0.16, R * 0.09, R * 0.05], [0, -0.7, 0.5]).name = 'fx-helmet-hl';
       mesh(geo('collar', () => new THREE.TorusGeometry(1, 0.13, 8, 24)), mat(pick(r, ['#ffffff', '#ffd23f', '#ff5fa2'])), g, [-R * 0.62, 0, 0], [R * 0.8, R * 0.8, R * 0.8], [0, Math.PI / 2, 0]);
       const ant = new THREE.Group(); ant.position.set(-R * 0.1, R * 0.98, 0); g.add(ant);
       mesh(CYL(), mat('#8a8f9e', { metalness: 0.5 }), ant, [0, R * 0.15, 0], [R * 0.025, R * 0.3, R * 0.025]);
@@ -619,7 +619,8 @@ void gxApply(inout vec4 dc, inout vec3 em, vec3 n, vec3 vv){
   vec3 jc = dc.rgb / max(max(dc.r, max(dc.g, dc.b)), 0.05);
   jc = gxSat(jc, 1.15);
   dc.rgb = jc * 0.6;
-  dc.a *= mix(0.7, 0.96, fres);
+  // 不透明：用柔和次表面色 + 边缘亮环代替真透明
+  em += mix(jc, vec3(1.0), 0.5) * pow(fres, 1.6) * 0.22;
   em += jc * (0.12 + 0.14 * (1.0 - fres)) + vec3(1.0) * pow(fres, 3.0) * 0.12;   // v3：去荧光，内发光弱、靠清漆高光出"果冻感"
 #elif GX_KIND == 2 // 糖果：高饱和 + 硬高光 + 糖粒闪
   dc.rgb = clamp(mix(vec3(lum), dc.rgb, 1.15) * 1.03, 0.0, 1.0);
@@ -641,7 +642,8 @@ void gxApply(inout vec4 dc, inout vec3 em, vec3 n, vec3 vv){
   vec3 cc = gxSat(dc.rgb / max(max(dc.r, max(dc.g, dc.b)), 0.05), 0.9);
   if (dot(cc, vec3(0.333)) > 0.85) cc = vec3(0.72, 0.8, 0.9);
   dc.rgb = mix(cc, vec3(0.82, 0.84, 0.9), 0.35) * (0.5 + 0.3 * gxH(floor(n * 6.0 + 0.5)));
-  dc.a *= mix(0.78, 0.97, fres);
+  // 不透明：珠光边缘代替真透明
+  em += vec3(0.85, 0.92, 1.0) * pow(fres, 1.5) * 0.18;
   em += mix(vec3(0.9), gxHue(fres * 1.3 + p.y * 1.5 + p.x * 0.7 + uGxTime * 0.08), 0.35) * (0.05 + fres * 0.3) + dc.rgb * 0.1;
   em += vec3(1.0) * smoothstep(0.86, 0.96, max(dot(R, normalize(vec3(-0.3, 0.8, 0.5))), 0.0)) * 0.45;
 #elif GX_KIND == 6 // 星空：深蓝紫星云 + 流动星点
@@ -697,11 +699,11 @@ export function applyMat(model, kind, glow = 0) {
     const P = m.isMeshPhysicalMaterial;
     const set = (o) => { if (P) Object.assign(m, o); };
     if (P) { m.iridescence = 0; m.clearcoat = 0; m.sheen = 0; }
-    if (K === 1) { m.transparent = true; m.roughness = 0.3; m.metalness = 0; set({ clearcoat: 1, clearcoatRoughness: 0.25 }); }
+    if (K === 1) { m.transparent = false; m.opacity = 1; m.depthWrite = true; m.roughness = 0.3; m.metalness = 0; set({ clearcoat: 1, clearcoatRoughness: 0.25 }); }
     else if (K === 2) { m.roughness = 0.42; m.metalness = 0; set({ clearcoat: 1, clearcoatRoughness: 0.25 }); }
     else if (K === 3) { m.roughness = 0.5; m.metalness = 0; set({ clearcoat: 0.6, clearcoatRoughness: 0.3 }); }
     else if (K === 4) { m.roughness = 1; m.metalness = 0; set({ sheen: 1, sheenRoughness: 0.55, sheenColor: new THREE.Color('#f3e6da') }); }
-    else if (K === 5) { m.transparent = true; m.flatShading = true; m.roughness = 0.3; m.metalness = 0; set({ clearcoat: 1, clearcoatRoughness: 0.25, iridescence: 0.5, iridescenceIOR: 1.4 }); }
+    else if (K === 5) { m.transparent = false; m.opacity = 1; m.depthWrite = true; m.flatShading = true; m.roughness = 0.3; m.metalness = 0; set({ clearcoat: 1, clearcoatRoughness: 0.25, iridescence: 0.5, iridescenceIOR: 1.4 }); }
     else if (K === 6) { m.roughness = 0.5; m.metalness = 0; set({ clearcoat: 0.8, clearcoatRoughness: 0.28 }); }
     else if (K === 7) { m.roughness = 0.45; m.metalness = 0; set({ clearcoat: 0.5, clearcoatRoughness: 0.3 }); }
     else if (K === 8) { m.roughness = 0.35; m.metalness = 0.15; set({ clearcoat: 1, clearcoatRoughness: 0.25, iridescence: 1, iridescenceIOR: 1.6, iridescenceThicknessRange: [200, 800] }); }

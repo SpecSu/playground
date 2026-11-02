@@ -17,19 +17,24 @@ function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^=
 // ---------------- 空间常量（米） ----------------
 const FOV = 50, TANH = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
 const CAM0 = V(0, 0.3, 8.8), LOOK0 = V(0, 0.05, 0);
-const Z_NEAR = 1.5, Z_FAR = -5.2;           // 鱼群纵深范围
+const Z_NEAR = 1.5, Z_FAR = -8.0;           // 鱼群纵深范围（v5：加深，大鱼放到后面——那里画面更宽）
+// v5 可视区（归一化屏幕坐标，±1 = 画面边缘）：顶部留给角落按钮，底部留给主人卡；左右留一点边
+const SCR = { top: 0.8, bot: -0.6, side: 0.94 };
 const SHOW = V(0, 0.5, 3.2);                 // 被选中的鱼游到这里（前景）
 const EGG_C = V(0, 0.35, 2.4);               // 卵变/孵化演出中心
 export const TANK = { w: 4, h: 5.5, d: Z_NEAR - Z_FAR };
 
-// 鱼的显示长度：对数映射保持大小差；最小也看得清，最大不撑爆屏幕
+// v0.9 C 鱼的显示体长（世界单位，= 含部件的最长水平跨度）：按 cm 的 0.65 次幂映射，尺寸差明显拉开
+//   12cm 小丑鱼 ≈0.45 · 30cm ≈0.8 · 1m ≈1.75 · 3m ≈3.6 · 6.5m 虎鲸/鲸鲨 ≈6.0（后景也会撑出画面）
+//   旧版是 log 映射 + fitTank 的 sqrt 二次压缩 → 小丑鱼和鲸鲨在屏幕上只差 ~2 倍
+export const TANK_L = { k: 0.45, ref: 12, p: 0.65, min: 0.38, max: 7.2 };
 export function tankLen(v) {
-  const cm = Math.max(8, v.cm || 30);
-  const t = clamp((Math.log(cm) - Math.log(10)) / (Math.log(700) - Math.log(10)), 0, 1);
-  let L = 0.62 + t * 0.98;
+  const cm = Math.max(6, v.cm || 30);
+  let L = TANK_L.k * Math.pow(cm / TANK_L.ref, TANK_L.p);
   const gs = v.gx?.scale || 1; if (gs > 1.01) L *= Math.min(1.3, 0.9 + gs * 0.16);
-  return Math.min(L, 1.85);
+  return clamp(L, TANK_L.min, TANK_L.max);
 }
+const SHOW_L = 2.3;   // 被选中 / 孵化亮相时的最大显示体长（巨型鱼游到前景时临时缩小，避免糊满屏、穿近裁剪面）
 
 function canvasTex(w, h, draw, srgb = true) {
   const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
@@ -214,25 +219,93 @@ export function createAquarium({ renderer }) {
   const hhAt = (z) => (CAM0.z - z) * TANH;
   const ycAt = (z) => CAM0.y + (LOOK0.y - CAM0.y) / (CAM0.z - LOOK0.z) * (CAM0.z - z);
 
-  function laneZ(uid, L) {
-    const k = ((hash(uid) % 1000) / 1000 + laneN++ * 0.618) % 1;
-    const z1 = Z_NEAR - Math.max(0, L - 1.4) * 1.5;
-    return lerp(Z_FAR, z1, Math.pow(k, 0.85));
+  // ---------------- v5 空间分布：按视锥算可视体积 · best-candidate 分散目标 · 屏幕空间分离 · 避障 ----------------
+  const uOf = (x, z) => x / hwAt(z);                       // 归一化屏幕坐标（基础机位）
+  const vOf = (y, z) => (y - ycAt(z)) / hhAt(z);
+  const ceilY = () => (th.ice ? 5.6 : 7.5);
+  // 每条鱼的纵深范围：大鱼只在靠后处（半长 ≤ ~0.48 画面半宽），小鱼偏前（太远会小得看不清）
+  function zRange(e) {
+    // v0.9 C：不再要求整条鱼塞进画面 —— 小鱼可以游到前景，大鱼按体长退到后景（大鱼 ~1m 起逐步后退，6m 级只在最深处慢游）
+    //   近端 z1 还要保证体长 ≤ ~1.1 个画面宽（巨型鱼最多出屏一截，不会糊满屏 / 靠近镜头）
+    const zFit = CAM0.z - (e.L * 0.45) / (TANH * Math.max(0.3, camera.aspect));
+    const s = clamp((e.L - 0.9) / 4.6, 0, 1);
+    //   小鱼也不再贴到镜头前（z ≤ 0.2）：纵深压缩后透视不会把「近处小鱼」放大到和「远处大鱼」一样大
+    const z1 = clamp(Math.min(lerp(0.2, Z_FAR + 2.6, Math.pow(s, 0.6)), zFit), Z_FAR + 1.0, Z_NEAR);
+    const z0 = lerp(-3.8, Z_FAR, clamp((e.L - 0.5) / 1.6, 0, 1));   // 小鱼别太靠后（远了小得看不清）
+    return [Math.min(z0, z1 - 1.2), z1];
   }
-  function boundsAt(e, z) {
-    const hl = e.L * 0.5, hh = Math.max(0.15, e.H * 0.5);
-    const hw = Math.max(hl + 0.1, hwAt(z) * 0.86 - hl), yc = ycAt(z), hH = hhAt(z);
-    // v4 构图：鱼群主活动区在屏幕中部偏上（底部 ~140px 会被个人信息卡覆盖；顶部只剩角落按钮）
-    const y0 = Math.max(floorAt(0, z) + 0.7 + hh, yc - hH * 0.4 + hh * 0.5), y1 = Math.max(y0 + 0.3, Math.min(3.3, yc + hH * 0.68) - hh);
-    return { x0: -hw, x1: hw, y0, y1 };
+  function boundsAt(e, z, x = 0) {
+    // v0.9 C：边界按鱼的「中心」算 —— 只留出一小截体长（≤0.2 画面半宽），大鱼游到边上会明显出屏，小鱼基本整条可见
+    const hl = e.L * 0.5, hh = Math.max(0.12, e.H * 0.5);
+    const hw = hwAt(z), yc = ycAt(z), hH = hhAt(z);
+    const xm = Math.max(0.05, hw * SCR.side - Math.min(hl, hw * 0.2));
+    const fy = Math.max(floorAt(x, z), floorAt(x - hl * 0.7, z), floorAt(x + hl * 0.7, z));
+    const hs = Math.min(hh, hH * 0.22);   // 屏幕上下边：同样按中心 + 一小截
+    const y0 = Math.max(fy + 0.75 + hh, yc + hH * SCR.bot + hs);
+    const y1 = Math.max(y0 + 0.2, Math.min(yc + hH * SCR.top, ceilY()) - hs);
+    return { x0: -xm, x1: xm, y0, y1 };
   }
-  function newTarget(e, side) {
-    e.side = side ?? -(e.side || (Math.random() < 0.5 ? 1 : -1));
-    const z = clamp(e.lane + rand(-0.9, 0.9), Z_FAR, Z_NEAR - Math.max(0, e.L - 1.4) * 1.5);
-    const b = boundsAt(e, z);
-    const x = e.side > 0 ? rand(lerp(b.x0, b.x1, 0.65), b.x1) : rand(b.x0, lerp(b.x0, b.x1, 0.35));
-    e.target.set(x, rand(b.y0, b.y1), z);
-    e.retarget = rand(7, 12);
+  // 避障：与布景（岩石 / 柱子 / 树根 / 冰柱）的竖直圆柱求穿透；返回 { c, d, dx, dz, R, up, down, side } 或 null
+  const colHit = {};
+  function hitCollider(e, x, y, z, pad = 0) {
+    const cs = env?.colliders; if (!cs) return null;
+    const hh = e.H * 0.5 + 0.1 + pad, rr = e.L * 0.38 + pad;
+    for (const c of cs) {
+      if (c.z < Z_FAR - 3 || c.z > Z_NEAR + 2) continue;
+      const dx = x - c.x, dz = z - c.z, d = Math.hypot(dx, dz), R = c.r + rr;
+      if (d >= R || y < c.y0 - hh || y > c.y1 + hh) continue;
+      colHit.c = c; colHit.d = d; colHit.dx = dx; colHit.dz = dz; colHit.R = R;
+      colHit.up = c.y1 < 50 ? c.y1 + hh - y : 1e9; colHit.down = c.y0 > -50 ? y - (c.y0 - hh) : 1e9; colHit.side = R - d;
+      return colHit;
+    }
+    return null;
+  }
+  function sampleIn(e) {
+    const [z0, z1] = zRange(e);
+    // 横向用反正弦分布采样（两端更密）：鱼在两个目标点之间往返时，时间平均会天然偏向中间，这里把端点往两侧推来抵消
+    const z = rand(z0, z1), xr = boundsAt(e, z).x1, x = xr * Math.sin((Math.random() - 0.5) * Math.PI), b = boundsAt(e, z, x);
+    return V(x, rand(b.y0, b.y1), z);
+  }
+  // 评分：屏幕上离其它鱼（当前位置 + 目标）/ 卵越远越好（按体型归一化）；偏好横向长距离巡游、坡度平缓、不进石头
+  function scoreAt(e, p, cur) {
+    const u = uOf(p.x, p.z), v = vOf(p.y, p.z), ru = (e.L * 0.5) / hwAt(p.z), rv = (e.H * 0.5) / hhAt(p.z);
+    let best = 3;
+    for (const o of ents.values()) {
+      if (o === e || (o.kind !== 'fish' && o.kind !== 'egg')) continue;
+      const oL = o.kind === 'fish' ? o.L : 0.9, oH = o.kind === 'fish' ? o.H : 0.9;
+      for (let k = 0; k < (o.kind === 'fish' ? 2 : 1); k++) {
+        const q = k ? o.target : o.pos; if (!q) continue;
+        const ou = uOf(q.x, q.z), ov = vOf(q.y, q.z), su = ru + (oL * 0.5) / hwAt(q.z), sv = rv + (oH * 0.5) / hhAt(q.z) + 0.04;
+        const d = Math.hypot((u - ou) / su, (v - ov) / sv) + Math.min(1, Math.abs(p.z - q.z) / 3) * 0.35;
+        if (d < best) best = d;
+      }
+    }
+    let s = best;
+    if (cur) {
+      const du = Math.abs(u - uOf(cur.x, cur.z));
+      if (du < 0.35) s -= 0.6 * (1 - du / 0.35);
+      if (Math.abs(p.z - cur.z) > 2.6) s -= 0.35;
+      if (Math.abs(p.y - cur.y) > (Math.abs(p.x - cur.x) + 0.4) * 0.8) s -= 0.3;
+    }
+    if (hitCollider(e, p.x, p.y, p.z, 0.15)) s -= 5;
+    return s;
+  }
+  function pickSpot(e, cur, n = 12) {
+    let bp = null, bs = -1e9;
+    for (let i = 0; i < n; i++) { const p = sampleIn(e), s = scoreAt(e, p, cur); if (s > bs) { bs = s; bp = p; } }
+    return bp;
+  }
+  function newTarget(e) {
+    e.target.copy(pickSpot(e, e.pos, 16));
+    e.side = e.target.x >= e.pos.x ? 1 : -1;
+    e.retarget = clamp(e.pos.distanceTo(e.target) / Math.max(0.1, e.speed) * 1.4, 6, 18) + rand(0, 2);
+    e.crowd = 0;
+  }
+  // 重新铺开（重进水族箱时不重建鱼，只把位置打散到整个可视体积）
+  function scatter() {
+    const fish = [...ents.values()].filter((e) => e.kind === 'fish' && e.mode === 'swim');
+    for (const e of fish) { e.pos.set(0, -50, -50); e.target.copy(e.pos); }        // 先移开，避免互相参照旧位置
+    for (const e of fish) { e.pos.copy(pickSpot(e, null, 16)); e.target.copy(e.pos); newTarget(e); e.vel.set(e.side * e.speed * 0.6, 0, 0); e.yaw = e.side > 0 ? 0 : Math.PI; placeFish(e, 0); }
   }
   function makeFish(v) {
     const prev = FISH_STYLE.outline; FISH_STYLE.outline = false;
@@ -241,23 +314,30 @@ export function createAquarium({ renderer }) {
     const rm = []; f.root.traverse((o) => { if (o.userData.isOutline || o.userData.outline) rm.push(o); }); rm.forEach((o) => o.parent?.remove(o));
     return f;
   }
+  // v0.9 C：先用 Fish.fitTank 算包围盒，再整体缩放到「最长跨度 = L」（绕开 fitTank 内部的 sqrt 压缩）；体高 ≤ 0.8L 且 ≤ max(1.15, 0.55L)
   function fitFish(f, L) {
-    if (typeof f.fitTank === 'function') { f.fitTank(L); } else f.setScale(L);
-    if (f.h > 1.15) f.setScale(f.dispLen * 1.15 / f.h);
-    return { L: f.len || L, H: f.h || L * 0.4 };
+    if (typeof f.fitTank !== 'function') { f.setScale(L); return { L: f.len || L, H: f.h || L * 0.4 }; }
+    f.fitTank(L);
+    const span = Math.max(f.len || 0, f.w || 0, 1e-3), h = Math.max(f.h || 0, 1e-3);
+    const vert = h > span * 1.25;                       // 海马 / 水母：按身高算体长
+    let r = (vert ? L / h : L / span);
+    r = Math.min(r, (L * 0.8) / h, Math.max(1.15, L * 0.55) / h);
+    f.root.scale.multiplyScalar(r);
+    f.len *= r; f.h *= r; f.w *= r; f.belly *= r; f.dispLen *= r; if (f.tankK) f.tankK *= r;
+    return { L: Math.max(f.len, vert ? f.h * 0.6 : 0), H: f.h };
   }
   function addFish(v, at = null) {
     const uid = v.uid || v.id;
     const f = makeFish(v);
     if (!fishEnv) fishEnv = fishEnvTex(renderer);
     causFish(f.root, 0.65, fishEnv, th.fish?.env ?? 0.9);
-    const { L, H } = fitFish(f, Math.min(3.0, tankLen(v) * 2.1));
+    const { L, H } = fitFish(f, tankLen(v));
     f.root.userData.uid = uid; world.add(f.root);
-    const e = { kind: 'fish', uid, v, f, L, H, pos: V(), vel: V(rand(-0.3, 0.3), 0, 0), target: V(), lane: 0, speed: lerp(0.5, 0.26, clamp((L - 1.0) / 2.0, 0, 1)), idle: 0, yaw: 0, mode: 'swim', scale: 1, retarget: 0, side: 0 };
-    e.lane = laneZ(uid, L);
-    const b = boundsAt(e, e.lane);
-    if (at) e.pos.copy(at); else e.pos.set(rand(b.x0, b.x1), rand(b.y0, b.y1), e.lane);
+    // v0.9 C：大鱼游得更慢（后景缓慢巡游，不长时间挡屏）；k0 = 正常缩放，sk = 展示时的临时缩放系数
+    const e = { kind: 'fish', uid, v, f, L, H, k0: f.root.scale.x, sk: 1, pos: V(), vel: V(rand(-0.3, 0.3), 0, 0), target: V(), speed: lerp(0.55, 0.26, clamp((L - 0.6) / 4.0, 0, 1)), idle: 0, yaw: 0, mode: 'swim', scale: 1, retarget: 0, side: 0, crowd: 0 };
+    if (at) e.pos.copy(at); else e.pos.copy(pickSpot(e, null, 16));
     newTarget(e);
+    e.vel.set(e.side * e.speed * 0.5, 0, 0);
     e.yaw = e.target.x > e.pos.x ? 0 : Math.PI;
     e.halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: '#cdf3ff', transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
     world.add(e.halo);
@@ -303,15 +383,22 @@ export function createAquarium({ renderer }) {
     ents.delete(uid); if (selected === uid) selected = null;
   }
 
+  const showK = (e) => Math.min(1, SHOW_L / Math.max(0.1, e.L));
+  const effL = (e) => e.L * (e.sk ?? 1);
   function placeFish(e, dt) {
     const f = e.f;
+    if (e.mode !== 'script' && e.k0) {   // 巨型鱼被选中 → 游到前景的同时平滑缩小；回到鱼群时恢复
+      const want = e.mode === 'show' ? showK(e) : 1;
+      e.sk += (want - e.sk) * Math.min(1, dt * 3);
+      f.root.scale.setScalar(e.k0 * e.sk);
+    }
     f.root.position.copy(e.pos);
     f.root.rotation.set(0, e.yaw, clamp(e.vel.y / Math.max(0.1, e.speed), -1, 1) * 0.28);
     if (typeof f.animate === 'function') f.animate(dt, { swimSpeed: e.vel.length() / Math.max(0.1, e.speed), mode: e.mode }); else f.update(dt, 'swim');
     const sel = selected === e.uid;
     e.halo.position.copy(e.pos).add(V(0, 0, -0.3));
     e.halo.material.opacity += ((sel ? 0.32 : 0) - e.halo.material.opacity) * Math.min(1, dt * 5);
-    e.halo.scale.setScalar(e.L * 2.2 * e.scale);
+    e.halo.scale.setScalar(effL(e) * 2.2 * e.scale);
   }
   function placeEgg(e, dt) {
     e.g.position.copy(e.pos);
@@ -333,7 +420,7 @@ export function createAquarium({ renderer }) {
   }
 
   // ---------------- 更新 ----------------
-  const tmp = V(), tmp2 = V(), tmp3 = V();
+  const tmp = V(), tmp2 = V(), tmp3 = V(), sep = V();
   function updateFish(e, dt) {
     if (e.mode === 'script') { placeFish(e, dt); return; }
     let want;
@@ -354,15 +441,65 @@ export function createAquarium({ renderer }) {
     e.retarget -= dt;
     // 生活感：到点后有时停下来悬停一会儿（轻轻摆鳍、慢慢漂），再换方向
     if (e.idle > 0) e.idle -= dt;
-    else if (e.pos.distanceTo(e.target) < 0.4 || e.retarget <= 0) { if (Math.random() < 0.35) e.idle = rand(1.5, 3.5); newTarget(e); }
-    want = tmp.copy(e.target).sub(e.pos).setLength(e.idle > 0 ? e.speed * 0.12 : e.speed);
+    else if (e.pos.distanceTo(e.target) < 0.4 || e.retarget <= 0) { if (Math.random() < 0.45) e.idle = rand(1.2, 3.2); newTarget(e); }
+    // 远处的鱼在画面上显得慢 → 按距离略微提速（视觉速度更一致）
+    const spd = e.speed * clamp(Math.sqrt((CAM0.z - e.pos.z) / 9.5), 0.85, 1.3);
+    want = tmp.copy(e.target).sub(e.pos);
+    const dT = want.length(); want.setLength((e.idle > 0 ? 0.12 : 1) * spd * clamp(dT / 0.8, 0.35, 1));
+    // 分离（boids separation）：① 3D 近距离 ② 屏幕空间重叠（不同深度也会在画面上叠成一坨）—— 按体型归一化，小鱼让大鱼
+    const ue = uOf(e.pos.x, e.pos.z), ve = vOf(e.pos.y, e.pos.z), rue = (e.L * 0.5) / hwAt(e.pos.z), rve = (e.H * 0.5) / hhAt(e.pos.z);
+    let crowded = false; sep.set(0, 0, 0);
     for (const o of ents.values()) {
-      if (o === e || o.kind !== 'fish') continue;
-      tmp2.copy(e.pos).sub(o.pos); const d = tmp2.length(), r = (e.L + o.L) * 0.5;
-      if (d < r && d > 1e-3) want.addScaledVector(tmp2.normalize(), (1 - d / r) * e.speed * 1.4);
-      // 画面重叠：投影上靠太近（xy 近、z 不同）也轻推开，避免一团
-      const dz = Math.abs(tmp2.z), dxy = Math.hypot(tmp2.x, tmp2.y), r2 = (e.L + o.L) * 0.42;
-      if (dz < 3 && dxy < r2 && dxy > 1e-3) { want.x += (tmp2.x / dxy) * (1 - dxy / r2) * e.speed * 0.8; want.y += (tmp2.y / dxy) * (1 - dxy / r2) * e.speed * 0.5; }
+      if (o === e || (o.kind !== 'fish' && o.kind !== 'egg')) continue;
+      const oL = o.kind === 'fish' ? o.L : 0.9, oH = o.kind === 'fish' ? o.H : 0.9;
+      tmp2.copy(e.pos).sub(o.pos); const d = tmp2.length(), r = (e.L + oL) * 0.45 + 0.15;
+      if (d < r && d > 1e-3) sep.addScaledVector(tmp2.multiplyScalar(1 / d), (1 - d / r) * spd * 1.5);
+      const su = rue + (oL * 0.5) / hwAt(o.pos.z) + 0.02, sv = (rve + (oH * 0.5) / hhAt(o.pos.z)) * 1.1 + 0.05;   // 留一点间隙，别贴着叠
+      const du = (ue - uOf(o.pos.x, o.pos.z)) / su, dv = (ve - vOf(o.pos.y, o.pos.z)) / sv, dd = Math.hypot(du, dv);
+      if (dd < 1) {
+        const k = (1 - dd * dd) * spd * (e.L <= oL ? 1.6 : 0.7);
+        const nx = dd > 1e-3 ? du / dd : (e.uid < o.uid ? 1 : -1), ny = dd > 1e-3 ? dv / dd : 0;
+        sep.x += nx * k; sep.y += ny * k * 0.85;
+        sep.z += (e.pos.z <= o.pos.z ? -1 : 1) * k * 0.3;       // 深度上也错开一点
+        if (dd < 0.7 && e.L <= oL) crowded = true;
+      } else if (o.kind === 'fish' && dd < 4) {
+        // 预判避让（unaligned collision avoidance）：按屏幕相对速度求最近接近点，~2.5s 内会叠上 → 提前上下错开
+        const ru = (e.vel.x / hwAt(e.pos.z) - o.vel.x / hwAt(o.pos.z)) / su, rv = (e.vel.y / hhAt(e.pos.z) - o.vel.y / hhAt(o.pos.z)) / sv;
+        const vv = ru * ru + rv * rv;
+        if (vv > 1e-4) {
+          const tc = -(du * ru + dv * rv) / vv;
+          if (tc > 0 && tc < 2.5) {
+            const cu = du + ru * tc, cv = dv + rv * tc, cd = Math.hypot(cu, cv);
+            if (cd < 1) {
+              const k = (1 - cd) * (1 - tc / 2.5) * spd * (e.L <= oL ? 1.1 : 0.4);
+              sep.y += (Math.abs(cv) > 0.05 ? Math.sign(cv) : e.uid < o.uid ? 1 : -1) * k;
+              sep.z += (e.pos.z <= o.pos.z ? -1 : 1) * k * 0.25;
+            }
+          }
+        }
+      }
+    }
+    // 分离优先：正在避让时减弱「奔向目标」的力，避免目标在另一条鱼身后时硬穿过去
+    const sm = sep.length(); want.multiplyScalar(1 - Math.min(0.75, sm / Math.max(0.05, spd))).add(sep);
+    // 一直挤在一起 → 小的那条换个去处
+    e.crowd = crowded ? (e.crowd || 0) + dt : Math.max(0, (e.crowd || 0) - dt);
+    if (e.crowd > 1.4 && e.idle <= 0) newTarget(e);
+    // 每 ~1.2s 复查一次目标点：别的鱼已经占了那里（屏幕上会叠）→ 提前换个空处
+    e.chk = (e.chk ?? Math.random()) - dt;
+    if (e.chk <= 0) { e.chk = rand(1.0, 1.5); if (e.idle <= 0 && scoreAt(e, e.target, null) < 0.9) newTarget(e); }
+    // 软边界：靠近可视体积边缘时往里收（不再硬贴边滑行）
+    const bb = boundsAt(e, e.pos.z, e.pos.x), [zz0, zz1] = zRange(e);
+    const soft = (v, lo, hi, m) => (v < lo + m ? (lo + m - v) / m : v > hi - m ? -(v - hi + m) / m : 0);
+    want.x += soft(e.pos.x, bb.x0, bb.x1, Math.min(0.3, (bb.x1 - bb.x0) * 0.15)) * spd * 1.2;
+    want.y += soft(e.pos.y, bb.y0, bb.y1, Math.min(0.4, (bb.y1 - bb.y0) * 0.3)) * spd * 1.2;
+    want.z += soft(e.pos.z, zz0, zz1, 0.5) * spd;
+    // 避障：岩石 / 柱子等 → 沿最短出路（向上 / 向下 / 侧向）离开
+    const hc = hitCollider(e, e.pos.x, e.pos.y, e.pos.z, 0.05);
+    if (hc) {
+      const m = Math.min(hc.up, hc.down, hc.side), k = spd * 2.2;
+      if (m === hc.up) want.y += k; else if (m === hc.down) want.y -= k;
+      else if (hc.d > 1e-3) { want.x += (hc.dx / hc.d) * k; want.z += (hc.dz / hc.d) * k; } else want.x += k;
+      if (hitCollider(e, e.target.x, e.target.y, e.target.z, 0.1)) newTarget(e);
     }
     // 有鱼被展示时，其它鱼礼让出前景（离开展示位附近与镜头之间的区域）
     const sh = selected && selected !== e.uid ? ents.get(selected) : null;
@@ -375,12 +512,14 @@ export function createAquarium({ renderer }) {
         want.z -= k * 0.8;
       }
     }
-    e.vel.lerp(want, Math.min(1, dt * (sh ? 1.6 : 0.8)));
-    e.vel.y *= 0.96;
+    e.vel.lerp(want, Math.min(1, dt * (sh ? 1.6 : 0.9)));
+    e.vel.y *= Math.pow(0.985, dt * 60);           // 竖直阻尼（保持横向巡游感，但不至于让上下避让失效）
     e.pos.addScaledVector(e.vel, dt);
-    e.pos.z = clamp(e.pos.z, Z_FAR - 0.5, Z_NEAR + 0.2);
-    const b = boundsAt(e, e.pos.z);
-    e.pos.x = clamp(e.pos.x, b.x0, b.x1); e.pos.y = clamp(e.pos.y, b.y0, b.y1);
+    // 兜底：越界时平滑拉回（从展示位游回来时不会瞬移）
+    const pull = Math.min(1, dt * 4);
+    e.pos.z += (clamp(e.pos.z, Z_FAR - 0.4, zz1 + 0.3) - e.pos.z) * pull;
+    const b = boundsAt(e, e.pos.z, e.pos.x);
+    e.pos.x += (clamp(e.pos.x, b.x0 - 0.12, b.x1 + 0.12) - e.pos.x) * pull; e.pos.y += (clamp(e.pos.y, b.y0 - 0.1, b.y1 + 0.12) - e.pos.y) * pull;
     if (Math.hypot(e.vel.x, e.vel.z) > 0.04) {
       // 偏侧身游：限制正对/背对镜头的角度，鱼尽量展示侧面
       let wy = Math.atan2(-e.vel.z, e.vel.x);
@@ -419,7 +558,7 @@ export function createAquarium({ renderer }) {
     lookTarget.set(LOOK0.x + pan * 0.55, LOOK0.y, LOOK0.z);
     camTarget.set(CAM0.x + pan * 1.5 + Math.sin(t * 0.23) * 0.08, CAM0.y + Math.sin(t * 0.31) * 0.06, CAM0.z);
     if (sel) {
-      const d = sel.kind === 'fish' ? clamp(1.5 + sel.L * 3.0, 2.9, 9) : 3.6;
+      const d = sel.kind === 'fish' ? clamp(1.5 + effL(sel) * 3.0, 2.9, 9) : 3.6;
       tmp.set(sel.pos.x * 0.75 + pan * 0.3, sel.pos.y - 0.155 * d, sel.pos.z);          // 卡片在下方：鱼落在画面上 1/3
       tmp3.set(tmp.x + pan * 0.6, tmp.y + 0.3, Math.min(CAM0.z, tmp.z + d));
       lookTarget.lerp(tmp, focusK); camTarget.lerp(tmp3, focusK);
@@ -427,7 +566,7 @@ export function createAquarium({ renderer }) {
     spot.intensity += ((sel ? 9 : 0) - spot.intensity) * Math.min(1, dt * 3);
     if (sel) spot.position.set(sel.pos.x + 0.6, sel.pos.y + 1.0, sel.pos.z + 1.4);
     veil.material.opacity = 0.42 * focusK; veil.visible = focusK > 0.01;
-    if (sel) { veil.position.set(sel.pos.x, sel.pos.y, sel.pos.z - Math.max(0.9, (sel.L || 1) * 0.7)); veil.scale.setScalar(9); }
+    if (sel) { veil.position.set(sel.pos.x, sel.pos.y, sel.pos.z - Math.max(0.9, (sel.kind === 'fish' ? effL(sel) : 1) * 0.7)); veil.scale.setScalar(9); }
     veil.quaternion.copy(camera.quaternion);
     const k = snap ? 1 : Math.min(1, dt * 3);
     camLook.lerp(lookTarget, k); camera.position.lerp(camTarget, k);
@@ -537,7 +676,7 @@ export function createAquarium({ renderer }) {
     flash(EGG_C, '#fff4dc', 0.6, 4.2, 0.9, 0.75);
     burst(EGG_C, '#fff1c8', 60, 2.2, 0.16); burst(EGG_C, glow, 36, 1.6, 0.13); bubbleBurst(EGG_C, 26, 0.45);
     if (v.mut) pillar(EGG_C, String(v.mut).includes('rare') ? '#ffd88a' : '#f0b89a');
-    const ne = addFish(v, EGG_C); ne.mode = 'script'; const k1 = ne.f.root.scale.x; ne.f.root.scale.setScalar(0.001); ne.yaw = -0.45;
+    const ne = addFish(v, EGG_C); ne.mode = 'script'; ne.sk = showK(ne); const k1 = ne.k0 * ne.sk; ne.f.root.scale.setScalar(0.001); ne.yaw = -0.45;
     selected = ne.uid;
     await tween(0.9, (k) => {
       e.top.position.y = ease(k) * 0.9; e.top.rotation.z = k * 1.2; e.top.position.x = -k * 0.4;
@@ -580,15 +719,16 @@ export function createAquarium({ renderer }) {
 
   // ---------------- 同步 / 拾取 ----------------
   function sync(tank) {
-    const keep = new Set();
-    for (const x of tank) {
-      if (!x || (!x.egg && (!SPECIES_BY_ID[x.sp] || SPECIES_BY_ID[x.sp].odd || x.item))) continue;   // v4 最后防线：宝箱/漂流物/道具不渲染进水族箱
-      const uid = x.uid || x.id; keep.add(uid);
-      const e = ents.get(uid);
+    const list = tankList(tank), keep = new Set(list.map((x) => x.uid || x.id));
+    for (const x of list) {
+      const e = ents.get(x.uid || x.id);
       if (!e) x.egg ? addEgg(x) : addFish(x);
       else if (e.kind === 'egg') e.egg = x;
     }
     for (const [uid, e] of [...ents]) if (!keep.has(uid) && e.mode !== 'script') removeEnt(uid);
+  }
+  function tankList(tank) {
+    return (tank || []).filter((x) => x && (x.egg || (SPECIES_BY_ID[x.sp] && !SPECIES_BY_ID[x.sp].odd && !x.item)));   // v4 最后防线：宝箱/漂流物/道具不渲染进水族箱
   }
   function clear() { for (const uid of [...ents.keys()]) removeEnt(uid); anims.length = 0; }
   function setEggProgress(uid, prog) { const e = ents.get(uid); if (e && e.kind === 'egg') e.prog = prog; }
@@ -610,7 +750,7 @@ export function createAquarium({ renderer }) {
       if (_p.z > 1) continue;
       const sx = (_p.x * 0.5 + 0.5) * W, sy = (-_p.y * 0.5 + 0.5) * H;
       const pxPerM = H / (2 * TANH * d0);
-      const r = Math.max(44, (e.kind === 'fish' ? e.L * 0.55 : 0.6) * pxPerM);
+      const r = Math.max(44, (e.kind === 'fish' ? effL(e) * 0.5 : 0.6) * pxPerM);
       const d = Math.hypot(sx - x, sy - y);
       const score = d / r + d0 * 0.01;
       if (d < r && score < bd) { bd = score; best = e.uid; }
@@ -636,6 +776,10 @@ export function createAquarium({ renderer }) {
   canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', () => { drag = null; });
 
   function render() {
+    if (!ready) return;          // 准备中（过场遮住）：不渲染半成品场景
+    drawFrame();
+  }
+  function drawFrame() {
     // 防闪白安全钳：曝光限定在 [0.85, 1.12]（主题微调），ACES；只有发光体（卵/光束/冷光）用加色
     const exp = renderer.toneMappingExposure, sh = renderer.shadowMap.enabled;
     renderer.toneMappingExposure = clamp(th.light.exp || 1, 0.85, 1.12); renderer.shadowMap.enabled = false;
@@ -645,6 +789,112 @@ export function createAquarium({ renderer }) {
   }
   function resize(Wd, Hd) { camera.aspect = Wd / Math.max(1, Hd); camera.updateProjectionMatrix(); uPx.value = Hd * renderer.getPixelRatio() / (2 * TANH); }
 
+  // ---------------- v5 异步准备（配合 tank_ui 过场）：拆帧建场景 / 鱼 → compileAsync 预编译 → 渲染首帧 ----------------
+  let ready = true, prepTok = 0;
+  const warmed = new Set();          // 已热身绘制过的「材质 × 顶点布局」，再次进场只补新出现的
+  const nextFrame = () => new Promise((res) => requestAnimationFrame(() => setTimeout(res, 0)));
+  // 预编译场景里所有材质（含不可见的光晕/雾幕），并先渲染一帧（贴图上传 / PMREM），避免进场后首帧卡几秒
+  async function warm(alive = () => true, onK = null) {
+    const sh = renderer.shadowMap.enabled; let p = null;
+    // 拆帧预编译：布景各部件 / 每条鱼单独 compile（灯光取自 scene，程序参数与正式渲染一致），每 ~40ms 让出一帧
+    const parts = [...(env ? env.group.children : []), ...world.children.filter((o) => o !== env?.group), ...scene.children.filter((o) => o !== world)];
+    renderer.setRenderTarget(null);
+    let slice = performance.now(); const W0 = performance.now(), WT = (warm.T = { n: parts.length });
+    for (const o of parts) {
+      if (performance.now() - slice > 40) { await nextFrame(); if (!alive()) return; slice = performance.now(); }
+      renderer.shadowMap.enabled = false;
+      try { renderer.compile(o, camera, scene); } catch (err) { /* 兜底在下面整体 compileAsync */ } finally { renderer.shadowMap.enabled = sh; }
+    }
+    renderer.shadowMap.enabled = false; renderer.setRenderTarget(null);     // 与 render() 一致的程序参数，避免编译后又重编
+    try { p = renderer.compileAsync ? renderer.compileAsync(scene, camera) : null; } catch (err) { console.warn('aq compile', err); } finally { renderer.shadowMap.enabled = sh; }
+    if (p) { try { await p; } catch (err) { console.warn('aq compile', err); } }
+    WT.compile = Math.round(performance.now() - W0);
+    if (!alive()) return;
+    // 拆帧「热身绘制」：驱动真正的管线生成 / 贴图上传发生在首次 draw（不在 link 时），一次画全场会卡成一大帧。
+    // 这里按「材质 × 顶点布局」去重，每次只让一个网格可见、裁剪到 2×2 像素画一遍（几乎无填充开销），分摊到多帧；灯光不动，程序参数不变。
+    const rend = [], seen = new Set();
+    (function walk(o) {
+      if (!o.visible) return;
+      if (o.isMesh || o.isSprite || o.isPoints || o.isLine) rend.push(o);
+      for (const c of o.children) walk(c);
+    })(scene);
+    const objs = rend.filter((o) => {
+      const ms = Array.isArray(o.material) ? o.material : [o.material];
+      const k = ms.map((m) => m?.uuid).join(',') + '|' + Object.keys(o.geometry?.attributes || {}).join(',') + (o.geometry?.index ? 'i' : '') + (o.isInstancedMesh ? 'I' : '') + (o.isSkinnedMesh ? 'S' : '') + (o.morphTargetInfluences ? 'M' : '');
+      if (seen.has(k) || warmed.has(k)) return false; seen.add(k); return true;
+    });
+    WT.uniq = objs.length; WT.all = rend.length;
+    const sc = renderer.getScissorTest(), sv = renderer.getScissor(new THREE.Vector4());
+    const show = (one) => {
+      for (const o of rend) o.visible = one === undefined;
+      for (let p = one; p; p = p.parent) p.visible = true;         // 父级若也是网格须保持可见，否则子网格画不出来
+    };
+    const d0 = performance.now(); slice = d0;
+    try {
+      renderer.setScissorTest(true); renderer.setScissor(0, 0, 2, 2);
+      for (let i = 0; i < objs.length; i++) {
+        if (performance.now() - slice > 40) {
+          show();                                                   // 让出期间恢复可见，避免外部读到半成品状态
+          renderer.setScissorTest(sc); await nextFrame(); if (!alive()) return;
+          renderer.setScissorTest(true); renderer.setScissor(0, 0, 2, 2); slice = performance.now();
+        }
+        show(objs[i]);
+        drawFrame();
+        if ((i & 7) === 7) onK?.((i + 1) / objs.length);
+      }
+    } finally {
+      show();
+      renderer.setScissor(sv); renderer.setScissorTest(sc);
+    }
+    for (const k of seen) warmed.add(k);
+    if (warmed.size > 6000) warmed.clear();
+    WT.pre = Math.round(performance.now() - d0);
+    if (!alive()) return;
+    await nextFrame(); if (!alive()) return;
+    const f0 = performance.now(); drawFrame(); WT.draw = Math.round(performance.now() - f0);
+  }
+  // 返回 Promise<{ ok, ms, cold }>；onProg(k 0..1, info) 报告进度；被新的 prepare 打断时 ok=false
+  async function prepare(tank, Wd, Hd, opts = {}, onProg = null) {
+    const tok = ++prepTok, alive = () => tok === prepTok, t0 = performance.now();
+    const prog = (k, info) => { try { onProg?.(k, info); } catch (err) { /* */ } };
+    ready = false; active = false; selected = null;
+    resize(Wd, Hd);
+    const tid = themeOf(opts.theme || themeId || DEFAULT_THEME).id;
+    const coldEnv = !(tid === themeId && env) && !envCache.has(tid);
+    const list = tankList(tank), keep = new Set(list.map((x) => x.uid || x.id));
+    if (opts.reset) clear(); else for (const [uid, e] of [...ents]) if (!keep.has(uid)) removeEnt(uid);
+    const todo = list.filter((x) => !ents.has(x.uid || x.id));
+    const cold = coldEnv || todo.length > 0 || !fishEnv;
+    prog(0.04, { cold, n: todo.length });
+    if (coldEnv || !fishEnv) { await nextFrame(); if (!alive()) return { ok: false }; }
+    const T = {}; let tm = performance.now();
+    setTheme(tid);                                   // 首次：建布景（同步重活，之后有缓存）
+    T.env = Math.round(performance.now() - tm); tm = performance.now();
+    prog(0.32, { cold });
+    let slice = performance.now();
+    for (let i = 0; i < todo.length; i++) {
+      if (performance.now() - slice > 12) { await nextFrame(); if (!alive()) return { ok: false }; slice = performance.now(); }
+      const x = todo[i];
+      if (!ents.has(x.uid || x.id)) x.egg ? addEgg(x) : addFish(x);
+      prog(0.32 + 0.43 * (i + 1) / todo.length, { cold, i: i + 1, n: todo.length });
+    }
+    T.fish = Math.round(performance.now() - tm);
+    for (const x of list) { const e = ents.get(x.uid || x.id); if (e?.kind === 'egg') e.egg = x; }
+    for (const e of ents.values()) if (e.kind === 'fish' && e.mode === 'show') e.mode = 'swim';
+    if (!opts.reset) scatter();
+    pan = 0; panV = 0; focusK = 0; selected = null;
+    camera.position.copy(CAM0).add(V(0, 0.4, 1.2)); camLook.copy(LOOK0);
+    active = true; update(0.016);
+    prog(0.8, { cold });
+    await nextFrame(); if (!alive()) return { ok: false };
+    tm = performance.now();
+    await warm(alive, (k) => prog(0.8 + 0.18 * k, { cold })); if (!alive()) return { ok: false };
+    T.warm = Math.round(performance.now() - tm); T.w = warm.T;
+    ready = true;
+    prog(1, { cold });
+    return { ok: true, ms: performance.now() - t0, cold, T };
+  }
+
   return {
     scene, camera, ents,
     get active() { return active; },
@@ -653,13 +903,21 @@ export function createAquarium({ renderer }) {
     get theme() { return themeId; },
     setTheme,
     open(tank, Wd, Hd, opts = {}) {
+      prepTok++; ready = true;
       setTheme(opts.theme || themeId || DEFAULT_THEME);
       active = true; resize(Wd, Hd);
       if (opts.reset) clear();
       sync(tank); pan = 0; panV = 0; focusK = 0; selected = null;
       camera.position.copy(CAM0).add(V(0, 0.4, 1.2)); camLook.copy(LOOK0); update(0.016);
     },
-    close() { active = false; selected = null; drag = null; },
+    prepare,
+    // 是否「热」：主题布景已缓存、鱼都已建好 → 进场几乎不耗时（过场只需轻微淡入淡出）
+    isWarm(tank, theme) {
+      const tid = themeOf(theme || themeId || DEFAULT_THEME).id;
+      return !!fishEnv && (tid === themeId ? !!env : envCache.has(tid)) && tankList(tank).every((x) => ents.has(x.uid || x.id));
+    },
+    get ready() { return ready; },
+    close() { prepTok++; ready = true; active = false; selected = null; drag = null; },
     clear, sync, update, render, resize, select, screenPos, pickAt, setEggProgress, playEggify, playHatch, playRelease,
     busy: () => anims.length > 0,
   };

@@ -101,20 +101,20 @@ function hullTexture() {
   });
 }
 
+// v0.8：船名 = 粉色手写体「Fish Party」（离线字体 assets/fonts/GreatVibes.woff2，加载完成后重绘贴图）
+function drawName(g, w, h) {
+  g.clearRect(0, 0, w, h);
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = `148px "FP Script", "Snell Roundhand", "Segoe Script", cursive`;
+  // 极细的暖白描边托底，在白色船尾上也能读出来；主体柔粉渐变
+  g.lineJoin = 'round'; g.lineWidth = 6; g.strokeStyle = 'rgba(255,250,244,.95)'; g.strokeText('Fish Party', w / 2, h * 0.45);
+  const gr = g.createLinearGradient(0, h * 0.2, 0, h * 0.85); gr.addColorStop(0, '#f4a3b4'); gr.addColorStop(1, '#e27d95');
+  g.fillStyle = gr; g.fillText('Fish Party', w / 2, h * 0.45);
+}
 function nameTexture() {
-  return canvasTex(1024, 256, (g, w, h) => {
-    g.clearRect(0, 0, w, h);
-    g.font = 'italic 900 118px "Arial Black", "Helvetica Neue", Arial';
-    g.textAlign = 'center';
-    g.textBaseline = 'middle';
-    g.lineJoin = 'round';
-    g.lineWidth = 18; g.strokeStyle = SOFT.ink; g.strokeText('PARTY TIDE', w / 2, h * 0.42);
-    g.fillStyle = SOFT.rose; g.fillText('PARTY TIDE', w / 2, h * 0.42);
-    g.font = '900 40px "Helvetica Neue", Arial';
-    g.lineWidth = 8; g.strokeText('★ FRIENDS FISHING ★', w / 2, h * 0.82);
-    g.fillStyle = SOFT.butter;
-    g.fillText('★ FRIENDS FISHING ★', w / 2, h * 0.82);
-  });
+  const t = canvasTex(1024, 256, drawName);
+  if (document.fonts?.load) document.fonts.load('160px "FP Script"').then(() => { const c = t.image; drawName(c.getContext('2d'), c.width, c.height); t.needsUpdate = true; }).catch(() => {});
+  return t;
 }
 
 function flagTexture() {
@@ -454,15 +454,15 @@ export function createBoat() {
     const thr = rbox(0.38, 0.32, 0.14, 0.07, m, 5);
     thr.position.set(x, 0.66, -0.47); thr.rotation.set(-0.25, 0.2 * Math.sign(x), 0.1); sofa.add(thr);
   }
-  // 侧边长椅（左舷）
+  // v0.8：左舷侧边长椅下线（占了左舷钓位）—— 保留 Group 但不挂到船上
   const side = new THREE.Group();
   side.position.set(-1.62, deckYAtZ(-4.4), -4.4);
-  boat.add(side);
   const sb = rbox(0.55, 0.38, 2.2, 0.12, M.white, 5); sb.position.y = 0.19; side.add(sb);
   const ss = rbox(0.55, 0.16, 2.15, 0.08, M.cushion, 5); ss.position.y = 0.45; side.add(ss);
-  // 茶几
+  // 茶几 —— v0.8：挪到尾沙发正前方的中轴线上，缩小一圈，两舷都空出来钓鱼
   const table = new THREE.Group();
-  table.position.set(-0.5, deckYAtZ(-4.7), -4.7);
+  table.position.set(0, deckYAtZ(-5.15), -5.15);
+  table.scale.setScalar(0.82);
   boat.add(table);
   const tTop = rbox(1.1, 0.1, 1.4, 0.05, M.teak, 5); tTop.position.y = 0.69; table.add(tTop);
   const tLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 0.68, 20), M.white); tLeg.position.y = 0.34; table.add(tLeg); tLeg.castShadow = true;
@@ -486,15 +486,15 @@ export function createBoat() {
   }
 
   // 冷藏箱 + 蓝牙音箱
+  // v0.8：绿色冷藏箱下线（挡右舷走道）—— 不挂到船上
   const cooler = new THREE.Group();
   cooler.position.set(1.55, deckYAtZ(-3.2), -3.2);
-  boat.add(cooler);
   const cBody = rbox(0.62, 0.4, 0.42, 0.15, M.mintP, 6); cBody.position.y = 0.2; cooler.add(cBody);
   const cLid = rbox(0.66, 0.1, 0.46, 0.05, M.white, 5); cLid.position.y = 0.44; cooler.add(cLid);
   const speaker = rbox(0.28, 0.14, 0.12, 0.055, M.grape, 4); speaker.position.set(0.05, 0.55, 0); cooler.add(speaker);
 
-  // 竿架上的备用钓竿
-  for (const sx of [-1, 1]) {
+  // 竿架上的备用钓竿 —— v0.8 下线：船尾两角的黑色细杆容易被误认成玩家鱼竿
+  if (false) for (const sx of [-1, 1]) {
     const z = -6.4;
     const base = new THREE.Vector3(sx * (halfBeamAtZ(z) - 0.12), gunwaleY(0.04), z);
     const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.016, 2.4, 6), M.black);
@@ -729,7 +729,7 @@ function buildParty(boat, M, { cabW, cabZ0, htZ0, htZ1 }) {
     g.fillStyle = SOFT.taupe; g.fillRect(0, 0, w, h);
     const cols = [SOFT.rose, SOFT.butter, SOFT.mint, SOFT.blue, SOFT.cream];
     for (let i = 0; i < 12; i++) { const bh = 20 + ((i * 37) % 70); g.fillStyle = cols[i % 5]; const x = 14 + i * 19, y = h - 14 - bh; g.beginPath(); g.roundRect ? g.roundRect(x, y, 13, bh, 6) : g.rect(x, y, 13, bh); g.fill(); }
-    g.font = 'italic 900 46px "Arial Black", Arial'; g.fillStyle = SOFT.cream; g.textAlign = 'left'; g.fillText('DJ', 14, 50);
+    /* v0.8：去掉面板上的「DJ」字样 */
     g.fillStyle = SOFT.rose; g.beginPath(); g.arc(w - 36, 34, 16, 0, Math.PI * 2); g.fill();
   });
   const faceM = new THREE.MeshStandardMaterial({ map: faceTex, emissiveMap: faceTex, emissive: new THREE.Color('#ffffff'), emissiveIntensity: 0.18, roughness: 0.7 });

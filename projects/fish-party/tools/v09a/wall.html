@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>v0.9 A · 合成物种墙</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  html, body { margin: 0; height: 100%; background: radial-gradient(120% 90% at 50% 20%, #24435a 0%, #10202e 60%, #0a141d 100%); color: #e8f1f5; font: 12px/1.3 -apple-system, "PingFang SC", sans-serif; overflow: hidden; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
+  #grid { position: fixed; inset: 0; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); pointer-events: none; }
+  .cell { position: relative; border-right: 1px solid #ffffff10; border-bottom: 1px solid #ffffff10; }
+  .lab { position: absolute; left: 8px; bottom: 6px; right: 8px; }
+  .lab b { font-size: 13px; letter-spacing: .5px; }
+  .lab i { display: block; font-style: normal; opacity: .62; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #stat { position: fixed; right: 8px; top: 6px; opacity: .55; font-size: 10px; }
+</style>
+<script type="importmap">{ "imports": { "three": "../../vendor/three.module.min.js" } }</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="grid"></div>
+<div id="stat"></div>
+<script type="module">
+import * as THREE from 'three';
+import { synthesize, wildSynth } from '../../src/synth.js';
+import { Fish, makeVariant, SPECIES_BY_ID } from '../../src/fishes.js';
+import { stylizeObject } from '../../src/toon.js';
+
+const qs = new URLSearchParams(location.search);
+const W = innerWidth, H = innerHeight;
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, +(qs.get('dpr') || 2)));
+renderer.setSize(W, H, false);
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+renderer.setScissorTest(true); renderer.setClearColor('#173042');
+
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight('#cfe6ff', '#2b3a44', 1.6));
+const key = new THREE.DirectionalLight('#fff4e2', 2.6); key.position.set(2, 3, 2.5); scene.add(key);
+const rim = new THREE.DirectionalLight('#8fd0ff', 1.4); rim.position.set(-2.5, 1.2, -2); scene.add(rim);
+// 简易环境反射（金属 / 瓷器需要）：程序化渐变天空 → PMREM
+{
+  const env = new THREE.Scene(), g = new THREE.SphereGeometry(10, 32, 16);
+  const m = new THREE.ShaderMaterial({ side: THREE.BackSide, uniforms: {}, vertexShader: 'varying vec3 p; void main(){ p = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }', fragmentShader: 'varying vec3 p; void main(){ float y = p.y; vec3 c = mix(vec3(.18,.22,.26), vec3(.95,.97,1.), smoothstep(-.2,.9,y)); c += vec3(1.,.9,.75) * pow(max(dot(p, normalize(vec3(.5,.6,.4))),0.), 24.) * 3.; gl_FragColor = vec4(c,1.); }' });
+  env.add(new THREE.Mesh(g, m));
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(env, 0.02).texture;
+}
+
+const mk = (id) => makeVariant(SPECIES_BY_ID[id], 0);
+const RECIPES = [
+  ['clownfish', 'tuna', 'suit'], ['pufferfish', 'salmon', 'toilet'], ['moray-eel', 'sardine', 'key'], ['tuna', 'barracuda', 'gear'],
+  ['sunfish', 'clownfish', 'teapot'], ['jellyfish', 'koi', 'umbrella'], ['lobster', 'mackerel', 'crown'], ['seahorse', 'blue-tang', 'icecream'],
+  ['anglerfish', 'sardine', 'bulb'], ['manta-ray', 'salmon', 'origami'], ['octopus', 'parrotfish', 'chili'], ['narwhal', 'swordfish', 'guitar'],
+  ['snow-crab', 'lionfish', 'rocket'], ['sea-turtle', 'pufferfish', 'mushroom'], null, null,
+];
+const vs = RECIPES.map((r, i) => {
+  if (!r) return wildSynth(4242 + i * 17, '@墙');
+  const [a, b, item] = r;
+  const A = SPECIES_BY_ID[a] ? mk(a) : mk('salmon'), B = SPECIES_BY_ID[b] ? mk(b) : mk('sardine');
+  return synthesize({ a: A, b: B, item, seed: 100 + i, creator: '@墙' });
+});
+const grid = document.getElementById('grid');
+const cells = [];
+let tris = 0, errs = 0;
+vs.forEach((v, i) => {
+  const div = document.createElement('div'); div.className = 'cell';
+  const s = v.syn || {};
+  div.innerHTML = `<div class="lab"><b>${v.name || v.nick || '合成物种'}</b><i>${v.synItem || (v.syn?.wild ? 'wild' : '')} · ${s.plan}/${s.head}/${s.dor?.k}/${s.tail?.k}${s.tail?.n > 1 ? '×2' : ''}/${s.pect?.k} · ${s.mat}/${s.pat?.k} · ${(s.app || []).join(',')}</i></div>`;
+  grid.appendChild(div);
+  let f = null;
+  try { f = new Fish(v, (o) => stylizeObject(o, { rim: 1.0 })); tris += f.model.userData.tris || 0; }
+  catch (e) { errs++; console.error('fish', i, e); }
+  const sc = new THREE.Scene(); sc.environment = scene.environment;
+  for (const l of scene.children) sc.add(l.clone());
+  if (f) {
+    f.fitTank(1.25);
+    const b = new THREE.Box3().setFromObject(f.root), c = b.getCenter(new THREE.Vector3());
+    f.root.position.sub(c);
+    sc.add(f.root);
+  }
+  const cam = new THREE.PerspectiveCamera(28, (W / 4) / (H / 4), 0.05, 50);
+  cam.position.set(0.5, 0.4, 2.2); cam.lookAt(0, -0.02, 0);
+  cells.push({ f, sc, cam, i });
+});
+document.getElementById('stat').textContent = `${vs.length} 条 · 平均 ${Math.round(tris / vs.length)} tris · err ${errs}`;
+const clock = new THREE.Clock();
+let frames = 0;
+function frame() {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  for (const c of cells) {
+    const col = c.i % 4, row = Math.floor(c.i / 4), cw = W / 4, ch = H / 4;
+    c.f?.animate(dt, { speed: 0.6, mode: 'swim' });
+    if (c.f) c.f.root.rotation.y = -0.5 + Math.sin(clock.elapsedTime * 0.3 + c.i) * 0.08;
+    renderer.setViewport(col * cw, H - (row + 1) * ch, cw, ch);
+    renderer.setScissor(col * cw, H - (row + 1) * ch, cw, ch);
+    renderer.render(c.sc, c.cam);
+  }
+  if (++frames === 3) window.G = { player: true, wall: { n: vs.length, errs, tris: Math.round(tris / vs.length) } };
+  requestAnimationFrame(frame);
+}
+frame();
+</script>
+</body>
+</html>

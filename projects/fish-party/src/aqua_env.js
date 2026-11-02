@@ -486,6 +486,9 @@ export function buildEnv(themeId, ctx) {
   const occ = [];
   const free = (x, z, rad) => { for (const o of occ) if (Math.hypot(o[0] - x, o[1] - z) < o[2] + rad) return false; return true; };
   const take = (x, z, rad) => occ.push([x, z, rad]);
+  // 鱼的避障体（竖直圆柱：xz 圆心 + 半径 + [y0, y1]）：岩石 / 柱子 / 玄武岩 / 热泉 / 树根 / 冰柱 → aquarium 用于避让，鱼不会钻进石头
+  const colliders = [];
+  const collide = (x, z, r, y0, y1) => colliders.push({ x, z, r, y0, y1 });
   const hw = (z) => ctx.hwAt(z);
   // 接触阴影 / 落地遮蔽：布景登记 → 最后画到一张俯视 AO 图，沙床 shader 采样（完全贴合起伏地形，0 额外 draw call）
   const aoList = []; let aoTex = null;
@@ -568,6 +571,7 @@ export function buildEnv(themeId, ctx) {
   function putRock(x, z, s, sy = 0.6, gi = -1) {
     const gidx = gi >= 0 ? gi : (r() * 4) | 0;
     const o = { x, z, s, sy, ry: R(0, 6), sx: R(0.9, 1.35), sz: R(0.8, 1.1) }; rockList[gidx].push(o);
+    collide(x, z, s * Math.max(o.sx, o.sz) * 1.05, -99, floorAt(x, z) + s * sy * 1.2);
     ao(x, z, s * 1.3, 0.8, o.sx, o.sz, -o.ry); ao(x, z, s * 0.85, 0.6, o.sx, o.sz, -o.ry);
   }
   {
@@ -724,6 +728,7 @@ export function buildEnv(themeId, ctx) {
       const pl = new THREE.BoxGeometry(0.9, 0.22, 0.9, 3, 1, 3); m4.compose(V(x, floorAt(x, z) - 0.02, z), q, V(1, 1, 1));
       if (!lying) extraAcc.addGeo(pl, m4, (c) => c.copy(stoneA).multiplyScalar(0.7));
       ao(x, z, lying ? hh * 0.6 : 0.85, 0.6, lying ? 1 : 1, lying ? 0.35 : 1);
+      if (lying) collide(x, z, hh * 0.55, -99, floorAt(x, z) + 0.8); else collide(x, z, 0.5, -99, floorAt(x, z) + hh);
     };
     column(-hw(-5.5) * 0.85, -5.5, 3.8, 0.04); column(hw(-7.5) * 0.8, -7.5, 2.4, -0.06); column(-hw(-12) * 0.5, -12, 5.2); column(hw(-13) * 0.65, -13.5, 4.2, 0.03);
     column(R(-0.8, 0.8), -6.8, 3.2, 0, true);
@@ -763,6 +768,7 @@ export function buildEnv(themeId, ctx) {
       const g = new THREE.ConeGeometry(R(0.12, 0.35), hh, 6, 4); g.rotateX(Math.PI); g.translate(0, -hh / 2, 0);
       m4.compose(V(x, 6.8 - fbm3(x * 0.25, 2, (z + 8) * 0.25, 3) * 1.2 + 0.4, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(R(-0.08, 0.08), R(0, 6), 0)), V(1, 1, 1));
       icAcc.addGeo(g, m4, (c) => c.copy(ic));
+      collide(x, z, 0.4, 6.8 - fbm3(x * 0.25, 2, (z + 8) * 0.25, 3) * 1.2 + 0.4 - hh, 99);
     }
     for (let i = 0; i < Math.round(9 * DENS); i++) {
       const at = spot(i < 4 ? 'side' : 'low', 0.6); if (!at) continue; const s = R(0.35, 1.0) * (at[1] < -6 ? 1.8 : 1); ao(at[0], at[1], s * 1.6, 0.45);
@@ -791,6 +797,7 @@ export function buildEnv(themeId, ctx) {
     for (const [sd, z] of trunks) {
       const x = sd ? sd * hw(z) * R(0.75, 1.0) : R(-2, 2), top = 7;
       take(x, z, 1.0); ao(x, z, 1.2, 0.55);
+      collide(x, z, 0.5, -99, 99); collide(x, z, 1.4, -99, floorAt(x, z) + 2.4);
       for (let k = 0; k < 7; k++) { const a = (k / 7) * 6.28 + R(-0.4, 0.4), d = R(1.2, 2.6), y0 = R(0.8, 3.2); rootArc(x + Math.cos(a) * 0.25, z + Math.sin(a) * 0.25, x + Math.cos(a) * d, z + Math.sin(a) * d * 0.7, y0, R(0.07, 0.13)); }
       const tr = new THREE.CylinderGeometry(0.3, 0.36, 9, 12, 8); tr.translate(0, 4.5, 0); m4.makeTranslation(x, 0.3, z);
       barkAcc.addGeo(tr, m4, (c, v) => c.copy(bark).multiplyScalar(0.75 + vn3(v.x * 3, v.y * 4, v.z * 3) * 0.3));
@@ -800,7 +807,7 @@ export function buildEnv(themeId, ctx) {
     // 玄武岩柱群（六棱柱，高低错落）
     const b1 = COL('#3a3838'), b2 = COL('#4d4a48');
     const cluster = (x, z, n, hmax) => {
-      ao(x, z, 1.25, 0.6);
+      ao(x, z, 1.25, 0.6); collide(x, z, 1.05, -99, floorAt(x, z) + hmax + 0.1);
       for (let i = 0; i < n; i++) {
         const rr = R(0.18, 0.3), hh = R(0.4, hmax), px = x + R(-0.7, 0.7), pz = z + R(-0.6, 0.6);
         // 六棱柱 + 顶部倒角（Lathe 轮廓：底 → 肩 → 倒角 → 顶面），断面略不平
@@ -819,7 +826,7 @@ export function buildEnv(themeId, ctx) {
       const hh = [1.1, 1.6, 2.4][i], g = new THREE.CylinderGeometry(0.12, 0.5, hh, 20, 10, true); g.translate(0, hh / 2, 0);
       const P = g.attributes.position; for (let k = 0; k < P.count; k++) { const n = 1 + (vn3(P.getX(k) * 5, P.getY(k) * 4, P.getZ(k) * 5) - 0.5) * 0.5; P.setX(k, P.getX(k) * n); P.setZ(k, P.getZ(k) * n); }
       g.computeVertexNormals();
-      const m = add(new THREE.Mesh(g, ventMat)); const y0 = floorAt(x, z) - 0.05; m.position.set(x, y0, z); take(x, z, 0.6); ao(x, z, 0.9, 0.6);
+      const m = add(new THREE.Mesh(g, ventMat)); const y0 = floorAt(x, z) - 0.05; m.position.set(x, y0, z); take(x, z, 0.6); ao(x, z, 0.9, 0.6); collide(x, z, 0.6, -99, y0 + hh + 0.6);
       const glow = add(new THREE.Sprite(M(new THREE.SpriteMaterial({ map: glowTex, color: '#d98a55', transparent: true, opacity: 0.32, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }))));
       glow.position.set(x, y0 + hh + 0.05, z); glow.scale.setScalar(1.1);
       upd.push((t) => { glow.material.opacity = 0.26 + Math.sin(t * 1.7 + i) * 0.06; });
@@ -974,7 +981,7 @@ export function buildEnv(themeId, ctx) {
   }
 
   return {
-    group, theme: th, lights, bubbleSrc,
+    group, theme: th, lights, bubbleSrc, colliders,
     // 缓存复用：重新挂回场景时恢复全局状态（水体 uniforms / 地形起伏 / 接触阴影图）
     activate() { floorAmp = th.sand.amp; applyWater(th); W.aqAO.value = aoTex; },
     update(t, cam) { for (const f of upd) f(t, cam); },

@@ -18,7 +18,7 @@ import { createScenery } from './scenery.js';
 import { GradeShader } from './grade.js';
 import { Character } from './rig.js';
 import { Angler, PERFECT_CAST, BITE_WINDOW } from './angler.js';
-import { SPECIES_BY_ID, RARITY, RARITY_ORDER, scoreOf, displayName, rollCatch, TRAITS, Fish, makeVariant, SPECIES, DECOS } from './fishes.js';
+import { SPECIES_BY_ID, RARITY, RARITY_ORDER, scoreOf, displayName, rollCatch, TRAITS, Fish, makeVariant, SPECIES, DECOS, isSynth } from './fishes.js';
 import { createMeta, ROOM, levelTitle, TANK_MAX } from './meta.js';
 import { initAudio, toggleMute, setMuted, sfx } from './sfx.js';
 import * as UI from './ui.js';
@@ -193,8 +193,10 @@ function updateSunHaze() {
 // ======================= 4 位钓手 =======================
 // 站位（船本地坐标）：玩家可走动；好友固定在各自的钓位
 const SPOTS = {
-  rummons: { x: -0.55, y: 0.5, z: HULL.zs - 0.6, ry: Math.PI },        // 船尾泳台
-  gugu: { x: 1.72, z: -1.55, ry: Math.PI / 2 },                       // 右舷后甲板
+  // v1.4：所有人都站在船舱后甲板「栏杆以内」（船尾泳台走不过去也不安全 → 不再站人）；
+  //       咕咕原位 z=-1.55 正好贴着硬顶右后支撑柱（z≈-1.3~-1.5）→ 穿模，挪到冰桶与沙发之间的空位
+  rummons: { x: 1.6, z: -2.05, ry: Math.PI / 2 },                     // 右舷前段（硬顶后柱与冰桶之间，离柱 ≥0.6m）
+  gugu: { x: 1.66, z: -4.6, ry: Math.PI / 2 },                        // 右舷后段（冰桶与尾沙发之间）
   chennayu: { x: -1.72, z: -2.45, ry: -Math.PI / 2 },                 // 左舷后甲板
 };
 const anglers = []; let player = null;
@@ -215,17 +217,21 @@ const ctx = {
     if (a.isPlayer) {
       const forced = Q.get('force');
       let usedBait = false;
-      if (baitOn && meta.useBait()) { usedBait = true; baitOn = false; $('bait').classList.remove('on'); $('bait').querySelector('.tip').textContent = '幸运饵'; }
       const L = meta.castLuck({ bait: usedBait, perfectCast: a.perfectCast, tide: frenzy.on });
       let min = L.min;
       if (meta.S.catches === 0 && !min) min = 'uncommon';     // 新手第一条：保证好看
       a.usedBait = usedBait;
-      // v1.0：这一杆钓到"别人放生/创作的鱼"时，物种对齐（搏鱼手感/稀有度一致），外观在 wrapOceanCatch 里换
-      if (a._ocean) return { luck: L.luck, force: a._ocean.sp };
-      // v1.1：20% 钓上来的是道具漂流物（第 1 杆 / 用了幸运饵 / 强制物种时不出；?item=<id> 或 G.dbg.item 强制）
+      // v0.9 C：这一杆钓到「海里的合成鱼」时，先按它的稀有度钓一条天然鱼占位（搏鱼手感一致），外观在 wrapOceanCatch 里换成合成鱼
+      if (a._ocean) {
+        const ov = a._ocean;
+        if (SPECIES_BY_ID[ov.sp] && !SPECIES_BY_ID[ov.sp].odd && ov.sp !== 'synth') return { luck: L.luck, force: ov.sp };
+        const rr = RARITY_ORDER.includes(ov.rarity) ? ov.rarity : 'legendary';   // mythic 等 → 按传说手感
+        return { luck: L.luck, forceMinRarity: rr, maxRarity: rr };
+      }
+      // v0.9 C：~7% 钓上来的是道具（海藻包裹；第 1 杆 / 用了幸运饵 / 强制物种时不出；?item=<id> 或 G.dbg.item 强制）。道具好运只取 1/2
       const itemForce = dbg.item || Q.get('item') || null;
       const itemP = dbg.itemP ?? (usedBait || dbg.force || forced || meta.S.catches < 1 ? 0 : meta.genes.ITEM_CATCH_P);
-      return { luck: L.luck, forceMinRarity: min, featured: meta.featured.id, force: dbg.force || forced, allowOdd: meta.S.catches > 1, itemP, item: itemForce && meta.genes.ITEM_BY_ID[itemForce] ? itemForce : null, itemLuck: L.luck };
+      return { luck: L.luck, forceMinRarity: min, featured: meta.featured.id, force: dbg.force || forced, itemP, item: itemForce && meta.genes.ITEM_BY_ID[itemForce] ? itemForce : null, itemLuck: L.luck * 0.5 };
     }
     // r3：好友以前 luck≈0.3（玩家 0~0.15）→ 好友 SSR 率约 24%、玩家约 9~16%，落差大 → 好友略低于玩家，且全房间好友 SSR/UR 至少间隔 80s
     return { luck: 0.02 + a.skill * 0.06 + (frenzy.on ? 0.12 : 0), featured: meta.featured.id, maxRarity: time - friendSSR.last < 80 ? 'rare' : null };
@@ -407,11 +413,11 @@ function refreshTankBtn(bump = false) {
   bub.classList.toggle('tut', tutB && !popOn); bub.classList.toggle('hidden', !bt || TANK_LOCK.has(player?.state));
   if (bump) { tankBtn.classList.remove('bump'); void tankBtn.offsetWidth; tankBtn.classList.add('bump'); }
   const isItem = !!player?.v?.item;   // v1.1：钓到道具 → 「收进背包」（不进水族箱、不占容量）
-  const oddId = !isItem && SPECIES_BY_ID[player?.v?.sp]?.odd ? player.v.sp : null;   // v4：宝箱 / 漂流瓶 / 小黄鸭 → 「收下」（不进水族箱）
+  const oddId = !isItem && SPECIES_BY_ID[player?.v?.sp]?.odd ? player.v.sp : null;   // 旧版漂流物（v0.9 已下线，仅兼容）→ 「收下」（不进水族箱）
   const key = isItem ? 'item' : oddId ? 'odd-' + oddId : full ? 'full' : 'n' + n;
   if (keepBtn.dataset.k !== key && oddId) {
     keepBtn.dataset.k = key; keepBtn.classList.remove('full');
-    keepBtn.innerHTML = oddId === 'chest' ? `${ic('bag')}收下宝箱奖励！<span class="tc">不占水族箱</span>` : `${ic('bag')}收下${SPECIES_BY_ID[oddId].name}！<span class="tc">不占水族箱</span>`;
+    keepBtn.innerHTML = `${ic('bag')}收下${SPECIES_BY_ID[oddId].name}！<span class="tc">不占水族箱</span>`;
   } else if (keepBtn.dataset.k !== key && isItem) {
     keepBtn.dataset.k = key; keepBtn.classList.remove('full');
     keepBtn.innerHTML = `${ic('bag')}收进背包！<span class="tc">道具 ${meta.bagTotal()}</span>`;
@@ -452,12 +458,12 @@ function keepCatch() {
   if (!player || player.state !== 'hold' || photo || tankUI.roomOpen() || player.t < 0.4) return;
   initAudio();
   const v = player.v; if (!v) return;
-  if (v.item) { meta.addItem(v.item.id, v.item.n || 1); const it = meta.genes.ITEM_BY_ID[v.item.id]; stowCatch(); UI.toast(`${it.emoji} ${it.name} 收进背包啦<small>去水族箱 · 基因改造里用它装扮鱼</small>`, true, 2400); return; }
-  // v4：odd（宝箱 / 漂流瓶 / 小黄鸭）不是鱼 → 不进水族箱；宝箱奖励已在钓上来时当场发放
+  if (v.item) { const it = meta.genes.ITEM_BY_ID[v.item.id]; if (it) meta.addItem(v.item.id, v.item.n || 1); stowCatch(); UI.toast(it ? `${it.emoji} ${it.name} 收进背包啦<small>基因改造时放进道具槽，会影响新物种的性状</small>` : '收下了<small>这件东西已经不存在了</small>', true, 2400); return; }
+  // 旧版漂流物（v0.9 已下线，不会再钓到；旧存档兼容）不是鱼 → 不进水族箱
   const osp = SPECIES_BY_ID[v.sp];
-  if (!osp || osp.odd) {
+  if (!isSynth(v) && (!osp || osp.odd)) {   // v0.9 C：合成鱼 sp 可能是 'synth'（不在 SPECIES_BY_ID）→ 照常进水族箱
     stowCatch(false);
-    UI.toast(v.sp === 'chest' ? `🎁 宝箱奖励已收下<small>${v.chestText || '幸运饵已到账'}</small>` : v.sp === 'bottle' ? '🍾 纸条收进图鉴啦<small>漂流瓶不占水族箱位置</small>' : `${UI.ODD_EMOJI[v.sp] || '✨'} 收下了${osp?.name || '礼物'}<small>它不是鱼，不会进水族箱</small>`, true, 2400);
+    UI.toast(`✨ 收下了${osp?.name || '礼物'}<small>它不是鱼，不会进水族箱</small>`, true, 2400);
     refreshTankBtn(); return;
   }
   if (!meta.tankFull()) { meta.addToTank(v); stowCatch(); return; }
@@ -503,17 +509,24 @@ function flyToTank(x0, y0, v) {
   };
   requestAnimationFrame(step);
 }
-// 玩家 18% 钓到"别人放生/创作的鱼"（不改 angler.js：包一层 hookset，物种经 getLuck 对齐后换外观）
+// v0.9 C 海洋回流：玩家 ~4% 钓到「别的玩家造的合成鱼」（synth_bridge.wildSynth），极小概率钓回自己放生的合成鱼
+// （不改 angler.js：包一层 hookset，先按稀有度钓天然鱼占位，再换成合成鱼外观；合成鱼渲染失败 → 降级为普通钓获）
 function wrapOceanCatch(a) {
   const hs = a.hookset.bind(a);
   a.hookset = () => {
-    const can = !baitOn && !dbg.force && !Q.get('force') && !dbg.item && !Q.get('item') && meta.S.catches >= 1;   // v1.1：强制道具（调试）时不走别人放生的鱼
-    a._ocean = can ? meta.rollOceanCatch(dbg.ocean ?? (Q.has('ocean') ? 1 : 0.18)) : null;
+    const can = !baitOn && !dbg.force && !Q.get('force') && !dbg.item && !Q.get('item') && meta.S.catches >= 1;   // 强制物种 / 道具（调试）时不走海洋回流
+    let ov = null;
+    if (can) {
+      try { ov = meta.rollOceanCatch({ p: dbg.ocean ?? (Q.has('ocean') ? 1 : undefined), own: dbg.oceanOwn, luck: meta.castLuck({ perfectCast: a.perfectCast, tide: frenzy.on }).luck }); } catch (err) { console.warn('ocean roll', err); ov = null; }
+    }
+    a._ocean = ov;
     hs();
-    const ov = a._ocean; a._ocean = null;
+    a._ocean = null;
     if (!ov || !a.fish || a.v?.item) return;
+    let f = null;
+    try { f = new Fish(ov, stylizeFish); } catch (err) { console.warn('synth catch render failed → 普通钓获', err); meta.undoOceanCatch?.(ov); return; }
     const vis = a.fish.root.visible; a.fish.dispose();
-    a.v = ov; const f = a.fish = new Fish(ov, stylizeFish); f.root.visible = vis; scene.add(f.root);
+    a.v = ov; a.fish = f; f.root.visible = vis; scene.add(f.root);
     f.holdFit(Math.max(0.4, Math.min(ov.cm / 100, 2.2)));
   };
 }
@@ -531,6 +544,12 @@ function updateTankFlow(dt) {
     if (tankUI.isOpen) tankUI.notify(ev.text, ev.mine, 4200);
     else UI.feedPush({ html: ev.text, icon: 'wave', mine: true, cls: 'ocean' + (ev.mine ? ' gold' : ''), v: ev.v, ttl: 4200, sticky: true });
     sfx.oceanBell(ev.mine); if (ev.mine) sfx.sparkle();
+  }
+  // v0.9 B 串门社交：NPC 回执 / 留言 / 偶尔送你鱼或拿走一条（水族箱里有面板打开时不触发主动互动）
+  const sev = meta.socialTick?.(Date.now(), dbg.npcNow || null, !(tankUI.isOpen && tankUI.busyish)); dbg.npcNow = null;
+  if (sev) {
+    if (tankUI.isOpen) tankUI.onSocial(sev);
+    else for (const e of sev) UI.feedPush({ html: e.text.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])), icon: 'gift', mine: true, ttl: 4200 });
   }
   if (!tankUI.isOpen) refreshTankBtn(); else eggPopSeenInTank();
 }
@@ -552,6 +571,7 @@ function actDown() {
   if (!started || !player || tankUI.isOpen || tankUI.roomOpen()) return;
   initAudio();
   actHeld = true; actEl.classList.add('down');
+  if (watch) endWatch();
   if (player.state === 'hold') { keepCatch(); return; }   // v1.0：抱鱼时主操作 = 收进水族箱（原"放生"）
   player.press();
 }
@@ -568,7 +588,7 @@ actEl.addEventListener('pointercancel', actUp);
 // 摇杆以外的屏幕区域由 canvas 处理 = 转视角。两者各自按 pointerId 捕获，可一指走一指转（多点触控）
 const joyEl = $('joy'), joyBase = $('joyBase'), joyKnob = $('joyKnob'), joyHint = $('joyHint');
 const JOY_KEY = 'ff-joy-hint-v1';
-const JOY_R = 46;   // 触点最大行程（px）
+const JOY_R = 40;   // 触点最大行程（px）· v1.4.1 底盘 124→104px 同比缩小
 const joyTip = { done: (() => { try { return !!localStorage.getItem(JOY_KEY); } catch { return false; } })(), t: 0 };
 function joyTipDone() { if (joyTip.done) return; joyTip.done = true; joyHint.classList.remove('show'); try { localStorage.setItem(JOY_KEY, '1'); } catch { /* */ } }
 function joyMove(e) {
@@ -595,13 +615,21 @@ joyEl.addEventListener('pointerup', joyEnd); joyEl.addEventListener('pointercanc
 // 镜头拖拽（画面空白处）
 const cam = { yaw: 0, pitch: 0.3, dist: 5.4, userT: 0 };
 let drag = null;
-canvas.addEventListener('pointerdown', (e) => { if (tankUI.isOpen) return; drag = { id: e.pointerId, x: e.clientX, y: e.clientY }; canvas.setPointerCapture(e.pointerId); initAudio(); });
+canvas.addEventListener('pointerdown', (e) => { if (tankUI.isOpen) return; drag = { id: e.pointerId, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, t0: performance.now() }; canvas.setPointerCapture(e.pointerId); initAudio(); });
 canvas.addEventListener('pointermove', (e) => {
   if (!drag || drag.id !== e.pointerId) return;
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
   cam.yaw -= dx * 0.008; cam.pitch = clamp(cam.pitch + dy * 0.005, 0.05, 1.0); cam.userT = 2.5;
 });
-const dragEnd = () => { drag = null; };
+// v1.4：轻点画面里的好友（或其名牌附近）→ 镜头环绕该好友观看；轻点自己 / 走动 / 按主按钮 → 自动切回自己
+const dragEnd = (e) => {
+  const d = drag; drag = null;
+  if (!d || !e || e.type !== 'pointerup' || !started || tankUI.isOpen) return;
+  if (Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > 10 || performance.now() - d.t0 > 400) return;
+  const r = canvas.getBoundingClientRect(), a = pickAngler(e.clientX - r.left, e.clientY - r.top);
+  if (a && !a.isPlayer) { if (watch?.a !== a) { sfx.tap(); onWatch(a); } }
+  else if (a && a.isPlayer && watch) endWatch();
+};
 canvas.addEventListener('pointerup', dragEnd); canvas.addEventListener('pointercancel', dragEnd);
 canvas.addEventListener('wheel', (e) => { cam.dist = clamp(cam.dist + e.deltaY * 0.004, 3, 9); }, { passive: true });
 
@@ -617,14 +645,7 @@ $('shX').onclick = () => { lastTab = UI.sheetOpen() || lastTab; UI.closeSheet();
 $('sheet').addEventListener('click', (e) => { if (e.target === $('sheet')) { lastTab = UI.sheetOpen() || lastTab; UI.closeSheet(); } });
 function toggleSound() { const m = toggleMute(); meta.S.muted = m; meta.save(); UI.renderSheet(sheetCtx); if (!UI.sheetOpen()) UI.toast(m ? '已静音' : '声音已开启'); }
 $('sndBtn').onclick = () => { initAudio(); toggleSound(); };
-const fmtReward = (r) => [r.bait ? `幸运饵 ×${r.bait}` : '', r.pts ? `+${r.pts} 分` : '', r.itemGot ? meta.genes.itemLabel(r.itemGot) : ''].filter(Boolean).join(' · ');
-$('bait').onclick = () => {
-  initAudio();
-  if (meta.S.bait <= 0 && !baitOn) { UI.toast('幸运饵用完啦<small>完成任务 / 升级可获得</small>'); sfx.slip(); return; }
-  baitOn = !baitOn; $('bait').classList.toggle('on', baitOn); sfx.tap();
-  $('bait').querySelector('.tip').textContent = baitOn ? '已挂上 · 必出特别以上' : '幸运饵';
-  if (!baitOn) UI.toast('已取下幸运饵');
-};
+const fmtReward = (r) => [r.bait ? `好运 +${r.bait}` : '', r.pts ? `+${r.pts} 分` : '', r.itemGot ? meta.genes.itemLabel(r.itemGot) : ''].filter(Boolean).join(' · ');
 $('photoBtn').onclick = () => takePhoto();
 // 点过的按钮立刻失焦：避免之后按空格（主操作）误触发它
 document.addEventListener('click', (e) => { const b = e.target.closest?.('button'); if (b) setTimeout(() => b.blur(), 0); }, true);
@@ -770,8 +791,10 @@ function onEvent(a, type, d) {
       if (me || near) sfx.jump();
       if (me) {
         slowmo(0.3, 0.45); shake(0.15);
-        const sp = SPECIES_BY_ID[a.v.sp];
-        fightUI.revealed = true; const s = screenOf(a.hook); UI.floatText(`是${sp.name}！`, s.x, s.y - 60, RARITY[sp.rarity].color);
+        const sy = isSynth(a.v), sp = SPECIES_BY_ID[a.v.sp];
+        fightUI.revealed = true; const s = screenOf(a.hook);
+        if (sy) UI.floatText('是没见过的新物种！', s.x, s.y - 60, UI.synthRar(a.v).color);   // v0.9 C：海洋回流的合成鱼
+        else UI.floatText(`是${sp.name}！`, s.x, s.y - 60, RARITY[sp.rarity].color);
       }
       break;
     case 'reenter': fx.splash(d.at, 1.0, 26); if (me) sfx.splash(1); break;
@@ -807,7 +830,6 @@ function onItemCaught(a, d, v) {
   const G = meta.genes, it = G.ITEM_BY_ID[v.item.id], R = G.ITEM_RARITY[it.rarity], cat = G.ITEM_CATS[it.cat];
   const ri = G.ITEM_RARITY_ORDER.indexOf(it.rarity);
   UI.showCatch(v, { isNew: false, n: 1, score: 0, bonus: [], chips: [], combo: 0, spGot: 0, prevBest: 0, prevSame: null, featured: false }, 0);
-  if (v.sp === 'pod_chest') openLid(a);   // v4.1：装扮小宝箱同样掀盖
   const rb = $('cRar'); rb.textContent = R.short; rb.style.background = R.color;
   $('cName').textContent = `获得道具：${it.name} ×${v.item.n || 1}`; $('cName').className = 'l';
   $('cNew').classList.add('hidden');
@@ -826,82 +848,46 @@ function onItemCaught(a, d, v) {
   onEvent(a, 'itemCaught', { id: it.id });
   setTimeout(() => friendsReact('small'), 500);
 }
-// v4：3D 箱盖掀开（迷你宝箱 / 装扮小宝箱共用）
-function openLid(a) {
-  const lid = a.fish?.model?.userData?.chestLid, t0 = performance.now();
-  if (!lid) return;
-  // v4.1 QA：抱在胸前时箱盖后缘贴着角色 → 掀开后竖起的箱盖正好挡脸；改为「掀开 → 弹飞缩小消失」，最终露出满箱金币
-  const y0 = lid.position.y;
-  const step = (now) => {
-    const k = THREE.MathUtils.clamp((now - t0 - 300) / 520, 0, 1), e = 1 - Math.pow(1 - k, 3);
-    const k2 = THREE.MathUtils.clamp((now - t0 - 820) / 420, 0, 1), e2 = k2 * k2;
-    lid.rotation.x = -1.95 * e + Math.sin(k * Math.PI) * 0.12 - 1.2 * e2;
-    lid.position.y = y0 + 0.9 * Math.sin(k2 * Math.PI * 0.5);
-    lid.scale.setScalar(Math.max(0.001, 1 - e2));
-    if (k2 >= 1) lid.visible = false;
-    if (k2 < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
-}
-// v4：迷你宝箱当场开箱 —— 幸运饵 ×2 + 一件稀有以上装扮道具 + 金币积分；3D 箱盖掀开 + 金色彩带
-function openChestNow(a, v) {
-  const G = meta.genes, bait = 2, pts = 50 + 10 * Math.floor(Math.random() * 6);
-  const item = G.rollItemDrop(Math.random, { minRarity: 'rare' }), it = G.ITEM_BY_ID[item];
-  meta.addItem(item, 1);
-  meta.S.bait += bait; meta.S.total += pts; meta.S.today.score += pts; meta.save();
-  v.chestText = `幸运饵 +${bait} · ${it.emoji}${it.name} · +${pts} 分`;
-  openLid(a);
-  setTimeout(() => {
-    const at = a.fish ? a.fish.root.getWorldPosition(V()) : a.char.headW.clone();
-    fx.confetti(at.clone().add(V(0, 0.25, 0)), 70, null); sfx.coin(); sfx.sparkle(); vibrate([30, 30, 60]);
-    const s = screenOf(at, {}); if (s.vis) UI.floatText(`🎁 幸运饵+${bait} ${it.emoji}${it.name}`, s.x, s.y - 40, '#ffb21e');
-    refreshHUD();
-  }, 650);
-  return { bait, pts, item };
-}
+// v0.9 C：宝箱 / 漂流瓶 / 小黄鸭已从钓获池移除 → 旧的 3D 掀盖 + 当场开箱发奖逻辑（openLid / openChestNow）一并删除
 function onCaught(a, d) {
-  const v = d.v, sp = SPECIES_BY_ID[v.sp], ri = RARITY_ORDER.indexOf(sp.rarity);
+  // v0.9 C：合成鱼（sp 可能是 'synth' 或天然物种占位）按自身稀有度；mythic 按传说算演出
+  const v = d.v, syn = isSynth(v);
+  const sp = syn ? { ...(SPECIES_BY_ID[v.sp] || {}), id: 'synth', name: displayName(v), odd: false, rarity: RARITY_ORDER.includes(v.rarity) ? v.rarity : 'legendary' } : SPECIES_BY_ID[v.sp];
+  const ri = RARITY_ORDER.indexOf(sp.rarity);
   const at = a.char.headW.clone();
   let away = null;
   if (a.isPlayer) { away = a.char.root.getWorldDirection(V()); away.y = 0; away.normalize(); }
   fx.confetti(at.clone().add(V(0, 0.3, 0)), 40 + ri * 30, away);
   if (a.isPlayer && v.item) { onItemCaught(a, d, v); return; }
   if (a.isPlayer) {
-    const isNew = !meta.S.codex[v.sp];
+    const isNew = !syn && !meta.S.codex[v.sp];
     const featured = v.sp === meta.featured.id;
-    const prevBest = meta.S.codex[v.sp]?.best || 0, prevSame = meta.S.log.find((L) => L.v.sp === v.sp)?.v || null;   // r3：钓获卡"这条哪里不一样"
+    const prevBest = syn ? 0 : meta.S.codex[v.sp]?.best || 0, prevSame = syn ? null : meta.S.log.find((L) => L.v.sp === v.sp && !isSynth(L.v))?.v || null;   // r3：钓获卡"这条哪里不一样"
     let score = scoreOf(v, { frenzy: frenzy.on, combo: meta.S.combo, first: isNew });
-    if (featured) score = Math.round(score * 1.3);
+    if (featured && !syn) score = Math.round(score * 1.3);
     if (d.perfect) score += 20;
     const rec = meta.recordCatch(v, { perfect: d.perfect, perfectCast: d.perfectCast, tide: frenzy.on, score });
-    if (sp.id === 'chest') v.chestGot = openChestNow(a, v);   // v4：宝箱当场开箱发奖（不进水族箱）
     if (rec.isNew) newSpecies++;
     // 全部加成进详情；卡片上只露最重要的 2 个
-    const mult = v.traits.reduce((m, t) => m * TRAITS[t].mult, 1);
+    const vt = v.traits || [];
+    const mult = vt.reduce((m, t) => m * TRAITS[t].mult, 1);
     const bonus = [], chips = [];
-    if (v.chestGot) chips.push(`幸运饵 +${v.chestGot.bait}`);
     if (rec.isNew) bonus.push('新物种 +100');
     if (rec.isBest) chips.push('个人最大');
-    if (v.traits.length) { bonus.push(`特质 ×${mult}`); chips.push(`${TRAITS[v.traits[0]].label} ×${mult}`); }
-    if (featured) { bonus.push('今日精选 ×1.3'); chips.push('今日精选 ×1.3'); }
+    if (vt.length) { bonus.push(`特质 ×${mult}`); chips.push(`${TRAITS[vt[0]].label} ×${mult}`); }
+    if (featured && !syn) { bonus.push('今日精选 ×1.3'); chips.push('今日精选 ×1.3'); }
     if (frenzy.on) { bonus.push('鱼潮 ×1.5'); chips.push('鱼潮 ×1.5'); }
     if (d.perfect) { bonus.push('完美扬竿 +20'); chips.push('完美扬竿 +20'); }
     if (a.usedBait) { bonus.push('幸运饵'); chips.push('幸运饵'); }
     if (meta.S.combo >= 2) bonus.push(`连击 ×${meta.S.combo}`);
     if (d.perfectCast) { bonus.push('完美抛竿'); chips.push('完美抛竿'); }
     const n = 100 + Math.floor(Math.random() * 9000);
-    const spGot = Object.keys(meta.S.codex).filter((id) => SPECIES_BY_ID[id] && !SPECIES_BY_ID[id].odd).length;
-    UI.showCatch(v, { ...rec, score, bonus, chips, combo: meta.S.combo, spGot, n: meta.S.codex[v.sp]?.n || 1, prevBest, prevSame, featured }, n);
+    const spGot = meta.codexProgress().got;   // v0.9 C：只算天然物种
+    UI.showCatch(v, { ...rec, score, bonus, chips, combo: meta.S.combo, spGot, n: syn ? 1 : meta.S.codex[v.sp]?.n || 1, prevBest, prevSame, featured }, n);
     catchCard.shown = true; catchCard.walkHide = 0;
-    if (sp.odd) {   // v4：odd 卡片注明不占水族箱；宝箱列出当场开出的奖励
-      $('cBy').textContent = v.chestGot ? '奖励已到账 · 不占水族箱' : '不是鱼 · 不占水族箱位置';
-      const cg = v.chestGot;
-      const cit = cg && meta.genes.ITEM_BY_ID[cg.item];
-      if (cg) $('cChips').innerHTML = `<span class="hi" style="--rc:#ffc94d"><em>🎁 当场开箱：幸运饵 ×${cg.bait}${cit ? ` · ${cit.emoji}${cit.name}` : ''} · +${cg.pts} 分</em></span>`;
-      refreshTankBtn();
-    }
+    if (sp.odd) { $('cBy').textContent = '不是鱼 · 不占水族箱位置'; refreshTankBtn(); }   // 旧存档兜底（v0.9 起钓获池里已没有 odd）
     // v1.1：12% 鱼嘴里叼着一个道具（直接进背包，卡片一行小字）
-    const mouthP = dbg.mouthP ?? (sp.odd ? 0 : meta.genes.ITEM_MOUTH_P);
+    const mouthP = dbg.mouthP ?? (sp.odd || syn ? 0 : meta.genes.ITEM_MOUTH_P);
     if (Math.random() < mouthP) {
       const mid = meta.genes.rollItemDrop(Math.random, {}); const it = meta.genes.ITEM_BY_ID[mid];
       meta.addItem(mid, 1); v.mouthItem = mid;
@@ -913,6 +899,7 @@ function onCaught(a, d) {
     sfx.catch(sp.rarity); if (ri >= 3) setTimeout(() => sfx.sparkle(), 400);
     vibrate(ri >= 3 ? [60, 40, 120] : 60);
     // 奖励排队：放生后依次出现（升级弹窗放最后）
+    if (syn) reward({ html: `钓到新物种『${UI.escHtml(displayName(v))}』<small>第${v.gen || 1}代 · 由 ${UI.escHtml(String(v.creator || '无名氏'))} 创造</small>`, accent: true, sfx: () => sfx.sparkle() });
     if (rec.isNew) reward({ html: `图鉴解锁新物种<small>${sp.name}${sp.odd ? '' : ` · 已集 ${spGot}/${SPECIES.length} 种`}</small>`, accent: true, sfx: () => sfx.coin() });
     taskDone(rec.done);
     refreshHUD(); checkRank();
@@ -920,8 +907,8 @@ function onCaught(a, d) {
       // r2：回流玩家前几把几乎每条鱼都升级 → 每轮一个弹窗打断节奏；只有称号变化才弹窗，其余是一条轻提示
       const lv = meta.S.level, newTitle = levelTitle(lv) !== levelTitle(lv - rec.lvUp);
       // v1.1：称号升级也改为不打断的庆祝轻提示（不再弹窗挡住「收进水族箱 / 水族箱入口 / 装扮间」操作）
-      if (newTitle) reward({ kind: 'lv', html: `升到 Lv.${lv} · 新称号「${levelTitle(lv)}」<small>幸运饵 +${rec.lvUp}</small>`, accent: true, ms: 2600, sfx: () => sfx.levelUp() });
-      else reward({ kind: 'lv', html: `升到 Lv.${lv}<small>幸运饵 +${rec.lvUp}</small>`, accent: true, sfx: () => sfx.levelUp() });
+      if (newTitle) reward({ kind: 'lv', html: `升到 Lv.${lv} · 新称号「${levelTitle(lv)}」<small>好运 +${rec.lvUp}</small>`, accent: true, ms: 2600, sfx: () => sfx.levelUp() });
+      else reward({ kind: 'lv', html: `升到 Lv.${lv}<small>好运 +${rec.lvUp}</small>`, accent: true, sfx: () => sfx.levelUp() });
     }
     a.usedBait = false;
     setTimeout(() => friendsReact(ri >= 2 ? 'big' : 'small'), 500);
@@ -952,8 +939,6 @@ function onCaught(a, d) {
       if (friendFeed(a, { v, html, like: likeFn, cls: cele ? 'cele' : '', ttl: cele ? 4200 : 3000 }, 2)) sfx.notify();
     } else {         // 普通渔获：随机挑一种更有生活感的说法，严格频控
       const opts = [];
-      if (sp.id === 'bottle') opts.push(`${name} 捡到漂流瓶：${(v.note || '').split('——')[0].slice(0, 14)}…`);
-      if (sp.id === 'duck') opts.push(`${name} 捞起一只小黄鸭 嘎`);
       if (v.ugc) opts.push(`${name} 钓到 ${v.creator} 投放的《${v.ugc.title}》`);
       if (v.ugc?.decos.length) opts.push(`${name} 的鱼戴着${v.ugc.decos.map((k) => DECOS[k]?.label).join('和')}`);
       if (v.cm >= 100) opts.push(`${name} 钓到一条 ${UI.fmtLenTxt(v.cm)} 的${sp.name}`);
@@ -1039,6 +1024,7 @@ function updatePlayerMove(dt) {
   const mag = Math.min(1, Math.hypot(ix, iz));
   const canMove = (player.state === 'idle' || player.state === 'hold') && !photo;
   const moving = mag > 0.12 && canMove;
+  if (watch && mag > 0.12) endWatch();   // v1.4：一动就切回自己的视角
   const holding = player.state === 'hold';
   const maxSpeed = holding ? 2.3 : 2.9;
   const target = moving ? maxSpeed * mag : 0;
@@ -1078,9 +1064,17 @@ function updatePlayerMove(dt) {
     // 站着不动时（例如刚在栏杆边钓上一条大鱼）平滑挪进来，而不是瞬移
     if (playerState.speed <= 0.01) { const k = 1 - Math.exp(-dt * 5); p.x = mx + (p.x - mx) * k; p.z = mz + (p.z - mz) * k; }
     const push = (cx, cz, r) => { const dx = p.x - cx, dz = p.z - cz, l = Math.hypot(dx, dz); if (l < r && l > 1e-4) { p.x = cx + (dx / l) * r; p.z = cz + (dz / l) * r; } };
-    push(-0.5, -4.7, 0.9); push(1.55, -3.2, 0.55);
-    push(SPOTS.gugu.x, SPOTS.gugu.z, 0.62); push(SPOTS.chennayu.x, SPOTS.chennayu.z, 0.62);
-    if (p.x < -1.12 && p.z < -3.2 && p.z > -5.6) p.x = -1.12;
+    // v0.8：矩形障碍（沿最小穿透轴推出，贴边滑动不卡顿）—— 船本地坐标 [x0,x1]×[z0,z1]，外扩人物半径
+    const pushBox = (x0, x1, z0, z1, r = 0.3) => {
+      x0 -= r; x1 += r; z0 -= r; z1 += r;
+      if (p.x <= x0 || p.x >= x1 || p.z <= z0 || p.z >= z1) return;
+      const dl = p.x - x0, dr = x1 - p.x, dn = p.z - z0, df = z1 - p.z, m = Math.min(dl, dr, dn, df);
+      if (m === dl) p.x = x0; else if (m === dr) p.x = x1; else if (m === dn) p.z = z0; else p.z = z1;
+    };
+    pushBox(-1.8, -0.36, -0.99, -0.6);          // DJ 台 + 落地音箱（之前可以直接穿过去）
+    pushBox(-0.47, 0.47, -5.74, -4.56, 0.26);   // 尾沙发前的茶几（v0.8 挪到中轴）
+    for (const id of ['gugu', 'chennayu', 'rummons']) push(SPOTS[id].x, SPOTS[id].z, 0.62);
+    push(1.98, -1.42, 0.38); push(-1.98, -1.42, 0.38);   // v1.4：硬顶两根后支撑柱，主角也不再穿过去
     const step = Math.hypot(p.x - ox, p.z - oz);
     if (holding && playerState.speed > 0.01) {
       playerState.walked += step;
@@ -1188,7 +1182,11 @@ function updateCamera(dt) {
       }
     }
   }
-  if (watch) { watch.t -= dt; if (watch.t <= 0) watch = null; else if (wantYaw === null) { c.root.getWorldDirection(tv); wantYaw = Math.atan2(-tv.x, -tv.z) + 0.6; wantPitch = 0.22; wantDist = 4.2; } }
+  if (watch) {
+    // v1.4：环绕观看 —— 镜头绕好友缓慢公转（拖拽可手动转，松手后从当前角度继续转）；好友搏鱼/出水时沿用动作镜头
+    if (cam.userT > 0) watch.yaw = cam.yaw; else watch.yaw += dt * 0.38;
+    if (!['fight', 'hookset', 'land'].includes(st)) { wantYaw = watch.yaw; wantPitch = 0.24; wantDist = Math.max(wantDist, 4.4); lookAt = null; camTarget.y -= 0.2; }
+  }
   cam.userT -= dt;
   const auto = cam.userT <= 0;
   const kk = 1 - Math.exp(-dt * 2.4);
@@ -1260,25 +1258,30 @@ function hideNearCamera(dt = 0.016) {
     if (a === focus) { if (a.fade !== undefined && a.fade < 1) { a.fade = 1; setCharFade(a, 1); } a.char.root.visible = true; continue; }
     a.char.root.getWorldPosition(tmp); tmp.y += 0.9;
     const dc = tmp.distanceTo(camera.position);
-    let near = dc < 1.5;
-    if (!near && occ) {
-      if (dc < 2.4 && !photo) near = true;
+    // v0.8：好友「忽隐忽现」修复 —— 旧逻辑在钓鱼各阶段只要好友离镜头 <2.4m、轻微挡到主角/浮漂、或在屏幕边缘露出大半身，
+    //       就整个隐身（opacity→0），转镜头/抛竿时好友频繁消失又出现。现在：
+    //       ① 只有镜头真的贴进好友身体（<1.25m，会穿模）才完全隐藏；
+    //       ② 明显挡住主角（更靠近镜头且重叠 >45%）或正好压住浮漂/出水的鱼时，只淡到 0.35（仍能看见人在那），不再消失；
+    //       ③ 去掉"屏幕边缘露出大半身"规则（这是正常构图，不该隐身）。合影规则保持不变。
+    let near = dc < 1.25, soft = false;
+    if (!near && photo) {
       const r = charRect(a.char, _rA);
-      if (!near && r) {
-        // 挡住主角（合影只看脸 —— 并排站是合影的一部分）
-        if (fr && dc < dF - 0.2) near = photo ? overlapRatio(r, fr, fr.y0 + fr.h * 0.45) > 0.1 : overlapRatio(r, fr) > 0.18;   // r3：合影里好友半个身子叠在主角背后像"连体人" → 0.3 → 0.1
-        // r3：合影时站在主角身后、轮廓和主角叠在一起（从肩后探出半个身子）也隐藏；并排站（叠得少）保留
-        if (!near && photo && fr && dc >= dF - 0.2 && dc < dF + 4) near = overlapRatio(r, fr) > 0.15;
-        // r2：近处好友大块压在画面角落/边缘（屏幕占比 >7% 且被裁切）也算遮挡
-        if (!near && !photo && dc < 9) { const area = Math.max(0, Math.min(r.x1, W) - Math.max(r.x0, 0)) * Math.max(0, Math.min(r.y1, H) - Math.max(r.y0, 0)); if (area > W * H * 0.05 && (r.x0 < 0 || r.x1 > W || r.y1 > H)) near = true; }
-        // 挡住浮漂 / 鱼线落点 / 出水的鱼
-        if (!near) for (const q of pts) if (dc < q.d && q.x > r.x0 - 14 && q.x < r.x1 + 14 && q.y > r.y0 - 14 && q.y < r.y1 + 8) { near = true; break; }
+      if (r && fr) {
+        if (dc < dF - 0.2) near = overlapRatio(r, fr, fr.y0 + fr.h * 0.45) > 0.1;
+        else if (dc < dF + 4) near = overlapRatio(r, fr) > 0.15;
+      }
+    } else if (!near && occ) {
+      const r = charRect(a.char, _rA);
+      if (r) {
+        if (fr && dc < dF - 0.3 && overlapRatio(r, fr) > 0.45) soft = true;
+        if (!soft) for (const q of pts) if (dc < q.d - 0.3 && q.x > r.x0 && q.x < r.x1 && q.y > r.y0 && q.y < r.y1) { soft = true; break; }
       }
     }
     // r2：硬切 → 淡出/淡入 + 迟滞（离开遮挡区 0.4s 后才回来，边界不闪）；鱼线跟着角色一起淡
     a.nearHidden = near;
     a.hideHold = near ? 0.4 : Math.max(0, (a.hideHold || 0) - dt);
-    const tgt = near || a.hideHold > 0 ? 0 : 1;
+    a.softHold = soft ? 0.6 : Math.max(0, (a.softHold || 0) - dt);   // 迟滞：离开遮挡 0.6s 后才恢复，边界不闪
+    const tgt = near || a.hideHold > 0 ? 0 : a.softHold > 0 ? 0.35 : 1;
     if (a.fade === undefined) a.fade = 1;
     a.fade = photo ? tgt : tgt < a.fade ? Math.max(tgt, a.fade - dt / 0.18) : Math.min(tgt, a.fade + dt / 0.3);
     setCharFade(a, a.fade);
@@ -1306,7 +1309,7 @@ const catchCard = { shown: false, walkHide: 0 };
 let uiSlowT = 0;
 const sOut = { x: 0, y: 0, vis: false };
 const feedEl = $('feed');
-const uiRoot = $('ui'), topEl = $('top'), baitEl = $('bait'), hintEl = $('hint'), distBox = $('dist'), tipEl = $('distTip'), distEl = $('distN');
+const uiRoot = $('ui'), topEl = $('top'), hintEl = $('hint'), distBox = $('dist'), tipEl = $('distTip'), distEl = $('distN');
 const ACT = {
   idle: ['cast', 'hook', '抛竿'], charge: ['cast charging', 'hook', '松手'], cast: ['wait', 'bobber', '…'], reelEmpty: ['wait', 'reel', '收线'],
   float: ['wait', 'bobber', '等待中'], bite: ['bite timed', 'bang', '扬竿'], hookset: ['reel', 'reel', '收线'], fight: ['reel', 'reel', '收线'],
@@ -1357,12 +1360,10 @@ function updateUI(dt) {
   if (tagT && actTagT.textContent !== tagT) actTagT.textContent = tagT;
   const tagPs = tagP.toFixed(3); if (actTag.style.getPropertyValue('--p') !== tagPs) actTag.style.setProperty('--p', tagPs);
 
-  // ---- 阶段可见性：顶栏 / 幸运饵 / 搏鱼胶囊 / 动态推送 ----
+  // ---- 阶段可见性：顶栏 / 搏鱼胶囊 / 动态推送 ----
   const topOn = !FOCUS_HIDE_TOP.has(st) && !photo;
   topEl.classList.toggle('off', !topOn);
   uiRoot.classList.toggle('notop', !topOn);
-  baitEl.classList.toggle('off', st !== 'idle' || !!photo || !!catchCard.shown);
-  baitEl.classList.toggle('empty', meta.S.bait <= 0 && !baitOn);
   tankBtn.classList.toggle('off', TANK_LOCK.has(st) || !!photo || !!catchCard.shown);   // v1.0：钓鱼/抱鱼时让位
   const fighting = st === 'fight' || st === 'hookset';
   document.body.classList.toggle('strain', fighting && tp > 0.86);
@@ -1450,9 +1451,25 @@ function updateUI(dt) {
 }
 const chargeTick = { t: 0 };
 
+function pickAngler(x, y) {
+  let best = null, bd = 1e9; const rc = {};
+  for (const a of anglers) {
+    if (!a.char.root.visible || (a.fade !== undefined && a.fade < 0.2)) continue;
+    const R = charRect(a.char, rc); if (!R) continue;
+    const pad = Math.max(14, R.h * 0.12);
+    if (x < R.x0 - pad || x > R.x1 + pad || y < R.y0 - pad - 26 || y > R.y1 + pad) continue;   // 头顶名牌也算
+    a.char.root.getWorldPosition(tmp); const dd = tmp.distanceTo(camera.position);
+    if (dd < bd) { bd = dd; best = a; }
+  }
+  return best;
+}
+const watchChip = (() => { const el = document.createElement('button'); el.id = 'watchChip'; el.innerHTML = '<i></i><span></span><b>回到我</b>'; el.onclick = () => { sfx.tap(); endWatch(); }; document.getElementById('app').appendChild(el); return el; })();
+function endWatch() { if (!watch) return; watch = null; cam.userT = 0; watchChip.classList.remove('show'); }
 function onWatch(a) {
   if (!a) return;
-  watch = { a, t: 4.5 }; cam.userT = 0;
+  // v1.4：不再 4.5 秒自动结束 —— 持续环绕好友，直到玩家移动 / 操作 / 点「回到我」
+  watch = { a, t: Infinity, yaw: cam.yaw }; cam.userT = 0;
+  watchChip.querySelector('span').textContent = `正在看 ${a.name}`; watchChip.style.setProperty('--c', a.color || '#ff7a8a'); watchChip.classList.add('show');
   UI.say(a, a.lastCatch && time - a.lastCatch.t < 60 ? `刚钓到 ${displayName(a.lastCatch.v)}！` : pick(a.lines));
 }
 
@@ -1661,12 +1678,12 @@ async function boot() {
   lastRank = meta.board(live).find((r) => r.you).rank;
   cam.yaw = playerState.facing + B.rotation.y - Math.PI * 0.3;   // 从船尾斜后方看，避免左舷好友挡镜头
   UI.splashProgress(1, '大家都到齐啦');
-  $('start').classList.add('ready');
+  $('start').classList.add('ready'); $('splash').classList.add('ready');   // 开屏：细线进度淡出 → 胶囊按钮淡入
   const go = () => {
     if (started) return;
     started = true; initAudio();
     $('splash').classList.add('out'); sfx.open();
-    setTimeout(() => $('splash').remove(), 600);
+    setTimeout(() => $('splash').remove(), 760);   // 与 #splash.out 的 .65s 淡出对齐
     setTimeout(() => {
       const mates = anglers.filter((a) => !a.isPlayer);
       UI.feedPush({ whos: mates, html: `<b>${mates.map((a) => a.name).join('、')}</b> 都在船上`, icon: 'wave' });

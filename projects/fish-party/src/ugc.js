@@ -325,7 +325,7 @@ export function buildDeco(kind, A, seed) {
     const col = pickR(r, ['#fff27a', '#7dfcff', '#ff9ef0', '#9dff8a']);
     const bulbM = std(col, { emissive: col, emissiveIntensity: 1.6, roughness: 0.2 });
     const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12), bulbM); bulb.position.copy(tip).add(new THREE.Vector3(0.04, -0.1, 0)); g.add(bulb);
-    const glow = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 12), new THREE.MeshBasicMaterial({ color: mute(col), transparent: true, opacity: 0.25, depthWrite: false })); glow.position.copy(bulb.position); g.add(glow);
+    const glow = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 12), new THREE.MeshBasicMaterial({ color: mute(col), transparent: true, opacity: 0.25, depthWrite: false })); glow.position.copy(bulb.position); glow.name = 'fx-glow'; g.add(glow);
     g.scale.setScalar(S * 0.75); g.position.copy(A.headTop).add(new THREE.Vector3(0, -S * 0.02, 0));
     anim = (t) => { const k = 0.5 + 0.5 * Math.sin(t * 3.2); bulbM.emissiveIntensity = 1.1 + k * 0.9; glow.scale.setScalar(0.9 + k * 0.25); g.rotation.z = Math.sin(t * 2.1) * 0.08; };
   } else if (kind === 'halo') {
@@ -406,7 +406,7 @@ export function buildDeco(kind, A, seed) {
   } else if (kind === 'bubbles') {
     const bm = new THREE.MeshStandardMaterial({ color: '#dff8ff', roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.55, emissive: '#bdf3ff', emissiveIntensity: 0.25, depthWrite: false });
     const bs = [];
-    for (let i = 0; i < 7; i++) { const b = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), bm); b.userData.ph = i / 7; b.userData.r = 0.5 + r() * 0.6; b.userData.z = (r() - 0.5) * 0.6; g.add(b); bs.push(b); }
+    for (let i = 0; i < 7; i++) { const b = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), bm); b.name = 'fx-bubble'; b.userData.ph = i / 7; b.userData.r = 0.5 + r() * 0.6; b.userData.z = (r() - 0.5) * 0.6; g.add(b); bs.push(b); }
     g.position.copy(A.tail);
     const L = A.len;
     anim = (t) => {

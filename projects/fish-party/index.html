@@ -135,6 +135,11 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 
 /* ---------- 好友头顶：名字 + 气泡 ---------- */
 #tags{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+/* v1.4：环绕观看好友时的顶部小胶囊（点击 / 走动 / 抛竿 → 回到自己） */
+#watchChip{position:absolute;left:50%;top:calc(84px + var(--st));z-index:14;display:flex;align-items:center;gap:8px;height:36px;padding:0 6px 0 14px;border:0;border-radius:var(--pill);background:rgba(255,250,243,.95);color:var(--ink);font:800 var(--f2)/1 inherit;box-shadow:var(--thick),var(--sh);opacity:0;transform:translate(-50%,-8px) scale(.94);pointer-events:none;transition:opacity .22s var(--ease),transform .32s var(--spring);white-space:nowrap}
+#watchChip.show{opacity:1;transform:translate(-50%,0) scale(1);pointer-events:auto}
+#watchChip i{width:8px;height:8px;border-radius:50%;background:var(--c,#ff7a8a);box-shadow:0 0 0 3px color-mix(in srgb,var(--c,#ff7a8a) 25%,transparent)}
+#watchChip b{display:flex;align-items:center;height:26px;padding:0 12px;border-radius:var(--pill);background:var(--pri);color:#fff;font-size:var(--f1)}
 .tag{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0;transition:opacity var(--dur) var(--ease);will-change:transform}
 .tag.show{opacity:1}
 .tag .say{position:relative;background:#fff;color:var(--ink);font-size:var(--f1);font-weight:700;padding:6px 12px;border-radius:16px;white-space:nowrap;box-shadow:var(--thick),var(--sh)}
@@ -154,31 +159,35 @@ body.frenzy-on #edge{box-shadow:inset 0 0 50px 4px rgba(255,212,92,.35)}
 @keyframes edgeR{to{box-shadow:inset 0 0 50px 6px rgba(255,107,107,.3)}}
 @keyframes edge{to{box-shadow:inset 0 0 30px 4px rgba(255,122,138,.28)}}
 
-/* ---------- 底部：提示 / 主按钮 + 环 / 幸运饵 / 摇杆 ---------- */
+/* ---------- 底部：提示 / 主按钮 + 环 / 摇杆 ---------- */
 /* v1.3：主按钮 92→102px、外圈状态环 112→150px 且更粗；按钮正上方加「状态条」#actTag（蓄力/完美区/咬钩/张力），
    拇指按住按钮时环的右下段会被挡住 → 关键状态在按钮上方 + 环的左上段（完美区 / 红色危险区都落在左上）始终可见 */
-#hint{position:absolute;right:calc(16px + var(--sr));bottom:calc(222px + var(--sb));max-width:76%;font-size:var(--f2);font-weight:700;color:var(--ink);background:rgba(255,250,243,.94);padding:9px 16px;border-radius:var(--pill);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;box-shadow:var(--thick),var(--sh)}
-#act{position:absolute;right:calc(26px + var(--sr));bottom:calc(34px + var(--sb));width:102px;height:102px;border-radius:50%;pointer-events:auto;touch-action:none}
+/* v0.8：状态条/距离挪到主按钮左侧成列 → 按钮正上方让给新手引导，气泡下移贴近按钮（外环顶 168px + 16px 呼吸） */
+#hint{position:absolute;right:calc(16px + var(--sr));bottom:calc(184px + var(--sb));max-width:76%;font-size:var(--f2);font-weight:700;color:var(--ink);background:rgba(255,250,243,.94);padding:9px 16px;border-radius:var(--pill);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;box-shadow:var(--thick),var(--sh)}
+/* v1.4：幸运饵按钮下线 → 底部只剩「摇杆 · 主按钮」两件，圆心对称（距各自角落 86px / 底边 92px），视觉重心左右平衡 */
+#act{position:absolute;right:calc(34px + var(--sr));bottom:calc(40px + var(--sb));width:104px;height:104px;border-radius:50%;pointer-events:auto;touch-action:none}
 #act::before{content:'';position:absolute;inset:-22px;border-radius:50%}   /* 触控热区随外环放大 */
-#act .ring{position:absolute;left:-24px;top:-24px;width:150px;height:150px;pointer-events:none;transform:rotate(-90deg);overflow:visible}
+#act .ring{position:absolute;left:-24px;top:-24px;width:152px;height:152px;pointer-events:none;transform:rotate(-90deg);overflow:visible}
 #act .ring circle{fill:none;stroke-width:7;stroke-linecap:round;transition:opacity var(--dur),stroke .12s}
 #act .ring .t{stroke:rgba(255,255,255,.6);opacity:0;filter:drop-shadow(0 1px 2px rgba(90,60,30,.25))}
 #act .ring .z{stroke:var(--lemon);opacity:0;stroke-linecap:butt;stroke-width:13;filter:drop-shadow(0 0 4px rgba(255,212,92,.9))}
 #act .ring .v{stroke-width:8}
 /* 状态条：按钮正上方（手指覆盖范围外），蓄力 / 咬钩 / 搏鱼时出现 */
-#actTag{position:absolute;left:50%;bottom:calc(100% + 30px);transform:translate(-50%,6px);display:flex;align-items:center;gap:7px;height:32px;padding:0 12px 0 8px;border-radius:var(--pill);background:rgba(255,250,243,.96);box-shadow:var(--thick),var(--sh);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .16s,transform .2s var(--ease),background .15s}
+/* v0.8：状态条 + 距离胶囊统一收到主按钮左侧，右对齐成一列（同高 34px · 同间距）；蓄力/咬钩时只有状态条 → 与按钮圆心对齐，搏鱼时两条上下排列 */
+#actTag{position:absolute;right:calc(100% + 34px);top:50%;transform:translate(6px,-50%);transform-origin:right center;height:34px;display:flex;align-items:center;gap:7px;padding:0 13px 0 10px;border-radius:var(--pill);background:rgba(255,250,243,.96);box-shadow:var(--thick),var(--sh);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .16s,transform .2s var(--ease),background .15s}
 #actTag .m{display:block;flex:none;position:relative;width:62px;height:10px;border-radius:var(--pill);background:#efe4d6;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(120,90,60,.12)}
 #actTag .m i{position:absolute;left:0;top:0;bottom:0;width:calc(var(--p,0) * 100%);border-radius:var(--pill);background:linear-gradient(90deg,#ffe48c,var(--lemon))}
 #actTag .m s{position:absolute;top:0;bottom:0;left:74%;width:16%;background:rgba(255,178,26,.55);box-shadow:inset 0 0 0 1.5px #fff;text-decoration:none;display:none}
 #actTag .m b{position:absolute;top:0;bottom:0;left:calc(var(--p,0) * 100%);width:4px;margin-left:-2px;border-radius:2px;background:#fff;box-shadow:0 0 0 1.5px var(--ink);display:none}
 #actTag span{font-size:var(--f2);font-weight:900;color:var(--ink);letter-spacing:.02em;min-width:3.5em}
-#act.charging #actTag,#act.timed #actTag,#act.reel #actTag{opacity:1;transform:translate(-50%,0)}
+#act.charging #actTag,#act.timed #actTag{opacity:1;transform:translate(0,-50%)}
+#act.reel #actTag{opacity:1;transform:translate(0,calc(-100% - 5px))}
 #act.charging #actTag .m s{display:block}
 #act.charging.inzone #actTag,#act.timed #actTag{background:linear-gradient(180deg,#fff3c4,var(--lemon));box-shadow:0 3px 0 var(--lemon-d),var(--sh)}
 #act.charging.inzone #actTag span,#act.timed #actTag span{color:#6b4800}
 #act.charging.inzone #actTag .m s{background:#fff}
 #act.timed #actTag{animation:tagPulse .45s ease-in-out infinite}
-@keyframes tagPulse{50%{transform:translate(-50%,0) scale(1.07)}}
+@keyframes tagPulse{50%{scale:1.07}}
 #act.timed #actTag .m i{background:var(--pri)}
 #act.reel #actTag .m{background:linear-gradient(90deg,rgba(79,214,192,.75) 0 61%,rgba(255,212,92,.85) 61% 82%,rgba(255,107,107,.85) 82%)}
 #act.reel #actTag .m i{display:none}
@@ -224,35 +233,27 @@ body.frenzy-on #edge{box-shadow:inset 0 0 50px 4px rgba(255,212,92,.35)}
 #act.reel.tr .ring .v,#act.reel.danger .ring .v{stroke:var(--red);filter:drop-shadow(0 0 5px rgba(255,107,107,.95))}
 #act.reel.danger .ring{animation:shk .18s linear infinite}
 @keyframes shk{0%,100%{translate:0 0}25%{translate:1px -1px}75%{translate:-1px 1px}}
-#dist{position:absolute;right:calc(100% + 30px);top:50%;transform:translate(6px,-50%);display:flex;align-items:center;gap:4px;height:34px;padding:0 12px 0 9px;border-radius:var(--pill);background:rgba(255,250,243,.95);color:var(--ink);white-space:nowrap;opacity:0;pointer-events:none;box-shadow:var(--thick),var(--sh);transition:opacity var(--dur),transform var(--dur) var(--ease)}
+#dist{position:absolute;right:calc(100% + 34px);top:50%;transform:translate(6px,5px);transform-origin:right center;display:flex;align-items:center;gap:5px;height:34px;padding:0 13px 0 10px;border-radius:var(--pill);background:rgba(255,250,243,.95);color:var(--ink);white-space:nowrap;opacity:0;pointer-events:none;box-shadow:var(--thick),var(--sh);transition:opacity var(--dur),transform var(--dur) var(--ease)}
 #dist svg{width:17px;height:17px;stroke:var(--sky-d)}
 #dist b{font-size:var(--f2)}
 #dist span{font-size:var(--f1);font-weight:800;color:var(--red-d);max-width:0;overflow:hidden;transition:max-width var(--dur)}
 #dist span.show{max-width:120px;margin-left:2px}
 #dist.far b{color:var(--red-d)}
-#act.reel #dist{opacity:1;transform:translate(0,-50%)}
-#bait{position:absolute;right:calc(128px + var(--sr));bottom:calc(138px + var(--sb));width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:auto;background:#fff;color:var(--lemon-d);box-shadow:0 3px 0 var(--edge),var(--sh);transition:transform .3s var(--spring),background var(--dur),box-shadow var(--dur),opacity var(--dur);z-index:3}
-#bait svg{width:22px;height:22px;stroke-width:2.2}
-#bait b{position:absolute;right:-5px;bottom:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--lemon);color:#6b4800;font-size:var(--f1);line-height:20px;text-align:center;box-shadow:0 0 0 2px #fff}
-#bait .tip{position:absolute;right:-8px;bottom:calc(100% + 8px);font-size:var(--f1);font-weight:800;color:var(--ink);background:rgba(255,250,243,.96);padding:5px 11px;border-radius:var(--pill);white-space:nowrap;opacity:0;transition:opacity var(--dur);pointer-events:none;box-shadow:var(--sh)}
-#bait.on .tip,#bait.hint .tip{opacity:1}
-#bait:active{transform:scale(.88);transition-duration:.06s}
-#bait.on{background:linear-gradient(180deg,#ffe48c,var(--lemon));color:#6b4800;box-shadow:0 3px 0 var(--lemon-d),0 0 0 3px #fff,0 0 18px rgba(255,212,92,.8)}
-#bait.on b{background:#fff}
-#bait.off,#bait.empty{opacity:0;pointer-events:none;transform:scale(.6)}
+#act.reel #dist{opacity:1;transform:translate(0,5px)}
 /* v1.3 常驻摇杆：左下固定底盘（idle / 抱鱼时一直显示），从底盘内按下拖动走路；摇杆以外任意处拖动 = 转视角（可一指走一指转） */
-#joy{position:absolute;left:calc(6px + var(--sl));bottom:calc(10px + var(--sb));width:168px;height:168px;border-radius:50%;pointer-events:auto;touch-action:none;transform:translateY(calc(var(--joyLift,0px) * -1));transition:opacity .2s var(--ease),transform .3s var(--ease)}
+#joy{position:absolute;left:calc(2px + var(--sl));bottom:calc(8px + var(--sb));width:168px;height:168px;border-radius:50%;pointer-events:auto;touch-action:none;transform:translateY(calc(var(--joyLift,0px) * -1));transition:opacity .2s var(--ease),transform .3s var(--ease)}
 #joy.off{transform:translateY(calc(var(--joyLift,0px) * -1)) scale(.85)}
 #joy.hold:not(.on){opacity:.6;transform:translateY(calc(var(--joyLift,0px) * -1)) scale(.82);transform-origin:20% 100%}
-#joyBase{position:absolute;left:50%;top:50%;width:124px;height:124px;margin:-62px 0 0 -62px;border-radius:50%;background:radial-gradient(circle,rgba(255,250,243,.10) 0 40%,rgba(255,250,243,.34) 70%,rgba(255,250,243,.42) 100%);box-shadow:inset 0 0 0 3px rgba(255,255,255,.9),0 4px 16px rgba(90,60,30,.14);opacity:.82;transition:opacity .16s var(--ease),transform .16s var(--ease);pointer-events:none}
-#joyBase::before{content:'';position:absolute;inset:16px;border-radius:50%;border:2px dashed rgba(255,255,255,.55)}
-#joyBase em{position:absolute;left:50%;top:50%;width:0;height:0;border:6px solid transparent;opacity:.85}
-#joyBase em:nth-of-type(1){margin:-58px 0 0 -6px;border-bottom:7px solid #fff;border-top:0}
-#joyBase em:nth-of-type(2){margin:51px 0 0 -6px;border-top:7px solid #fff;border-bottom:0}
-#joyBase em:nth-of-type(3){margin:-6px 0 0 -58px;border-right:7px solid #fff;border-left:0}
-#joyBase em:nth-of-type(4){margin:-6px 0 0 51px;border-left:7px solid #fff;border-right:0}
+/* v1.4.1：摇杆底盘与主按钮统一「同尺寸 + 同结构」：104px 圆芯 + 4px 白描边 + 6px 底唇 → 视觉直径都是 112px；圆心同高（距底 92px），左右镜像（距屏边 86px） */
+#joyBase{position:absolute;left:50%;top:50%;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;background:radial-gradient(circle at 50% 38%,rgba(255,252,247,.72) 0 45%,rgba(255,244,232,.6) 100%);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 0 0 4px #fff,0 6px 0 4px var(--edge),0 14px 26px rgba(90,60,30,.18);transition:opacity .16s var(--ease),transform .16s var(--ease);pointer-events:none}
+#joyBase::before{content:'';position:absolute;inset:14px;border-radius:50%;border:2px dashed rgba(200,170,140,.35)}
+#joyBase em{position:absolute;left:50%;top:50%;width:0;height:0;border:6px solid transparent;opacity:.9}
+#joyBase em:nth-of-type(1){margin:-49px 0 0 -6px;border-bottom:7px solid #e2c9ae;border-top:0}
+#joyBase em:nth-of-type(2){margin:42px 0 0 -6px;border-top:7px solid #e2c9ae;border-bottom:0}
+#joyBase em:nth-of-type(3){margin:-6px 0 0 -49px;border-right:7px solid #e2c9ae;border-left:0}
+#joyBase em:nth-of-type(4){margin:-6px 0 0 42px;border-left:7px solid #e2c9ae;border-right:0}
 #joy.on #joyBase{opacity:1;transform:scale(1.04)}
-#joyKnob{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#fff 0 55%,#fff6ea 100%);box-shadow:0 4px 0 var(--edge),0 6px 14px rgba(90,60,30,.22);transition:transform .14s var(--ease)}
+#joyKnob{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#fff 0 55%,#fff6ea 100%);box-shadow:0 4px 0 var(--edge),0 6px 14px rgba(90,60,30,.22);transition:transform .14s var(--ease)}
 #joy.on #joyKnob{transition:none;box-shadow:0 2px 0 var(--edge),0 0 0 4px rgba(255,255,255,.45),0 6px 14px rgba(90,60,30,.22)}
 #joyHint{position:absolute;left:10px;bottom:calc(100% - 4px);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;opacity:0;transition:opacity var(--dur)}
 #joyHint.show{opacity:1}
@@ -376,8 +377,9 @@ body[data-fish="hold"] #act{opacity:0;pointer-events:none;transform:scale(.6);tr
 .sh-tank button{height:44px;padding:0 14px;border-radius:var(--pill);background:#fff;color:var(--mint-t);font-weight:800;white-space:nowrap;box-shadow:0 3px 0 var(--edge),0 0 0 1.5px var(--mint) inset}
 .sh-tank button:active{transform:translateY(2px)}
 .cx-top{display:grid;grid-template-columns:auto 1fr;gap:10px;margin-bottom:10px}
-.cx-sum{background:#fff;border-radius:20px;box-shadow:var(--thick),var(--sh-s);padding:10px 12px;display:flex;align-items:baseline;gap:4px;font-size:var(--f1);color:var(--ink2);white-space:nowrap}
-.cx-sum b{font-size:var(--f3);color:var(--ink)}.cx-sum i{width:1px;height:14px;background:var(--line);margin:0 6px;align-self:center}
+.cx-sum{background:#fff;border-radius:20px;box-shadow:var(--thick),var(--sh-s);padding:10px 14px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:var(--f1);color:var(--ink2);white-space:nowrap}
+.cx-sum em{font-style:normal;display:inline-flex;align-items:baseline;gap:4px;line-height:1}
+.cx-sum b{font-size:var(--f3);color:var(--ink);line-height:1}.cx-sum i{flex:none;width:1px;height:16px;background:var(--line)}
 .luck{background:linear-gradient(135deg,var(--lemon-l),#fff);border-radius:20px;box-shadow:var(--thick),var(--sh-s);padding:9px 12px}
 .luck .row{display:flex;justify-content:space-between;align-items:center;font-size:var(--f1);font-weight:700;color:var(--lemon-t);margin-bottom:6px;gap:6px}
 .luck .row span{display:flex;align-items:center;gap:3px}.luck .row .i{width:14px;height:14px;stroke:var(--lemon-d)}
@@ -502,37 +504,53 @@ body[data-fish="hold"] #act{opacity:0;pointer-events:none;transform:scale(.6);tr
 #fps{position:absolute;left:8px;bottom:calc(4px + var(--sb));font-size:var(--f1);color:rgba(255,255,255,.7);pointer-events:none;font-family:monospace;z-index:6}
 body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
 
-/* ---------- 开屏：暖白 · 朋友钓鱼 / 神奇钓鱼派对 ---------- */
-#splash{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(90% 60% at 50% 32%,#fff 0%,#fffaf3 55%,#ffefe2 100%);color:var(--ink);transition:opacity .4s var(--ease),transform .4s var(--ease)}
-#splash.out{opacity:0;transform:scale(1.04);pointer-events:none}
-#splash>*:not(.sp-deco){position:relative;z-index:2}
-.sp-mark{width:104px;height:104px;border-radius:34px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--pri2),var(--pri));color:#fff;box-shadow:0 6px 0 var(--pri-d),0 18px 34px rgba(255,122,138,.35);transform:rotate(-6deg);animation:popIn .6s var(--spring) both,markBob 2.8s ease-in-out .6s infinite}
-.sp-mark svg{width:64px;height:64px;stroke-width:2.2}
-.sp-mark i{position:absolute;right:-8px;top:-8px;width:30px;height:30px;border-radius:50%;background:var(--lemon);box-shadow:0 3px 0 var(--lemon-d);display:flex;align-items:center;justify-content:center;color:#6b4800}
-.sp-mark i svg{width:18px;height:18px}
-@keyframes markBob{50%{transform:rotate(-2deg) translateY(-6px)}}
-#splash .logo{margin-top:26px;font-size:46px;font-weight:900;letter-spacing:.06em;color:var(--ink);line-height:1.1;animation:popIn .6s var(--spring) .1s both}
-#splash .logo span{display:inline-block}
-#splash .logo span:nth-child(3){color:var(--pri)}
-#splash .sub{margin-top:12px;display:flex;align-items:center;gap:8px;font-size:var(--f3);font-weight:800;color:var(--mint-t);background:var(--mint-l);border-radius:var(--pill);padding:7px 18px;animation:popIn .6s var(--spring) .2s both}
-#splash .sub i{width:8px;height:8px;border-radius:50%;background:var(--lemon)}
-#splash .sub i:last-child{background:var(--grape)}
-#splash .en{margin-top:10px;font-size:var(--f1);color:var(--ink3);font-weight:800;letter-spacing:.24em}
-#splash .load{width:56%;height:12px;border-radius:var(--pill);background:var(--bg2);box-shadow:inset 0 0 0 1.5px var(--line);margin-top:46px;overflow:hidden}
-#splash .load i{display:block;height:100%;width:0;border-radius:var(--pill);background:linear-gradient(90deg,var(--mint),var(--sky));transition:width .3s var(--ease)}
-#splash .lt{font-size:var(--f1);margin-top:10px;color:var(--ink2);font-weight:600;height:18px}
-#start{margin-top:26px;height:60px;padding:0 52px;border-radius:var(--pill);font-size:var(--f3);color:#fff;background:linear-gradient(180deg,var(--pri2),var(--pri));box-shadow:0 5px 0 var(--pri-d),0 14px 28px rgba(255,122,138,.32);text-shadow:0 1px 0 rgba(200,60,80,.25);opacity:0;transform:translateY(8px);pointer-events:none}
-#start svg.i{width:22px;height:22px;stroke-width:2.4;fill:currentColor}
-#start.ready{opacity:1;transform:none;pointer-events:auto;animation:wig 2.2s ease-in-out .6s infinite}
-#start:active{animation:none}
-.sp-deco{position:absolute;pointer-events:none;z-index:0}
-.sp-blob{border-radius:50%;filter:blur(2px);opacity:.55;animation:blob 7s ease-in-out infinite alternate}
-@keyframes blob{to{transform:translate(10px,-14px) scale(1.06)}}
-.sp-bb{bottom:-40px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#fff 0 18%,rgba(255,255,255,.3) 34%,transparent 70%),var(--c);opacity:.5;animation:spBub linear infinite}
-@keyframes spBub{0%{transform:translate(0,0)}50%{transform:translate(14px,-55vh)}100%{transform:translate(-6px,-112vh)}}
-.sp-wave{left:-10%;right:-10%;bottom:-2px;height:14%;background:var(--c);-webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 100' preserveAspectRatio='none'><path d='M0 18 C 40 0, 40 0, 80 18 S 120 36, 160 18 V100 H0z' fill='black'/></svg>") 0 0/160px 100% repeat-x;mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 100' preserveAspectRatio='none'><path d='M0 18 C 40 0, 40 0, 80 18 S 120 36, 160 18 V100 H0z' fill='black'/></svg>") 0 0/160px 100% repeat-x;animation:spWave 4s linear infinite}
-.sp-wave.back{bottom:7%;height:12%;opacity:.7;animation-duration:6s;animation-direction:reverse}
-@keyframes spWave{to{-webkit-mask-position:160px 0;mask-position:160px 0}}
+/* ---------- 开屏 v3：珍珠白留白 · Fish Party 手写品牌字 · 几条花纹各异的小鱼（UGC）慢慢游过 ----------
+   动画只用 transform / opacity（合成线程），主线程加载 3D 时依旧顺滑；无 blur / backdrop-filter */
+@font-face{font-family:'FP Script';src:url(assets/fonts/GreatVibes.woff2) format('woff2');font-display:block}
+:root{--fp-bg:#fbf8f3;--fp-pink:#ec8fa3;--fp-pink2:#f4a7b6;--fp-ink:#8f847b;--fp-ink2:#b3a89e;--fp-line:#ebe3d9;--fp-ease:cubic-bezier(.22,.7,.2,1)}
+#splash{position:absolute;inset:0;z-index:40;overflow:hidden;background:var(--fp-bg);color:var(--fp-ink);font-family:var(--font);transition:opacity .65s var(--fp-ease)}
+#splash::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(140% 95% at 50% 44%,rgba(255,255,255,.6) 0%,rgba(255,255,255,0) 50%,rgba(238,227,214,.32) 100%)}
+#splash.out{opacity:0;pointer-events:none}
+#splash .sp-sea{position:absolute;inset:0;pointer-events:none;z-index:0}
+#splash .sp-fish{position:absolute;left:0;top:var(--y);width:var(--w);opacity:0;animation:spSwim var(--d) linear var(--dl) infinite,spFade 1.6s var(--fp-ease) .2s forwards;will-change:transform}
+#splash .sp-fish.l{animation-name:spSwimL,spFade}
+#splash .sp-fb{animation:spBob var(--b,3.8s) ease-in-out infinite alternate}
+#splash .sp-fish svg{display:block;width:100%;height:auto;overflow:visible}
+#splash .sp-fish:not(.l) svg{transform:scaleX(-1)}
+#splash .sp-fish .tail{transform-box:view-box;transform-origin:42px 16px;animation:spTail var(--t,.9s) ease-in-out infinite alternate}
+@keyframes spSwim{from{transform:translate3d(-18vw,0,0)}to{transform:translate3d(112vw,0,0)}}
+@keyframes spSwimL{from{transform:translate3d(112vw,0,0)}to{transform:translate3d(-18vw,0,0)}}
+@keyframes spFade{to{opacity:var(--o,1)}}
+@keyframes spBob{from{transform:translateY(calc(var(--a,6px) * -1)) rotate(-2deg)}to{transform:translateY(var(--a,6px)) rotate(2deg)}}
+@keyframes spTail{from{transform:rotate(-11deg)}to{transform:rotate(11deg)}}
+#splash .sp-main{position:absolute;left:0;right:0;top:44%;z-index:2;display:flex;flex-direction:column;align-items:center;transform:translateY(-50%);transition:transform .7s var(--fp-ease)}
+#splash.out .sp-main{transform:translateY(calc(-50% - 14px)) scale(1.03)}
+#splash .sp-brand{margin:0;font:400 clamp(60px,18vw,92px)/1.2 'FP Script','Snell Roundhand','Brush Script MT','Segoe Script',cursive;letter-spacing:.005em;white-space:nowrap}
+/* 书写式揭示：外层窗口从左滑入、内层反向等速滑动 → 文字静止、右缘带柔边逐字"写"出来（纯 transform，合成线程） */
+#splash .sp-wipe{display:block;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 72px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 72px),transparent);transform:translateX(-100%);animation:spWipe 2.2s cubic-bezier(.5,.08,.3,1) .25s forwards}
+#splash .sp-ink{display:block;padding:.1em 72px .22em;transform:translateX(100%);animation:spWipe 2.2s cubic-bezier(.5,.08,.3,1) .25s forwards;
+  color:var(--fp-pink);background:linear-gradient(100deg,#e8879d 22%,var(--fp-pink) 40%,var(--fp-pink2) 66%,#f3b3aa 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+@keyframes spWipe{to{transform:none}}
+#splash .sp-rule{width:26px;height:1px;margin:-4px 0 16px;background:var(--fp-pink);opacity:0;transform:scaleX(0);animation:spRule .9s var(--fp-ease) 1.5s forwards}
+@keyframes spRule{to{opacity:.55;transform:none}}
+#splash .sp-sub{font-size:13px;line-height:1;font-weight:300;letter-spacing:.62em;padding-left:.62em;color:var(--fp-ink);opacity:0;transform:translateY(6px);animation:spUp 1s var(--fp-ease) 1.7s forwards}
+@keyframes spUp{to{opacity:1;transform:none}}
+#splash .sp-load{position:absolute;left:50%;bottom:calc(15% + var(--sb));z-index:2;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);transition:opacity .5s var(--fp-ease),transform .6s var(--fp-ease)}
+#splash.ready .sp-load{opacity:0;transform:translate(-50%,8px);pointer-events:none}
+#splash .sp-track{position:relative;width:136px;height:1.5px;border-radius:1px;background:var(--fp-line)}
+#splash #loadBar{position:relative;display:block;width:0;height:100%;border-radius:1px;background:linear-gradient(90deg,var(--fp-pink2),var(--fp-pink));transition:width .7s var(--fp-ease)}
+#splash #loadBar::after{content:'';position:absolute;right:-2.5px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:var(--fp-pink);box-shadow:0 0 0 3px rgba(236,143,163,.16);animation:spDot 1.8s ease-in-out infinite}
+@keyframes spDot{50%{transform:scale(.7);opacity:.7}}
+#splash #loadT{margin-top:16px;height:16px;font-size:11px;line-height:16px;font-weight:400;letter-spacing:.18em;color:var(--fp-ink2);white-space:nowrap}
+#splash #start{position:absolute;left:50%;bottom:calc(15% + var(--sb) - 18px);z-index:3;margin:0;gap:0;height:48px;min-width:172px;padding:0 40px 0 calc(40px + .34em);border-radius:999px;font-size:15px;font-weight:500;letter-spacing:.34em;color:#fff;text-shadow:none;
+  background:linear-gradient(100deg,var(--fp-pink),var(--fp-pink2));box-shadow:0 10px 22px -14px rgba(214,110,136,.6);opacity:0;transform:translate(-50%,10px);pointer-events:none;animation:none;
+  transition:opacity .8s var(--fp-ease) .15s,transform .8s var(--fp-ease) .15s,box-shadow .3s}
+#splash #start.ready{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+@media (hover:hover){#splash #start.ready:hover{transform:translate(-50%,-1px);box-shadow:0 16px 30px -14px rgba(214,110,136,.85)}}
+#splash #start.ready:active{transform:translate(-50%,0) scale(.97);box-shadow:0 6px 14px -10px rgba(214,110,136,.7);transition-duration:.08s;transition-delay:0s}
+#splash .sp-foot{position:absolute;left:0;right:0;bottom:calc(26px + var(--sb));z-index:2;text-align:center;font-size:10px;line-height:1;font-weight:300;letter-spacing:.32em;padding-left:.32em;color:#c6bbb0;opacity:0;animation:spUp 1.2s var(--fp-ease) 2.2s forwards}
+@media (max-height:540px){#splash .sp-main{top:40%}#splash .sp-brand{font-size:56px}#splash .sp-ink{padding-top:0;padding-bottom:.16em}#splash .sp-load{bottom:calc(12% + var(--sb))}#splash #start{bottom:calc(12% + var(--sb) - 18px)}#splash .sp-foot{display:none}}
+@media (prefers-reduced-motion:reduce){#splash .sp-wipe,#splash .sp-ink,#splash .sp-fish,#splash .sp-fb,#splash .sp-fish .tail{animation-duration:0s!important}}
 </style>
 <style>
 /* ===================== 水族箱页（全屏水下 · 动森博物馆式）—— 与设计系统统一 ===================== */
@@ -747,7 +765,8 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
 .ib-it .m{flex:1;min-width:0;font-size:var(--f1);font-weight:600;line-height:1.45}
 .ib-it .m small{display:block;font-size:var(--f1);color:var(--ink3);font-weight:600;margin-top:2px}
 .ib-it .m b.u{color:var(--sky-t)}.ib-it .m b.f{color:var(--pri-d)}
-.ib-it.new .m::after{content:'NEW';display:inline-block;margin-left:6px;font-size:var(--f1);color:#fff;background:var(--pri);border-radius:6px;padding:0 5px;vertical-align:1px;line-height:16px}
+/* v0.9：NEW 跟在时间后同一行（之前挂在 .m 末尾 → 被 small 的 block 挤到单独一行） */
+.ib-it.new .m small::after{content:'NEW';display:inline-block;margin-left:8px;font-size:10px;font-weight:800;letter-spacing:.06em;color:#fff;background:var(--pri);border-radius:5px;padding:0 5px;line-height:15px;vertical-align:1px}
 .ib-empty{text-align:center;padding:22px 6px 10px;color:var(--ink2);font-size:var(--f2);line-height:1.7}
 .ib-empty b{display:flex;justify-content:center;font-size:30px;color:var(--sky-t)}
 .ib-empty b svg.i{width:36px;height:36px}
@@ -916,7 +935,6 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
       <div id="actTag"><i class="m"><i></i><s></s><b></b></i><span id="actTagT"></span></div>
       <div id="dist"><svg class="i" viewBox="0 0 24 24"><path d="M3 12c3-4.5 9-6 14-2l4-3v10l-4-3c-5 4-11 2.5-14-2z"/><circle cx="8" cy="11" r=".6"/></svg><b class="num" id="distN">0m</b><span id="distTip"></span></div>
     </div>
-    <button id="bait" class="fade" aria-label="幸运饵"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg><b class="num" id="baitN">0</b><span class="tip">幸运饵</span></button>
 
     <div id="catch" class="glass">
       <div class="hd"><span class="rb" id="cRar">SR</span><span id="cName">鱼</span><span id="cNew" class="hidden">NEW</span></div>
@@ -940,24 +958,50 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
   <div id="modal"><div class="box" id="mBox"></div></div>
 
   <div id="splash">
-    <div class="sp-mark"><svg class="i" viewBox="0 0 24 24"><path d="M2.5 12c2.6-3.6 6-5.2 9.6-5 3 .2 5.3 2 6.4 5-1.1 3-3.4 4.8-6.4 5-3.6.2-7-1.4-9.6-5z"/><path d="M18.5 12l3-3.5v7z"/><circle cx="7.5" cy="11.2" r=".6"/></svg><i><svg class="i" viewBox="0 0 24 24"><path d="M12 4l1.9 5.1L19 11l-5.1 1.9L12 18l-1.9-5.1L5 11l5.1-1.9z"/></svg></i></div>
-    <div class="logo"><span>朋</span><span>友</span><span>钓</span><span>鱼</span></div>
-    <div class="sub"><i></i>神奇钓鱼派对<i></i></div>
-    <div class="en">FRIENDS FISHING PARTY</div>
-    <div class="load"><i id="loadBar"></i></div>
-    <div class="lt" id="loadT">正在连接房间…</div>
-    <button id="start"><svg class="i" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></svg>开始派对</button>
+    <div class="sp-sea" id="spSea" aria-hidden="true"></div>
+    <div class="sp-main">
+      <h1 class="sp-brand" aria-label="Fish Party"><span class="sp-wipe"><span class="sp-ink">Fish Party</span></span></h1>
+      <i class="sp-rule"></i>
+      <div class="sp-sub">神奇钓鱼派对</div>
+    </div>
+    <div class="sp-load" role="status" aria-live="polite">
+      <div class="sp-track"><i id="loadBar"></i></div>
+      <div id="loadT">正在连接房间…</div>
+    </div>
+    <button id="start">开始派对</button>
+    <div class="sp-foot">每一条鱼，都独一无二</div>
   </div>
   <script>
-  // 开屏氛围：暖白底 + 糖果色柔光团 + 上升气泡 + 两层软浪（纯 DOM/CSS，进入游戏后随开屏一起移除）
+  // 开屏：5 条花纹各不相同的极简小鱼（条纹 / 波点 / 渐变 / 星星 / 线描 —— 暗示 UGC），低饱和、慢速、留白；纯 SVG + CSS transform
   (function () {
-    var sp = document.getElementById('splash'); if (!sp) return;
-    var C = ['#ffd3d9', '#c9f2ea', '#fff0bf', '#e3ddff', '#d6eeff'];
-    var B = [[-60, 90, 220, C[0]], [230, 40, 180, C[2]], [-40, 520, 200, C[1]], [250, 600, 230, C[3]], [120, 300, 120, C[4]]];
-    B.forEach(function (b, i) { var d = document.createElement('i'); d.className = 'sp-deco sp-blob'; d.style.cssText = 'left:' + b[0] + 'px;top:' + b[1] + 'px;width:' + b[2] + 'px;height:' + b[2] + 'px;background:' + b[3] + ';animation-delay:' + (-i * 1.3) + 's'; sp.insertBefore(d, sp.firstChild); });
-    for (var k = 0; k < 12; k++) { var b = document.createElement('i'), s = 10 + Math.random() * 22; b.className = 'sp-deco sp-bb'; b.style.width = b.style.height = s + 'px'; b.style.left = (Math.random() * 96) + '%'; b.style.setProperty('--c', ['#ffb3bd', '#8fe6d6', '#ffe08a', '#c4b9ff', '#a8dcff'][k % 5]); b.style.animationDuration = (7 + Math.random() * 5) + 's'; b.style.animationDelay = (-Math.random() * 10) + 's'; sp.appendChild(b); }
-    var w1 = document.createElement('div'); w1.className = 'sp-deco sp-wave back'; w1.style.setProperty('--c', '#d9f3ff'); sp.appendChild(w1);
-    var w2 = document.createElement('div'); w2.className = 'sp-deco sp-wave'; w2.style.setProperty('--c', '#bfeee4'); sp.appendChild(w2);
+    var sea = document.getElementById('spSea'); if (!sea) return;
+    var BODY = 'M3 16C8 6.5 25 4 36 13.2L39 16L36 18.8C25 28 8 25.5 3 16Z';
+    var TAIL = 'M37.5 16L46.5 8.2Q43.6 16 46.5 23.8Z', FIN = 'M15.5 7.8Q21 2.6 27.5 7.2Z';
+    var STAR = function (x, y, r) { return 'M' + x + ' ' + (y - r) + 'Q' + x + ' ' + y + ' ' + (x + r) + ' ' + y + 'Q' + x + ' ' + y + ' ' + x + ' ' + (y + r) + 'Q' + x + ' ' + y + ' ' + (x - r) + ' ' + y + 'Q' + x + ' ' + y + ' ' + x + ' ' + (y - r) + 'Z'; };
+    function fish(i, kind, c1, c2) {
+      var id = 'spf' + i, pat = '', fill = c1, defs = '<clipPath id="' + id + 'c"><path d="' + BODY + '"/></clipPath>';
+      if (kind === 'stripe') pat = [12, 19.5, 27].map(function (x) { return '<rect x="' + x + '" y="0" width="3.4" height="32" fill="' + c2 + '"/>'; }).join('');
+      if (kind === 'dots') pat = [[12, 11, 1.7], [18, 17, 2.1], [25, 11.5, 1.5], [26, 20, 1.8], [32, 15, 1.4], [13, 21, 1.3]].map(function (d) { return '<circle cx="' + d[0] + '" cy="' + d[1] + '" r="' + d[2] + '" fill="' + c2 + '"/>'; }).join('');
+      if (kind === 'grad') { defs += '<linearGradient id="' + id + 'g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/></linearGradient>'; fill = 'url(#' + id + 'g)'; }
+      if (kind === 'star') pat = '<path d="' + STAR(15, 12, 2.6) + STAR(24, 18.5, 2) + STAR(31, 12.5, 1.6) + STAR(19, 21, 1.2) + '" fill="' + c2 + '"/>';
+      var line = kind === 'line', st = line ? ' fill="none" stroke="' + c1 + '" stroke-width="1.1" stroke-linejoin="round"' : ' fill="' + fill + '"';
+      return '<svg viewBox="0 0 48 32"><defs>' + defs + '</defs><g class="tail"><path d="' + TAIL + '"' + (line ? st : ' fill="' + (kind === 'grad' ? c2 : c1) + '"') + '/></g>'
+        + '<path d="' + FIN + '"' + (line ? st : ' fill="' + c1 + '" opacity=".75"') + '/><path d="' + BODY + '"' + st + '/>'
+        + (pat ? '<g clip-path="url(#' + id + 'c)">' + pat + '</g>' : '') + (line ? '<path d="M27 9.6Q24.2 16 27 22.4" fill="none" stroke="' + c1 + '" stroke-width="1" stroke-linecap="round"/>' : '')
+        + '<circle cx="9.6" cy="14.6" r="1.25" fill="#6f625a" opacity=".55"/></svg>';
+    }
+    // [花纹, 主色, 辅色, top%, 宽px, 周期s, 起点(负延迟比例), 方向, 不透明度, 尾摆s]
+    var F = [
+      ['stripe', '#efb4c0', '#fbe6ea', 14, 46, 38, .30, 'r', .9, .95],
+      ['dots', '#a8cec2', '#eef6f2', 25, 34, 46, .72, 'l', .8, 1.1],
+      ['grad', '#f4d7a3', '#f1b3a6', 60, 52, 42, .55, 'l', .85, 1.0],
+      ['star', '#b5cee5', '#ffffff', 68, 30, 50, .12, 'r', .75, .85],
+      ['line', '#cbb3d6', '#cbb3d6', 77, 40, 54, .86, 'r', .9, 1.2]
+    ];
+    sea.innerHTML = F.map(function (f, i) {
+      return '<div class="sp-fish ' + (f[7] === 'l' ? 'l' : '') + '" style="--y:' + f[3] + '%;--w:' + f[4] + 'px;--d:' + f[5] + 's;--dl:' + (-f[5] * f[6]).toFixed(1) + 's;--o:' + f[8] + '"><div class="sp-fb" style="--b:' + (3.2 + i * .45) + 's;--a:' + (4 + i % 3 * 2) + 'px;animation-delay:-' + i * 0.9 + 's">'
+        + fish(i, f[0], f[1], f[2]).replace('class="tail"', 'class="tail" style="--t:' + f[9] + 's"') + '</div></div>';
+    }).join('');
   })();
   </script>
   <div id="fps"></div>

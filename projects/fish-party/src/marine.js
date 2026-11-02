@@ -753,5 +753,6 @@ function animateMarineModel(model, elapsedSeconds, supportProgress = 0) {
 }
 export {
   animateMarineModel,
-  createMarineModel
+  createMarineModel,
+  Sculpture   // v0.9 A：合成物种引擎（synth.js）复用同一套雕塑工具（薄膜鳍 / 眼睛 / 管状附肢）
 };

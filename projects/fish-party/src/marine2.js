@@ -272,7 +272,7 @@ export function buildMarine2(H) {
   function jellyfish(s) {
     const prof = [[0.0, 0.34], [0.12, 0.33], [0.24, 0.285], [0.33, 0.21], [0.4, 0.115], [0.44, 0.03], [0.452, -0.02], [0.435, -0.04], [0.37, -0.005], [0.25, 0.06], [0.1, 0.095], [0.0, 0.1]];
     const bell = s.mesh('mantle', new THREE.LatheGeometry(prof.map(([r, y]) => new THREE.Vector2(r, y)), 48), '#bfd6f0');
-    const bm = bell.material.clone(); bm.transparent = true; bm.opacity = 0.74; bm.side = THREE.DoubleSide; bm.emissive = C('#9cc8ff'); bm.emissiveIntensity = 0.26;   // v4.1：浅色背景下几乎隐身 → 提高不透明度 bm.roughness = 0.12; bell.material = bm;
+    const bm = bell.material.clone(); bm.transparent = false; bm.opacity = 1; bm.side = THREE.DoubleSide; bm.emissive = C('#9cc8ff'); bm.emissiveIntensity = 0.26;   // v4.1：浅色背景下几乎隐身 → 提高不透明度 bm.roughness = 0.12; bell.material = bm;
     const rim = s.mesh('bell-rim', new THREE.TorusGeometry(0.445, 0.012, 8, 64), '#f2f8ff');
     rim.rotation.x = Math.PI / 2; rim.position.y = -0.025;
     for (let i = 0; i < 4; i++) {
@@ -282,7 +282,7 @@ export function buildMarine2(H) {
       g.rotation.set(Math.PI / 2, 0, -a + Math.PI * 0.27);
       const gm = g.material.clone(); gm.emissive = C('#ff6fae'); gm.emissiveIntensity = 0.25; g.material = gm;
     }
-    const tm = (m, o) => { const c = m.material.clone(); c.transparent = true; c.opacity = o; c.depthWrite = false; m.material = c; return m; };
+    const tm = (m, o) => { const c = m.material.clone(); c.transparent = false; c.opacity = 1; c.depthWrite = true; m.material = c; return m; };
     for (let i = 0; i < 4; i++) {
       const a = i / 4 * TAU;
       const arm = s.group(`oral-arm-${i}`, [0, 0.02, 0]);

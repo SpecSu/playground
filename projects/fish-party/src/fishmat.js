@@ -260,8 +260,8 @@ void skAlbedo(inout vec4 dc){
     vec3 memb = mix(dc.rgb, dc.rgb * 0.85 + vec3(0.12), 0.35);
     dc.rgb = mix(dc.rgb, memb, smoothstep(0.3, 1.0, rad) * (1.0 - ray));
     if (uFin1.y > 0.5) {
-      float a = mix(0.8, 0.52, smoothstep(0.15, 1.0, rad));
-      a = mix(a, min(a + 0.25, 0.92), ray * aaf);
+      float a = mix(0.95, 0.8, smoothstep(0.15, 1.0, rad));   // 鳍膜仅轻微半透（≥0.8）
+      a = mix(a, 1.0, ray * aaf);
       dc.a *= a;
     }
     gSkH = ray * (1.0 - seg * 0.5); gSkK = 0.0035 * aaf;     // 鳍条 = 细骨棱（法线隆起），膜 = 平

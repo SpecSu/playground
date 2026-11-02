@@ -5,6 +5,7 @@ import { createMarineModel, animateMarineModel } from './marine.js';
 import { newSeed, ugcFromSeed, applyPattern, findAnchors, buildDeco, DECOS, decoText } from './ugc.js';
 import { rollItemCatch, ITEM_BY_ID } from './items.js';
 import { skinFish, stepSwim } from './fishmat.js';
+import { buildSynthModel, applySynthPattern, synthBeforeSkin, synthAfterSkin } from './synth_model.js';   // v0.9 A：合成物种
 import { normGx, wildGx, funnyName, anchorsPlus, buildExtra, outlineGroup, addOutline, applyMat, tuneEyes, graftTail, cartoonEye, MAT_TIME, extraOk, stripHullOnTransparent, hasHull } from './parts.js';
 export { DECOS, decoText };
 
@@ -64,30 +65,29 @@ export const SPECIES = [
 export const SPECIES_BY_ID = Object.fromEntries(SPECIES.map((s) => [s.id, s]));
 const VERT_SP = { seahorse: 1, jellyfish: 1 };   // 竖直体型（与 marine2.js normY 一致）
 
-// "奇怪的东西"：漂流瓶（来自其他玩家的留言）/ 小黄鸭 / 宝箱
-export const ODDITIES = [
-  { id: 'bottle', name: '漂流瓶', rarity: 'rare', w: 4.4, cm: 30, kgm: 1, color: '#9fe3d0', desc: '瓶子里塞着一张纸条，来自另一位钓友。', odd: true },
-  { id: 'duck', name: '小黄鸭', rarity: 'uncommon', w: 4.4, cm: 18, kgm: 1, color: '#ffd84a', desc: '嘎。它看起来已经漂了很久，很开心被你捡到。', odd: true },
-  { id: 'chest', name: '迷你宝箱', rarity: 'epic', w: 1.6, cm: 40, kgm: 6, color: '#d39a52', desc: '沉甸甸的，当场打开：金币 + 幸运鱼饵 + 装扮道具！', odd: true },
+// v0.9 C：「奇怪的东西」（漂流瓶 / 小黄鸭 / 宝箱）下线 —— 只能钓到水生物 + 稀有道具。
+// ODDITIES 保留导出名但为空（不进抽取池）；旧 id 仍注册在 SPECIES_BY_ID（legacy），旧存档 / 图鉴记录里出现也不会崩。
+export const ODDITIES = [];
+const LEGACY_ODD = [
+  { id: 'bottle', name: '漂流瓶', rarity: 'rare', w: 0, cm: 30, kgm: 1, color: '#9fe3d0', desc: '旧版本的漂流物。', odd: true, legacy: true },
+  { id: 'duck', name: '小黄鸭', rarity: 'uncommon', w: 0, cm: 18, kgm: 1, color: '#ffd84a', desc: '旧版本的漂流物。', odd: true, legacy: true },
+  { id: 'chest', name: '迷你宝箱', rarity: 'epic', w: 0, cm: 40, kgm: 6, color: '#d39a52', desc: '旧版本的漂流物。', odd: true, legacy: true },
 ];
-for (const o of ODDITIES) SPECIES_BY_ID[o.id] = o;
-// v1.1 道具漂流物：钓上来的是"装扮道具"而不是鱼（不进 ODDITIES 抽取池、不计图鉴；由 rollCatch({ itemP }) 触发）
-// v.item = { id, n } —— 道具表见 items.js；外观：贝壳包（普通）/ 漂流瓶（稀有）/ 小宝箱（史诗·传说）
+// 道具钓获：v.item = { id, n }（道具表见 items.js）。外观统一为「被海藻缠住的小包裹」pod_kelp；pod_shell / pod_bottle / pod_chest 仅作旧存档兼容
 export const ITEM_PODS = [
-  { id: 'pod_shell', name: '贝壳包', rarity: 'common', w: 0, cm: 22, kgm: 1, color: '#ffc7da', desc: '一只合不拢的贝壳，里面夹着亮晶晶的东西。', odd: true, pod: true },
-  { id: 'pod_bottle', name: '道具漂流瓶', rarity: 'uncommon', w: 0, cm: 30, kgm: 1, color: '#9fe3d0', desc: '瓶子里装的不是纸条，是一件装扮道具！', odd: true, pod: true },
-  { id: 'pod_chest', name: '装扮小宝箱', rarity: 'rare', w: 0, cm: 40, kgm: 6, color: '#d39a52', desc: '沉甸甸的，里面是稀有的装扮道具。', odd: true, pod: true },
+  { id: 'pod_kelp', name: '海藻包裹', rarity: 'common', w: 0, cm: 24, kgm: 1, color: '#7fa88a', desc: '一只被海藻缠住的小布包，里面裹着一件东西。', odd: true, pod: true },
+  { id: 'pod_shell', name: '贝壳包', rarity: 'common', w: 0, cm: 22, kgm: 1, color: '#ffc7da', desc: '一只合不拢的贝壳，里面夹着亮晶晶的东西。', odd: true, pod: true, legacy: true },
+  { id: 'pod_bottle', name: '海藻包裹', rarity: 'common', w: 0, cm: 24, kgm: 1, color: '#7fa88a', desc: '一只被海藻缠住的小布包。', odd: true, pod: true, legacy: true },
+  { id: 'pod_chest', name: '海藻包裹', rarity: 'common', w: 0, cm: 24, kgm: 1, color: '#7fa88a', desc: '一只被海藻缠住的小布包。', odd: true, pod: true, legacy: true },
 ];
-for (const o of ITEM_PODS) SPECIES_BY_ID[o.id] = o;
-
-export const BOTTLE_NOTES = [
-  '今天钓到了人生第一条鲯鳅，分你一点好运 🍀 —— @海盐柠檬',
-  '如果你捡到这个，说明我们在同一片海里 🌊 —— @不吃香菜',
-  '我画的那条彩虹河豚，希望有一天被你钓到！—— @画画的小葵',
-  '加油，下一杆就是传说！—— @深夜钓鱼佬',
-  '别忘了抬头看看晚霞 🌅 —— @云朵收藏家',
-  '给我的鱼起名叫"周一不上班"，祝你也是 —— @摸鱼大师',
-];
+for (const o of [...LEGACY_ODD, ...ITEM_PODS]) SPECIES_BY_ID[o.id] = o;
+// v0.9 A：合成物种（隐藏）—— 只注册进 SPECIES_BY_ID（不进 SPECIES 数组 → 不进钓鱼抽取池 / 图鉴；w=0 双保险）
+// 模型由 synth_model.buildSynthModel(v) 按 v.syn 基因组生成；cm/kgm 只是兜底（真实体长在 v.cm）
+SPECIES_BY_ID.synth = { id: 'synth', name: '合成物种', rarity: 'rare', w: 0, cm: 60, kgm: 6, color: '#8fb9c4', desc: '一个世界上从未出现过的新物种。', synth: true, hidden: true };
+// 天然物种（图鉴 / 抽取池）：合成鱼 synth、道具包裹、旧漂流物都不算
+const NATURAL = new Set(SPECIES.map((s) => s.id));
+export const isNaturalSp = (id) => id !== 'synth' && NATURAL.has(id);
+export const isSynth = (v) => !!v && (v.sp === 'synth' || !!v.syn);
 
 // ---------------- UGC 变种 ----------------
 export const CREATORS = ['@画画的小葵', '@海盐柠檬', '@鲸鱼不睡觉', '@不吃香菜', '@今天也躺平', '@泡泡糖星人', '@阿杰的船', '@摸鱼大师', '@云朵收藏家', '@深夜钓鱼佬', '@咸鱼翻身中', '@粉红鲨鲨', '@月亮邮差', '@奶盖大王', '@橘子汽水', '@小鹿乱撞'];
@@ -108,20 +108,22 @@ export const TRAITS = {
 function pickW(list, wf) { let s = 0; for (const x of list) s += wf(x); let r = Math.random() * s; for (const x of list) { r -= wf(x); if (r <= 0) return x; } return list[list.length - 1]; }
 
 // luck: 0~1（幸运饵/保底/鱼潮）—— 越高越偏向稀有
-// v1.1 itemP：这一杆钓到道具漂流物的概率（玩家 0.2，好友 0）；item：强制道具 id（测试 / ?item=）
-export function rollCatch({ luck = 0, forceMinRarity = null, maxRarity = null, featured = null, allowOdd = true, force = null, itemP = 0, item = null, itemLuck = 0 } = {}) {
+// itemP：这一杆钓到道具（海藻包裹）的概率（玩家 = items.ITEM_CATCH_P，好友 0）；item：强制道具 id（测试 / ?item=）
+// v0.9 C：抽取池只有天然水生物（漂流瓶 / 小黄鸭 / 宝箱下线，allowOdd 参数保留但无效）；道具好运只做轻微加成（见 items.ITEM_LUCK_K）
+export function rollCatch({ luck = 0, forceMinRarity = null, maxRarity = null, featured = null, allowOdd = false, force = null, itemP = 0, item = null, itemLuck = 0 } = {}) {
   let sp;
   if (!force && (item || (itemP > 0 && Math.random() < itemP))) {
     const got = rollItemCatch(Math.random, { p: 1, luck: itemLuck, force: item });
-    const v = makeVariant(SPECIES_BY_ID[got.pod]);
-    v.item = { id: got.id, n: got.n }; v.nick = ITEM_BY_ID[got.id].name; v.creator = '大海';
+    const v = makeVariant(SPECIES_BY_ID[got.pod] || SPECIES_BY_ID.pod_kelp);
+    v.item = { id: got.id, n: got.n }; v.nick = ITEM_BY_ID[got.id]?.name || '道具'; v.creator = '大海';
     return v;
   }
-  if (force && SPECIES_BY_ID[force]) sp = SPECIES_BY_ID[force];
+  if (force && SPECIES_BY_ID[force] && force !== 'synth') sp = SPECIES_BY_ID[force];
   else {
-    const minIdx = forceMinRarity ? RARITY_ORDER.indexOf(forceMinRarity) : 0;
-    const maxIdx = maxRarity ? RARITY_ORDER.indexOf(maxRarity) : 9;
-    const pool = SPECIES.filter((s) => RARITY_ORDER.indexOf(s.rarity) >= minIdx && RARITY_ORDER.indexOf(s.rarity) <= maxIdx).concat(allowOdd && minIdx < 3 ? ODDITIES.filter((s) => RARITY_ORDER.indexOf(s.rarity) <= maxIdx) : []);
+    const minIdx = forceMinRarity ? Math.max(0, RARITY_ORDER.indexOf(forceMinRarity)) : 0;
+    const maxIdx = maxRarity && RARITY_ORDER.includes(maxRarity) ? RARITY_ORDER.indexOf(maxRarity) : 9;
+    let pool = SPECIES.filter((s) => isNaturalSp(s.id) && s.w > 0 && RARITY_ORDER.indexOf(s.rarity) >= minIdx && RARITY_ORDER.indexOf(s.rarity) <= maxIdx);
+    if (!pool.length) pool = SPECIES.filter((s) => isNaturalSp(s.id) && s.w > 0);
     sp = pickW(pool, (s) => {
       const ri = RARITY_ORDER.indexOf(s.rarity);
       let w = s.w * Math.pow(1 + luck * 2.2, ri);
@@ -132,23 +134,23 @@ export function rollCatch({ luck = 0, forceMinRarity = null, maxRarity = null, f
   return makeVariant(sp, luck);
 }
 
+// v0.9 C：天然鱼 = 它本来的样子 —— 不再附加「派对基因」（wildGx 部件 / 材质 / 拉伸 / 萌眼）和 UGC 头饰脸饰；
+// 保留：个体色相微差 + 柔和花纹（ugc 种子）+ 天然稀有色变 traits（金色 / 彩虹 / 夜光 / 霓虹 / 马卡龙）+ 体型（巨型 / 迷你）
+const NAT_TRAITS = Object.keys(TRAITS).filter((k) => k !== 'jelly');   // 果冻质感算「装扮」，不再天然出现（旧存档仍可显示）
 export function makeVariant(sp, luck = 0) {
   const v = { sp: sp.id, id: newSeed().toString(36) + Date.now().toString(36).slice(-4), creator: CREATORS[(Math.random() * CREATORS.length) | 0], traits: [], hue: 0, sat: 1, light: 1 };
   if (!sp.odd) {
     v.hue = (Math.random() - 0.5) * 0.16; v.sat = 0.9 + Math.random() * 0.35; v.light = 0.92 + Math.random() * 0.16;
-    if (Math.random() < 0.42 + luck * 0.3) v.traits.push(pickW(Object.keys(TRAITS), (k) => TRAITS[k].w));
-    if (Math.random() < 0.08 + luck * 0.1) { const t2 = pickW(Object.keys(TRAITS), (k) => TRAITS[k].w); if (!v.traits.includes(t2) && !(t2 === 'mini' && v.traits.includes('giant')) && !(t2 === 'giant' && v.traits.includes('mini'))) v.traits.push(t2); }
-    // UGC：种子 → 独一无二的花纹 / 配色 / 装饰 / 作品名
+    if (Math.random() < 0.42 + luck * 0.3) v.traits.push(pickW(NAT_TRAITS, (k) => TRAITS[k].w));
+    if (Math.random() < 0.08 + luck * 0.1) { const t2 = pickW(NAT_TRAITS, (k) => TRAITS[k].w); if (!v.traits.includes(t2) && !(t2 === 'mini' && v.traits.includes('giant')) && !(t2 === 'giant' && v.traits.includes('mini'))) v.traits.push(t2); }
+    // UGC 种子 → 个体花纹 / 配色微差 / 作品名（装饰 decos 清空：鱼不能被装扮）
     v.seed = newSeed();
-    v.ugc = ugcFromSeed(v.seed, sp.id);
+    v.ugc = ugcFromSeed(v.seed, sp.id); v.ugc.decos = [];
     v.title = v.ugc.title;
-    // v1.0 派对基因（§5）：35% 自带部件 / 15% 特殊材质 / 大萌眼 / 夸张拉伸 / 搞怪名字
-    v.gx = wildGx(sp.id);
-    v.nick = funnyName(sp.name, v.gx, v.ugc.decos, Math.random, null);
+    v.nick = funnyName(sp.name, null, [], Math.random, null);
     if (v.nick === sp.name) v.nick = `${ADJ[(Math.random() * ADJ.length) | 0]}${sp.name}`;
   } else {
     v.nick = sp.name;
-    if (sp.id === 'bottle') v.note = BOTTLE_NOTES[(Math.random() * BOTTLE_NOTES.length) | 0];
   }
   let sizeK = 0.8 + Math.random() * 0.45;
   if (v.traits.includes('giant')) sizeK *= 1.6;
@@ -166,19 +168,21 @@ export function rarityOf(v) { return (v && v.rarity && RARITY[v.rarity]) ? v.rar
 
 // 旧存档（v0.5 及以前）没有 seed：用 sp+cm 派生一个稳定种子，保证图鉴里每次看到的样子一致
 export function ensureUgc(v) {
-  if (!v || SPECIES_BY_ID[v.sp]?.odd || v.ugc) return v;
+  if (!v || SPECIES_BY_ID[v.sp]?.odd || v.sp === 'synth' || v.ugc) return v;   // 合成鱼：花纹 / 配色由基因组决定，不叠 UGC
   if (v.seed == null) { let h = 2166136261; for (const ch of `${v.sp}|${v.cm}|${v.creator}|${v.nick}`) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); v.seed = h >>> 0; }
   v.ugc = ugcFromSeed(v.seed, v.sp, v.acc || null); v.title = v.ugc.title;
   return v;
 }
-export function variantMult(v) { return v.traits.reduce((m, t) => m * TRAITS[t].mult, 1) * (1 + 0.15 * (v.ugc?.decos?.length || 0)); }
+export function variantMult(v) { return (v.traits || []).reduce((m, t) => m * TRAITS[t].mult, 1) * (1 + 0.15 * (v.ugc?.decos?.length || 0)); }
 export function scoreOf(v, { frenzy = false, combo = 0, first = false } = {}) {
-  const sp = SPECIES_BY_ID[v.sp];
-  const base = RARITY[rarityOf(v) || sp.rarity].pts * (0.7 + 0.3 * Math.min(v.sizeK, 2)) * variantMult(v);
+  // v0.9 C：合成鱼可能 sp==='synth' / rarity==='mythic' → 兜底按传说计分
+  const R = RARITY[rarityOf(v)] || RARITY.legendary;
+  const base = R.pts * (0.7 + 0.3 * Math.min(v.sizeK || 1, 2)) * variantMult(v);
   return Math.round(base * (frenzy ? 1.5 : 1) * (1 + Math.min(combo, 10) * 0.1) + (first ? 100 : 0));
 }
 export function traitText(v) { return v.traits.map((t) => TRAITS[t].icon + TRAITS[t].label).concat(v.ugc?.decos?.length ? [decoText(v.ugc)] : []).join(' · '); }
-export function displayName(v) { const sp = SPECIES_BY_ID[v.sp]; return sp.odd ? sp.name : v.nick; }
+// v0.9：合成鱼（sp==='synth' 或带 syn 基因组）优先显示玩家起的名字 v.name
+export function displayName(v) { if (!v) return ''; if ((v.sp === 'synth' || v.syn) && v.name) return v.name; const sp = SPECIES_BY_ID[v.sp]; return !sp ? (v.name || v.nick || '未知生物') : sp.odd ? sp.name : (v.nick || v.name || sp.name); }
 
 // ---------------- 3D 模型 ----------------
 const raycaster = new THREE.Raycaster();
@@ -192,40 +196,45 @@ function oddModel(id) {
     for (let i = -3; i <= 3; i++) { const rib = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 1.0), std('#ff8fb8')); rib.position.set(i * 0.15, 0.2, 0); rib.rotation.y = i * 0.18; top.add(rib); }
     const pearl = new THREE.Mesh(new THREE.SphereGeometry(0.2, 18, 12), std('#fffbe8', { emissive: '#ffe08a', emissiveIntensity: 0.9, roughness: 0.15 })); pearl.position.set(0.12, 0.12, 0); g.add(pearl);
     const ribbon = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.04, 6, 14), std('#7b5cff')); ribbon.position.set(-0.45, 0.1, 0.35); g.add(ribbon);
-  } else if (id === 'bottle' || id === 'pod_bottle') {
-    const glass = new THREE.MeshPhysicalMaterial({ color: '#9fe3d0', roughness: 0.08, transmission: 0.0, transparent: true, opacity: 0.55 });
-    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.28, 0.75, 8, 16), glass); body.rotation.z = Math.PI / 2; g.add(body);
-    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.16, 0.3, 14), glass); neck.rotation.z = -Math.PI / 2; neck.position.x = 0.75; g.add(neck);
-    const cork = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.09, 0.14, 12), std('#b88454', { roughness: 0.9 })); cork.rotation.z = -Math.PI / 2; cork.position.x = 0.95; g.add(cork);
-    const paper = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.6, 12), std('#fff4d8', { roughness: 0.9 })); paper.rotation.z = Math.PI / 2; g.add(paper);
-    const ribbon = new THREE.Mesh(new THREE.TorusGeometry(0.105, 0.02, 6, 16), std('#ff6b7a')); ribbon.rotation.y = Math.PI / 2; g.add(ribbon);
-  } else if (id === 'duck') {
-    const y = std('#ffd84a', { roughness: 0.3 });
-    const body = new THREE.Mesh(new THREE.SphereGeometry(0.5, 24, 16), y); body.scale.set(1.25, 0.85, 0.95); g.add(body);
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 24, 16), y); head.position.set(0.45, 0.52, 0); g.add(head);
-    const beak = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 10), std('#ff8a3d')); beak.scale.set(1.4, 0.5, 1); beak.position.set(0.76, 0.46, 0); g.add(beak);
-    for (const s of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), std('#222')); e.position.set(0.66, 0.62, s * 0.18); g.add(e); }
-    const tail = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.3, 12), y); tail.rotation.z = Math.PI / 2 + 0.6; tail.position.set(-0.62, 0.2, 0); g.add(tail);
   } else {
-    const wood = std('#b9773e', { roughness: 0.8 }), gold = std('#ffcf4a', { metalness: 0.7, roughness: 0.3 });
-    const box = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 0.75), wood); g.add(box);
-    // v4：箱盖挂在后缘铰链上（现场开箱时 main.js 把 userData.chestLid 绕 x 轴掀开），箱内一堆金币
-    const hinge = new THREE.Group(); hinge.position.set(0, 0.3, -0.375); g.add(hinge); g.userData.chestLid = hinge;
-    const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.375, 0.375, 1.2, 20, 1, false, 0, Math.PI), wood); lid.rotation.z = Math.PI / 2; lid.rotation.x = Math.PI / 2; lid.position.set(0, 0, 0.375); hinge.add(lid);
-    for (const x of [-0.45, 0.45]) {
-      const b = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.62, 0.78), gold); b.position.set(x, 0, 0); g.add(b);
-      const lb = new THREE.Mesh(new THREE.CylinderGeometry(0.39, 0.39, 0.08, 20, 1, false, 0, Math.PI), gold); lb.rotation.z = Math.PI / 2; lb.rotation.x = Math.PI / 2; lb.position.set(x, 0, 0.375); hinge.add(lb);
+    // v0.9 C：道具统一外观「被海藻缠住的小包裹」—— 湿润亚麻布包 + 麻绳十字结 + 斜缠的两条海带 + 垂下的海藻须；
+    // 布缝里露出一点点光（podGlint，main.js 按道具稀有度染色）。旧的漂流瓶 / 宝箱 / 小黄鸭 id 也用它渲染（旧存档兼容）
+    const cloth = std('#cbb894', { roughness: 0.82 }), clothD = std('#a8946e', { roughness: 0.9 });
+    const twine = std('#8a6b45', { roughness: 0.95 });
+    const kelpM = new THREE.MeshStandardMaterial({ color: '#56794a', roughness: 0.5, side: THREE.DoubleSide });
+    const kelpM2 = new THREE.MeshStandardMaterial({ color: '#7d9a52', roughness: 0.55, side: THREE.DoubleSide });
+    const body = new THREE.Mesh(new THREE.SphereGeometry(0.5, 28, 18), cloth); body.scale.set(1.18, 0.78, 0.92); g.add(body);
+    // 顶部收口：布褶扎成一小撮
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.16, 0.16, 12), clothD); neck.position.set(0, 0.42, 0); g.add(neck);
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2, fl = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.2, 6), cloth);
+      fl.position.set(Math.cos(a) * 0.07, 0.56, Math.sin(a) * 0.07); fl.rotation.set(Math.sin(a) * 0.6, 0, -Math.cos(a) * 0.6); g.add(fl);
     }
-    for (let i = 0; i < 9; i++) { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.03, 14), gold); c.position.set(-0.36 + (i % 5) * 0.18, 0.29 + (i > 4 ? 0.04 : 0), -0.15 + (i % 3) * 0.14); c.rotation.set(0.3 * (i % 3) - 0.3, 0, 0.25 * (i % 2)); g.add(c); }
-    const lock = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.2, 0.06), gold); lock.position.set(0, 0.22, 0.4); g.add(lock);
-    const glowM = std('#fff2a8', { emissive: '#ffd34a', emissiveIntensity: 1.2 });
-    const glint = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.04, 0.6), glowM); glint.position.y = 0.32; g.add(glint);
+    const knot = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.028, 8, 18), twine); knot.position.set(0, 0.45, 0); knot.rotation.x = Math.PI / 2; g.add(knot);
+    // 麻绳十字
+    for (const ry of [0, Math.PI / 2]) { const r = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.018, 6, 40), twine); r.scale.set(ry ? 0.93 : 1.19, 0.79, 1); r.rotation.y = ry; g.add(r); }
+    // 海带：扁平带状环，斜着缠两圈
+    const band = (rx, rz, m, s = 1) => { const t = new THREE.Mesh(new THREE.TorusGeometry(0.52, 0.06, 4, 48), m); t.scale.set(1.2 * s, 0.82 * s, 0.32); t.rotation.set(rx, 0, rz); g.add(t); return t; };
+    band(1.25, 0.5, kelpM); band(1.6, -0.75, kelpM2, 0.98);
+    // 垂下 / 漂起的海藻须（细长波浪带）
+    const frond = (len, w, m) => {
+      const geo = new THREE.PlaneGeometry(len, w, 12, 1), P = geo.attributes.position;
+      for (let i = 0; i < P.count; i++) { const x = P.getX(i), u = x / len + 0.5; P.setZ(i, Math.sin(u * 7) * 0.05 * u); P.setY(i, P.getY(i) * (1 - u * 0.7)); }
+      geo.translate(len / 2, 0, 0); geo.computeVertexNormals();
+      return new THREE.Mesh(geo, m);
+    };
+    const f1 = frond(0.75, 0.11, kelpM); f1.position.set(0.48, 0.05, 0.18); f1.rotation.set(0.3, 0.2, -0.55); g.add(f1);
+    const f2 = frond(0.55, 0.09, kelpM2); f2.position.set(-0.5, -0.05, -0.12); f2.rotation.set(-0.2, Math.PI + 0.3, -0.4); g.add(f2);
+    const f3 = frond(0.42, 0.08, kelpM); f3.position.set(0.05, 0.5, 0.05); f3.rotation.set(0.4, 0.8, 0.9); g.add(f3);
+    // 布缝里透出的一点光（不张扬）
+    const glint = new THREE.Mesh(new THREE.SphereGeometry(0.075, 14, 10), std('#fff6dc', { emissive: '#ffe2a0', emissiveIntensity: 0.9, roughness: 0.2 }));
+    glint.name = 'podGlint'; glint.position.set(0.3, 0.12, 0.36); g.add(glint);
+    const gap = new THREE.Mesh(new THREE.SphereGeometry(0.11, 14, 10), clothD); gap.scale.set(1, 0.45, 0.6); gap.position.set(0.31, 0.06, 0.34); g.add(gap);
   }
   g.traverse((o) => { if (o.isMesh) { o.castShadow = true; } });
   const box = new THREE.Box3().setFromObject(g), sz = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
   const k = 1.6 / Math.max(sz.x, sz.z);
   const wrap = new THREE.Group(); g.scale.setScalar(k); g.position.copy(c).multiplyScalar(-k); wrap.add(g);
-  if (g.userData.chestLid) wrap.userData.chestLid = g.userData.chestLid;
   return wrap;
 }
 
@@ -236,11 +245,13 @@ const NO_OUTLINE = /eye|pupil|glint|gill|mouth|nostril|sucker|stripe|lips|smile|
 export class Fish {
   constructor(v, stylize) {
     this.v = ensureUgc(v);
-    this.sp = SPECIES_BY_ID[v.sp];
-    this.gx = !this.sp.odd && v.gx ? normGx(v.gx) : null;   // 旧存档无 gx → 原样渲染
+    this.sp = SPECIES_BY_ID[v.sp] || SPECIES_BY_ID.salmon;
+    this.synth = v.sp === 'synth';
+    if (this.synth) { if (!Array.isArray(v.traits)) v.traits = []; if (!Number.isFinite(v.cm)) v.cm = 60; }
+    this.gx = !this.sp.odd && !this.synth && v.gx ? normGx(v.gx) : null;   // 旧存档无 gx → 原样渲染
     this.root = new THREE.Group();
     this.body = new THREE.Group(); this.root.add(this.body);
-    this.model = this.sp.odd ? oddModel(this.sp.id) : createMarineModel(this.sp.id, v.cm);
+    this.model = this.synth ? buildSynthModel(v) : this.sp.odd ? oddModel(this.sp.id) : createMarineModel(this.sp.id, v.cm);
     this.body.add(this.model);
     const gx = this.gx;
     // 融合：嫁接另一物种的尾巴（在材质克隆前，保证一起被风格化/上花纹）
@@ -255,6 +266,7 @@ export class Fish {
     });
     for (const m of this.mats) { m.userData.base = m.color.clone(); }
     stylize?.(this.model);
+    if (this.synth) applySynthPattern(this.model, v.syn);   // 必须在 stylize 之后、skinFish 之前（onBeforeCompile 链）
     if (gx) {
       tuneEyes(this.model, gx.eyeK);
       const s = gx.stretch; this.model.scale.set(s[0], s[1], s[2]);
@@ -262,7 +274,9 @@ export class Fish {
     this.applyVariant();
     if (gx && (gx.mat || gx.glow > 0)) applyMat(this.model, gx.mat, gx.glow);
     // v3：写实风格化皮肤（鳞片法线/清漆/虹彩/鳍条透光）+ 脊柱行波游动 —— 链在所有材质注入之后
+    if (this.synth) synthBeforeSkin(this.model);
     this.swim = this.sp.odd ? null : skinFish(this);
+    if (this.synth) synthAfterSkin(this.model, this.swim);
     // 归一化尺寸：模型最长水平维度 1.6 —— 以"米"为单位缩放到 1
     this.model.scale.multiplyScalar(1 / 1.6);
     this.realLen = v.cm / 100;
@@ -297,13 +311,18 @@ export class Fish {
     for (const m of this.mats) {
       const c = m.userData.base.clone();
       c.getHSL(_hsl);
-      let h = _hsl.h + v.hue, s = Math.min(1, _hsl.s * v.sat), l = Math.min(0.95, _hsl.l * v.light);
+      let h = _hsl.h + (v.hue || 0), s = Math.min(1, _hsl.s * (v.sat ?? 1)), l = Math.min(0.95, _hsl.l * (v.light ?? 1));
       if (tr.includes('pastel')) { s *= 0.55; l = l * 0.6 + 0.38; }
       if (tr.includes('neon')) { s = Math.min(0.72, s * 1.15 + 0.06); h += 0.45; }   // v3：霓虹不再荧光
       c.setHSL(((h % 1) + 1) % 1, s, l);
       if (tr.includes('gold')) { c.lerp(new THREE.Color('#e0b65a'), 0.6); m.metalness = 0.7; m.roughness = 0.32; }
       m.color.copy(c);
-      if (tr.includes('jelly') && !this.gx?.mat) { m.transparent = true; m.opacity = 0.62; m.depthWrite = true; m.roughness = 0.1; }
+      if (tr.includes('jelly') && !this.gx?.mat) {   // 果冻特质：不透明表现（高光清漆 + 柔和内发光 + 浅色次表面），身体绝不真透明
+        m.transparent = false; m.opacity = 1; m.depthWrite = true; m.roughness = 0.12;
+        c.lerp(new THREE.Color('#ffffff'), 0.18); m.color.copy(c);
+        if (m.isMeshPhysicalMaterial) { m.clearcoat = 1; m.clearcoatRoughness = 0.04; m.sheen = 0.6; m.sheenRoughness = 0.3; m.sheenColor = c.clone().lerp(new THREE.Color('#ffffff'), 0.5); }
+        m.emissive = c.clone(); m.emissiveIntensity = 0.16;
+      }
       if (tr.includes('glow') || tr.includes('neon')) { m.emissive = c.clone(); m.emissiveIntensity = tr.includes('glow') ? 0.45 : 0.18; }
       m.userData.cur = c.clone();
     }

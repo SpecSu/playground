@@ -1,5 +1,6 @@
 // UI 层（v0.5 极简分阶段聚焦）：顶栏 / 单条动态胶囊 / 头顶气泡 / 紧凑钓获卡 / 菜单抽屉 / 轻提示 / 弹窗
-import { SPECIES, SPECIES_BY_ID, RARITY, TRAITS, DECOS, displayName, decoText, ensureUgc } from './fishes.js';
+import { SPECIES, SPECIES_BY_ID, RARITY, TRAITS, DECOS, displayName, decoText, ensureUgc, makeVariant, isSynth } from './fishes.js';
+import * as synthB from './synth_bridge.js';   // v0.9 C：合成鱼钓获卡的性状标签
 import { PATTERNS as PATTERN_NAMES, PALETTES } from './ugc.js';
 const PALETTE_NAMES = PALETTES.map((p) => p[0]);
 const DECO_LABEL = Object.fromEntries(Object.entries(DECOS).map(([k, d]) => [k, d.label.replace(/^小(?=..)/, '')]));
@@ -10,12 +11,17 @@ import { ic, CAT_IC, CAT_SHORT } from './icons.js';
 
 export const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+export const escHtml = esc;
 export const ODD_EMOJI = { bottle: '🍾', duck: '🦆', chest: '🎁' };
 let thumbMaker = null;
 export function setThumbMaker(fn) { thumbMaker = fn; }
 // 给 <img data-ugc=idx> 填上这条鱼独一无二的渲染图
 export function fillThumbs(root, list) { root.querySelectorAll('img[data-ugc]').forEach((el) => { const v = list[+el.dataset.ugc]; if (v && thumbMaker) thumbMaker(v, el); }); }
 export const thumb = (id) => (ODD_EMOJI[id] ? null : `assets/thumbs/${id}.webp`);
+// v1.4：今日精选不再引用静态 webp（40 种里只有 20 张，缺图会裂）→ 统一走实时 3D 渲染缩略图，按物种缓存一条稳定的展示鱼
+let featV = null;
+const featVariant = (sp) => { if (!featV || featV.sp !== sp.id) { featV = makeVariant(sp, 0); featV.id = `feat-${sp.id}`; } return featV; };
+const fillFeat = (root, sp) => { const el = root.querySelector('.feat-im'); if (el && thumbMaker && sp && !sp.odd) thumbMaker(featVariant(sp), el); };
 export const fmtLenTxt = (cm) => (cm >= 100 ? `${(cm / 100).toFixed(2)}m` : `${Math.round(cm)}cm`);
 const ago = (ts) => { const s = (Date.now() - ts) / 1000; if (s < 60) return '刚刚'; if (s < 3600) return `${Math.floor(s / 60)} 分钟前`; if (s < 86400) return `${Math.floor(s / 3600)} 小时前`; return `${Math.floor(s / 86400)} 天前`; };
 const fmtTime = (ts) => { const d = new Date(ts); return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
@@ -148,7 +154,6 @@ export function updateTop(meta) {
   $('meXp').style.strokeDashoffset = 100 - Math.min(100, (S.xp / meta.levelXP()) * 100);
   const sn = $('scoreN'); const v = S.today.score;
   if (+sn.dataset.n !== v) { animateNum(sn, v); const me = $('me'); me.classList.remove('bump'); void me.offsetWidth; me.classList.add('bump'); }
-  $('baitN').textContent = S.bait;
 }
 export function updateBadges(meta, newSpecies) {
   const nTask = meta.S.today.tasks.filter((t) => t.done && !t.claimed).length + (meta.streakGift ? 1 : 0);
@@ -199,7 +204,14 @@ export function friendStatus(a) {
 }
 
 // ---------------- 钓获卡（紧凑，详情可展开） ----------------
+// v0.9 C：合成鱼（含 mythic）稀有度兜底
+const RAR_SYN = { mythic: { label: '神话', short: 'MR', color: '#c79a5b' } };
+export const synthRar = (v) => RARITY[v?.rarity] || RAR_SYN[v?.rarity] || RARITY.epic;
+// 鱼获记录里：合成鱼按「新物种」展示（sp 可能是 'synth' 或某个天然物种占位）
+const spOfV = (v) => !isSynth(v) ? SPECIES_BY_ID[v.sp] : { ...(SPECIES_BY_ID[v.sp] || {}), id: 'synth', odd: false, rarity: v.rarity, name: `新物种 · 第${v.gen || 1}代`, desc: `由 ${String(v.creator || '无名氏').replace(/^@?/, '@')} 创造` };
+const rarOfV = (v) => (isSynth(v) ? synthRar(v) : RARITY[SPECIES_BY_ID[v.sp].rarity]);
 export function showCatch(v, info, n) {
+  if (isSynth(v)) return showSynthCatch(v, info);
   const sp = SPECIES_BY_ID[v.sp], R = RARITY[sp.rarity];
   const el = $('catch');
   const rb = $('cRar'); rb.textContent = R.short; rb.style.background = R.color;
@@ -239,12 +251,44 @@ export function showCatch(v, info, n) {
   el.classList.remove('mini', 'item'); el.style.removeProperty('--ic'); el.style.removeProperty('--rc');
   el.classList.add('show');
 }
+// v0.9 C：钓到「别人造的合成鱼」—— 名字 +「新物种 · 第N代 · 由 XX 创造」+ 性状标签 + 基因指纹；不计物种图鉴
+function showSynthCatch(v, info) {
+  const R = synthRar(v), el = $('catch');
+  const rb = $('cRar'); rb.textContent = R.short; rb.style.background = R.color;
+  const nm = displayName(v); $('cName').textContent = nm;
+  $('cName').className = nm.length > 8 ? 'xl' : nm.length > 6 ? 'l' : '';
+  const cn = $('cNew'); cn.textContent = '新物种'; cn.classList.remove('hidden', 'dup');
+  const who = String(v.creator || '无名氏').replace(/^@?/, '@');
+  const own = !!v.fromOcean?.own;
+  $('cMeta').textContent = `第 ${v.gen || 1} 代 · 由 ${who} 创造`;   // 「新物种」已在名字旁的徽标里，副标题不再重复
+  $('cBy').textContent = own ? '🌊 你放生的作品游回来了' : `🌊 ${fmtLenTxt(v.cm)} · ${v.kg}kg · 从大海回流`;
+  $('cCombo').textContent = info.combo >= 2 ? `连击 ×${info.combo}` : '';
+  const n0 = Math.round(info.score * 0.6);
+  const pts = $('cPts'); pts.dataset.n = n0; pts.textContent = '+' + n0;
+  pts.classList.remove('rise'); void pts.offsetWidth; pts.classList.add('rise');
+  animateNum(pts, info.score, '+', 700);
+  let tags = []; try { tags = (synthB.synthTags?.(v) || []).slice(0, 3); } catch (e) { tags = []; }
+  $('cChips').innerHTML = `<span class="hi" style="--rc:${R.color}">${svg('spark')}<em>${esc(own ? '你的作品被大海送回来了' : '别的玩家创造的新物种 · 全海罕见')}</em></span>`
+    + (tags.length ? `<span class="hi" style="--rc:${R.color}"><em>🧬 ${tags.map(esc).join(' · ')}</em></span>` : '');
+  const par = (v.parents || []).map((p) => p && (p.name || SPECIES_BY_ID[p.sp]?.name)).filter(Boolean);
+  const lines = [
+    `<b>${esc(nm)}</b> · ${R.label} · 新物种 · 第 ${v.gen || 1} 代`,
+    `由 <b>${esc(who)}</b> 创造${par.length ? ` · 亲本：${par.map(esc).join(' × ')}` : ''}`,
+    v.fp ? `基因指纹 <b>${esc(v.fp)}</b> · 全宇宙唯一` : '',
+    tags.length ? `性状：${tags.map(esc).join('　')}` : '',
+    '🌊 有人把它放回了大海，它游到了你的鱼钩上 · 合成鱼不计入物种图鉴',
+    info.bonus.length ? `加成：${info.bonus.map(esc).join(' · ')}` : '',
+  ].filter(Boolean);
+  $('cDetail').innerHTML = lines.join('<br>');
+  el.classList.remove('open', 'mini', 'item'); el.style.removeProperty('--ic'); el.style.setProperty('--rc', R.color);
+  el.classList.add('show');
+}
 const pctUp = (a, b) => Math.round((a / b - 1) * 100);
 export function catchHighlight(v, sp, info) {
   const C = [];   // [分数, 文案]
   const u = v.ugc, pat = u ? PATTERN_NAMES[u.pat] : '', pal = u ? PALETTE_NAMES[u.pal] : '';
   const D = (k) => DECO_LABEL[k] || '';
-  if (sp.odd) return sp.id === 'chest' ? '打开有幸运饵 ×2' : '来自大海的礼物';
+  if (sp.odd) return sp.id === 'chest' ? '打开有好运 +2' : '来自大海的礼物';
   if (v.fromOcean) C.push([96, `${v.fromOcean.by} 改造过的第 ${v.gen || 1} 代鱼`]);
   if (info.isBest && info.prevBest > 0 && pctUp(v.cm, info.prevBest) >= 1) C.push([90, `个人最大纪录 · 比之前大 ${pctUp(v.cm, info.prevBest)}%`]);
   for (const t of v.traits) C.push([t === 'giant' ? 72 : 52, t === 'giant' ? `巨型个体 · 比普通${sp.name}大一圈` : `${TRAITS[t].icon} ${TRAITS[t].label}个体 · 积分 ×${TRAITS[t].mult}`]);
@@ -300,7 +344,7 @@ const goTankPill = (txt) => `<div class="sh-go-w"><button class="sh-go" id="shGo
 const tabIc = (k, icn) => (icn ? svg(icn) : ic('bag'));
 function homeHTML(ctx) {
   const { meta } = ctx; const S = meta.S;
-  const spGot = new Set(S.log.map((L) => L.v.sp).filter((id) => !SPECIES_BY_ID[id]?.odd)).size;
+  const spGot = new Set(S.log.filter((L) => !isSynth(L.v)).map((L) => L.v.sp).filter((id) => SPECIES_BY_ID[id] && !SPECIES_BY_ID[id].odd)).size;   // v0.9 C：合成鱼不计物种进度
   const me = meta.board(ctx.live).find((r) => r.you);
   const nTask = S.today.tasks.filter((t) => t.done && !t.claimed).length + (meta.streakGift ? 1 : 0);
   const nDone = S.today.tasks.filter((t) => t.done).length;
@@ -361,41 +405,41 @@ export function renderSheet(ctx) {
     const f = meta.featured;
     const pity = Math.min(S.pity, 9);
     const list = S.log.map((L) => { ensureUgc(L.v); return L; });
-    const spGot = new Set(list.map((L) => L.v.sp).filter((id) => !SPECIES_BY_ID[id]?.odd)).size;
+    const spGot = new Set(list.filter((L) => !isSynth(L.v)).map((L) => L.v.sp).filter((id) => SPECIES_BY_ID[id] && !SPECIES_BY_ID[id].odd)).size;
     const sortBy = sheetState.sub === 'rare' ? 'rare' : 'new';
-    const RI = (L) => ['common', 'uncommon', 'rare', 'epic', 'legendary'].indexOf(SPECIES_BY_ID[L.v.sp].rarity);
+    const RI = (L) => ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'].indexOf(isSynth(L.v) ? L.v.rarity : SPECIES_BY_ID[L.v.sp].rarity);
     const shown = sortBy === 'rare' ? list.slice().sort((a, b) => RI(b) - RI(a) || b.v.cm - a.v.cm) : list;
     // v1.0：图鉴 = 历史记录（钓到过的每一条）；正在养的鱼在水族箱（主页主角）
     let html = `<div class="cx-top">
-        <div class="cx-sum"><b class="num">${list.length}</b><span>条收藏</span><i></i><b class="num">${spGot}</b><span>/${SPECIES.length} 种</span></div>
+        <div class="cx-sum"><em><b class="num">${list.length}</b><span>条收藏</span></em><i></i><em><b class="num">${spGot}</b><span>/${SPECIES.length} 种</span></em></div>
         <div class="luck"><div class="row"><span>${svg('spark')}好运值</span><b class="num">${pity >= 9 ? '已满 · 下一条必出稀有' : `${pity}/9`}</b></div><div class="lbar"><i style="width:${(pity / 9) * 100}%"></i>${[1, 2, 3, 4, 5, 6, 7, 8].map((k) => `<s style="left:${(k / 9) * 100}%"></s>`).join('')}</div></div>
       </div>
-      <div class="blk feat"><img src="${thumb(f.id)}" alt=""><div class="m"><span class="tagc">今日精选</span><div class="h" style="margin-top:4px">${esc(f.name)}</div><div class="cap">出现率 ×3 · 推荐作者 ${esc(meta.featuredCreator)}</div></div></div>`;
+      <div class="blk feat"><img class="feat-im" alt=""><div class="m"><span class="tagc">今日精选</span><div class="h" style="margin-top:4px">${esc(f.name)}</div><div class="cap">出现率 ×3 · 推荐作者 ${esc(meta.featuredCreator)}</div></div></div>`;
     if (!list.length) {
       html += `<div class="empty cx-empty">${svg('hook')}<b>还没有鱼获</b>每一条鱼都是玩家创作投放的<br>钓上来，它就是你独一无二的收藏</div>`;
-      body.innerHTML = html + goTankPill('去水族箱看正在养的鱼'); bindGoTank(ctx);
+      body.innerHTML = html + goTankPill('去水族箱看正在养的鱼'); bindGoTank(ctx); fillFeat(body, f);
     } else {
       html += `<div class="cx-bar"><span class="sect" style="margin:0">我的鱼获</span><div class="subseg"><button data-sub="new" class="${sortBy === 'new' ? 'on' : ''}">最新</button><button data-sub="rare" class="${sortBy === 'rare' ? 'on' : ''}">稀有</button></div></div>
         <div id="cdDetail"></div><div class="cx-grid">`;
       shown.forEach((L, i) => {
-        const v = L.v, sp = SPECIES_BY_ID[v.sp], R = RARITY[sp.rarity];
+        const v = L.v, sp = spOfV(v), R = rarOfV(v);
         const im = sp.odd ? `<div class="em">${ODD_EMOJI[sp.id]}</div>` : `<img data-ugc="${i}" alt="">`;
         const nd = v.ugc?.decos?.length || 0;
         html += `<div class="cx" data-i="${i}" style="--rc:${R.color}"><div class="ph">${im}<span class="rb" style="background:${R.color}">${R.short}</span>${nd ? `<span class="dk">${svg('spark')}${nd}</span>` : ''}</div>
           <div class="t"><b>${esc(displayName(v))}</b><span class="w">${v.ugc ? `《${esc(v.ugc.title)}》` : esc(sp.desc)}</span><span>${fmtLenTxt(v.cm)} · ${ago(L.ts)}</span><span class="by">${esc(v.creator)}</span></div></div>`;
       });
-      body.innerHTML = html + '</div>' + goTankPill('去水族箱看正在养的鱼'); bindGoTank(ctx);
+      body.innerHTML = html + '</div>' + goTankPill('去水族箱看正在养的鱼'); bindGoTank(ctx); fillFeat(body, f);
       fillThumbs(body, shown.map((L) => L.v));
       body.querySelectorAll('.cx').forEach((c) => c.onclick = () => {
         sfx.tap();
-        const L = shown[+c.dataset.i], v = L.v, sp = SPECIES_BY_ID[v.sp], R = RARITY[sp.rarity];
+        const L = shown[+c.dataset.i], v = L.v, sp = spOfV(v), R = rarOfV(v);
         const im = sp.odd ? `<div class="em big">${ODD_EMOJI[sp.id]}</div>` : `<img data-ugc="0" alt="">`;
         const u = v.ugc;
         const rows = [
           ['物种', `${esc(sp.name)} · ${R.label}`],
           u ? ['作品', `《${esc(u.title)}》`] : null,
           u ? ['外观', `${esc(PATTERN_NAMES[u.pat])}花纹 · ${esc(PALETTE_NAMES[u.pal])}配色${u.decos.length ? ' · ' + esc(decoText(u)) : ''}`] : null,
-          ['体型', `${fmtLenTxt(v.cm)} · ${v.kg}kg${v.traits.length ? ' · ' + v.traits.map((t) => TRAITS[t].icon + TRAITS[t].label).join(' ') : ''}`],
+          ['体型', `${fmtLenTxt(v.cm)} · ${v.kg}kg${v.traits?.length ? ' · ' + v.traits.map((t) => TRAITS[t].icon + TRAITS[t].label).join(' ') : ''}`],
           ['钓获', `${fmtTime(L.ts)} · +${L.score} 分`],
           ['创作者', esc(v.creator)],
         ].filter(Boolean);
@@ -443,10 +487,10 @@ export function renderSheet(ctx) {
     html += `</div><div class="sect">今日任务 · 每天刷新</div>`;
     for (const t of S.today.tasks) {
       const d = meta.taskDef(t.id);
-      const rw = [d.reward.bait ? `幸运饵 ×${d.reward.bait}` : '', d.reward.pts ? `+${d.reward.pts} 分` : '', d.reward.item ? `🎁${{ common: '普通', rare: '稀有', epic: '史诗', legendary: '传说' }[d.reward.item] || ''}道具` : ''].filter(Boolean).join(' · ');
+      const rw = [d.reward.bait ? `好运 +${d.reward.bait}` : '', d.reward.pts ? `+${d.reward.pts} 分` : '', d.reward.item ? `🎁${{ common: '普通', rare: '稀有', epic: '史诗', legendary: '传说' }[d.reward.item] || ''}道具` : ''].filter(Boolean).join(' · ');
       html += `<div class="li task"><div class="m"><b>${esc(d.text)}</b><span>${t.n}/${d.goal} · ${rw}</span><div class="bar"><i style="width:${(t.n / d.goal) * 100}%"></i></div></div><button data-claim="${t.id}" class="${t.claimed ? 'ok' : t.done ? 'go' : ''}">${t.claimed ? '已领取' : t.done ? '领取' : '进行中'}</button></div>`;
     }
-    html += `<div class="cap" style="margin:12px 4px">幸运饵：挂上后下一条必定「特别」以上，且更容易出稀有</div>`;
+    html += `<div class="cap" style="margin:12px 4px">好运值：攒满 9 点，下一条必出「稀有」以上</div>`;
     body.innerHTML = html;
     body.querySelector('#claimStreak')?.addEventListener('click', () => { ctx.onClaimStreak(); renderSheet(ctx); });
     body.querySelectorAll('[data-claim]').forEach((b) => b.onclick = () => { if (b.classList.contains('go')) { ctx.onClaimTask(b.dataset.claim); renderSheet(ctx); } });
