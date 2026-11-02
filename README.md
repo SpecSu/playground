@@ -1,58 +1,72 @@
-# playground
+# Playground
 
-project and demo for interactive spaces and games
+互动空间、游戏原型与美术流程的项目仓库。所有项目统一放在 [`projects/`](projects/)，每个项目保留自己的源码、素材、依赖和运行方式。
 
-## 小岛美术资产流程
+## 项目导航
 
-[小岛美术资产搭建流程 0.1](island/artdesign/README.md)：图片与资产确认、Tripo 几何/PBR、Three.js 装配渲染、减面、贴图压缩和证据验收。包含可供其他 agent 使用的 skill、分阶段手册、八类资产的五阶段 GLB、真实截图与可离线运行的示例。
+| 项目 | 目录 | 内容与入口 |
+| --- | --- | --- |
+| 分身舞者 · ENCORE | [`projects/avatar-dancer/`](projects/avatar-dancer/) | 3D 换装节奏游戏；先读 [v14 交接说明](projects/avatar-dancer/HANDOFF.md)，大素材需按说明从随库分片恢复 |
+| 机甲格斗 · Fight Bot Club | [`projects/fight-bot-club/`](projects/fight-bot-club/) | 机甲对战原型；[项目说明](projects/fight-bot-club/README.md) |
+| 灵感花园 · Inspiration Garden | [`projects/inspiration-garden/`](projects/inspiration-garden/) | 等距种植与建造原型；[交接说明](projects/inspiration-garden/HANDOFF.md)、[运行说明](projects/inspiration-garden/README.md) |
+| 小岛 · Island | [`projects/island/`](projects/island/) | [即梦庄园玩法工程](projects/island/dreamina-manor-v0.1/README.md)与[美术资产流程](projects/island/artdesign/README.md) |
+| 云蹦迪 · AFTERHOURS | [`projects/disco/`](projects/disco/) | 旧版玩法归档，包版本 0.5.3 / Sites 8；[运行说明](projects/disco/README.md) |
+| 云钓鱼 | [`projects/fishing/`](projects/fishing/) | 旧版玩法归档，包版本 0.3.5 / Sites 7；[运行说明](projects/fishing/README.md) |
+| 火人节 | [`projects/festival/`](projects/festival/) | 旧版玩法归档，包版本 0.3.3 / Sites 35；[运行说明](projects/festival/README.md) |
 
-从 [接手说明](island/artdesign/docs/HANDOFF.md) 开始。此目录为独立美术实验，不改动下列旧版玩法 Demo。
+版本号与状态以各项目交接文档为准。不同项目的版本号不互相比较；本仓库保存源码与交接快照，不会自动更新线上站点。
 
-## 三个旧版玩法 Demo 归档
+## 目录结构
 
-本节归档用户指定的三个已发布版本，包含可编辑 TypeScript/React/Three.js 源码、服务端 API、D1 数据结构与迁移、运行素材、资产处理脚本及既有测试。不是静态 dist 备份。这三个 Demo 包不包含小岛或潮汐来信 v0.2；小岛美术资料见上方独立入口。
-
-| 工程 | 包版本 | Sites 发布版 | 线上地址 | 发布源码 commit |
-| --- | --- | --- | --- | --- |
-| [云蹦迪](demos/disco/README.md) | 0.5.3 | 8 | [打开](https://dreamina-disco-avatars.mythicgleam32.chatgpt.site/) | `b957db28ad5650daafdfd31dc4aa333d58a98d6a` |
-| [云钓鱼](demos/fishing/README.md) | 0.3.5 | 7 | [打开](https://dreamina-fishing-avatars.mythicgleam32.chatgpt.site/) | `55de7c92b90d54665d4f4772b793aa5be46e856b` |
-| [火人节](demos/festival/README.md) | 0.3.3 | 35 | [打开](https://dreamina-desert-festival.mythicgleam32.chatgpt.site/) | `1237c6810f851b33f50652c379268a5d5d3dc33d` |
-
-基线由 Sites 保存版本的源码 commit、成功发布记录和恢复后的 Git HEAD 交叉核对，未按文件修改日期挑选。机器可读映射在 [versions.json](manifests/versions.json)。归档剔除了旧个人主页图片和固定示例个人姓名，替换为中性占位图；移除了生产站点身份，保留本地 D1 绑定。完整差异见 [归档差异](docs/archive-differences.md)。因此本包是精确发布基线经过明确脱敏后的源码副本，不声称与线上逐字节一致。
-
-## 从零运行
-
-需要 Node.js 24.9.0（各工程 `.nvmrc`）与 npm 11.6.0；源码声明最低 Node 22.13.0，本轮使用固定版本验证。每个工程有独立 `package.json`、`package-lock.json`、`public/` 和服务端代码。不要合并三个工程的数据库或运行状态。
-
-```sh
-cd demos/disco # 或 fishing / festival
-npm run install:ci
-npm run typecheck
-npm run build
-npm run db:init
-npm run start -- --port 5181
+```text
+playground/
+├── projects/                    # 按项目归档，源码和素材留在所属项目
+│   ├── avatar-dancer/
+│   ├── fight-bot-club/
+│   ├── inspiration-garden/
+│   ├── island/
+│   │   ├── dreamina-manor-v0.1/   # 庄园玩法工程
+│   │   └── artdesign/            # 独立美术流程、模型与验收证据
+│   ├── disco/
+│   ├── fishing/
+│   └── festival/
+├── docs/
+│   ├── repository-layout.md     # 目录约定与旧路径迁移表
+│   └── legacy-demos/            # 三个旧版 Demo 的共同说明与历史验证报告
+├── manifests/
+│   └── legacy-demos/            # 三个旧版 Demo 的版本、素材、依赖与校验清单
+├── scripts/                     # 仓库级打包和素材核验工具
+├── README.md
+└── THIRD_PARTY_NOTICES.md        # 三个旧版 Demo 的来源与授权说明
 ```
 
-开发模式：`npm run dev -- --port 5181`。本地使用 Wrangler/Miniflare 的 D1 模拟器；`npm start` 在 `.wrangler/state` 保存本地状态。这些文件不应上传。必须先执行 `npm run db:init` 应用归档中的 SQL 迁移；首次 API 请求随后初始化房间记录。此脚本强制 `--local`，不会迁移线上数据库。在线多人需要同一个服务器地址与共享 D1，打开多个各自独立的本地服务不构成联机。
+## 从哪里开始
 
-完整现有测试可用 `node --experimental-strip-types --test --test-concurrency=1 tests/*.test.*`；这是包含高成本模型网格检查的历史套件，不等同于构建前必须全部通过的快速检查。实际结果和遗留失败见 [验证报告](docs/verification.md)，不得据此假定 UI、性能或所有历史测试均通过。
+先进入目标项目，再按其 README 或 HANDOFF 安装和运行。仓库没有统一的 npm 工作区，不在根目录执行 `npm install`；各项目的依赖、数据库和存档分别管理。
 
-## 开发与交接
+例如启动灵感花园（无需安装 npm 依赖）：
 
-- [开发指引](docs/development-guide.md)：阶段、技术职责、边界、资产、同步、性能、发布。
-- [体验设计原则](docs/experience-principles.md)：用户明确要求、历史实现和新建议分列。
-- [交接与验收](docs/handoff-checklist.md)：接手顺序及完成标准。
-- [素材与缺失项](docs/assets-and-provenance.md)、[依赖与许可](THIRD_PARTY_NOTICES.md)。
-- [素材清单与 SHA-256](manifests/assets.json)、[源文件校验和](manifests/source-files.sha256)、[归档调整](manifests/archive-adjustments.json)。
+```sh
+cd projects/inspiration-garden
+npm run check
+npm run build
+python3 -m http.server 4173 --directory dist
+```
 
-`scripts/avatars/` 中的旧版程序化角色生成器不能重新生成 `public/avatars/cast-v1/` 的全部上传模型。缺失原始建模工程、用户原始参考图、未处理录音与云端实际数据库，详见素材文档。
+其他项目使用各自说明中的命令。分身舞者的素材恢复脚本、小岛的服务端/数据库配置、旧版 Demo 的本地迁移流程都应按对应交接文件执行。
 
-## 打包与核验
+## 共用资料与工具
 
-在仓库根运行 `python3 scripts/verify-assets.py` 检查素材，然后 `python3 scripts/package.py` 生成总源码包与三个独立源码包。ZIP 包及其校验和位于被 Git 忽略的 `artifacts/`，不把重复压缩包提交到 Git。固定文件排序、时间戳及权限；同一 Python/zlib 环境下可重复得到相同 ZIP。
+- [旧版三个 Demo 的完整交接入口](docs/legacy-demos/README.md)：开发指引、体验原则、素材来源、归档差异与历史验证。
+- [清单说明](manifests/README.md)：区分历史记录与当前文件校验和。
+- [目录约定和迁移表](docs/repository-layout.md)：以后新增项目、文档与产物放在哪里。
+- [依赖与素材授权](THIRD_PARTY_NOTICES.md)：此说明针对旧版三个 Demo；其他项目的来源与限制见各自交接文档，本仓库未设统一开源许可。
 
-三个工程保留独立素材路径；相同二进制由 Git 内容寻址自动去重，不需要复制共享目录或符号链接才能启动。单文件均低于 100 MiB；本轮未启用 Git LFS、创建付费配置或新增长期凭据。
+在仓库根运行：
 
-## 归档边界
+```sh
+python3 scripts/verify-assets.py  # 只核验旧版 disco / fishing / festival 的素材清单
+python3 scripts/package.py        # 全仓源码包 + 三个独立旧版 Demo 源码包
+```
 
-上述三个 Demo 仅归档源码与必要素材；不含 Git 历史、环境变量、运行数据库、用户会话、私有参考图、内部文档、聊天或记忆。小岛美术目录另含用户授权交接的参考图，边界见其来源说明。没有修改三个线上站点。许可说明不授予本仓库内容统一的开源许可证；用户提供素材的授权范围不自动扩展到第三方商业使用。
+输出位于 Git 忽略的 `artifacts/`。源码包按脚本规则排除构建产物和本地依赖，不等同于可直接部署的站点发布包。

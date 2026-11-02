@@ -6,7 +6,7 @@
 
 各工程保留原始 `package-lock.json`，固定实际安装的完整依赖树。主要版本包括 React 19.2.6、Three.js 0.186.1、Next 16.3.4、Vinext 1.0.0-beta.5、Vite 8.0.13、Wrangler 4.92.0、TypeScript 5.9.3。`npm run install:ci` 使用 `npm ci`，不会依赖本机全局 node_modules。
 
-第三方依赖遵循各自包内 LICENSE。机器可读的锁文件许可字段清单见 `manifests/dependencies.json`；未声明许可的项标为 unknown，不自动推断。它不是法律审计。`build/sites-vite-plugin.LICENSE`、`vendor/shadcn-tailwind-4.13.0.LICENSE.md`、图标与字体原始许可文件均保留。
+第三方依赖遵循各自包内 LICENSE。机器可读的锁文件许可字段清单见 `manifests/legacy-demos/dependencies.json`；未声明许可的项标为 unknown，不自动推断。它不是法律审计。`build/sites-vite-plugin.LICENSE`、`vendor/shadcn-tailwind-4.13.0.LICENSE.md`、图标与字体原始许可文件均保留。
 
 ## 演示素材
 

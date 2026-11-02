@@ -5,7 +5,7 @@ import hashlib
 import json
 
 root = Path(__file__).resolve().parents[1]
-manifest = json.loads((root / 'manifests' / 'assets.json').read_text())
+manifest = json.loads((root / 'manifests' / 'legacy-demos' / 'assets.json').read_text())
 errors = []
 for asset in manifest['assets']:
     file = root / asset['path']
@@ -14,7 +14,9 @@ for asset in manifest['assets']:
     elif hashlib.sha256(file.read_bytes()).hexdigest() != asset['sha256']:
         errors.append(f"Checksum mismatch: {asset['path']}")
 expected = {a['path'] for a in manifest['assets']}
-actual = {p.relative_to(root).as_posix() for p in (root / 'demos').glob('*/public/**/*') if p.is_file()}
+actual = {p.relative_to(root).as_posix()
+          for demo in ('disco', 'fishing', 'festival')
+          for p in (root / 'projects' / demo / 'public').rglob('*') if p.is_file()}
 errors.extend(f'Unlisted asset: {p}' for p in sorted(actual - expected))
 if errors:
     raise SystemExit('\n'.join(errors))
