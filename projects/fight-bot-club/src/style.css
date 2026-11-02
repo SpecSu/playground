@@ -431,7 +431,7 @@ body.assisting #toast { opacity: 0; } /* 投票时提示条不压在 TAP 圈上 
 body.ulting #ultClock { opacity: 0 !important; transform: translateY(-14px) scale(.85); transition: none; }
 /* 投票获胜方配色的大招条幅：黄绿方用深色字保证可读，粉方保持白字 */
 #ultcut.v0 { background: linear-gradient(90deg, transparent, rgba(222, 255, 114, 0.75) 18%, rgba(196, 240, 70, 0.75) 82%, transparent); }
-#ultcut.v0 .uc-tag { color: rgba(23, 23, 25, 0.7); }
+#ultcut.v0 .uc-tag { color: #171719; opacity: 1; text-shadow: none; }
 #ultcut.v0 .uc-name { color: #171719; -webkit-text-stroke: 0; text-shadow: 3px 3px 0 rgba(255, 255, 255, 0.55); }
 #ultcut.v0 .uc-owner { color: #171719; text-shadow: none; }
 #ultcut.v0 .uc-ava { box-shadow: 0 0 0 3px #171719, 0 0 0 6px #fff, 0 6px 18px rgba(0, 0, 0, 0.5); }

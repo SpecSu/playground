@@ -64,7 +64,7 @@ css += '''
 .uc-owner{color:#F5F4F0!important;text-shadow:none!important}
 /* v10.1 投票模式：条幅跟随获胜方投票色——黄绿方深色字，粉方白字 */
 #ultcut.v0{background:rgba(222,255,114,.75)!important}
-#ultcut.v0 .uc-tag{color:rgba(23,23,25,.7)!important}
+#ultcut.v0 .uc-tag{color:#171719!important;opacity:1!important;text-shadow:none!important}
 #ultcut.v0 .uc-name{color:#171719!important;-webkit-text-stroke:0!important;text-shadow:2px 2px 0 rgba(255,255,255,.55)!important}
 #ultcut.v0 .uc-owner{color:#171719!important}
 #ultcut.v0 .uc-ava{box-shadow:0 0 0 3px #171719,0 0 0 6px #F5F4F0,0 6px 18px rgba(0,0,0,.5)!important}
