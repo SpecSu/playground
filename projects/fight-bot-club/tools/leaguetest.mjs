@@ -6,7 +6,7 @@ let fail = 0; const ok = (c, msg) => { console.log((c ? '✓ ' : '✗ ') + msg);
 const st = mem(); let day = new Date(2026, 4, 1, 10);
 let L = new League(st, () => day);
 // NPC 最多 5 个
-for (const n of ['奶蛙', '牛来', '喵脆角', '香蕉猫', '刀盾狗', '多余1', '多余2']) L.addNpc(n);
+for (const n of ['奶蛙', '牛来', '喵脆角', '香蕉猫', '刀盾狗', 'LX', 'Rummons', 'Jiaxin', '多余1', '多余2']) L.addNpc(n);
 ok(L.npcNames().length === NPC_MAX, `NPC 账号上限 ${NPC_MAX}（实际 ${L.npcNames().length}）`);
 // 用户维度每日 10 局：无论换几台机器人都共用
 ok(L.left('me') === DAILY_MAX, '新的一天：我还剩 10 局');
@@ -38,7 +38,7 @@ const L3 = new League(st, () => day);
 ok(L3.left('me') === DAILY_MAX && L3.robots().length === 1, '跨天：今日局数重置为 10，机器人保留');
 ok(L3.npcNames().length === NPC_MAX && L3.npcNames().every((n) => L3.user(n).matches >= 2), '跨天：NPC 重新生成 mock 今日战绩');
 // 名单变更：不在名单的旧 NPC 剔除，可补入新 NPC
-const L4 = new League(st, () => day); L4.syncNpcs(['奶蛙', '牛来', '喵脆角', '吉吉', '刀盾狗']); L4.addNpc('吉吉');
+const L4 = new League(st, () => day); L4.syncNpcs(['奶蛙', '牛来', '喵脆角', '吉吉', '刀盾狗', 'LX', 'Rummons', 'Jiaxin']); L4.addNpc('吉吉');
 ok(!L4.npcNames().includes('香蕉猫') && L4.npcNames().includes('吉吉') && L4.npcNames().length === NPC_MAX, `名单同步：剔除旧 NPC、补入吉吉（${L4.npcNames().join('/')}）`);
 // 损坏存档 → 回退空档不崩
 const bad = mem(); bad.setItem('fbc.v11', '{oops');

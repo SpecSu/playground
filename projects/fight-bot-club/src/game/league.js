@@ -1,9 +1,9 @@
 // v11 联赛层（纯逻辑，可在 node 里单测）：本机存档 / 用户维度每日参赛上限 / 用户维度排行 / NPC 兜底
 //  · 每个用户（我 / NPC 账号）每天最多参赛 DAILY_MAX 局，按「打完一局」计数（擂主连胜也逐局计数）
 //  · 排行按用户聚合：综合分 = 平滑胜率 × 60% + 人气指数 × 40%
-//  · NPC 账号最多 NPC_MAX 个，不新增；某个 NPC 当天打满还需要它兜底时，清零它的今日战绩重新计
+//  · NPC 账号固定 NPC_MAX 个（v11.4：8 位，战绩全部保留，开场只随机挑人上场），不新增；某个 NPC 当天打满还需要它兜底时，清零它的今日战绩重新计
 export const DAILY_MAX = 10;
-export const NPC_MAX = 5;
+export const NPC_MAX = 8;
 export const W_WIN = 0.6, W_POP = 0.4, POP_HALF = 2000; // 人气指数：票数 2000 ≈ 50 分，饱和增长
 const KEY = 'fbc.v11';
 

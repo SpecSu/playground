@@ -92,21 +92,19 @@ const views = new Map(); // Fighter -> MechView
 const projSeen = new Map();
 const MAX_TIME = 99;
 
-const BOTS = [
-  { ava: 0, name: '奶蛙', prompt: '黄金重装坦克，巨型铁拳，能震地', role: 'tank', form: 'humanoid' },
-  // { ava: 5, name: '外星猫', prompt: '霓虹赛博刺客猎犬，双刀，闪电般的速度', role: 'assassin', form: 'dog' }, // 外星猫暂时隐藏
-  { ava: 3, name: '喵脆角', prompt: '霓虹赛博刺客猎犬，双刀，闪电般的速度', role: 'assassin', form: 'dog' },
-  { ava: 11, name: '吉吉', prompt: '深海鲨鱼浮游炮台，蜂群导弹', role: 'gunner', form: 'hover' }, // v11.1：原「苏贝壳」与用户本人重名，换成吉吉
-  { ava: 6, name: '刀盾狗', prompt: '废土拼装多足蜘蛛，电锯手臂，锈迹斑斑', role: 'brawler', form: 'spider' },
-  { ava: 1, name: '牛来', prompt: '', role: '', form: '' }, // v10.2：开场共 5 台（2 台对战 + 3 台候擂）
-];
+// v11.4：开场 5 台 = 对战 2 台（只从 LX / Rummons / 吉吉 / Jiaxin 里随机挑）+ 候擂 3 台（从老 NPC 里随机挑）
+const shuffle = (a) => [...a].sort(() => Math.random() - 0.5);
+const OPENER_POOL = [{ ava: 9, name: 'LX' }, { ava: 10, name: 'Rummons' }, { ava: 11, name: '吉吉' }, { ava: 8, name: 'Jiaxin' }];
+const WAIT_POOL = [{ ava: 0, name: '奶蛙' }, { ava: 3, name: '喵脆角' }, { ava: 6, name: '刀盾狗' }, { ava: 1, name: '牛来' }];
+const BOTS = [...shuffle(OPENER_POOL).slice(0, 2), ...shuffle(WAIT_POOL).slice(0, 3)];
+const ALL_NPCS = [...OPENER_POOL, ...WAIT_POOL]; // v11.4：8 位 NPC 账号常驻，战绩不因本次未出场而清除
 
 function makeEntry(design, ava, owner, mine = false, extra = {}) {
   const e = { id: design.id, design, ava, owner, mine, uid: mine ? 'me' : owner, strat: 'balanced', wins: 0, losses: 0, best: 0, created: performance.now(), thumb: null, ...extra };
   roster.push(e); queueThumb(e); return e;
 }
 // —— v11 联赛：NPC 账号（最多 5 个，= 开场 5 位）/ 兜底补位 / 退场 ——
-const NPCS = BOTS.map((b) => ({ uid: b.name, ava: b.ava }));
+const NPCS = ALL_NPCS.map((b) => ({ uid: b.name, ava: b.ava }));
 const MIN_WAIT = 2; // 候场至少保留 2 位（不够就由 NPC 兜底补位）
 function randStrat() { const r = Math.random(); return r < 0.5 ? 'balanced' : r < 0.75 ? 'attack' : 'defense'; }
 function activeEntries() { return [...queue, ...G.E.filter((e) => e && !e.out)]; }
@@ -278,8 +276,9 @@ async function boot() {
     if (i === 1 && !gapOk(d, opener[0])) { const big = d.scale >= opener[0].scale ? d : opener[0], small = big === d ? opener[0] : d; big.scale = small.scale * SIZE_GAP; }
     usedUlt.add(d.ult); opener.push(d);
   });
-  league.syncNpcs(BOTS.map((b) => b.name)); // 旧存档里已不在名单的 NPC（如苏贝壳）剔除
-  BOTS.forEach((b) => { league.addNpc(b.name); if (!league.canPlay(b.name)) league.resetNpc(b.name); });
+  league.syncNpcs(ALL_NPCS.map((b) => b.name)); // 只剔除不在 8 人名单里的旧 NPC（如苏贝壳），本次没出场的照样保留战绩
+  ALL_NPCS.forEach((b) => league.addNpc(b.name));
+  BOTS.forEach((b) => { if (!league.canPlay(b.name)) league.resetNpc(b.name); });
   BOTS.forEach((b, i) => queue.push(makeEntry(opener[i], b.ava, b.name, false, { strat: i < 2 ? 'balanced' : randStrat() })));
   syncCreateBtn();
   // 预编译 + 首帧
