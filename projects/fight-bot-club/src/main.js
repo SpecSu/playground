@@ -256,15 +256,27 @@ async function boot() {
   // 第一轮对战两台大招固定「全弹发射」「万雷天罚」，体型随机；候擂 3 台大招从其余大招里随机且互不相同
   // 首轮看点约束：可以两近战 / 一远一近，不允许两远程 → 「万雷天罚」那台固定为近战体型 + 近战打法
   const KITE = new Set(['manta', 'flamingo', 'spider']);
-  const meleeForms = FORM_LIST.filter((f) => !KITE.has(f));
+  // v11.3：第一场不出鳄鱼；对战两台体型（scale）必须拉开差距
+  const meleeForms = FORM_LIST.filter((f) => !KITE.has(f) && f !== 'croc');
   const anchor = meleeForms[Math.floor(Math.random() * meleeForms.length)];
-  const forms = [anchor, ...[...FORM_LIST].filter((f) => f !== anchor).sort(() => Math.random() - 0.5)].slice(0, BOTS.length);
-  [forms[0], forms[1]] = [forms[1], forms[0]]; // forms[1] = 近战锚点（万雷天罚），forms[0] 随机（全弹发射）
+  const rest = [...FORM_LIST].filter((f) => f !== anchor).sort(() => Math.random() - 0.5);
+  const f0 = rest.find((f) => f !== 'croc');
+  const forms = [f0, anchor, ...rest.filter((f) => f !== f0)].slice(0, BOTS.length); // forms[1] = 近战锚点（万雷天罚），forms[0] 随机（全弹发射）
+  const SIZE_GAP = 1.2;
+  const gapOk = (a, b) => Math.max(a.scale, b.scale) / Math.min(a.scale, b.scale) >= SIZE_GAP;
   const usedUlt = new Set(['barrage', 'storm']);
-  const opener = BOTS.map((b, i) => {
+  const opener = [];
+  BOTS.forEach((b, i) => {
     const want = i === 0 ? 'barrage' : i === 1 ? 'storm' : null;
-    const d = pickDesign(b.name, () => ({ form: forms[i] }), (x) => (want ? x.ult === want && (i !== 1 || x.range === 'melee') : !usedUlt.has(x.ult)), null, 600);
-    usedUlt.add(d.ult); return d;
+    let d = pickDesign(b.name, () => ({ form: forms[i] }), (x) => (want ? x.ult === want && (i !== 1 || x.range === 'melee') && (i !== 1 || gapOk(x, opener[0])) : !usedUlt.has(x.ult)), null, 600);
+    if (i === 1 && !gapOk(d, opener[0])) {
+      for (const f of meleeForms.filter((f) => f !== forms[0]).sort(() => Math.random() - 0.5)) {
+        const alt = pickDesign(b.name, () => ({ form: f }), (x) => x.ult === 'storm' && x.range === 'melee' && gapOk(x, opener[0]), null, 300);
+        if (gapOk(alt, opener[0]) && alt.ult === 'storm') { const k = forms.indexOf(f); if (k > 1) forms[k] = forms[1]; forms[1] = f; d = alt; break; }
+      }
+    }
+    if (i === 1 && !gapOk(d, opener[0])) { const big = d.scale >= opener[0].scale ? d : opener[0], small = big === d ? opener[0] : d; big.scale = small.scale * SIZE_GAP; }
+    usedUlt.add(d.ult); opener.push(d);
   });
   league.syncNpcs(BOTS.map((b) => b.name)); // 旧存档里已不在名单的 NPC（如苏贝壳）剔除
   BOTS.forEach((b) => { league.addNpc(b.name); if (!league.canPlay(b.name)) league.resetNpc(b.name); });
