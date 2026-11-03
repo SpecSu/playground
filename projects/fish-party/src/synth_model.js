@@ -1,1405 +1,657 @@
-// v0.9 A：合成物种 —— 基因组（syn）→ 程序化雕塑模型
-// - 复用 marine.js 的 Sculpture（薄膜鳍 + 放射鳍条 / 角膜眼 / 管状附肢），与 40 种天然物种同一套造型语言与 fishmat 皮肤
-// - 身体 = 参数化截面放样（超椭圆截面 × 包络 × 头型 × 体节 / 细腰 / 拱背），每个顶点带 aSyn=(u, θ, y/H) 体表坐标 → 花纹 shader 用
-// - 鼻尖 +x、背 +y（与 marine.js 一致）；模型最长水平维度归一化到 1.6（Fish 类再缩到 1m）
-// - 身体永远不透明；鳍膜由 fishmat 按放射鳍条做轻微透光；器物部件（钥匙齿 / 马桶盖 / 齿轮…）是实心材质
+// v0.9.1 A：合成物种 —— 「美的流形」上的形态融合（重构版）
+// 反思：旧版把「不可预测」做成了部件随机拼接 + 狂野突变（针嘴、多眼、对称破缺、器物插件）→ 畸形低模拼装。
+// 新方案：
+//   ① 身体 = 亲本（天然物种主躯干侧视轮廓，取自 marine.js 同一套采样）在采样点上加权插值 → 再过「审美约束」
+//      （体高比安全区、尾柄收束、头部圆润封顶、三遍平滑）→ 永远连续、光滑、比例协调，一眼看得出血统
+//   ② 鳍 = 审美校准过的观赏鱼鳍型库（扇形背鳍 / 帆鳍 / 镰月 / 羽状棘鳍 / 飘纱；叉尾 / 新月 / 燕尾 / 琴尾 / 半月裙尾 / 斗鱼裙尾），
+//      鳍根贴合背/腹轮廓长出来，薄膜 + 放射鳍条 + 根→梢渐变半透明；左右严格对称
+//   ③ 华丽度 lux 1~4（= 稀有度）：鳍更长更飘、延长鳍丝、波纹鳍缘、珠光/金属鳞缘、发光鳍缘与流光
+//   ④ 花纹 = 精致图案 shader（渐变 / 龙鳞 / 锦鲤斑 / 大理石 / 水墨 / 星点 / 环带 / 礼服 / 青花 / 冰裂 / 回纹 …）
+// 鼻尖 +x、背 +y（与 marine.js 一致）；身体长 1.4，归一化后最长水平维度 1.6（Fish 类再缩到 1m）
 import * as THREE from 'three';
-import { Sculpture } from './marine.js';
+import { Sculpture, marineBlueprint } from './marine.js';
 
-const TAU = Math.PI * 2, PI = Math.PI;
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
 const lerp = (a, b, t) => a + (b - a) * t;
 const sst = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
 const V3 = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
-function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = Math.imul(s ^ (s >>> 15), 2246822519) + 0x6d2b79f5 >>> 0) / 4294967296); }
 const WHITE = new THREE.Color('#ffffff');
-const hex = (c) => '#' + new THREE.Color(c).getHexString();
-const shade = (c, k) => { const o = new THREE.Color(c); o.multiplyScalar(k); return '#' + o.getHexString(); };
+const HEX = /^#[0-9a-f]{6}$/i;
+const hexOk = (c, d) => (typeof c === 'string' && HEX.test(c) ? c.toLowerCase() : d);
 const mixc = (a, b, t) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), t).getHexString();
+const _h = { h: 0, s: 0, l: 0 };
+// 注意：HSL 必须在 sRGB 空间算（THREE 默认在线性空间 → 暗色被误判为高饱和、明度阈值整体偏白 = 旧版「发灰发粉」的根因）
+const hslOf = (c) => { new THREE.Color(c).getHSL(_h, THREE.SRGBColorSpace); return [_h.h, _h.s, _h.l]; };
+const fromHsl = (h, s, l) => '#' + new THREE.Color().setHSL(((h % 1) + 1) % 1, clamp(s, 0, 1), clamp(l, 0, 1), THREE.SRGBColorSpace).getHexString();
+// HSL 短弧插值（色相走近路，饱和度不塌）
+function hslArc(a, b, t) { const [h1, s1, l1] = hslOf(a), [h2, s2, l2] = hslOf(b); let d = h2 - h1; d -= Math.round(d); const h = s1 < 0.1 ? h2 : s2 < 0.1 ? h1 : h1 + d * t; return fromHsl(h, Math.max(lerp(s1, s2, t), Math.min(s1, s2)), lerp(l1, l2, t)); }
+function hashStr(str) { let x = 2166136261; for (let i = 0; i < str.length; i++) { x ^= str.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
 
-// ---------------- 基因组默认值（synth.js 产出完整基因组；这里兜底旧数据 / 手写数据） ----------------
-export const G_DEFAULT = {
-  v: 1, plan: 'fusiform', len: 1, ht: 0.17, wd: 0.62, sq: 2, arch: 0, hump: 0, belly: 0.5, peak: 0.55, ped: 0.3, seg: 0, waist: 0,
-  head: 'round', mouth: 'smile', eyes: { n: 2, k: 1, stalk: 0, lens: 0 },
-  dor: { k: 'shark', h: 1, l: 1, x: 0.5 }, dor2: null, tail: { k: 'fork', s: 1 }, pect: { k: 'std', s: 1 }, pelv: 1, anal: 1,
-  app: [], pal: ['#547f87', '#f1e3d8', '#3c555d', '#5c7d88'], pat: { k: 'none', d: 4, a: 0.8, r: 0 }, mat: 'wet', glow: 0, irid: 0.3,
+// ---------------- 词表 ----------------
+export const FIN_KINDS = {
+  dor: ['soft', 'sickle', 'sail', 'crest', 'fan', 'plume', 'veil'],
+  tail: ['fork', 'lunate', 'round', 'swallow', 'lyre', 'delta', 'veil'],
+  pect: ['std', 'fan', 'long', 'bow'],
+  pelv: ['std', 'fil'],
 };
+const KSET = Object.fromEntries(Object.entries(FIN_KINDS).map(([k, a]) => [k, new Set(a)]));
+// 背鳍 → 臀鳍（上下呼应：神仙鱼 / 斗鱼式的对称美）
+export const ANAL_OF = { soft: 'soft', sickle: 'sickle', sail: 'crest', crest: 'crest', fan: 'fan', plume: 'soft', veil: 'veil' };
+export const PAT_IDS = { none: 0, grad: 1, scale: 2, koi: 3, marble: 4, cloud: 5, stars: 6, bands: 7, tux: 8, porcelain: 9, crackle: 10, fret: 11, ocelli: 12, neon: 13, leopard: 14, sunset: 15, pearlline: 16, mesh: 17, speckle: 18, spots: 19 };
+// 器物质感（身体）：fishmat 见 userData.synPBR 时保留这些 PBR 参数
+export const MATS = {
+  wet: { metal: 0.12, rough: 0.38, coat: 0.75, coatR: 0.25 },
+  satin: { metal: 0.04, rough: 0.42, coat: 0.45, coatR: 0.3, sheen: 0.35 },
+  glaze: { metal: 0.02, rough: 0.24, coat: 1, coatR: 0.05 },
+  ceramic: { metal: 0, rough: 0.16, coat: 1, coatR: 0.03 },
+  metal: { metal: 0.7, rough: 0.22, coat: 0.8, coatR: 0.06 },
+  brass: { metal: 0.66, rough: 0.24, coat: 0.8, coatR: 0.08, irid: 0.3 },
+  gold: { metal: 0.68, rough: 0.2, coat: 0.95, coatR: 0.05, irid: 0.4 },
+  pearl: { metal: 0.1, rough: 0.24, coat: 0.95, coatR: 0.08, irid: 1, sheen: 0.45 },
+  glow: { metal: 0.04, rough: 0.3, coat: 0.85, coatR: 0.1 },
+  crystal: { metal: 0.06, rough: 0.12, coat: 1, coatR: 0.04, irid: 0.8 },
+};
+const SKINS = {
+  wet: { type: 0, den: 44, bump: 0.4 }, satin: { type: 1, den: 30, bump: 0.08 }, glaze: { type: 1, den: 20, bump: 0.04 },
+  ceramic: { type: 1, den: 10, bump: 0.02 }, metal: { type: 0, den: 40, bump: 0.16 }, brass: { type: 0, den: 40, bump: 0.16 },
+  gold: { type: 0, den: 42, bump: 0.2 }, pearl: { type: 0, den: 46, bump: 0.14 }, glow: { type: 1, den: 20, bump: 0.08 }, crystal: { type: 1, den: 12, bump: 0.04 },
+};
+// 天然物种 → 用作身体蓝本的「鱼形」物种（非鱼形生物取气质相近的鱼形轮廓）
+export const BODY_PROXY = {
+  squid: 'mackerel', cuttlefish: 'parrotfish', 'snow-crab': 'sea-bream', octopus: 'parrotfish', lobster: 'coelacanth', 'king-crab': 'giant-grouper',
+  'manta-ray': 'sea-bream', flounder: 'sea-bream', starfish: 'butterflyfish', seahorse: 'lionfish', jellyfish: 'butterflyfish', 'mantis-shrimp': 'parrotfish',
+  'sea-turtle': 'giant-grouper', bottle: 'salmon', duck: 'pufferfish', chest: 'giant-grouper',
+};
+export const proxyOf = (sp) => BODY_PROXY[sp] || sp;
+
+export const G_DEFAULT = {
+  v: 2, base: [['salmon', 1]], len: 1, ht: 1, eyeK: 1,
+  dor: { k: 'soft', h: 1 }, anal: { k: 'soft', h: 1 }, tail: { k: 'fork', s: 1 }, pect: { k: 'std', s: 1 }, pelv: { k: 'std', s: 1 },
+  pal: ['#547f87', '#f1e3d8', '#d9a35b', '#6f97a0', '#e9f2f4'], pat: { k: 'grad', d: 3, a: 0.75 }, mat: 'wet',
+  irid: 0.3, glow: 0, finA: null, lux: null, fil: 0, scal: 0, scl: 0, mood: 'calm',
+};
+
+// ---------------- 旧存档（v1 基因组）→ v2 重映射：不崩、并渲染成新方案下的好看鱼 ----------------
+const OLD_DOR = { shark: 'sickle', sail: 'sail', spiny: 'plume', crest: 'crest', ribbon: 'veil', fan: 'fan', finlet: 'sickle', lid: 'sail', canopy: 'sail', cap: 'soft', handle: 'crest', key: 'crest', gear: 'crest', quill: 'plume', wedge: 'sickle', saw: 'plume', crystal: 'fan', none: 'soft' };
+const OLD_TAIL = { fork: 'fork', lunate: 'lunate', round: 'round', fan: 'round', swallow: 'swallow', shark: 'lunate', fluke: 'lunate', whip: 'veil', lobe: 'round', stiletto: 'swallow', ribbon: 'veil', paddle: 'round', hook: 'lyre', ring: 'delta', shears: 'swallow', feather: 'veil', anchor: 'lyre', curl: 'veil', leaf: 'round', rocket: 'fork', none: 'round' };
+const OLD_PECT = { std: 'std', long: 'long', wing: 'long', fan: 'fan', frill: 'fan', leg: 'std', paddle: 'fan', bow: 'bow', none: 'std' };
+const OLD_PAT = { bars: 'bands', lines: 'neon', spots: 'spots', freckle: 'speckle', mottle: 'cloud', grad: 'grad', tiger: 'bands', stars: 'stars', scale: 'scale', stripe: 'bands', marble: 'marble', galaxy: 'stars', tux: 'tux', ring: 'bands', ocelli: 'ocelli', geo: 'mesh', melon: 'bands', lateral: 'neon', sprinkle: 'speckle', dial: 'ocelli', sunburst: 'sunset', waffle: 'mesh', none: 'grad' };
+const OLD_MAT = { matte: 'satin', paper: 'satin' };
+const OLD_PLAN = { fusiform: 'salmon', deep: 'sea-bream', globe: 'pufferfish', eel: 'moray-eel', flat: 'sea-bream', box: 'giant-grouper', seg: 'mackerel', disc: 'butterflyfish', hourglass: 'parrotfish', diamond: 'butterflyfish' };
+function remapV1(g) {
+  const anc = g.anc && typeof g.anc === 'object' ? g.anc : {};
+  const top = Object.entries(anc).filter(([k, w]) => marineBlueprint(proxyOf(k)) && +w > 0).sort((a, b) => b[1] - a[1]).slice(0, 2);
+  const base = top.length ? top.map(([k, w]) => [proxyOf(k), +w]) : [[OLD_PLAN[g.plan] || 'salmon', 1]];
+  const pal = Array.isArray(g.pal) ? g.pal : [];
+  const dk = OLD_DOR[g.dor?.k] || 'soft';
+  return {
+    v: 2, base, anc, len: 1, ht: 1, eyeK: 1,
+    dor: { k: dk, h: 1 }, anal: { k: ANAL_OF[dk], h: 1 }, tail: { k: OLD_TAIL[g.tail?.k] || 'fork', s: 1 }, pect: { k: OLD_PECT[g.pect?.k] || 'std', s: 1 }, pelv: { k: 'std', s: 1 },
+    pal: harmonizePal([pal[0], pal[1], pal[2], pal[3]]),
+    pat: { k: OLD_PAT[g.pat?.k] || 'grad', d: 3, a: 0.8 }, mat: OLD_MAT[g.mat] || (MATS[g.mat] ? g.mat : 'wet'),
+    irid: clamp(+g.irid || 0.3, 0, 1), glow: clamp(+g.glow || 0, 0, 0.8), lux: null, item: g.item || null, tags: Array.isArray(g.tags) ? g.tags : [],
+  };
+}
+// 调色板和谐化：饱和度 / 明度落在安全区，点缀色只允许 类比(≤0.09) / 三角(≈0.33) / 互补(≈0.5) 关系；腹色永远更亮
+export function harmonizePal(p) {
+  const back = hexOk(p[0], G_DEFAULT.pal[0]);
+  let [hb, sb, lb] = hslOf(back);
+  // 配色约束：要么「饱和体色」（sat≥0.42），要么「素体 + 艳鳍」（白瓷/银/珍珠体 → 点缀色必须鲜明，鳍染点缀色）
+  // 灰调只允许「白瓷/珍珠白」(亮) 或「礼服墨黑」(暗)；中间的灰 → 染上点缀色相，避免脏灰
+  let neutral = sb < 0.2;
+  if (neutral && lb > 0.3 && lb < 0.74) { const [ha0, sa0] = hslOf(hexOk(p[2], back)); if (sa0 > 0.2) { hb = ha0; sb = 0.3; neutral = false; } }
+  // 珍珠白 / 白瓷：很亮的浅色 → 当作中性素体（饱和度压低成「带一丝色相的珠白」），不当作粉彩
+  if (!neutral && lb > 0.76 && sb < 0.75) { neutral = true; sb = Math.min(sb, 0.22); lb = Math.max(lb, 0.84); }
+  if (!neutral) sb = clamp(sb, 0.55, 0.9);
+  lb = clamp(lb, neutral ? 0.1 : 0.28, neutral ? 0.94 : 0.54);   // 宝石色：主色不许发白发粉（粉彩 = 廉价）
+  // 去脏：暖黄区低明度 = 土褐 → 提亮成金；黄绿区低饱和 = 脏绿 → 提纯成翠
+  if (!neutral && hb > 0.04 && hb < 0.17 && lb < 0.5) { lb = 0.5; sb = Math.max(sb, 0.72); }
+  // 柠檬黄 = 廉价 → 推向万寿菊金（更暖、更深、更像鎏金）
+  if (!neutral && hb >= 0.115 && hb < 0.17) { hb = lerp(hb, 0.105, 0.6); sb = Math.max(sb, 0.82); lb = Math.min(lb, 0.5); }
+  if (!neutral && hb >= 0.17 && hb < 0.36) { sb = Math.max(sb, 0.58); if (hb < 0.26) hb = lerp(hb, 0.36, 0.5); }
+  const b0 = fromHsl(hb, sb, lb);
+  const belly = hexOk(p[1], fromHsl(hb + 0.02, sb * 0.35, 0.9));
+  let [hy, sy, ly] = hslOf(belly);
+  // 腹色：比背亮但保持同族色相与饱和度（参照鲯鳅 青背金腹），避免整条鱼被奶白腹色洗淡
+  if (!neutral) { hy = hb + clamp(((hy - hb + 1.5) % 1) - 0.5, -0.06, 0.06); sy = Math.max(sy, sb * 0.7); }
+  ly = neutral ? clamp(ly, Math.min(0.94, lb + 0.04), 0.95) : clamp(ly, lb + 0.1, Math.min(0.8, lb + 0.28)); sy = Math.min(sy, 0.85);
+  let acc = hexOk(p[2], fromHsl(hb + 0.5, 0.6, 0.55));
+  let [ha, sa, la] = hslOf(acc);
+  if (sa > 0.15 && sb > 0.15 && !neutral) {
+    const d = ((ha - hb) % 1 + 1) % 1, dd = Math.min(d, 1 - d), sgn = d <= 0.5 ? 1 : -1;
+    const ok = [0.05, 0.33, 0.5].reduce((best, t) => (Math.abs(dd - t) < Math.abs(dd - best) ? t : best), 0.05);
+    if (Math.abs(dd - ok) > 0.035 && dd > 0.09) ha = hb + sgn * ok;
+  }
+  if (neutral) { sa = Math.max(sa, 0.62); la = clamp(la, 0.38, 0.62); }
+  sa = clamp(sa, 0.35, 0.88); la = clamp(la, 0.24, 0.8);
+  // 点缀色与体色明度拉开（对比度）
+  if (Math.abs(la - lb) < 0.14) la = clamp(lb > 0.5 ? lb - 0.2 : lb + 0.2, 0.24, 0.8);
+  acc = fromHsl(ha, sa, la);
+  // 鳍色：与体色同族但偏向点缀色，饱和度不低于体色（鳍是华丽感的主要载体）
+  let fin = neutral ? mixc(hexOk(p[3], acc), acc, 0.45) : hexOk(p[3], b0);   // 非素体：鳍保持自身色相（RGB 混点缀色会混出橄榄 / 柠檬绿）
+  { const [hf, sf, lf] = hslOf(fin); fin = fromHsl(hf, clamp(Math.max(sf, neutral ? 0.6 : sb * 0.95, 0.55), 0, 0.92), clamp(lf, 0.32, 0.62)); }
+  const edge = hexOk(p[4], fromHsl(ha, sa * 0.6, Math.max(0.78, la)));
+  return [b0, fromHsl(hy, sy, ly), acc, fin, edge];
+}
+const numIn = (x, a, b, d) => (Number.isFinite(+x) ? clamp(+x, a, b) : d);
+const finIn = (o, kind, d) => { o = o && typeof o === 'object' ? o : {}; return { ...o, k: KSET[kind].has(o.k) ? o.k : d, h: numIn(o.h, 0.7, 1.6, 1), s: numIn(o.s, 0.7, 1.6, 1) }; };
 export function normGenome(g) {
   g = g && typeof g === 'object' ? g : {};
+  if (g.v !== 2) g = remapV1(g);
   const o = { ...G_DEFAULT, ...g };
-  o.eyes = { ...G_DEFAULT.eyes, ...(g.eyes || {}) };
-  o.dor = { ...G_DEFAULT.dor, ...(g.dor || {}) };
-  o.tail = { ...G_DEFAULT.tail, ...(g.tail || {}) };
-  o.pect = { ...G_DEFAULT.pect, ...(g.pect || {}) };
-  o.pat = { ...G_DEFAULT.pat, ...(g.pat || {}) };
-  o.pal = Array.isArray(g.pal) && g.pal.length >= 4 ? g.pal.slice(0, 4) : G_DEFAULT.pal.slice();
-  o.app = Array.isArray(g.app) ? g.app.slice(0, 6) : [];
-  for (const k of ['len', 'ht', 'wd', 'sq', 'arch', 'hump', 'belly', 'peak', 'ped', 'waist', 'glow', 'irid']) if (!Number.isFinite(+o[k])) o[k] = G_DEFAULT[k];
-  o.len = clamp(+o.len, 0.6, 3.2); o.ht = clamp(+o.ht, 0.035, 0.5); o.wd = clamp(+o.wd, 0.25, 5); o.sq = clamp(+o.sq, 1.2, 6);
-  o.peak = clamp(+o.peak, 0.3, 0.8); o.ped = clamp(+o.ped, 0, 1); o.seg = clamp(o.seg | 0, 0, 9); o.waist = clamp(+o.waist, 0, 0.7);
+  let base = Array.isArray(g.base) ? g.base.filter((b) => Array.isArray(b) && typeof b[0] === 'string' && +b[1] > 0).slice(0, 3) : [];
+  base = base.map(([sp, w]) => [proxyOf(sp), +w]).filter(([sp]) => marineBlueprint(sp));
+  if (!base.length) base = [['salmon', 1]];
+  const ws = base.reduce((s, b) => s + b[1], 0);
+  o.base = base.map(([sp, w]) => [sp, Math.round((w / ws) * 1000) / 1000]);
+  o.dor = finIn(g.dor, 'dor', 'soft');
+  o.anal = finIn(g.anal, 'dor', ANAL_OF[o.dor.k]);
+  o.tail = finIn(g.tail, 'tail', 'fork');
+  o.pect = finIn(g.pect, 'pect', 'std');
+  o.pelv = finIn(g.pelv, 'pelv', 'std');
+  const pal = Array.isArray(g.pal) ? g.pal : [];
+  o.pal = [0, 1, 2, 3, 4].map((i) => hexOk(pal[i], G_DEFAULT.pal[i]));
+  const pt = g.pat && typeof g.pat === 'object' ? g.pat : {};
+  o.pat = { k: PAT_IDS[pt.k] != null ? pt.k : 'grad', d: numIn(pt.d, 1, 8, 3), a: numIn(pt.a, 0, 1, 0.75) };
+  o.mat = MATS[g.mat] ? g.mat : OLD_MAT[g.mat] || 'wet';
+  o.len = numIn(g.len, 0.85, 1.2, 1); o.ht = numIn(g.ht, 0.85, 1.2, 1); o.eyeK = numIn(g.eyeK, 0.8, 1.3, 1);
+  o.irid = numIn(g.irid, 0, 1, 0.3); o.glow = numIn(g.glow, 0, 1, 0);
+  o.finA = g.finA == null ? null : numIn(g.finA, 0.62, 1, 0.8);
+  o.lux = g.lux == null ? null : Math.round(numIn(g.lux, 1, 4, 1));
+  o.fil = g.fil ? 1 : 0; o.scal = g.scal ? 1 : 0; o.scl = numIn(g.scl, 0, 1, 0);
+  o.anc = g.anc && typeof g.anc === 'object' ? g.anc : {};
+  o.app = []; o.wild = [];
+  o.tags = Array.isArray(g.tags) ? g.tags.slice(0, 4) : [];
   return o;
 }
 
-// ---------------- 材质 ----------------
-// 器物质感：身体 / 器物部件用；fishmat 见 userData.synPBR 时不覆盖这些 PBR 参数，见 userData.dry 时不加湿润高光
-export const MATS = {
-  wet: { metal: 0.08, rough: 0.4, coat: 0.7, coatR: 0.27 },
-  matte: { metal: 0, rough: 0.8, coat: 0.06, coatR: 0.6, sheen: 0.35, dry: 1 },
-  glaze: { metal: 0, rough: 0.22, coat: 1, coatR: 0.05 },
-  ceramic: { metal: 0, rough: 0.16, coat: 1, coatR: 0.03 },
-  metal: { metal: 0.82, rough: 0.3, coat: 0.3, coatR: 0.2 },
-  brass: { metal: 0.9, rough: 0.34, coat: 0.2, coatR: 0.3 },
-  gold: { metal: 1, rough: 0.24, coat: 0.45, coatR: 0.2 },
-  pearl: { metal: 0.12, rough: 0.26, coat: 0.9, coatR: 0.1, irid: 1, sheen: 0.4 },
-  satin: { metal: 0, rough: 0.5, coat: 0.1, coatR: 0.5, sheen: 1, dry: 1 },
-  glow: { metal: 0, rough: 0.34, coat: 0.85, coatR: 0.12 },
-  crystal: { metal: 0.08, rough: 0.1, coat: 1, coatR: 0.04, irid: 0.75 },
-  paper: { metal: 0, rough: 0.92, coat: 0, coatR: 0.6, sheen: 0.25, dry: 1, flat: 1 },
-};
-// fishmat 皮肤参数（鳞片 / 光滑皮 …）
-const SKINS = {
-  wet: { type: 0, den: 44, bump: 0.42, irid: 0.3, metal: 0.1, coat: 0.85 },
-  matte: { type: 1, den: 26, bump: 0.22, irid: 0, metal: 0, coat: 0.3 },
-  glaze: { type: 1, den: 20, bump: 0.05, irid: 0, metal: 0, coat: 1 },
-  ceramic: { type: 1, den: 10, bump: 0.02, irid: 0, metal: 0, coat: 1 },
-  metal: { type: 1, den: 30, bump: 0.12, irid: 0, metal: 0.8, coat: 0.6 },
-  brass: { type: 1, den: 30, bump: 0.12, irid: 0, metal: 0.8, coat: 0.5 },
-  gold: { type: 0, den: 40, bump: 0.18, irid: 0, metal: 0.9, coat: 0.6 },
-  pearl: { type: 0, den: 46, bump: 0.16, irid: 1, metal: 0.1, coat: 0.9 },
-  satin: { type: 1, den: 30, bump: 0.08, irid: 0.1, metal: 0, coat: 0.35 },
-  glow: { type: 1, den: 20, bump: 0.1, irid: 0.2, metal: 0, coat: 0.8 },
-  crystal: { type: 1, den: 12, bump: 0.04, irid: 0.6, metal: 0, coat: 1 },
-  paper: { type: 1, den: 12, bump: 0, irid: 0, metal: 0, coat: 0 },
-};
-export function physMat(color, kind = 'wet', o = {}) {
-  const p = MATS[kind] || MATS.wet;
-  const m = new THREE.MeshPhysicalMaterial({ color, metalness: p.metal, roughness: p.rough, clearcoat: p.coat, clearcoatRoughness: p.coatR, vertexColors: !!o.vc });
-  if (p.irid) { m.iridescence = p.irid; m.iridescenceIOR = 1.3; m.iridescenceThicknessRange = [200, 620]; }
-  if (p.sheen) { m.sheen = p.sheen; m.sheenRoughness = 0.42; m.sheenColor = new THREE.Color(o.vc ? '#ffffff' : color).lerp(WHITE, 0.45); }
-  if (p.flat) m.flatShading = true;
-  if (o.glow) { m.emissive = new THREE.Color(o.glowColor || color); m.emissiveIntensity = o.glow; }
-  if (kind !== 'wet' || o.keep) m.userData.synPBR = true;
-  if (p.dry) m.userData.dry = true;
-  if (o.side) m.side = o.side;
-  return m;
+// ---------------- 形态融合：亲本轮廓插值 + 审美约束 ----------------
+const KS = 97;
+const BL = 1.4;    // 身体长度（雕塑坐标）
+function sampleBP(bp, u) {
+  const U = bp.u; let i = 1;
+  while (i < U.length - 1 && U[i] < u) i++;
+  const t = clamp((u - U[i - 1]) / Math.max(U[i] - U[i - 1], 1e-6), 0, 1);
+  return [lerp(bp.h[i - 1], bp.h[i], t), lerp(bp.w[i - 1], bp.w[i], t)];
 }
-const METALLIC = new Set(['metal', 'brass', 'gold']);
-
-// ---------------- 身体场：u ∈ [0,1] 尾→头，a = 截面角（0 = 背脊，π/2 = +z 体侧，π = 腹） ----------------
-function headCurve(head, t) {
-  switch (head) {
-    case 'pointed': case 'bill': return Math.pow(Math.cos(t * PI / 2), 1.25);
-    case 'blunt': case 'hammer': return Math.pow(Math.max(0, 1 - t ** 6), 0.4);
-    case 'snub': case 'dome': return Math.pow(Math.max(0, 1 - t ** 3.2), 0.5);
-    case 'tube': return t < 0.45 ? lerp(1, 0.3, sst(0, 0.45, t)) : 0.3 * Math.pow(Math.max(0, 1 - ((t - 0.45) / 0.55) ** 8), 0.5);
-    default: return Math.pow(Math.max(0, 1 - t ** 2.2), 0.55);
+export function morphProfile(g) {
+  const U = [], H = new Float64Array(KS), W = new Float64Array(KS);
+  for (let i = 0; i < KS; i++) U.push(i / (KS - 1));
+  for (const [sp, w] of g.base) {
+    const bp = marineBlueprint(sp) || marineBlueprint('salmon');
+    for (let i = 0; i < KS; i++) { const [h, wd] = sampleBP(bp, U[i]); H[i] += h * w; W[i] += wd * w; }
   }
-}
-export function makeField(g) {
-  const L = 1.6 * g.len, H = g.ht * L, W = g.wd * H;
-  const pk = g.peak, pedH = lerp(0.07, 0.36, g.ped), plan = g.plan, head = g.head;
-  const nseg = g.seg | 0, waist = g.waist || 0, hump = g.hump || 0, bellyK = lerp(0.72, 1.22, g.belly ?? 0.5);
-  const flat = plan === 'flat', sq = g.sq;
-  const env = (u) => {
-    let e;
-    if (plan === 'diamond') e = u <= pk ? lerp(pedH, 1, u / pk) : Math.max(0, 1 - (u - pk) / (1 - pk)) ** 0.9;
-    else if (u <= pk) { const t = u / pk; e = pedH + (1 - pedH) * Math.pow(1 - Math.pow(1 - t, 2.1), 0.8); }
-    else e = headCurve(head, (u - pk) / (1 - pk));
-    if (plan === 'box') e = Math.pow(e, 0.42);
-    if (plan === 'eel') e = Math.pow(e, 0.5);
-    if (plan === 'hourglass') e = Math.pow(e, 0.7);
-    if (nseg) e *= 1 - 0.14 * Math.pow(Math.cos(PI * nseg * u) ** 2, 6) * sst(0.02, 0.12, u) * (1 - sst(0.86, 0.97, u));
-    if (waist) e *= 1 - waist * Math.exp(-(((u - 0.47) / 0.1) ** 2));
-    return Math.max(e, 0.004);
-  };
-  const ht = (u) => {
-    let h = H * env(u) * (1 + hump * 0.45 * Math.exp(-(((u - pk) / 0.22) ** 2)));
-    if (u > pk) {
-      const t = (u - pk) / (1 - pk);
-      if (head === 'bevel') h *= 1 - 0.62 * sst(0.05, 1, t);
-      if (head === 'dome') h *= 1 + 0.2 * Math.exp(-(((t - 0.5) / 0.24) ** 2));
-    }
-    return h;
-  };
-  const hb = (u) => H * env(u) * bellyK;
-  const wz = (u) => flat ? W * Math.pow(Math.max(0, Math.sin(PI * clamp(u * 0.9 + 0.07, 0, 1))), 0.55) * Math.min(1, env(u) * 3) : W * Math.pow(env(u), 0.9);
-  const yc = (u) => g.arch * L * 0.17 * (1 - (2 * u - 1) ** 2);
-  const x = (u) => -L / 2 + u * L;
-  const e2 = 2 / sq;
-  const pt = (u, a, ex = 1) => {
-    const c = Math.cos(a), s = Math.sin(a);
-    const yy = Math.sign(c) * Math.abs(c) ** e2;
-    let zz = Math.sign(s) * Math.abs(s) ** e2;
-    zz *= 1 - 0.12 * Math.max(c, 0) ** 3;
-    return V3(x(u), yc(u) + (yy > 0 ? ht(u) : hb(u)) * yy * ex, wz(u) * zz * ex);
-  };
-  const nrm = (u, a) => {
-    const p = pt(u, a);
-    const du = pt(Math.min(u + 0.004, 1), a).sub(pt(Math.max(u - 0.004, 0), a));
-    const da = pt(u, a + 0.02).sub(pt(u, a - 0.02));
-    const n = da.clone().cross(du);
-    const c = V3(x(u), yc(u), 0);
-    if (n.lengthSq() < 1e-12) return p.sub(c).normalize();
-    n.normalize();
-    if (n.dot(p.clone().sub(c)) < 0) n.negate();
-    return n;
-  };
-  const top = (u) => yc(u) + ht(u), bot = (u) => yc(u) - hb(u);
-  const S = Math.max(H, L * 0.09);   // 附肢尺度（细长体型也不至于小到看不见）
-  return { L, H, W, S, pk, plan, head, flat, env, ht, hb, wz, yc, x, pt, nrm, top, bot, uHead: pk + (1 - pk) * 0.5 };
+  // 宽高比（截面）先算好，再统一约束高度
+  const R = new Float64Array(KS);
+  for (let i = 0; i < KS; i++) R[i] = W[i] / Math.max(H[i], 1e-4);
+  const kH = g.ht / g.len;
+  for (let i = 0; i < KS; i++) H[i] *= kH;
+  let mh = 0, pi = 0; for (let i = 0; i < KS; i++) if (H[i] > mh) { mh = H[i]; pi = i; }
+  const rPk = clamp(R[pi], 0.2, 1.0), compressed = rPk < 0.5;
+  const target = clamp(mh, 0.118, compressed ? 0.33 : 0.235);   // 圆截面体（河豚系）限高：杜绝「球身」
+  for (let i = 0; i < KS; i++) H[i] *= target / mh;
+  mh = target;
+  for (let i = 0; i < KS; i++) {
+    const u = U[i];
+    // 尾柄：收束成优雅的细腰（上限）且不细成线（下限）
+    if (u < 0.36) H[i] = Math.min(H[i], mh * (0.16 + 0.84 * Math.pow(sst(0, 0.36, u), 0.9)));
+    if (u > 0.015 && u < 0.14) H[i] = Math.max(H[i], mh * 0.11);
+    // 头部：圆润封顶（不准出现平头墙 / 针状细吻）
+    if (u > 0.78) H[i] = Math.min(H[i], mh * Math.sqrt(Math.max(0, 1 - ((u - 0.78) / 0.226) ** 2)));
+    if (u > 0.8 && u < 0.995) H[i] = Math.max(H[i], mh * 0.46 * Math.sqrt(Math.max(0, 1 - ((u - 0.8) / 0.2) ** 2)));
+    R[i] = clamp(R[i], 0.22, compressed ? 0.62 : 0.9);
+  }
+  for (let pass = 0; pass < 4; pass++) {
+    const h0 = H.slice(), r0 = R.slice();
+    for (let i = 1; i < KS - 1; i++) { H[i] = (h0[i - 1] + 2 * h0[i] + h0[i + 1]) / 4; R[i] = (r0[i - 1] + 2 * r0[i] + r0[i + 1]) / 4; }
+  }
+  H[0] = mh * 0.05; H[KS - 1] = mh * 0.06;
+  for (let i = 0; i < KS; i++) W[i] = H[i] * R[i];
+  return { U, H, W, mh, compressed, rPk };
 }
 
-function bodyGeometry(F, g, back, belly) {
-  const paper = g.mat === 'paper';
-  const N = paper ? 18 : 58, R = paper ? 8 : 30;
-  const pos = [], col = [], syn = [], idx = [];
-  const cb = new THREE.Color(back), cl = new THREE.Color(belly), c = new THREE.Color();
-  for (let i = 0; i < N; i++) {
-    const u = 0.5 - 0.5 * Math.cos(PI * i / (N - 1));
-    const yc = F.yc(u);
-    for (let j = 0; j <= R; j++) {
-      const a = j / R * TAU;
-      const p = F.pt(u, a);
-      pos.push(p.x, p.y, p.z);
-      c.copy(cl).lerp(cb, sst(-0.58, 0.64, Math.cos(a)));
-      col.push(c.r, c.g, c.b);
-      syn.push(u, j / R, (p.y - yc) / F.H);
-      if (i < N - 1 && j < R) { const A = i * (R + 1) + j, B = A + R + 1; idx.push(A, A + 1, B, A + 1, B + 1, B); }
-    }
-  }
-  // 尾端封口
-  const ci = pos.length / 3, y0 = F.yc(0);
-  pos.push(F.x(0) - 0.004, y0, 0); c.copy(cl).lerp(cb, 0.5); col.push(c.r, c.g, c.b); syn.push(0, 0, 0);
-  for (let j = 0; j < R; j++) idx.push(ci, j + 1, j);
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
-  geo.setAttribute('aSyn', new THREE.Float32BufferAttribute(syn, 3));
-  geo.setIndex(idx);
-  geo.computeVertexNormals();
-  const nr = geo.getAttribute('normal');
-  for (let i = 0; i < N; i++) {
-    const a = i * (R + 1), b = a + R;
-    const nx = nr.getX(a) + nr.getX(b), ny = nr.getY(a) + nr.getY(b), nz = nr.getZ(a) + nr.getZ(b), l = Math.hypot(nx, ny, nz) || 1;
-    nr.setXYZ(a, nx / l, ny / l, nz / l); nr.setXYZ(b, nx / l, ny / l, nz / l);
-  }
-  return geo;
-}
-// 贴体壳片（甲板 / 龟壳 / 糖霜…）：身体某段 u∈[u0,u1]、截面角 |a|≤aMax 的外扩曲面
-function shellGeometry(F, u0, u1, aMax, ex, nu = 14, na = 18) {
-  const pos = [], idx = [];
-  for (let i = 0; i <= nu; i++) {
-    const u = lerp(u0, u1, i / nu);
-    const k = Math.sin(PI * i / nu) ** 0.25;   // 两端收边
-    for (let j = 0; j <= na; j++) {
-      const a = lerp(-aMax, aMax, j / na);
-      const p = F.pt(u, a, 1 + (ex - 1) * k);
-      pos.push(p.x, p.y, p.z);
-      if (i < nu && j < na) { const A = i * (na + 1) + j, B = A + na + 1; idx.push(A, B, A + 1, A + 1, B, B + 1); }
-    }
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  geo.setIndex(idx); geo.computeVertexNormals();
-  return geo;
-}
-
-// ---------------- 花纹 shader（只编译一次：25 种花纹族用 uniform 切换） ----------------
-export const PAT_IDS = { none: 0, bars: 1, lines: 2, spots: 3, freckle: 4, mottle: 5, grad: 6, tiger: 7, stars: 8, scale: 9, stripe: 10, marble: 11, ring: 12, ocelli: 13, geo: 14, tux: 15, lateral: 16, galaxy: 17, sprinkle: 18, dial: 19, melon: 20, sunburst: 21, waffle: 22, orca: 23, ribs: 24 };
+// ---------------- 花纹 / 鳍膜 shader（身体 aSyn=(u, a, y/H)；鳍 aSyn=(根→梢 r, 角度, -1)） ----------------
 const SYN_GLSL = /* glsl */`
-uniform float uSP, uSD, uSA, uSR, uSAsp, uSSeed, uSGlow;
-uniform vec3 uSC0, uSC1, uSC2, uSC3;
+uniform float uSHue, uSP, uSD, uSA, uSAsp, uSSeed, uSGlow, uSF, uSFA, uSEdge, uSLux, uSScl, uSTime, uSIri, uSGlit;
+uniform vec3 uSC0, uSC1, uSC2, uSC3, uSC4, uSC5, uSGlowC;
 varying vec3 vSyn;
 float sH(vec2 p){ p = fract((p + uSSeed * 0.0137) * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 vec2 sH2(vec2 p){ float n = sH(p); return vec2(n, sH(p + n + 17.0)); }
 float sN(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
   return mix(mix(sH(i), sH(i + vec2(1, 0)), f.x), mix(sH(i + vec2(0, 1)), sH(i + vec2(1, 1)), f.x), f.y); }
 float sF(vec2 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a * sN(p); p *= 2.03; a *= 0.5; } return s; }
+vec2 sV(vec2 p){ vec2 c = floor(p), f = fract(p); float d1 = 9.0, d2 = 9.0;
+  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) { vec2 g = vec2(float(i), float(j)); vec2 o = sH2(c + g) * 0.8 + 0.1; float d = length(g + o - f);
+    if (d < d1) { d2 = d1; d1 = d; } else if (d < d2) d2 = d; }
+  return vec2(d1, d2 - d1); }
 float sA(float d, float w){ return smoothstep(w, -w, d); }
-vec4 synPattern(vec3 base){
+float sScale(vec2 q, float dens){
+  vec2 p = vec2(q.x * dens * 1.5, q.y * dens * 1.15); float row = floor(p.y); p.x += mod(row, 2.0) * 0.5;
+  vec2 f = fract(p); float e = length((f - vec2(1.0, 0.5)) * vec2(1.0, 1.1)); float w = fwidth(p.x) * 1.4 + 1e-3;
+  return sA(abs(e - 0.62) - 0.05, w) * (1.0 - smoothstep(0.25, 0.6, w)); }
+float synGlit = 0.0;
+// 色相旋转（YIQ）：鳍膜沿径向的细微色相漂移 = 观赏鱼鳍的「虹彩渐变」
+vec3 synHue(vec3 c, float a){
+  const mat3 toY = mat3(0.299, 0.596, 0.211, 0.587, -0.274, -0.523, 0.114, -0.322, 0.312);
+  const mat3 toR = mat3(1.0, 1.0, 1.0, 0.956, -0.272, -1.106, 0.621, -0.647, 1.703);
+  vec3 y = toY * c; float cs = cos(a * 6.2831853), sn = sin(a * 6.2831853);
+  y.yz = vec2(y.y * cs - y.z * sn, y.y * sn + y.z * cs);
+  return max(toR * y, 0.0);
+}
+// 珠光虹彩色：以调色板点缀 / 鳍缘为主、掺一点克制的光谱色（不跳出配色）
+vec3 synIri(float t){
+  vec3 rb = 0.5 + 0.5 * cos(6.2831853 * (t + vec3(0.0, 0.33, 0.67)));
+  vec3 pc = mix(uSC2, uSC4, 0.5 + 0.5 * sin(t * 6.2831853));
+  return mix(pc, rb, 0.4);
+}
+vec4 synFin(vec3 base){
+  float r = vSyn.x, an = vSyn.y;
+  // 根部承接体色 → 中段饱和鳍色 → 外缘染点缀色 → 梢部珠光亮缘（观赏鱼鳍的多段渐变）
+  vec3 c = mix(base, uSC3 * 1.08, smoothstep(0.05, 0.45, r) * 0.6);
+  c = mix(c, uSC5, smoothstep(0.35, 0.92, r) * (0.45 + 0.1 * uSLux));   // uSC5 = 鳍色→点缀色的 HSL 短弧中点（不经过灰）
+  // 华丽度签名：传说 = 双色晕染，神话 = 鳍膜彩虹渐变（色相沿根→梢旋转，且随时间极慢流动）
+  c = synHue(c, (r - 0.35) * uSHue + step(3.5, uSLux) * uSHue * 0.12 * sin(uSTime * 0.35 + an * 3.0));
+  c = mix(c, uSC4, smoothstep(0.78, 1.0, r) * uSEdge);
+  // 细密放射鳍条：根部深、梢部变成珠光细线
+  float ry = an * (11.0 + 3.0 * uSLux); float rw = fwidth(ry) * 1.6 + 1e-3;
+  float ray = sA(abs(fract(ry) - 0.5) - 0.06, rw) * smoothstep(0.06, 0.25, r) * (1.0 - smoothstep(0.25, 0.6, rw));
+  c = mix(c, mix(c * 0.6, mix(c, uSC4, 0.6) * 1.15, smoothstep(0.35, 0.95, r) * step(1.5, uSLux)), ray * 0.32);
+  // 鳍膜上的细带（史诗+：两道随鳍条起伏的亮带，像斗鱼鳍的色环）
+  float bd = smoothstep(0.07, 0.0, abs(r - 0.62 - 0.006 * sin(an * 9.0))) * 0.7 + smoothstep(0.05, 0.0, abs(r - 0.84)) * 0.5 * step(2.5, uSLux);
+  c = mix(c, mix(c, uSC4, 0.7) * 1.05, bd * 0.32 * step(1.5, uSLux));
+  float gl = smoothstep(0.78, 1.0, r) * uSGlow * (1.0 + 0.6 * step(3.5, uSLux));
+  // 神话：鳍膜流光（从鳍根向鳍梢一波波推过去）
+  gl += uSGlow * 0.9 * smoothstep(0.82, 1.0, sin(r * 9.0 - uSTime * 2.4 + an * 2.0) * 0.5 + 0.5) * smoothstep(0.15, 0.6, r) * step(3.5, uSLux);
+  return vec4(c, gl);
+}
+vec4 synBody(vec3 base){
   float u = vSyn.x, a = vSyn.y, yn = vSyn.z;
   vec2 q = vec2(u * uSAsp, yn);
-  float aw = max(fwidth(u * uSAsp), fwidth(yn)) * 0.9 + 1e-4;
-  int P = int(uSP + 0.5);
-  float d = uSD, m = 0.0, gl = 0.0, belly = 1.0;
-  vec3 pc = uSC2;
-  if (P == 1) {            // 竖环带（白带 + 深色描边）
-    float x = u * d + 0.15; float f = abs(fract(x) - 0.5); float w = fwidth(x) + 1e-4;
-    float core = sA(f - 0.1, w), edge = sA(f - 0.15, w);
-    m = edge * step(0.08, u) * step(u, 0.93); pc = mix(uSC3, uSC2, core); belly = 0.0;
-  } else if (P == 2) {     // 纵向条纹
-    float y = yn * d * 0.55 + 0.5; float f = abs(fract(y) - 0.5); float w = fwidth(y) + 1e-4;
-    m = sA(f - 0.14, w) * smoothstep(0.02, 0.15, u) * (1.0 - smoothstep(0.85, 0.97, u));
-  } else if (P == 3) {     // 斑点（随机大小）
-    vec2 p = q * d * 0.5; vec2 c = floor(p), f = fract(p); float w = fwidth(p.x) + 1e-4;
-    for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
-      vec2 gg = vec2(float(i), float(j)); vec2 o = sH2(c + gg);
-      float r = 0.16 + 0.18 * o.y, on = step(0.25, sH(c + gg + 7.0));
-      float k = sA(length(gg + o * 0.6 + 0.2 - f) - r, w) * on;
-      if (k > m) { m = k; pc = mix(uSC2, uSC3, step(0.75, sH(c + gg + 3.0))); }
-    }
-  } else if (P == 4) {     // 雀斑（细小深色点，背部多）
-    vec2 p = q * d * 1.3; vec2 c = floor(p), f = fract(p); vec2 o = sH2(c); float w = fwidth(p.x) + 1e-4;
-    m = sA(length(f - 0.25 - o * 0.5) - 0.13 - 0.07 * o.y, w) * step(0.35, sH(c + 9.0)) * smoothstep(-0.45, 0.15, yn);
-  } else if (P == 5) {     // 云斑 / 迷彩
-    float n = sF(q * d * 0.35 + uSSeed);
-    m = smoothstep(0.47, 0.53, n) * 0.85; pc = mix(uSC2, uSC3, smoothstep(0.62, 0.66, n));
-  } else if (P == 6) {     // 渐变（尾 → 头）
-    float t = clamp(1.0 - u + yn * 0.12 + (sN(q * 2.0) - 0.5) * 0.12, 0.0, 1.0);
-    m = smoothstep(0.15, 1.0, t) * 0.95; belly = 0.6;
-  } else if (P == 7) {     // 虎纹（背部波浪竖纹）
-    float x = u * d + 0.18 * sin(yn * 5.0 + u * 9.0); float f = abs(fract(x) - 0.5); float w = fwidth(x) + 1e-4;
-    m = sA(f - 0.12, w) * smoothstep(-0.15, 0.35, yn) * step(0.06, u) * step(u, 0.9);
-  } else if (P == 8) {     // 星点（鲸鲨）
-    vec2 p = q * d * 0.9; vec2 c = floor(p), f = fract(p); vec2 o = sH2(c); float w = fwidth(p.x) + 1e-4;
-    m = sA(length(f - 0.3 - o * 0.4) - 0.12, w) * smoothstep(-0.35, 0.05, yn);
-    m = max(m, sA(abs(fract(p.x + 0.5) - 0.5) - 0.03, w) * smoothstep(0.25, 0.6, yn) * 0.5);
-  } else if (P == 9) {     // 鳞片描边
-    vec2 p = q * d * 1.2 * vec2(1.0, 1.3); p.y += 0.5 * mod(floor(p.x), 2.0);
-    vec2 f = fract(p); float w = fwidth(p.x) * 1.4 + 1e-4;
-    m = sA(abs(length(f - vec2(0.0, 0.5)) - 0.58) - 0.06, w) * 0.75;
-  } else if (P == 10) {    // 斜条纹（可波浪）
-    float cr = cos(uSR), sr = sin(uSR); vec2 p = mat2(cr, sr, -sr, cr) * q * d * 0.5;
-    float x = p.x + sin(p.y * 2.3 + uSSeed) * 0.15; float f = abs(fract(x) - 0.5); float w = fwidth(x) + 1e-4;
-    m = sA(f - 0.2, w); pc = mix(uSC2, uSC3, step(0.5, fract(floor(x) * 0.5)) * 0.4);
-  } else if (P == 11) {    // 大理石 / 墨渍
-    vec2 p = q * d * 0.35; float n = sF(p * 1.4 + uSSeed);
-    float f = abs(sin((p.x + p.y * 0.7 + n * 3.2) * 3.0));
-    m = max(sA(f - 0.1, fwidth(f) + 0.02), smoothstep(0.55, 0.75, n) * 0.45); pc = mix(uSC2, uSC3, smoothstep(0.6, 0.8, n));
-  } else if (P == 12) {    // 螺旋环带
-    float x = u * d * 1.4 + a * 1.0; float f = abs(fract(x) - 0.5); float w = fwidth(x) + 1e-4;
-    m = sA(f - 0.12, w) * 0.85; pc = mix(uSC2, uSC3, step(0.5, fract(floor(x) * 0.5)));
-    m = max(m, sA(abs(fract(x * 3.0) - 0.5) - 0.06, w * 3.0) * 0.25);
-  } else if (P == 13) {    // 眼斑 / 舷窗
-    if (uSR < 0.5) {
-      for (int i = 0; i < 3; i++) {
-        vec2 c = vec2((0.32 + 0.17 * float(i)) * uSAsp, 0.18); float r = length(q - c);
-        float rim = sA(abs(r - 0.25) - 0.055, aw), glass = sA(r - 0.2, aw);
-        if (rim > 0.01 || glass > 0.01) { m = max(rim, glass); pc = mix(vec3(0.07, 0.11, 0.18) + vec3(0.35, 0.6, 0.8) * smoothstep(0.2, 0.0, length(q - c - vec2(-0.06, 0.07))), uSC2, rim); gl = max(gl, glass * 0.55); }
-      }
-    } else {
-      vec2 c = vec2(0.16 * uSAsp, 0.2); float r = length(q - c);
-      m = max(sA(r - 0.2, aw), sA(abs(r - 0.27) - 0.04, aw)); pc = mix(uSC1, uSC2, sA(r - 0.2, aw));
-    }
-    belly = 0.0;
-  } else if (P == 14) {    // 几何：棋盘色块 / 冰晶三角网
-    if (uSR < 0.5) {
-      vec2 p = vec2(u * d * 1.1, a * d * 2.4); vec2 c = floor(p), f = fract(p); float w = fwidth(p.x) + 1e-4;
-      float h = sH(c); pc = h < 0.25 ? uSC0 : h < 0.5 ? uSC1 : h < 0.75 ? uSC2 : uSC3;
-      float gap = max(sA(0.06 - f.x, w), max(sA(f.x - 0.94, w), max(sA(0.06 - f.y, w), sA(f.y - 0.94, w))));
-      pc = mix(pc, vec3(0.06), gap); m = 1.0; belly = 0.0;
-    } else {
-      vec2 p = q * d * 0.6; float w = fwidth(p.x) * 1.2 + 1e-4;
-      float l1 = abs(fract(p.y) - 0.5), l2 = abs(fract(p.y * 0.5 + p.x * 0.866) - 0.5), l3 = abs(fract(p.y * 0.5 - p.x * 0.866) - 0.5);
-      m = max(sA(l1 - 0.035, w), max(sA(l2 - 0.035, w), sA(l3 - 0.035, w))) * 0.8; pc = uSC1; gl = m * 0.25;
-    }
-  } else if (P == 15) {    // 燕尾服：黑背 + 白衬衫 V 领 + 纽扣
-    float shirt = sA(yn - (-0.35 + 1.6 * max(u - 0.55, 0.0)), aw * 2.0) * step(0.5, u);
-    pc = mix(uSC0, uSC1, shirt); m = 1.0; belly = 0.0;
-    vec2 bq = vec2(fract(u * 14.0) - 0.5, abs(a - 0.5) * 6.0);
-    float btn = sA(length(bq) - 0.18, 0.06) * step(0.6, u) * step(u, 0.85) * step(abs(a - 0.5), 0.05);
-    pc = mix(pc, uSC2, btn);
-  } else if (P == 16) {    // 侧线（霓虹灯管）
-    float y = yn - 0.05 - 0.05 * sin(u * 9.0 + uSSeed); float w = fwidth(y) + 1e-4;
-    float line = sA(abs(y) - 0.045, w), halo = smoothstep(0.25, 0.0, abs(y));
-    m = max(line, halo * 0.35) * smoothstep(0.05, 0.15, u) * (1.0 - smoothstep(0.85, 0.95, u)); gl = line * 1.2 + halo * 0.2; belly = 0.0;
-  } else if (P == 17) {    // 星云
-    float n = sF(q * 0.9 + uSSeed);
-    m = smoothstep(0.38, 0.78, n) * 0.85; pc = mix(uSC1, uSC2, smoothstep(0.5, 0.85, n)); gl = m * 0.25;
-    vec2 p = q * d * 2.0; vec2 c = floor(p), f = fract(p); vec2 o = sH2(c);
-    float st = smoothstep(0.09, 0.0, length(f - 0.2 - o * 0.6)) * step(0.55, sH(c + 4.0));
-    m = max(m, st); pc = mix(pc, vec3(1.0, 0.98, 0.92), st); gl += st * 1.4; belly = 0.0;
-  } else if (P == 18) {    // 甜甜圈：糖霜 + 彩针糖
-    float edge = -0.08 + 0.1 * sin(u * 23.0 + uSSeed) + 0.05 * sin(u * 51.0);
-    float ice = sA(edge - yn, aw * 2.0); pc = uSC2; m = ice;
-    vec2 p = q * d * 1.6; vec2 c = floor(p), f = fract(p) - 0.5; float h = sH(c);
-    float an = h * 6.283; f = mat2(cos(an), sin(an), -sin(an), cos(an)) * f;
-    float rod = sA(max(abs(f.x) - 0.16, abs(f.y) - 0.04), 0.03) * step(0.35, h) * ice;
-    vec3 rc = 0.55 + 0.4 * cos(6.283 * (fract(h * 7.0) + vec3(0.0, 0.33, 0.67)));
-    pc = mix(pc, rc, rod); belly = 0.0;
-  } else if (P == 19) {    // 表盘
-    vec2 c = vec2(0.5 * uSAsp, 0.05); vec2 v = q - c; float r = length(v), R = 0.62;
-    float face = sA(r - R, aw), rim = sA(abs(r - R - 0.05) - 0.045, aw);
-    float ang = atan(v.y, v.x);
-    float tick = sA(abs(fract(ang / 6.283 * 12.0 + 0.5) - 0.5) - 0.06, 0.02) * step(R * 0.78, r) * step(r, R * 0.93);
-    vec2 h1 = vec2(cos(2.2), sin(2.2)), h2 = vec2(cos(0.5), sin(0.5));
-    float hand1 = sA(abs(dot(v, vec2(-h1.y, h1.x))) - 0.035, aw) * step(0.0, dot(v, h1)) * step(dot(v, h1), R * 0.48);
-    float hand2 = sA(abs(dot(v, vec2(-h2.y, h2.x))) - 0.022, aw) * step(0.0, dot(v, h2)) * step(dot(v, h2), R * 0.78);
-    float hub = sA(r - 0.05, aw);
-    pc = mix(uSC1, uSC2, max(max(tick, hand1), max(hand2, hub))); pc = mix(pc, uSC3, rim);
-    m = max(face, rim); belly = 0.0;
-  } else if (P == 20) {    // 西瓜：瓜皮纵纹 + 白边 + 红瓤黑籽
-    float x = a * d * 2.0 + 0.06 * sin(u * 34.0) + 0.04 * sin(u * 71.0); float f = abs(fract(x) - 0.5); float w = fwidth(x) + 1e-4;
-    float stripe = sA(f - 0.17, w * 2.0);
-    float rindL = -0.38, flesh = sA(yn - (rindL - 0.1), aw * 2.0), rind = sA(yn - rindL, aw * 2.0) - flesh;
-    pc = mix(uSC2, vec3(0.9, 0.94, 0.8), rind); pc = mix(pc, uSC1, flesh); m = max(stripe * (1.0 - rind - flesh), max(rind, flesh));
-    vec2 p = q * 3.2; vec2 c = floor(p), ff = fract(p) - 0.5; vec2 o = sH2(c) - 0.5;
-    float seed = sA(length((ff - o * 0.4) * vec2(1.0, 0.6)) - 0.1, 0.03) * flesh * step(0.4, sH(c + 2.0));
-    pc = mix(pc, vec3(0.06, 0.05, 0.04), seed); belly = 0.0;
-  } else if (P == 21) {    // 日落渐变（琴面）+ 音孔
-    vec2 c = vec2(0.45 * uSAsp, 0.0); float t = length((q - c) / vec2(1.6, 1.0));
-    pc = mix(uSC1, uSC2, smoothstep(0.35, 1.05, t)); m = 1.0;
-    vec2 hc = vec2(0.64 * uSAsp, 0.06); float r = length(q - hc);
-    pc = mix(pc, uSC2 * 0.4, sA(r - 0.2, aw)); pc = mix(pc, uSC1 * 1.1, sA(abs(r - 0.26) - 0.025, aw)); belly = 0.0;
-  } else if (P == 22) {    // 甜筒：后段华夫格 + 前段奶油（滴落边）
-    float edge = 0.48 + 0.035 * sin(a * 6.283 * 7.0) + 0.02 * sin(a * 6.283 * 13.0);
-    float cone = sA(u - edge, 0.006);
-    vec2 p = vec2(u * d * 3.0 + yn * 0.8, u * d * 3.0 - yn * 0.8); float w = fwidth(p.x) + 1e-4;
-    float grid = max(sA(abs(fract(p.x) - 0.5) - 0.07, w), sA(abs(fract(p.y) - 0.5) - 0.07, w));
-    pc = mix(uSC2, uSC2 * 0.62, grid); m = cone; belly = 0.0;
-  } else if (P == 23) {    // 虎鲸：黑白分区 + 眼斑
-    float wb = sA(yn - (-0.28 + 0.12 * sin(u * 6.0)), aw * 2.0) * step(0.22, u);
-    float eye = sA(length(vec2((u - 0.8) * uSAsp * 0.55, yn - 0.3)) - 0.17, aw);
-    pc = mix(uSC0, uSC1, max(wb, eye)); m = 1.0; belly = 0.0;
-  } else if (P == 24) {    // 纵棱 + 刺座
-    float x = a * d * 3.0; float f = abs(fract(x) - 0.5); float w = fwidth(x) + 1e-4;
-    m = sA(f - 0.06, w) * 0.65; pc = uSC1;
-    vec2 p = vec2(x, u * d * 3.0); vec2 c = floor(p + 0.5); float dot2 = sA(length((p - c) * vec2(1.0, 1.4)) - 0.11, 0.03);
-    pc = mix(pc, vec3(0.96, 0.94, 0.86), dot2); m = max(m, dot2);
+  float aw = max(fwidth(q.x), fwidth(q.y)) + 1e-4;
+  int P = int(uSP + 0.5); float d = uSD, gl = 0.0, bk = 1.0;
+  float inner = smoothstep(0.07, 0.15, u) * (1.0 - smoothstep(0.88, 0.95, u));
+  vec3 c = base, dark = uSC0 * 0.38;
+  if (P == 1) {            // 渐变：尾段晕染点缀色
+    float t = smoothstep(0.72, 0.04, u + (sN(q * 1.5) - 0.5) * 0.1 - yn * 0.06);
+    c = mix(c, uSC2, t * 0.9 * uSA); bk = 0.7;
+  } else if (P == 2) {     // 龙鳞：错位鳞片 + 鳞缘金属描边
+    float m = sScale(q, d * 1.5) * inner;
+    c = mix(c, uSC4, m * uSA * 0.85); c = mix(c, uSC2, smoothstep(0.6, 0.0, u) * 0.35 * uSA); bk = 0.5;
+  } else if (P == 3) {     // 锦鲤斑：大块有机色斑，腹部留白
+    float n = sF(q * d * 0.32 + uSSeed * 3.1);
+    float m = sA(0.53 - n, 0.012 + aw) * smoothstep(-0.6, -0.15, yn) * inner;
+    c = mix(c, uSC2, m * uSA);
+    float n2 = sF(q * d * 0.7 + 7.7 + uSSeed);
+    c = mix(c, dark, sA(0.71 - n2, 0.01 + aw) * smoothstep(-0.2, 0.3, yn) * inner * 0.6 * uSA * step(2.5, uSLux)); bk = 0.0;
+  } else if (P == 4) {     // 大理石：细脉 + 柔和云影
+    float n = sF(q * d * 0.3 + uSSeed);
+    float v = abs(sin((q.x * 0.55 + q.y * 1.4 + n * 5.0) * 1.6));
+    float m = (1.0 - smoothstep(0.0, 0.1 + aw * 3.0, v)) * 0.75 + smoothstep(0.55, 0.78, n) * 0.3;
+    c = mix(c, uSC2, m * uSA * inner);
+  } else if (P == 5) {     // 水墨云纹
+    float n = sF(q * d * 0.26 + uSSeed);
+    c = mix(c, uSC2, smoothstep(0.44, 0.74, n) * 0.85 * smoothstep(-0.7, 0.1, yn) * uSA);
+  } else if (P == 6) {     // 星点：疏朗的亮点 + 微闪
+    vec2 p = q * d * 1.5; vec2 cc = floor(p), f = fract(p); vec2 o = sH2(cc);
+    float k = sA(length(f - 0.2 - o * 0.6) - (0.05 + 0.06 * o.y), fwidth(p.x) * 1.2 + 1e-3) * step(0.42, sH(cc + 5.0));
+    c = mix(c, uSC4, k * uSA); gl = k * (0.35 + 0.9 * uSGlow) * (0.65 + 0.35 * sin(uSTime * 2.0 + o.x * 40.0)); bk = 0.4;
+  } else if (P == 7) {     // 环带：随体弯曲的柔边环带 + 深色细描边
+    float x = u * d + 0.18 + yn * yn * 0.05 * d; float f = abs(fract(x) - 0.5); float w = fwidth(x) * 1.2 + 1e-4;
+    float core = sA(f - 0.1, w), edge = sA(f - 0.135, w);
+    float m = edge * smoothstep(0.1, 0.16, u) * (1.0 - smoothstep(0.9, 0.95, u));
+    c = mix(c, mix(dark, uSC2, core), m * uSA); bk = 0.0;
+  } else if (P == 8) {     // 礼服：深色背 + 白色衬衫前胸（V 领）+ 细条纹
+    float shirt = sA(yn - (-0.15 - 2.6 * (0.66 - u)) , aw * 2.0) * step(0.4, u);
+    float pin = sA(abs(fract(yn * d * 2.2) - 0.5) - 0.035, fwidth(yn * d * 2.2) + 1e-3) * 0.16 * (1.0 - shirt) * smoothstep(-0.2, 0.3, yn);
+    c = mix(c, uSC4, pin * uSA); c = mix(c, uSC1, shirt * uSA); bk = 0.0;
+  } else if (P == 9) {     // 青花：缠枝卷草 + 团花 + 首尾弦纹
+    float n = sF(q * d * 0.32 + uSSeed);
+    float line = 1.0 - smoothstep(0.0, 0.022 + aw * 2.0, abs(fract(n * 3.0) - 0.5) - 0.0);
+    line *= smoothstep(0.35, 0.6, sF(q * 0.8 + 9.1));
+    float blob = smoothstep(0.66, 0.69, sF(q * d * 0.9 + 3.1)) * 0.7;
+    float ring = sA(abs(u - 0.84) - 0.012, aw) + sA(abs(u - 0.8) - 0.006, aw) + sA(abs(u - 0.16) - 0.012, aw);
+    float ridge = smoothstep(0.72, 0.82, yn);
+    float m = max(max(line * 0.85, blob * 0.9) * smoothstep(0.17, 0.2, u) * (1.0 - smoothstep(0.77, 0.79, u)), max(ring, ridge));
+    c = mix(c, uSC2, clamp(m, 0.0, 1.0) * uSA); bk = 0.0;
+  } else if (P == 10) {    // 冰裂纹（开片）
+    vec2 v1 = sV(q * d * 0.9 + uSSeed), v2 = sV(q * d * 2.3 + 4.0);
+    float m = max(1.0 - smoothstep(0.0, 0.035 + aw, v1.y), (1.0 - smoothstep(0.0, 0.025 + aw, v2.y)) * 0.45);
+    c = mix(c, uSC2, m * uSA * 0.8); bk = 0.2;
+  } else if (P == 11) {    // 回纹：侧线带上一列「回」字 + 上下弦线
+    float band = sA(abs(yn - 0.02) - 0.3, aw) * inner * smoothstep(0.2, 0.3, u) * (1.0 - smoothstep(0.68, 0.76, u));
+    vec2 p = vec2(q.x / 0.6 * d * 0.8, (yn - 0.02) / 0.6 + 0.5); vec2 f = fract(p); float sq = max(abs(f.x - 0.5), abs(f.y - 0.5)); float w = fwidth(p.x) * 1.2 + 1e-3;
+    float hui = max(sA(abs(sq - 0.4) - 0.045, w), sA(abs(sq - 0.17) - 0.05, w));
+    float rail = sA(abs(abs(yn - 0.02) - 0.33) - 0.012, aw) * inner;
+    c = mix(c, uSC2, (hui * band * 0.3 + rail * 0.55) * uSA);
+    c = mix(c, uSC4, sScale(q, d * 1.3) * 0.25 * (1.0 - band) * inner);
+  } else if (P == 12) {    // 孔雀眼斑
+    float e = length(vec2((u - 0.27) * uSAsp * 0.45, yn - 0.32));
+    c = mix(c, dark, sA(abs(e - 0.2) - 0.035, aw) * uSA); c = mix(c, uSC4, sA(e - 0.165, aw) * uSA); c = mix(c, uSC2, sA(e - 0.11, aw) * uSA);
+    float e2 = length(vec2((u - 0.6) * uSAsp * 0.45, yn - 0.42));
+    float k2 = step(2.5, uSLux);
+    c = mix(c, dark, sA(abs(e2 - 0.13) - 0.025, aw) * uSA * k2); c = mix(c, uSC2, sA(e2 - 0.1, aw) * uSA * k2);
+  } else if (P == 13) {    // 霓虹侧线
+    float y0 = 0.12 + 0.04 * sin(u * 6.0);
+    float s = sA(abs(yn - y0) - 0.1, aw * 1.5) * smoothstep(0.1, 0.2, u) * (1.0 - smoothstep(0.84, 0.92, u));
+    float s2 = sA(abs(yn - y0 - 0.17) - 0.025, aw) * smoothstep(0.2, 0.3, u) * (1.0 - smoothstep(0.78, 0.86, u));
+    c = mix(c, uSC2, s * uSA); c = mix(c, uSC4, s2 * uSA * 0.8); gl = s * (0.2 + uSGlow);
+  } else if (P == 14) {    // 玫瑰斑
+    vec2 v = sV(q * d * 0.85 + uSSeed);
+    float ring = sA(abs(v.x - 0.27) - 0.07, aw * 3.0), core = sA(v.x - 0.18, aw * 3.0);
+    c = mix(c, uSC2, core * 0.55 * uSA * inner); c = mix(c, dark, ring * uSA * inner * smoothstep(-0.5, 0.0, yn)); bk = 0.3;
+  } else if (P == 15) {    // 晚霞：腹 → 点缀 → 背 三段柔和渐变
+    float t = clamp(yn * 0.5 + 0.5 + (sN(q * 1.4) - 0.5) * 0.16 + (0.5 - u) * 0.12, 0.0, 1.0);
+    vec3 col = t < 0.5 ? mix(uSC1, uSC2, t * 2.0) : mix(uSC2, uSC0, (t - 0.5) * 2.0);
+    c = mix(c, col, uSA * 0.9); bk = 0.0;
+  } else if (P == 16) {    // 发光点阵：侧线与腹线两列珠点
+    float p = u * uSAsp * d * 0.9; float fx = (fract(p) - 0.5) / (d * 0.9);
+    float r1 = length(vec2(fx, yn - 0.06)), p2 = p + 0.5, fx2 = (fract(p2) - 0.5) / (d * 0.9), r2 = length(vec2(fx2, yn + 0.5));
+    float k = max(sA(r1 - 0.055, aw), sA(r2 - 0.045, aw) * 0.85) * inner;
+    c = mix(c, uSC4, k * uSA); gl = k * (0.3 + uSGlow);
+  } else if (P == 17) {    // 网纹 / 蕾丝
+    vec2 v = sV(q * d * 0.7 + uSSeed);
+    c = mix(c, uSC2, (1.0 - smoothstep(0.0, 0.05 + aw, v.y)) * uSA * 0.85 * inner);
+  } else if (P == 18) {    // 金箔碎点
+    vec2 p = q * d * 3.0; vec2 cc = floor(p); vec2 o = sH2(cc);
+    float k = sA(length(fract(p) - 0.5 - (o - 0.5) * 0.6) - 0.07 - 0.06 * o.y, fwidth(p.x) * 1.2 + 1e-3) * step(0.55, sH(cc + 3.0));
+    c = mix(c, mix(uSC4, uSC2, step(0.5, o.x)), k * uSA); gl = k * uSGlow * 0.5; bk = 0.5;
+  } else if (P == 19) {    // 圆斑
+    vec2 p = q * d * 0.6; vec2 cc = floor(p), f = fract(p); vec2 o = sH2(cc);
+    float k = sA(length(f - 0.25 - o * 0.5) - (0.14 + 0.1 * o.y), fwidth(p.x) * 2.0 + 1e-3) * step(0.3, sH(cc + 7.0)) * smoothstep(-0.55, -0.2, yn);
+    c = mix(c, uSC2, k * uSA * inner);
   }
-  m *= mix(1.0, mix(0.55, 1.0, smoothstep(-0.85, -0.2, yn)), belly);
-  return vec4(mix(base, pc, clamp(m * uSA, 0.0, 1.0)), gl * uSA);
+  // 华丽叠层：金属鳞缘（史诗+）、背脊加深、珠光腹、闪鳞（史诗+）、流光（神话）
+  c = mix(c, mix(uSC4, vec3(1.0, 0.93, 0.72), 0.25), sScale(q, uSD * 1.6 + 2.0) * uSScl * 0.45 * inner * smoothstep(-0.7, 0.2, yn));
+  c = mix(c, uSC0 * 0.78, smoothstep(0.62, 0.98, yn) * 0.28);
+  c = mix(c, mix(uSC1, uSC4, 0.5) * 1.05, smoothstep(-0.25, -0.9, yn) * 0.22 * step(1.5, uSLux));
+  {
+    vec2 gp = q * vec2(9.0, 7.0) + uSSeed; vec2 gc = floor(gp); vec2 go = sH2(gc + 11.0);
+    float gd = length(fract(gp) - 0.25 - go * 0.5);
+    synGlit = sA(gd - 0.11, fwidth(gp.x) * 1.5 + 1e-3) * step(0.6, sH(gc + 31.0)) * inner * smoothstep(-0.55, 0.1, yn);
+    synGlit *= 0.35 + 0.65 * pow(0.5 + 0.5 * sin(uSTime * 1.7 + go.x * 37.0), 4.0);
+  }
+  gl += uSGlow * 0.55 * exp(-pow((fract(u * 0.7 - uSTime * 0.12) - 0.5) * 7.0, 2.0)) * smoothstep(-0.4, 0.5, yn) * step(3.5, uSLux);
+  c = mix(base, c, mix(1.0, smoothstep(-0.88, -0.3, yn), bk));
+  return vec4(c, gl);
 }
 `;
-// Fish 构造时（stylize 之后、skinFish 之前）调用：toon.stylizeMaterial 会重设 onBeforeCompile，所以花纹注入必须在它之后链上
+// Fish 构造时（stylize 之后、skinFish 之前）调用
 export function applySynthPattern(model, syn) {
-  const g = normGenome(syn);
+  const g = model.userData.synGenome || normGenome(syn);
   const P = model.userData.synPat || {};
-  const pid = PAT_IDS[g.pat.k] ?? 0;
+  const lux = model.userData.synLux || g.lux || 1;
   const C = g.pal.map((c) => new THREE.Color(c));
-  const glowK = 0.35 + (g.glow || 0) * 1.6;
+  const glow = Math.max(g.glow || 0, [0, 0, 0.2, 0.42][lux - 1] || 0);   // 传说+：克制的鳍缘发光
   const shared = {
-    uSP: { value: pid }, uSD: { value: +g.pat.d || 4 }, uSA: { value: clamp(+g.pat.a || 0.8, 0, 1) }, uSR: { value: +g.pat.r || 0 },
-    uSAsp: { value: P.asp || 6 }, uSSeed: { value: ((P.seed || 1) % 9973) / 97.3 }, uSGlow: { value: g.glow || 0 },
-    uSC0: { value: C[0] }, uSC1: { value: C[1] }, uSC2: { value: C[2] }, uSC3: { value: C[3] },
-    uSGlowC: { value: C[2].clone().lerp(WHITE, 0.25).multiplyScalar(glowK) },
+    uSHue: { value: lux >= 4 ? (g.mat === 'gold' || g.mat === 'brass' ? 0.05 : 0.24) : lux >= 3 ? 0.08 : 0.02 * lux },
+    uSP: { value: PAT_IDS[g.pat.k] ?? 1 }, uSD: { value: g.pat.d }, uSA: { value: g.pat.a },
+    uSAsp: { value: P.asp || 5 }, uSSeed: { value: ((P.seed || 1) % 9973) / 97.3 }, uSGlow: { value: glow },
+    uSFA: { value: P.finA ?? 0.8 }, uSEdge: { value: P.edge ?? 0.5 }, uSLux: { value: lux }, uSScl: { value: g.scl || 0 }, uSTime: { value: 0 },
+    uSIri: { value: clamp(0.25 + 0.5 * (g.irid || 0), 0, 1) * [0.55, 0.75, 0.95, 1.1][lux - 1] }, uSGlit: { value: [0.5, 0.85, 1.1, 1.35][lux - 1] },
+    uSC0: { value: C[0] }, uSC1: { value: C[1] }, uSC2: { value: C[2] }, uSC3: { value: C[3] }, uSC4: { value: C[4] }, uSC5: { value: new THREE.Color(hslArc(g.pal[3], g.pal[2], 0.5)) },
+    uSGlowC: { value: C[4].clone().lerp(C[2], 0.35).multiplyScalar(0.6 + glow * 1.4) },
   };
+  const t0 = performance.now();
   model.traverse((o) => {
-    if (!o.isMesh || !o.userData.synBody) return;
+    if (!o.isMesh || !(o.userData.synBody || o.userData.synFin)) return;
     const m = o.material; if (!m || m.userData.synPat) return;
     m.userData.synPat = true;
+    const fin = !!o.userData.synFin, U = { ...shared, uSF: { value: fin ? 1 : 0 } };
+    if (o.userData.synBody) o.onBeforeRender = () => { shared.uSTime.value = (performance.now() - t0) / 1000; };
     const prev = m.onBeforeCompile, prevKey = m.customProgramCacheKey?.() || '';
     m.onBeforeCompile = (sh, r) => {
       prev?.call(m, sh, r);
-      Object.assign(sh.uniforms, shared);
+      Object.assign(sh.uniforms, U);
       sh.vertexShader = sh.vertexShader
         .replace('#include <common>', '#include <common>\nattribute vec3 aSyn;\nvarying vec3 vSyn;')
         .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSyn = aSyn;');
       sh.fragmentShader = sh.fragmentShader
-        .replace('#include <common>', '#include <common>\nuniform vec3 uSGlowC;\n' + SYN_GLSL)
-        .replace('#include <color_fragment>', '#include <color_fragment>\nvec4 synP = synPattern(diffuseColor.rgb); diffuseColor.rgb = synP.rgb; float synGl = synP.w;')
-        .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += uSGlowC * synGl;');
+        .replace('#include <common>', '#include <common>\n' + SYN_GLSL)
+        .replace('#include <color_fragment>', `#include <color_fragment>
+vec4 synP = uSF > 0.5 ? synFin(diffuseColor.rgb) : synBody(diffuseColor.rgb); diffuseColor.rgb = synP.rgb; float synGl = synP.w;
+if (uSF > 0.5) diffuseColor.a *= mix(1.0, uSFA, smoothstep(0.5, 1.0, vSyn.x));`)
+        .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+totalEmissiveRadiance += uSGlowC * synGl;
+{ // 菲涅尔珠光变色 + 闪鳞（视角相关）
+  vec3 sVd = normalize(vViewPosition); float sNv = clamp(abs(dot(normal, sVd)), 0.0, 1.0);
+  float sFr = pow(1.0 - sNv, 2.4);
+  if (uSF > 0.5) totalEmissiveRadiance += synIri(vSyn.x * 0.8 + vSyn.y * 0.35 + sFr * 0.6 + uSTime * 0.03) * (0.06 + sFr * 0.45) * uSIri * smoothstep(0.15, 0.9, vSyn.x);
+  else totalEmissiveRadiance += synIri(sFr * 0.9 + vSyn.x * 0.6 + vSyn.z * 0.15 + uSTime * 0.03) * sFr * uSIri * 0.45;
+  float sTw = pow(max(0.0, sin(dot(normal, vec3(17.3, 41.9, 29.1)) * 2.0 + uSTime * 0.8)), 6.0);
+  totalEmissiveRadiance += mix(vec3(1.0, 0.97, 0.9), uSC4, 0.35) * synGlit * uSGlit * (0.35 + 1.4 * sTw);
+}`);
     };
-    m.customProgramCacheKey = () => prevKey + '-syn1';
+    m.customProgramCacheKey = () => prevKey + (fin ? '-syn3f' : '-syn3b');
     m.needsUpdate = true;
   });
 }
 
 // =====================================================================================
-// 构建器：基因组 → THREE.Group（buildSynthModel）
-//   造型词表与 synth.js SHAPES 对齐；未知 id 一律回退到最接近的通用形状（不崩）
+// 构建器：基因组 → THREE.Group
 // =====================================================================================
-const AX = { x: V3(1, 0, 0), y: V3(0, 1, 0), z: V3(0, 0, 1) };
-const ALIAS = {
-  plan: { round: 'globe', ball: 'globe', long: 'eel', snake: 'eel', square: 'box', cube: 'box' },
-  head: { hammerhead: 'hammer', sword: 'bill', beak: 'bill', round2: 'round' },
-  mouth: { teeth: 'fang', jaw: 'underbite', beard: 'whisker', open: 'gape' },
-  dor: { spines: 'spiny', spike: 'spiny', spikes: 'spiny', comb: 'crest', toothed: 'saw', umbrella: 'canopy', mushroom: 'cap', pizza: 'wedge', feather: 'quill' },
-  tail: { moon: 'lunate', crescent: 'lunate', double: 'fork', heel: 'stiletto', scissors: 'shears', keyring: 'ring', spiral: 'curl', oar: 'paddle', flame: 'rocket', sword: 'swallow' },
-  pect: { normal: 'std', bowtie: 'bow', wings: 'wing', flipper: 'paddle', legs: 'leg', skirt: 'frill' },
-};
-const KNOWN = {
-  plan: ['fusiform', 'deep', 'globe', 'eel', 'flat', 'box', 'seg', 'disc', 'hourglass', 'diamond'],
-  head: ['round', 'pointed', 'blunt', 'bevel', 'snub', 'dome', 'tube', 'bill', 'hammer', 'spout'],
-  mouth: ['smile', 'gape', 'beak', 'fang', 'tube', 'underbite', 'sucker', 'whisker', 'none'],
-  dor: ['none', 'shark', 'sail', 'spiny', 'crest', 'ribbon', 'fan', 'finlet', 'lid', 'canopy', 'handle', 'key', 'gear', 'quill', 'wedge', 'saw', 'cap', 'crystal'],
-  tail: ['fork', 'lunate', 'round', 'fan', 'swallow', 'shark', 'fluke', 'whip', 'lobe', 'stiletto', 'ribbon', 'paddle', 'hook', 'ring', 'shears', 'feather', 'anchor', 'curl', 'leaf', 'rocket', 'none'],
-  pect: ['std', 'long', 'wing', 'fan', 'frill', 'leg', 'paddle', 'bow', 'none'],
-};
-const KSET = Object.fromEntries(Object.entries(KNOWN).map(([k, a]) => [k, new Set(a)]));
-export const SYN_SHAPES = KNOWN;   // 构建器实际支持的造型 id（调试 / 自测用）
-function shapeOf(kind, v, def) { let s = String(v ?? def); s = ALIAS[kind]?.[s] || s; return KSET[kind].has(s) ? s : def; }
-function hashStr(str) { let x = 2166136261; for (let i = 0; i < str.length; i++) { x ^= str.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
-
-// 变径管（触手 / 角 / 眼柄 / 鞭尾 / 项链…）：外法线朝外（与 marine bodyGeometry 同绕序），两端封口
-function tubeGeo(pts, r0, r1 = r0, o = {}) {
-  const radial = o.radial ?? 8, seg = o.seg ?? 16, closed = !!o.closed;
-  const curve = new THREE.CatmullRomCurve3(pts.map((p) => (p.isVector3 ? p.clone() : V3(...p))), closed, 'catmullrom', 0.5);
-  const fr = curve.computeFrenetFrames(seg, closed);
-  const pos = [], idx = [], P = V3();
-  for (let i = 0; i <= seg; i++) {
-    const t = i / seg;
-    curve.getPointAt(closed ? t % 1 : t, P);
-    const N = fr.normals[i], B = fr.binormals[i];
-    const rb = o.prof ? o.prof(t) : lerp(r0, r1, t);
-    for (let j = 0; j <= radial; j++) {
-      const a = (j / radial) * TAU;
-      const r = Math.max(1e-4, rb * (o.rib ? 1 + o.rib * Math.cos(a * (o.ribN || 6) + t * (o.twist || 0)) : 1));
-      const ca = Math.cos(a), sa = Math.sin(a);
-      pos.push(P.x + r * (ca * N.x + sa * B.x), P.y + r * (ca * N.y + sa * B.y), P.z + r * (ca * N.z + sa * B.z));
-      if (i < seg && j < radial) { const A = i * (radial + 1) + j, C = A + radial + 1; idx.push(A, A + 1, C, A + 1, C + 1, C); }
+const X = (u) => (u - 0.5) * BL;
+function makeCtx(g, seed, lux) {
+  const M = morphProfile(g);
+  const at = (A, u) => { const f = clamp(u, 0, 1) * (KS - 1), i = Math.min(KS - 2, Math.floor(f)), t = f - i; return lerp(A[i], A[i + 1], t) * BL; };
+  return { g, M, lux, seed, s: new Sculpture(), Hh: (u) => at(M.H, u), Ww: (u) => at(M.W, u), mhW: M.mh * BL };
+}
+// 截面超椭圆：给定 y/H 求体表 z（与 marine.js bodyGeometry 截面公式一致）
+function surfZ(C, u, yf) {
+  const c = Math.pow(Math.abs(clamp(yf, -0.999, 0.999)), 1 / 0.94), sn = Math.sqrt(1 - c * c);
+  return Math.pow(sn, 0.86) * (1 - 0.14 * Math.pow(yf > 0 ? c : 0, 3)) * C.Ww(u);
+}
+// 鳍膜坐标：根→梢 r ∈ [0,1]（给渐变 / 透光 / 发光鳍缘用）
+function finSyn(mesh) {
+  const geo = mesh.geometry, F = geo.userData.fin, a = geo.getAttribute('aFin');
+  mesh.userData.synFin = true;
+  if (!F || !a) return;
+  const n = a.count, arr = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const x = a.getX(i), y = a.getY(i);
+    arr[i * 3] = clamp((Math.hypot(x, y) - F.dmin) / Math.max(F.dmax - F.dmin, 1e-4), 0, 1);
+    arr[i * 3 + 1] = clamp((Math.atan2(y, x) - F.amin) / Math.max(F.amax - F.amin, 1e-4), 0, 1);
+    arr[i * 3 + 2] = -1;
+  }
+  geo.setAttribute('aSyn', new THREE.Float32BufferAttribute(arr, 3));
+}
+// 波纹鳍缘：外缘相邻点之间插入向内收的中点（克制的皇冠尾感）
+function scallop(pts, amp) {
+  const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length, cy = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+  const out = [];
+  for (let i = 0; i < pts.length; i++) {
+    out.push(pts[i]);
+    if (i < pts.length - 1) {
+      const m = [(pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2];
+      const dx = cx - m[0], dy = cy - m[1], dl = Math.hypot(dx, dy) || 1;
+      out.push([m[0] + dx / dl * amp, m[1] + dy / dl * amp]);
     }
   }
-  if (!closed) {
-    const c0 = curve.getPointAt(0), c1 = curve.getPointAt(1), i0 = pos.length / 3, b = seg * (radial + 1);
-    pos.push(c0.x, c0.y, c0.z, c1.x, c1.y, c1.z);
-    for (let j = 0; j < radial; j++) { idx.push(i0, j + 1, j); idx.push(i0 + 1, b + j, b + j + 1); }
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  geo.setIndex(idx); geo.computeVertexNormals();
-  return geo;
+  return out;
 }
-function smoothPts(points, k = 4) {
-  const c = new THREE.CatmullRomCurve3(points.map(([x, y]) => V3(x, y, 0)), true, 'catmullrom', 0.35);
-  return c.getPoints(points.length * k).slice(0, -1).map((p) => [p.x, p.y]);
-}
-// 实心挤出板（器物部件）：在 XY 平面、z 居中
-function plateGeo(pts, depth, o = {}) {
-  const P = o.smooth ? smoothPts(pts, o.smooth) : pts;
-  const sh = new THREE.Shape(P.map(([x, y]) => new THREE.Vector2(x, y)));
-  for (const h of o.holes || []) sh.holes.push(h);
-  const bev = o.bevel ?? depth * 0.35;
-  const geo = new THREE.ExtrudeGeometry(sh, { depth, bevelEnabled: bev > 0, bevelThickness: bev, bevelSize: bev, bevelSegments: o.bs ?? 2, steps: 1, curveSegments: o.cs ?? 8 });
-  geo.translate(0, 0, -depth / 2);
-  return geo;
-}
-const circlePath = (x, y, r, cw = true) => { const p = new THREE.Path(); p.absarc(x, y, r, 0, TAU, cw); return p; };
-const lathe = (prof, seg = 16) => new THREE.LatheGeometry(prof.map(([r, y]) => new THREE.Vector2(Math.max(r, 0), y)), seg);
-// 以法线为 +z 的局部基（x 尽量对齐鼻尖方向）
-function quatN(n, fwd = AX.x) {
-  const z = n.clone().normalize();
-  let x = fwd.clone().addScaledVector(z, -fwd.dot(z));
-  if (x.lengthSq() < 1e-6) x = AX.y.clone().addScaledVector(z, -z.y);
-  x.normalize();
-  const y = z.clone().cross(x);
-  return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, z));
-}
-const quatY = (dir) => new THREE.Quaternion().setFromUnitVectors(AX.y, dir.clone().normalize());
-
-// ---------------- 构建上下文 ----------------
-function makeCtx(g, seed) {
-  const s = new Sculpture();
-  s.sphere = new THREE.SphereGeometry(1, 14, 10);   // 低面数共享球（眼睛 / 小球部件）
-  const F = makeField(g);
-  const pal = g.pal;
-  const names = {};
-  const mats = new Map();
-  const C = {
-    s, g, F, pal, R: rng(seed ^ 0x9e3779b9), L: F.L, H: F.H, S: F.S, pk: F.pk,
-    th: 0.013 * F.L / 1.6,                                  // 鳍膜厚度随体长
-    finC: mixc(pal[3], pal[0], 0.12),
-    uNeck: F.pk + (1 - F.pk) * 0.2, uHT: F.pk + (1 - F.pk) * 0.45,
-    asym: clamp(+g.asym || 0, 0, 1),
-    nm(base) { names[base] = (names[base] || 0) + 1; return names[base] > 1 ? `${base}-${names[base]}` : base; },
-    // 器物 / 皮肤材质（缓存）：kind 见 MATS；wet 交给 fishmat 做湿润鱼皮
-    mat(color, kind = 'wet', o = {}) {
-      const key = `${hex(color)}|${kind}|${o.glow || 0}|${o.side || 0}|${o.glowColor || ''}`;
-      let m = mats.get(key); if (!m) { m = physMat(color, kind, o); mats.set(key, m); } return m;
-    },
-    skin(color = pal[0]) { return C.mat(color, g.mat, g.mat === 'glow' ? { glow: 0.15 + 0.25 * (g.glow || 0) } : {}); },
-    add(base, geo, mat, parent = s.root) {
-      const m = new THREE.Mesh(geo, mat); m.name = C.nm(base); m.castShadow = true; m.receiveShadow = true;
-      parent.add(m); s.parts[m.name] = m; return m;
-    },
-    group(base, pos = [0, 0, 0], parent = s.root) { return s.group(C.nm(base), pos, parent); },
-    ball(base, pos, scl, mat, parent = s.root) { const m = C.add(base, s.sphere, mat, parent); m.position.copy(pos); m.scale.set(...scl); m.geometry.userData.shared = true; return m; },
-    tube(base, pts, r0, r1, mat, o, parent) { return C.add(base, tubeGeo(pts, r0, r1, o), mat, parent); },
-    // 头部 / 体表定位
-    surf(u, a, ex = 1) { return F.pt(u, a, ex); },
-    headTop(u = C.uHT) { return V3(F.x(u), F.top(u), 0); },
-  };
-  // 器物主材：体表本身是金属 / 瓷 / 金 → 器物跟随；否则按部件默认
-  C.solidKind = (def) => (['metal', 'brass', 'gold', 'ceramic', 'glaze', 'crystal', 'pearl'].includes(g.mat) ? g.mat : def);
-  return C;
-}
-
-// ---------------- 身体 + 头型附件 ----------------
+const CTRL_U = [0, 0.035, 0.09, 0.18, 0.3, 0.43, 0.56, 0.68, 0.79, 0.87, 0.93, 0.975, 1];
 function buildBody(C) {
-  const { g, F, pal } = C;
-  const bm = physMat('#ffffff', g.mat, { vc: true, glow: g.mat === 'glow' ? 0.14 + 0.3 * (g.glow || 0) : 0, glowColor: mixc(pal[0], pal[2], 0.5) });
-  const body = C.add('body', bodyGeometry(F, g, pal[0], pal[1]), bm);
+  const { g, s } = C;
+  const prof = CTRL_U.map((u) => [X(u), Math.max(C.Hh(u), 0.003), Math.max(C.Ww(u), 0.003)]);
+  // 金属系：体色向金属本色靠拢（保持一点亲本色相），避免「生锈 / 脏金」
+  const MET_TINT = { gold: ['#f5c65a', '#fff0c2', 0.72], brass: ['#eaa957', '#fbe3b4', 0.62], metal: ['#dbe4ee', '#f6f8fb', 0.4] }[g.mat];
+  const back = MET_TINT ? mixc(g.pal[0], MET_TINT[0], MET_TINT[2]) : g.pal[0], belly = MET_TINT ? mixc(g.pal[1], MET_TINT[1], MET_TINT[2]) : g.pal[1];
+  const body = s.body('body', prof, back, belly, 0.1);
+  const p = MATS[g.mat] || MATS.wet, m = body.material;
+  m.metalness = p.metal; m.roughness = p.rough; m.clearcoat = p.coat; m.clearcoatRoughness = p.coatR;
+  const ir = Math.max(p.irid || 0, (g.irid || 0) * 0.85, [0.3, 0.45, 0.6, 0.75][C.lux - 1] || 0);   // 稀有度越高越有镭射珠光
+  if (ir > 0.25) { m.iridescence = ir; m.iridescenceIOR = 1.35; m.iridescenceThicknessRange = [260, 780]; }
+  if (p.sheen || C.lux >= 2) { m.sheen = Math.max(p.sheen || 0, 0.15 + 0.07 * C.lux); m.sheenRoughness = 0.38; m.sheenColor = new THREE.Color(g.pal[4]).lerp(new THREE.Color(g.pal[2]), 0.4); }
+  if (g.mat === 'glow' || g.glow > 0.3) { m.emissive = new THREE.Color(g.pal[2]); m.emissiveIntensity = 0.06 + g.glow * 0.16; }
+  if (g.mat !== 'wet' || ir > 0.25) m.userData.synPBR = true;
   body.userData.synBody = true;
+  const pos = body.geometry.getAttribute('position'), n = pos.count, arr = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i), u = clamp(x / BL + 0.5, 0, 1);
+    arr[i * 3] = u; arr[i * 3 + 1] = Math.atan2(Math.abs(z), y) / Math.PI; arr[i * 3 + 2] = clamp(y / Math.max(C.Hh(u), 1e-4), -1, 1);
+  }
+  body.geometry.setAttribute('aSyn', new THREE.Float32BufferAttribute(arr, 3));
   C.body = body;
 }
-function buildHeadExtras(C) {
-  const { g, F, L, s } = C;
-  if (g.head === 'hammer') {
-    const u = F.pk + (1 - F.pk) * 0.8, h = F.ht(u) + F.hb(u);
-    const span = Math.max(F.wz(u) * 2.3, 0.15 * L);
-    const cy = F.yc(u) + 0.1 * F.ht(u);
-    const geo = tubeGeo([[0, 0, -span], [0, 0, -span * 0.3], [0, 0, span * 0.3], [0, 0, span]], 1, 1, { radial: 12, seg: 16, prof: (t) => 0.25 + 0.75 * Math.sin(PI * clamp(t * 1.04 - 0.02, 0, 1)) ** 0.3 });
-    geo.scale(Math.max(0.055 * L, h * 0.25), h * 0.2, 1);
-    const m = C.add('syn-hammer', geo, C.skin(mixc(g.pal[0], g.pal[1], 0.15)));
-    m.position.set(F.x(u) - 0.01 * L, cy, 0);
-    C.hammerTips = [-1, 1].map((sd) => ({ p: V3(F.x(u) - 0.005 * L, cy + 0.005 * L, sd * span * 0.93), n: V3(0.35, 0.15, sd).normalize(), side: sd }));
-  } else if (g.head === 'spout') {
-    const u = F.pk + (1 - F.pk) * 0.82, r0 = Math.max(0.2 * F.ht(u), 0.018 * L);
-    const b = V3(F.x(u), F.yc(u) - 0.1 * F.hb(u), 0);
-    const pts = [b, b.clone().add(V3(0.1 * L, 0.0 * L, 0)), b.clone().add(V3(0.2 * L, 0.06 * L, 0)), b.clone().add(V3(0.25 * L, 0.15 * L, 0))];
-    C.tube('syn-spout', pts, r0, r0 * 0.45, C.skin(), { radial: 12, seg: 16 });
-    const lip = C.add('syn-spout-lip', new THREE.TorusGeometry(r0 * 0.5, r0 * 0.12, 6, 16), C.skin(shade(g.pal[0], 0.92)));
-    lip.position.copy(pts[3]); lip.quaternion.copy(quatN(V3(0.45, 1, 0)));
-    C.noseTip = pts[3];
-  } else if (g.head === 'bill') {
-    const u = 0.965, r0 = Math.max(0.3 * F.ht(u), 0.012 * L);
-    const b = V3(F.x(u), F.yc(u) + 0.15 * F.ht(u), 0), len = 0.3 * L;
-    C.tube('syn-bill', [b, b.clone().add(V3(len * 0.5, -0.004 * L, 0)), b.clone().add(V3(len, 0.004 * L, 0))], r0, r0 * 0.08, C.skin(shade(g.pal[0], 0.85)), { radial: 10, seg: 12 });
-    C.billEnd = b.clone().add(V3(len, 0, 0)); C.billBase = b;
-  }
-}
-
-// ---------------- 眼睛：0~8 只 / 眼柄 / 望远镜 / 锤头两端 / 比目鱼式偏眼 ----------------
 function buildEyes(C) {
-  const { g, F, L, S, s } = C;
-  const n = clamp(Math.round(+g.eyes.n), 0, 8); if (!n) return;
-  const k = clamp(+g.eyes.k || 1, 0.4, 2.2);
-  const uE = F.pk + (1 - F.pk) * (g.head === 'bill' ? 0.4 : g.head === 'tube' ? 0.2 : 0.55);
-  const r = clamp(0.2 * F.ht(uE), 0.022 * L, 0.058 * L) * k;
-  const iris = mixc(g.pal[2], '#f2deb0', 0.55);
-  const du = (2.5 * r) / L;
-  const spots = [];
-  const A = [0.95, 1.5, 0.5, 1.95], DU = [0, -1, -1.9, -0.6];
-  if (n === 1) spots.push({ u: uE + (1 - uE) * 0.22, a: 1e-3, r: r * 1.35, side: 0 });
-  else {
-    const pairs = Math.floor(n / 2);
-    for (let i = 0; i < pairs; i++) {
-      const u = clamp(uE + DU[i % 4] * du, F.pk * 0.8, 0.97), rr = r * (1 - Math.min(i, 3) * 0.14);
-      spots.push({ u, a: A[i % 4], r: rr, side: 1 }, { u, a: -A[i % 4], r: rr, side: -1 });
-    }
-    if (n % 2) spots.push({ u: Math.min(uE + du * 0.6, 0.97), a: 1e-3, r: r * 0.8, side: 0 });
-  }
-  if (C.asym > 0.6 && n === 2) spots[1] = { u: Math.min(uE + du * 0.9, 0.97), a: 0.42, r: r * 0.95, side: 1 };   // 比目鱼：双眼长到同一侧
-  const stalk = clamp(+g.eyes.stalk || 0, 0, 1), lens = clamp(+g.eyes.lens || 0, 0, 1);
-  spots.forEach((e, i) => {
-    let p, nn;
-    if (C.hammerTips && e.side && i < 2) { const t = C.hammerTips[e.side > 0 ? 1 : 0]; p = t.p.clone(); nn = t.n.clone(); }
-    else { p = F.pt(e.u, e.a); nn = F.nrm(e.u, e.a); }
-    const er = e.r * (1 + C.asym * 0.35 * (e.side || 0) * (i % 3 === 0 ? 1 : -1));
-    const name = i === 0 ? 'eye-left' : i === 1 && spots[1].side < 0 ? 'eye-right' : `eye-${i + 1}`;
-    if (stalk > 0.05) {   // 眼柄：先向上再外翻
-      const dir = nn.clone().multiplyScalar(0.55).add(V3(0.12, 1, 0)).normalize();
-      const len = (0.3 + 0.8 * stalk) * Math.max(S, 0.12 * L) * 0.7;
-      const tip = p.clone().addScaledVector(dir, len);
-      const mid = p.clone().addScaledVector(dir, len * 0.5).addScaledVector(nn, len * 0.12);
-      C.tube('syn-stalk', [p.clone().addScaledVector(nn, -er * 0.3), mid, tip], er * 0.36, er * 0.26, C.skin(), { radial: 8, seg: 10 });
-      p = tip; nn = V3(0.25, 0.25, e.side || 0.001).normalize();
-    }
-    if (lens > 0.05) {    // 伸缩望远镜筒（黄铜三节）
-      const brass = C.mat(mixc('#c9a14a', g.pal[2], 0.15), 'brass');
-      let q = p.clone().addScaledVector(nn, -er * 0.25), rr = er * 0.72;
-      for (let j = 0; j < 3; j++) {
-        const len = er * (0.62 - j * 0.08) * (0.6 + lens * 0.6);
-        const cyl = C.add('prop-scope', new THREE.CylinderGeometry(rr, rr, len, 14, 1, true), C.mat(j % 2 ? shade(g.pal[0], 0.9) : mixc('#c9a14a', g.pal[2], 0.15), j % 2 ? 'satin' : 'brass', { side: THREE.DoubleSide }));
-        cyl.position.copy(q).addScaledVector(nn, len / 2); cyl.quaternion.copy(quatY(nn));
-        const ring = C.add('prop-scope-ring', new THREE.TorusGeometry(rr * 1.02, rr * 0.1, 6, 16), brass);
-        ring.position.copy(q).addScaledVector(nn, len); ring.quaternion.copy(quatN(nn));
-        q.addScaledVector(nn, len); rr *= 1.12;
-      }
-      p = q.addScaledVector(nn, -er * 0.15);
-    }
-    const grp = new THREE.Group(); grp.name = `${name}-socket`;
-    grp.position.copy(p).addScaledVector(nn, -er * 0.16); grp.quaternion.copy(quatN(nn));
-    s.root.add(grp);
-    s.eye(name, [0, 0, 0], er, 1, grp, iris);
-  });
+  const uE = C.M.mh < 0.14 ? 0.885 : 0.865;
+  const hE = C.Hh(uE), yf = 0.27;
+  const r = clamp(hE * 0.34, 0.022, 0.068) * C.g.eyeK;
+  const z = Math.max(surfZ(C, uE, yf) - r * 0.12, r * 0.45);
+  C.s.eyes(X(uE), hE * yf, z, r, C.lux >= 3 ? '#ffdc94' : '#fff6da');
+  C.eye = { u: uE, r };
 }
-
-// ---------------- 嘴型 ----------------
-function uAtRadius(F, rad) { for (let u = 0.999; u > F.pk; u -= 0.004) if (Math.min(F.ht(u), F.wz(u)) >= rad) return u; return F.pk; }
-function buildMouth(C) {
-  const { g, F, L, S, pal } = C;
-  const k = shapeOf('mouth', g.mouth, 'smile'); if (k === 'none') return;
-  const dark = mixc(shade(pal[0], 0.35), '#1d1418', 0.4), teethM = C.mat('#f3eee4', 'glaze'), lipM = C.skin(mixc(pal[0], pal[1], 0.4));
-  const uC = g.head === 'bill' ? 0.955 : 0.968;
-  const cL = F.pt(uC, 0.68 * PI, 1.01), cR = F.pt(uC, -0.68 * PI, 1.01);
-  const tipX = g.head === 'bill' ? F.x(0.975) : F.x(0.997);
-  const tip = V3(tipX, lerp(F.yc(0.995), F.bot(0.99), 0.5) - 0.004 * L, 0);
-  const rm = clamp(0.012 * S + 0.004 * L, 0.006, 0.05);
-  const line = () => C.tube('mouth', [cL, tip.clone().add(V3(0.004 * L, -0.002 * L, 0)), cR], rm, rm, C.mat(dark, 'matte'), { radial: 6, seg: 10 });
-  if (k === 'smile') line();
-  else if (k === 'fang' || k === 'whisker') {
-    line();
-    if (k === 'fang') for (const sd of [-1, 1]) {
-      const b = tip.clone().lerp(sd > 0 ? cL : cR, 0.45), len = clamp(0.06 * S + 0.012 * L, 0.02, 0.12);
-      const f = C.add('prop-fang', new THREE.ConeGeometry(len * 0.22, len, 8), teethM); f.position.copy(b).add(V3(0, -len * 0.42, 0)); f.rotation.x = PI; f.rotation.z = -0.15;
-    }
-    else for (const sd of [-1, 1]) for (const j of [0, 1]) {
-      const b = (sd > 0 ? cL : cR).clone(), len = (0.3 - j * 0.1) * L;
-      C.tube('prop-barbel', [b, b.clone().add(V3(0.02 * L, -0.06 * L, sd * 0.02 * L)), b.clone().add(V3(-len * 0.4, -len * 0.45, sd * (0.05 + j * 0.03) * L)), b.clone().add(V3(-len * 0.8, -len * 0.35, sd * (0.06 + j * 0.05) * L))], rm * 0.9, rm * 0.2, C.skin(shade(pal[3], 0.85)), { radial: 5, seg: 12 });
-    }
-  } else if (k === 'gape' || k === 'sucker') {
-    const Rm = clamp(0.36 * Math.min(F.ht(0.9), F.wz(0.9) * 1.2), 0.03 * L, 0.13 * L);
-    const u = uAtRadius(F, Rm * 1.12), cy = F.yc(u) - (k === 'gape' ? 0.18 * F.hb(u) : 0);
-    const c = V3(F.x(u) + Rm * 0.12, cy, 0);
-    const hole = C.ball('mouth-hole', c.clone().add(V3(-Rm * 0.05, 0, 0)), [Rm * 0.35, Rm * 0.82, Rm * 0.82], C.mat('#241a1e', 'matte'));
-    const ring = C.add(k === 'gape' ? 'mouth-lip' : 'mouth-sucker', new THREE.TorusGeometry(Rm * 0.9, Rm * (k === 'gape' ? 0.2 : 0.28), 10, 28), k === 'gape' ? C.mat(mixc(pal[1], '#ffffff', 0.2), C.solidKind('glaze')) : lipM);
-    ring.position.copy(c); ring.rotation.y = PI / 2; ring.scale.set(1, k === 'gape' ? 0.82 : 1, 1);
-    if (k === 'sucker') for (let i = 0; i < 10; i++) { const a = (i / 10) * TAU; C.ball('prop-tooth', c.clone().add(V3(Rm * 0.06, Math.cos(a) * Rm * 0.58, Math.sin(a) * Rm * 0.58)), [Rm * 0.07, Rm * 0.11, Rm * 0.07], teethM); }
-    void hole;
-  } else if (k === 'beak') {
-    const u = 0.93, b = V3(F.x(u), F.yc(u), 0), h = Math.max(F.ht(u), 0.04 * L), len = clamp(0.5 * h, 0.04 * L, 0.14 * L);
-    const bm = C.mat(mixc(pal[1], '#e6d7b4', 0.55), 'glaze');
-    C.tube('prop-beak', [b.clone().add(V3(0, h * 0.15, 0)), b.clone().add(V3(len * 0.7, h * 0.05, 0)), b.clone().add(V3(len * 1.15, -h * 0.25, 0))], h * 0.42, h * 0.04, bm, { radial: 10, seg: 10 });
-    C.tube('prop-beak', [b.clone().add(V3(0, -h * 0.3, 0)), b.clone().add(V3(len * 0.6, -h * 0.34, 0)), b.clone().add(V3(len * 0.9, -h * 0.22, 0))], h * 0.3, h * 0.04, bm, { radial: 10, seg: 8 });
-  } else if (k === 'tube') {
-    const u = 0.975, b = V3(F.x(u), F.yc(u) - 0.1 * F.hb(u), 0), r0 = clamp(0.25 * F.ht(0.95), 0.008 * L, 0.04 * L), len = 0.12 * L;
-    C.tube('syn-snout', [b, b.clone().add(V3(len * 0.6, -0.004 * L, 0)), b.clone().add(V3(len, 0, 0))], r0, r0 * 0.8, C.skin(), { radial: 10, seg: 8 });
-    const lip = C.add('mouth-lip', new THREE.TorusGeometry(r0 * 0.75, r0 * 0.28, 6, 14), lipM); lip.position.copy(b).add(V3(len, 0, 0)); lip.rotation.y = PI / 2;
-  } else if (k === 'underbite') {
-    line();
-    const jaw = C.ball('syn-jaw', tip.clone().add(V3(0.004 * L, -0.012 * L, 0)), [0.035 * L, 0.018 * L + 0.1 * F.hb(0.97), Math.max(F.wz(0.95), 0.025 * L)], C.skin(mixc(pal[0], pal[1], 0.5)));
-    for (const z of [-0.6, 0, 0.6]) { const t = C.add('prop-tooth', new THREE.ConeGeometry(0.006 * L, 0.022 * L, 6), teethM); t.position.copy(jaw.position).add(V3(0.02 * L, jaw.scale.y * 0.9, z * jaw.scale.z * 0.7)); }
-  }
+function buildHead(C) {
+  const { g, s } = C;
+  const hM = C.Hh(0.97);
+  s.mouth(X(1) - 0.006, -hM * 0.2, clamp(C.Ww(0.965) * 0.7, 0.01, 0.04), mixc(g.pal[0], '#3a2626', 0.55));
+  const uG = clamp(C.eye.u - 0.07 - C.eye.r / BL * 1.6, 0.62, 0.82);
+  s.gills(X(uG), C.Hh(uG) * 0.02, surfZ(C, uG, 0) * 0.985, C.Hh(uG) * 0.48, mixc(g.pal[0], '#101418', 0.3));
 }
-
-// ---------------- 正中鳍（背鳍 / 臀鳍）：轮廓 [[s, h]]，s 沿鳍基 前→后（可 >1 拖到身后），h 为高度倍数；鳍基贴着体表曲线并略陷入 ----------------
-function medianFin(C, name, uF, uB, hD, outline, color, o = {}) {
-  const { F } = C;
-  const xF = F.x(uF), len = xF - F.x(uB), sg = o.down ? -1 : 1, sink = o.sink ?? 0.05 * C.S;
-  const yAt = (s) => { const u = clamp(lerp(uF, uB, s), 0, 1); return o.down ? F.bot(u) : F.top(u); };
-  const pts = outline.map(([s, h]) => [xF - s * len, yAt(s) + sg * h * hD]);
-  for (let i = 6; i >= 0; i--) { const s = i / 6; pts.push([xF - s * len, yAt(s) - sg * sink]); }
-  const fin = C.s.fin(C.nm(name), pts, color, [0, 0, 0], [0, 0, 0], o.parent || C.s.root, o.thick || C.th);
-  return { fin, xF, len, yAt, P: (s, h) => V3(xF - s * len, yAt(s) + sg * h * hD, 0) };
-}
-const OUT = {
-  shark: [[0, 0], [0.3, 0.72], [0.5, 0.98], [0.62, 1.0], [0.6, 0.8], [0.78, 0.3], [1, 0.04]],
-  sail: [[0, 0], [0.04, 0.9], [0.2, 1.05], [0.5, 1.0], [0.8, 0.72], [0.96, 0.32], [1, 0.03]],
-  crest: [[0, 0], [0.06, 0.8], [0.3, 1], [0.7, 0.95], [0.95, 0.6], [1.02, 0.1]],
-  ribbon: [[0, 0], [0.08, 0.95], [0.3, 0.72], [0.7, 0.55], [1.05, 0.48], [1.35, 0.3], [1.55, 0.1], [1.2, 0.05], [1.0, 0.02]],
-  anal: [[0, 0], [0.25, 0.85], [0.45, 1], [0.62, 0.72], [1, 0.05]],
+// ---- 背鳍 / 臀鳍：鳍根沿背（腹）轮廓长出来；外缘 = 审美校准过的观赏鱼鳍型 ----
+const PLUME = (fl) => { const o = [[0, 0.05]], n = 7; for (let i = 0; i < n; i++) { const t = i / (n - 1) * 0.92; o.push([t + 0.05, (1.25 - 0.5 * t) * (1 + 0.22 * fl)]); if (i < n - 1) o.push([t + 0.5 / (n - 1) * 0.92 + 0.03, 0.78 * (1.12 - 0.5 * t)]); } o.push([1.0, 0.3], [1.03, 0.06]); return o; };
+const DOR = {
+  soft: { f: 0.74, b: 0.3, k: 0.62, pts: () => [[0, 0.05], [0.1, 0.55], [0.3, 0.82], [0.5, 0.78], [0.62, 0.6], [0.75, 0.8], [0.9, 0.65], [1.02, 0.1]] },
+  sickle: { f: 0.62, b: 0.42, k: 0.85, pts: (fl) => [[0, 0.04], [0.2, 0.55], [0.42, 1.0], [0.66 + fl * 0.28, 1.12 + fl * 0.22], [0.6, 0.7], [0.72, 0.32], [1, 0.06]] },
+  sail: { f: 0.8, b: 0.22, k: 1.02, pts: () => [[0, 0.05], [0.04, 0.85], [0.18, 1.12], [0.4, 1.15], [0.62, 1.02], [0.82, 0.75], [0.96, 0.38], [1.03, 0.06]] },
+  crest: { f: 0.82, b: 0.12, k: 0.55, pts: (fl) => [[0, 0.04], [0.06, 0.55 + fl * 0.35], [0.22, 0.68], [0.45, 0.66], [0.7, 0.6], [0.9, 0.48], [1.04, 0.08]] },
+  fan: { f: 0.72, b: 0.3, k: 0.95, pts: (fl) => [[0, 0.04], [0.06, 0.62], [0.2, 1.02], [0.42, 1.26], [0.66, 1.3 + fl * 0.12], [0.88, 1.12 + fl * 0.1], [1.04, 0.72], [1.06, 0.3], [1.03, 0.06]] },
+  plume: { f: 0.8, b: 0.36, k: 0.95, pts: PLUME },
+  veil: { f: 0.66, b: 0.24, k: 0.85, pts: (fl) => [[0, 0.04], [0.08, 0.42], [0.24, 0.74], [0.46, 0.98], [0.72, 1.12], [1.0 + fl * 0.1, 1.08 + fl * 0.08], [1.24 + fl * 0.18, 0.86], [1.34 + fl * 0.22, 0.56], [1.26, 0.3], [1.04, 0.06]] },
 };
-function buildDorsal(C, d, tag = 'dorsal') {
-  const { g, F, L, H, S, pk, pal, s } = C;
-  const k = shapeOf('dor', d?.k, 'shark'); if (k === 'none') return;
-  const hK = clamp(+d.h || 1, 0.25, 2.4), lK = clamp(+d.l || 1, 0.25, 3);
-  const hD = (0.5 * H + 0.22 * S) * hK;
-  const lu = clamp(0.28 * lK, 0.08, 0.75), c = clamp(Number.isFinite(+d.x) ? +d.x : 0.5, 0.2, 0.8);
-  const uMax = pk + (1 - pk) * 0.22;
-  const span = (l2) => { const uF = Math.min(c + l2 / 2, uMax); return [uF, Math.max(uF - l2, 0.04)]; };
-  const grp = C.group(tag); grp.rotation.x = C.asym * 0.12 * (tag === 'dorsal' ? 1 : -1);
-  const fin = C.finC, sink = 0.05 * S;
-  const top = (u) => F.top(u);
-  const solid = (col, kind, o) => C.mat(col, C.solidKind(kind), o);
-  const mf = (nm, sp, h, out, col = fin, o = {}) => medianFin(C, nm, sp[0], sp[1], h, out, col, { parent: grp, ...o });
-  switch (k) {
-    case 'shark': case 'sail': case 'crest': case 'ribbon': {
-      const sp = span(k === 'sail' ? lu * 1.7 : k === 'crest' ? lu * 2.2 : k === 'ribbon' ? lu * 1.2 : lu);
-      const r = mf(`${tag}-fin`, sp, hD * (k === 'sail' ? 1.35 : k === 'crest' ? 0.5 : k === 'ribbon' ? 0.8 : 1), OUT[k]);
-      if (k === 'ribbon') s.wiggle(r.fin, 'x', 0.05, 2.2, 0.5);
-      break;
-    }
-    case 'spiny': case 'saw': {
-      const sp = span(lu * (k === 'saw' ? 1.3 : 1.1)), n = clamp(Math.round(5 + lK * 3), 5, 12), out = [[0, 0]];
-      const peaks = [];
-      for (let i = 0; i < n; i++) {
-        const t = i / (n - 1), s0 = 0.03 + t * 0.9, h = lerp(1, 0.5, t) * (i === 0 ? 0.85 : 1);
-        if (k === 'saw') { out.push([s0 + 0.035, h], [s0 + 0.07, h * 0.5]); }
-        else { out.push([s0, h * 0.72]); if (i < n - 1) out.push([s0 + 0.45 / (n - 1) * 0.9 * 2, h * 0.38]); }
-        peaks.push([s0, h]);
-      }
-      out.push([1, 0.04]);
-      const r = mf(`${tag}-fin`, sp, hD, out);
-      if (k === 'spiny') for (const [s0, h] of peaks) {
-        const b = r.P(s0, -0.05), tip = r.P(s0 + 0.04, h * 1.12);
-        s.spike(C.nm(`${tag}-spine`), [b.x, b.y, 0], [tip.x, tip.y, 0], 0.012 * S + 0.002 * L, shade(fin, 0.7), grp);
-      }
-      break;
-    }
-    case 'fan': {
-      const sp = span(lu * 1.1), out = [[0, 0]], N = 11;
-      for (let j = 1; j < N; j++) { const th = PI * (1 - j / N); out.push([0.5 + 0.5 * Math.cos(th), Math.sin(th) * (j % 2 ? 1 : 0.9)]); }
-      out.push([1, 0.02]);
-      const r = mf(`${tag}-fan`, sp, hD * 1.1, out);
-      const stick = C.mat(mixc(pal[2], '#2a2224', 0.2), C.solidKind('glaze'));
-      const b = r.P(0.5, -0.1);
-      for (let j = 1; j < N; j += 2) { const th = PI * (1 - j / N), tip = r.P(0.5 + 0.48 * Math.cos(th), Math.sin(th) * 1.02); C.tube('prop-fanstick', [b, tip], 0.006 * S + 0.0015 * L, 0.004 * S + 0.001 * L, stick, { radial: 5, seg: 2 }, grp); }
-      break;
-    }
-    case 'finlet': {
-      const col = mixc(fin, pal[2], 0.5);
-      for (let i = 0; i < 6; i++) { const u = lerp(Math.min(c, uMax), 0.08, i / 5); mf(`${tag}-finlet`, [u + 0.02, u - 0.02], hD * 0.38 * (1 - i * 0.08), OUT.shark, col); }
-      break;
-    }
-    case 'key': {   // 黄铜钥匙齿：直柄 + 高低齿 + 斜尖（钥匙环在尾巴 tail:'ring'）
-      const [uF, uB] = span(lu * 1.4), xF = F.x(uF), len = xF - F.x(uB), hs = hD * 0.3;
-      const P = (s, off) => [xF - s * len, top(clamp(lerp(uF, uB, s), 0, 1)) + off];
-      const pts = [P(0, -sink), P(-0.03, hs * 0.55), P(0.03, hs)];
-      const nT = 6;
-      for (let j = 0; j < nT; j++) { const s0 = 0.1 + j * 0.72 / nT, w = 0.72 / nT, t = hD * 0.55 * (0.35 + 0.65 * C.R()); pts.push(P(s0, hs), P(s0 + w * 0.22, hs + t), P(s0 + w * 0.62, hs + t), P(s0 + w * 0.86, hs)); }
-      pts.push(P(0.9, hs), P(0.94, hs * 1.35), P(1, hs * 1.35), P(1, -sink));
-      for (let i = 9; i >= 1; i--) pts.push(P(i / 10, -sink));
-      const dep = 0.028 * S + 0.006 * L;
-      C.add('prop-key', plateGeo(pts, dep, { bevel: dep * 0.18, bs: 1 }), solid(mixc(pal[0], '#d8b25e', 0.35), 'brass'), grp);
-      const gp = []; for (let i = 0; i <= 8; i++) gp.push(P(0.04 + i * 0.11, hs * 0.42));
-      for (const sd of [-1, 1]) { const t = C.tube('prop-key-groove', gp.map(([x, y]) => V3(x, y, sd * dep * 0.62)), dep * 0.16, dep * 0.16, solid(shade(mixc(pal[0], '#d8b25e', 0.35), 0.62), 'brass'), { radial: 5, seg: 12 }, grp); void t; }
-      break;
-    }
-    case 'lid': {   // 马桶盖：贴背的椭圆座圈 + 向后掀起的盖板 + 铰链
-      const R = clamp(0.62 * hD, 0.06 * L, 0.2 * L), xc = F.x(c), yc = top(c);
-      const cer = solid(mixc(pal[0], '#ffffff', 0.18), 'ceramic');
-      const seat = C.add('prop-seat', new THREE.TorusGeometry(R, R * 0.16, 8, 30), cer, grp);
-      seat.rotation.x = PI / 2; seat.scale.set(1.22, 1, 1); seat.position.set(xc, yc - R * R / (2.4 * Math.max(H, R)) + R * 0.06, 0);
-      const hinge = C.group('prop-lid-hinge', [xc - R * 1.26, seat.position.y + R * 0.1, 0], grp);
-      hinge.rotation.z = 0.3;
-      const a = R * 1.02, b = R * 1.2, ell = [];
-      for (let i = 0; i < 28; i++) { const t = (i / 28) * TAU; ell.push([a * Math.cos(t), b + b * Math.sin(t) * (Math.sin(t) < 0 ? 0.92 : 1)]); }
-      const lid = C.add('prop-lid', plateGeo(ell, R * 0.08, { bevel: R * 0.035 }), cer, hinge); lid.rotation.y = PI / 2;
-      const chrome = C.mat('#d9dde0', 'metal');
-      for (const z of [-0.55, 0.55]) { const h = C.add('prop-hinge', new THREE.CylinderGeometry(R * 0.07, R * 0.07, R * 0.3, 10), chrome, hinge); h.rotation.x = PI / 2; h.position.set(0, R * 0.02, z * R); }
-      s.wiggle(hinge, 'z', 0.05, 1.3);
-      break;
-    }
-    case 'canopy': {   // 伞盖：伞骨下垂的扇形分瓣 + 伞尖
-      const Rc = clamp(hD * 0.85, 0.08 * L, 0.24 * L), hc = hD * 0.8, base = V3(F.x(c), top(c) - sink, 0);
-      const um = C.group('prop-umbrella', [base.x, base.y, 0], grp); um.rotation.z = 0.28;
-      const gold = C.mat(mixc(pal[2], '#c8a35a', 0.3), C.solidKind('brass'));
-      C.tube('prop-shaft', [V3(0, 0, 0), V3(0, hc * 1.05, 0)], Rc * 0.035, Rc * 0.035, gold, { radial: 6, seg: 2 }, um);
-      const geo = lathe([[0, Rc * 0.42], [Rc * 0.32, Rc * 0.38], [Rc * 0.66, Rc * 0.24], [Rc, 0]], 32), P = geo.getAttribute('position');
-      for (let i = 0; i < P.count; i++) { const x = P.getX(i), z = P.getZ(i), rr = Math.hypot(x, z) / Rc, ph = Math.atan2(z, x); P.setY(i, P.getY(i) - Rc * 0.12 * rr * rr * (1 - Math.abs(Math.cos(4 * ph)))); }
-      geo.computeVertexNormals();
-      const cv = C.add('prop-canopy', geo, C.mat(pal[0], C.solidKind('satin'), { side: THREE.DoubleSide }), um); cv.position.y = hc;
-      for (let j = 0; j < 8; j++) { const ph = (j / 8) * TAU, pts = []; for (let i = 0; i <= 4; i++) { const r = Rc * i / 4; pts.push(V3(Math.cos(ph) * r, hc + Rc * 0.42 * (1 - (i / 4) ** 1.6) + Rc * 0.012, Math.sin(ph) * r)); } C.tube('prop-rib', pts, Rc * 0.016, Rc * 0.012, gold, { radial: 4, seg: 8 }, um); }
-      C.ball('prop-finial', V3(0, hc + Rc * 0.47, 0), [Rc * 0.06, Rc * 0.1, Rc * 0.06], gold, um);
-      break;
-    }
-    case 'handle': {   // 提梁：半圆拱
-      const Rh = clamp(lu * L * 0.45, 0.07 * L, 0.2 * L) * Math.sqrt(hK), mat = C.mat(mixc(pal[2], pal[0], 0.3), C.solidKind('ceramic'));
-      const arc = C.add('prop-handle', new THREE.TorusGeometry(Rh, Rh * 0.11, 10, 30, PI), mat, grp);
-      arc.position.set(F.x(c), top(c) - Rh * 0.15, 0); arc.scale.set(1, 0.85 + 0.25 * hK, 1);
-      for (const sd of [-1, 1]) C.ball('prop-handle-knob', V3(F.x(c) + sd * Rh, top(clamp(c + sd * Rh / L, 0, 1)) + Rh * 0.02, 0), [Rh * 0.2, Rh * 0.14, Rh * 0.2], mat, grp);
-      break;
-    }
-    case 'gear': {   // 齿轮：齿形挤出 + 减重孔 + 啮合小齿轮（嘀嗒摆动）
-      const R = clamp(hD * 0.75, 0.06 * L, 0.2 * L);
-      const gearGeo = (Rg, nT) => {
-        const pts = [], r0 = Rg * 0.8;
-        for (let i = 0; i < nT; i++) { const a0 = (i / nT) * TAU, p = TAU / nT; for (const [f, r] of [[0, r0], [0.1, Rg], [0.4, Rg], [0.5, r0]]) pts.push([Math.cos(a0 + f * p) * r, Math.sin(a0 + f * p) * r]); }
-        const holes = [circlePath(0, 0, Rg * 0.16)];
-        for (let i = 0; i < 5; i++) { const a = (i / 5) * TAU + 0.3; holes.push(circlePath(Math.cos(a) * Rg * 0.5, Math.sin(a) * Rg * 0.5, Rg * 0.15)); }
-        return plateGeo(pts, Rg * 0.12, { bevel: Rg * 0.02, bs: 1, holes, cs: 6 });
-      };
-      const metal = C.mat(mixc(pal[2], '#9aa3ab', 0.25), C.solidKind('metal')), hub = C.mat(pal[1], C.solidKind('metal'));
-      const g1 = C.group('prop-gear', [F.x(c), top(c) + R * 0.12, 0], grp);
-      C.add('prop-gear', gearGeo(R, 14), metal, g1);
-      const hb = C.add('prop-gear-hub', new THREE.CylinderGeometry(R * 0.2, R * 0.2, R * 0.22, 14), hub, g1); hb.rotation.x = PI / 2;
-      const r2 = R * 0.52, a2 = 2.45;
-      const g2 = C.group('prop-gear', [g1.position.x + Math.cos(a2) * (R + r2) * 0.9, g1.position.y + Math.sin(a2) * (R + r2) * 0.9 - R * 0.35, -R * 0.02], grp);
-      C.add('prop-gear', gearGeo(r2, 8), C.mat(mixc(pal[0], '#b5763a', 0.4), C.solidKind('brass')), g2);
-      s.wiggle(g1, 'z', 0.35, 1.2); s.wiggle(g2, 'z', -0.35 * R / r2, 1.2);
-      break;
-    }
-    case 'quill': {   // 翎羽：羽轴 + 两侧羽片（带两道裂口）
-      const [uF] = span(lu), b = V3(F.x(uF), top(uF) - sink, 0), len = lu * L;
-      const crv = new THREE.CatmullRomCurve3([b, b.clone().add(V3(-len * 0.25, hD * 0.6, 0)), b.clone().add(V3(-len * 0.75, hD * 1.15, 0)), b.clone().add(V3(-len * 1.15, hD * 1.3, 0))]);
-      const N = 14, up = [], dn = [];
-      for (let i = 0; i <= N; i++) {
-        const t = 0.1 + 0.9 * i / N, p = crv.getPointAt(t), tg = crv.getTangentAt(t), nx = -tg.y, ny = tg.x;
-        const w = hD * 0.3 * Math.sin(PI * clamp((t - 0.08) / 0.94, 0, 1)) ** 0.65;
-        const notch = (i === 6 || i === 10) ? 0.45 : 1;
-        up.push([p.x + nx * w, p.y + ny * w]); dn.push([p.x - nx * w * notch, p.y - ny * w * notch]);
-      }
-      const p0 = crv.getPointAt(0.1);
-      s.fin(C.nm(`${tag}-quill`), [[p0.x, p0.y], ...up, ...dn.reverse()], fin, [0, 0, 0], [0, 0, 0], grp, C.th);
-      C.tube('prop-rachis', crv.getPoints(10), 0.012 * S + 0.002 * L, 0.003 * S, C.mat(mixc(pal[1], '#ffffff', 0.3), 'satin'), { radial: 6, seg: 14 }, grp);
-      break;
-    }
-    case 'wedge': {   // 披萨角：芝士三角 + 饼边 + 香肠片
-      const w = clamp(lu * L, 0.1 * L, 0.32 * L) * 0.9, xc = F.x(c), y0 = top(c), dep = 0.035 * S + 0.004 * L;
-      const A = [xc, y0 - hD * 0.2], B = [xc + w * 0.42, y0 + hD], D = [xc - w * 0.58, y0 + hD * 0.88];
-      C.add('prop-wedge', plateGeo([A, B, D], dep, { bevel: dep * 0.25, bs: 1 }), C.mat(pal[0], C.solidKind('matte')), grp);
-      C.tube('prop-crust', [V3(B[0] + w * 0.03, B[1] + hD * 0.02, 0), V3((B[0] + D[0]) / 2, (B[1] + D[1]) / 2 + hD * 0.07, 0), V3(D[0] - w * 0.03, D[1] + hD * 0.02, 0)], hD * 0.085, hD * 0.085, C.mat(pal[3], 'matte'), { radial: 8, seg: 10 }, grp);
-      for (const [u1, u2] of [[0.25, 0.3], [0.5, 0.15], [0.2, 0.62]]) {
-        const x = A[0] + (B[0] - A[0]) * u1 + (D[0] - A[0]) * u2, y = A[1] + (B[1] - A[1]) * u1 + (D[1] - A[1]) * u2;
-        const pp = C.add('prop-pepperoni', new THREE.CylinderGeometry(w * 0.085, w * 0.085, dep * 1.35, 14), C.mat(pal[2], 'matte'), grp); pp.rotation.x = PI / 2; pp.position.set(x, y, 0);
-      }
-      break;
-    }
-    case 'cap': {   // 菌盖：短柄 + 圆顶 + 白点
-      const Rc = clamp(hD * 0.65, 0.06 * L, 0.2 * L), base = V3(F.x(c), top(c) - sink, 0), hs = hD * 0.32;
-      C.tube('prop-stipe', [base, base.clone().add(V3(0, hs, 0))], Rc * 0.3, Rc * 0.26, C.mat(pal[1], 'matte'), { radial: 10, seg: 2 }, grp);
-      const cap = C.add('prop-cap', lathe([[0, Rc * 0.72], [Rc * 0.5, Rc * 0.64], [Rc * 0.86, Rc * 0.38], [Rc * 1.0, Rc * 0.08], [Rc * 0.92, 0], [Rc * 0.35, Rc * 0.04], [0, Rc * 0.03]], 20), C.mat(pal[0], C.solidKind('matte')), grp);
-      cap.position.copy(base).add(V3(0, hs, 0)); cap.rotation.z = 0.12;
-      for (let i = 0; i < 8; i++) {
-        const ph = i * 2.4, t = 0.18 + 0.68 * ((i * 0.618) % 1), r = Rc * Math.sin(t * PI / 2) * 0.93, y = Rc * 0.7 * Math.cos(t * PI / 2) * 0.98;
-        const nrm = V3(Math.cos(ph) * Math.sin(t * PI / 2), Math.cos(t * PI / 2) * 1.4, Math.sin(ph) * Math.sin(t * PI / 2)).normalize();
-        const sp = C.ball('prop-cap-spot', V3(Math.cos(ph) * r, y, Math.sin(ph) * r), [Rc * 0.13, Rc * 0.04, Rc * 0.13], C.mat(pal[2], 'matte'), cap); sp.quaternion.copy(quatY(nrm));
-      }
-      break;
-    }
-    case 'crystal': {   // 六棱晶簇
-      const base = V3(F.x(c), top(c) - sink * 1.5, 0), cm = physMat(pal[2], 'crystal', { glow: 0.2 + 0.4 * (g.glow || 0), glowColor: pal[2] }); cm.flatShading = true;
-      for (let i = 0; i < 6; i++) {
-        const r = hD * (0.09 + 0.05 * C.R()), h = hD * (0.45 + 0.75 * (i === 0 ? 1 : C.R()));
-        const m = C.add('prop-crystal', lathe([[0, -r], [r, 0], [r, h], [0, h + r * 1.7]], 6), cm, grp);
-        m.position.copy(base).add(V3((i - 2.5) * hD * 0.09, 0, (C.R() - 0.5) * hD * 0.12));
-        m.rotation.set((C.R() - 0.5) * 0.7, C.R() * PI, (i - 2.5) * 0.17);
-      }
-      break;
-    }
-  }
+const ANAL_PLACE = { soft: [0.42, 0.18, 0.7], sickle: [0.38, 0.26, 0.6], sail: [0.5, 0.14, 0.62], crest: [0.5, 0.1, 0.75], fan: [0.52, 0.22, 0.92], plume: [0.42, 0.18, 0.7], veil: [0.5, 0.13, 0.85] };
+// 华丽度 → 鳍长倍率（稀有起明显变长；传说 / 神话 = 帆状背臀鳍）
+const LUX_DOR = [1.18, 1.45, 1.75, 2.0], LUX_ANAL = [1.1, 1.4, 1.7, 1.95];
+function medianFin(C, name, kind, sgn, kScale, place, color) {
+  const D = DOR[kind] || DOR.soft, uF = place ? place[0] : D.f, uB = place ? place[1] : D.b;
+  const Hs = Math.min(D.k * kScale * (0.12 + 0.36 * C.mhW) * (sgn > 0 ? LUX_DOR : LUX_ANAL)[C.lux - 1], Math.max(C.mhW * (0.9 + 0.3 * C.lux), 0.16));
+  const xAt = (t) => lerp(X(uF), X(uB), t), yB = (t) => C.Hh(lerp(uF, uB, clamp(t, 0, 1)));
+  let edge = D.pts(C.g.fil).map(([t, y]) => [xAt(t), sgn * (yB(t) * 0.94 + y * Hs)]);
+  if (C.g.scal) edge = scallop(edge, Hs * 0.022);
+  const root = []; for (let i = 0; i <= 6; i++) root.push([xAt(i / 6), sgn * yB(i / 6) * 0.78]);
+  // 起点放在鳍根中段 → 放射鳍条从根部向外扇开
+  const poly = [...root.slice(3), ...edge.slice().reverse(), ...root.slice(0, 3)];
+  const mesh = C.s.fin(name, poly, color);
+  finSyn(mesh);
+  C.s.wiggle(mesh, 'x', 0.04 + 0.012 * C.lux, 2.4, sgn > 0 ? 1.3 : 2.1);
+  return mesh;
 }
-
-// ---------------- 尾 ----------------
+// ---- 尾鳍 ----
+const TAIL_K = { fork: [1, 1], lunate: [1.05, 0.85], round: [0.85, 1.0], swallow: [1, 0.95], lyre: [1, 0.85], delta: [1.05, 0.8], veil: [1.1, 0.85] };
+function tailOutline(k, T, l, hp, fl, lux = 1) {
+  // 斗鱼式裙尾：上叶略短、下叶长而下垂，外缘带柔和的波浪褶（华丽度越高褶越多）
+  if (k === 'veil') {
+    const o = [[0.04, hp], [-l * 0.35, T * 0.66]], n = 9 + lux * 2;
+    for (let i = 0; i <= n; i++) {
+      const t = i / n, a = lerp(0.5, -0.62, t) * Math.PI;
+      const R = 1 + 0.035 * Math.sin(t * Math.PI * (2 + lux)) * Math.min(1, lux / 2);
+      o.push([-l * (0.55 + 1.4 * Math.cos(a * 0.92)) * R, (Math.sin(a) * T * (a < 0 ? 1.2 : 1.02) - T * 0.08 * t) * R]);
+    }
+    o.push([-l * 0.4, -T * 0.7], [0.04, -hp]);
+    return o;
+  }
+  // 半月裙尾：上下缘展开接近 180°，外缘是一道饱满的 D 形弧
+  if (k === 'delta') {
+    const o = [[0.04, hp], [-l * 0.18, T * 0.86]], n = 8 + lux * 2;
+    for (let i = 0; i <= n; i++) {
+      const a = lerp(0.47, -0.47, i / n) * Math.PI, R = 1 + 0.025 * Math.sin(i / n * Math.PI * (2 + lux)) * Math.min(1, lux / 3);
+      o.push([-(l * 0.3 + l * 1.25 * Math.cos(a)) * R, T * 1.12 * Math.sin(a) * R]);
+    }
+    o.push([-l * 0.18, -T * 0.86], [0.04, -hp]);
+    return o;
+  }
+  const top = {
+    fork: [[0.04, hp], [-l * 0.55, T * 0.62], [-l * (1 + fl * 0.22), T * (1 + fl * 0.12)], [-l * 0.86, T * 0.36], [-l * 0.5, 0]],
+    lunate: [[0.04, hp], [-l * 0.6, T * 0.7], [-l * (1.05 + fl * 0.28), T * (1.05 + fl * 0.14)], [-l * 0.72, T * 0.5], [-l * 0.45, 0]],
+    round: [[0.04, hp], [-l * 0.55, T * 0.8], [-l * 0.9, T * 0.72], [-l * 1.02, 0]],
+    swallow: [[0.04, hp], [-l * 0.7, T * 0.7], [-l * (1.55 + fl * 0.25), T * 1.08], [-l * 1.12, T * 0.42], [-l * 0.55, 0]],
+    lyre: [[0.04, hp], [-l * 0.5, T * 0.7], [-l * 1.0, T * 1.0], [-l * (1.75 + fl * 0.3), T * 1.36], [-l * 1.05, T * 0.62], [-l * 0.62, 0]],
+  }[k] || [[0.04, hp], [-l, T], [-l * 0.5, 0]];
+  return [...top, ...top.slice(0, -1).reverse().map(([x, y]) => [x, -y])];
+}
 function buildTail(C) {
-  const { g, F, L, H, S, s } = C;
-  const k = shapeOf('tail', g.tail.k, 'fork');
-  const n = (+g.tail.n >= 2 || g.tail.k === 'double') ? 2 : 1;
-  const sK = clamp(+g.tail.s || 1, 0.4, 3.2);
-  const h = Math.min((0.6 * H + 0.3 * S) * sK, (k === 'ribbon' || k === 'swallow' ? 0.32 : 0.5) * L), l = h * 0.95;
-  for (let i = 0; i < n; i++) {
-    const piv = C.group('tail', [F.x(0) + 0.012 * L, F.yc(0), 0]);
-    if (n === 2) { piv.rotation.x = (i ? -1 : 1) * 0.5; piv.scale.setScalar(0.86); }
-    piv.rotation.x += C.asym * 0.22;
-    tailShape(C, k, piv, h, l);
-    s.wiggle(piv, 'y', k === 'ribbon' || k === 'whip' ? 0.13 : 0.07, 3.8, i * 0.7);
-  }
+  const { g, s } = C, k = g.tail.k, [tk, lk] = TAIL_K[k] || TAIL_K.fork;
+  const T = (0.13 + 0.34 * C.mhW) * g.tail.s * tk * [1.1, 1.3, 1.5, 1.7][C.lux - 1];
+  const flow = k === 'veil' || k === 'delta' || k === 'lyre';
+  // 尾鳍比例约束：随华丽度放宽（稀有 0.55 → 神话 0.9 体长；尾高 1.6 → 2.4 倍体高）—— 华丽但仍是一条鱼
+  const EXT = { veil: 1.95, lyre: 2.05, swallow: 1.8, delta: 1.55, fork: 1.22, lunate: 1.33, round: 1.02 };
+  const T2 = Math.min(T, Math.max(C.mhW * (1.35 + 0.27 * C.lux), 0.2));
+  let l = T2 * lk * (flow ? 1 + 0.2 * C.lux : 1 + 0.08 * C.lux);
+  l = Math.min(l, BL * (flow ? 0.43 + 0.12 * C.lux : 0.5 + 0.04 * C.lux) / (EXT[k] || 1.3));
+  const hp = Math.max(C.Hh(0.05), C.mhW * 0.12) * 0.9;
+  const pivot = s.group('tail', [X(0.035), 0, 0]);
+  let out = tailOutline(k, T2, l, hp, g.fil, C.lux);
+  if (g.scal && !flow) out = [out[0], ...scallop(out.slice(1, -1), T2 * 0.02), out[out.length - 1]];
+  const mesh = s.fin('tail-fluke', [[0.07, 0], ...out], g.pal[3], [0, 0, 0], [0, 0, 0], pivot);
+  finSyn(mesh);
+  s.wiggle(pivot, 'y', flow ? 0.12 : 0.06, flow ? 2.2 : 3.8);
 }
-function tailShape(C, k, piv, h, l) {
-  const { g, F, L, S, pal, s } = C;
-  const fin = C.finC;
-  const F2 = (pts, name = 'tail-fin', o = {}) => s.fin(C.nm(name), pts, o.color || fin, [0, 0, 0], o.rot || [0, 0, 0], piv, o.thick || C.th);
-  const solid = (col, kind, o) => C.mat(col, C.solidKind(kind), o);
-  let r0 = Math.max(F.ht(0.03), 0.012 * L);
-  switch (k) {
-    case 'none': return;
-    case 'fork': F2([[0.06 * l, 0], [-l, h], [-l * 0.87, h * 0.33], [-l * 0.46, 0], [-l * 0.87, -h * 0.33], [-l, -h]]); return;
-    case 'lunate': case 'fluke': {
-      const p = [[0.06 * l, 0], [-l * 0.86, h], [-l * 1.05, h * 1.04], [-l * 0.68, h * 0.48], [-l * 0.43, 0], [-l * 0.68, -h * 0.48], [-l * 1.05, -h * 1.04], [-l * 0.86, -h]];
-      F2(p, k === 'fluke' ? 'tail-fluke' : 'tail-fin', k === 'fluke' ? { rot: [PI / 2, 0, 0], thick: Math.max(C.th * 3.2, 0.04) } : {}); return;
-    }
-    case 'round': F2([[0.06 * l, 0], [-l * 0.4, h * 0.72], [-l * 0.85, h * 0.7], [-l * 1.06, h * 0.25], [-l * 1.06, -h * 0.25], [-l * 0.85, -h * 0.7], [-l * 0.4, -h * 0.72]]); return;
-    case 'fan': {
-      const p = [[0.06 * l, 0]];
-      for (let j = 0; j <= 12; j++) { const th = lerp(0.95, -0.95, j / 12), r = l * 1.1 * (j % 2 ? 0.93 : 1); p.push([-r * Math.cos(th) + 0.04 * l, r * Math.sin(th) * h / l * 1.15]); }
-      F2(p); return;
-    }
-    case 'swallow': F2([[0.06 * l, 0], [-l * 0.55, h * 0.55], [-l * 1.8, h * 1.2], [-l * 1.62, h * 0.98], [-l * 0.75, h * 0.22], [-l * 0.62, 0], [-l * 0.75, -h * 0.22], [-l * 1.62, -h * 0.98], [-l * 1.8, -h * 1.2], [-l * 0.55, -h * 0.55]]); return;
-    case 'shark': { const q = h / 0.58; F2([[0.06, 0], [-0.31, 0.52], [-0.43, 0.58], [-0.36, 0.29], [-0.19, 0.035], [-0.4, -0.2], [-0.39, -0.27], [-0.18, -0.16]].map(([x, y]) => [x * q, y * q])); return; }
-    case 'lobe': F2([[0.06 * l, 0], [-l * 0.45, h * 0.85], [-l * 0.75, h * 0.75], [-l * 0.7, h * 0.25], [-l * 1.15, h * 0.13], [-l * 1.25, 0], [-l * 1.15, -h * 0.13], [-l * 0.7, -h * 0.25], [-l * 0.75, -h * 0.75], [-l * 0.45, -h * 0.85]]); return;
-    case 'whip': {
-      C.tube('syn-whip', [V3(0.04 * l, 0, 0), V3(-l * 0.8, -h * 0.05, 0), V3(-l * 1.6, h * 0.04, h * 0.05), V3(-l * 2.5, h * 0.12, h * 0.12)], r0 * 0.9, r0 * 0.08, C.skin(), { radial: 7, seg: 20 }, piv);
-      F2([[0.06 * l, 0], [-l * 0.3, h * 0.3], [-l * 0.5, h * 0.06], [-l * 0.5, -h * 0.06], [-l * 0.3, -h * 0.3]]); return;
-    }
-    case 'stiletto': {   // 细高跟：鞋底弧线的上叶 + 漆面细跟 + 鞋跟掌
-      F2([[0.06 * l, 0], [-l * 0.4, h * 0.36], [-l * 1.15, h * 0.78], [-l * 1.26, h * 0.64], [-l * 0.6, h * 0.06], [-l * 0.2, -h * 0.12]]);
-      const lac = C.mat(pal[0], C.solidKind('glaze'));
-      const e = V3(-l * 0.4, -h * 1.15, 0);
-      C.tube('prop-heel', [V3(-l * 0.08, -h * 0.04, 0), V3(-l * 0.26, -h * 0.5, 0), e], h * 0.1, h * 0.02, lac, { radial: 10, seg: 12 }, piv);
-      C.ball('prop-heel-tip', e, [h * 0.045, h * 0.03, h * 0.045], C.mat('#141214', 'glaze'), piv);
-      return;
-    }
-    case 'ribbon': {
-      const p = F2([[0.06 * l, 0], [-l * 0.5, h * 0.62], [-l * 1.2, h * 0.5], [-l * 1.8, h * 0.24], [-l * 2.1, -h * 0.02], [-l * 1.65, -h * 0.2], [-l * 1.0, -h * 0.4], [-l * 0.4, -h * 0.48]]);
-      s.wiggle(p, 'y', 0.08, 2.6, 1.1); return;
-    }
-    case 'paddle': F2([[0.06 * l, 0], [-l * 0.3, h * 0.35], [-l * 0.85, h * 0.62], [-l * 1.12, h * 0.4], [-l * 1.18, 0], [-l * 1.12, -h * 0.4], [-l * 0.85, -h * 0.62], [-l * 0.3, -h * 0.35]], 'tail-paddle', { thick: Math.max(0.05 * L / 1.6, 0.041) }); return;
-    case 'hook': {   // 伞柄钩
-      F2([[0.06 * l, 0], [-l * 0.35, h * 0.45], [-l * 0.48, h * 0.3], [-l * 0.48, -h * 0.3], [-l * 0.35, -h * 0.45]]);
-      const m = solid(mixc(pal[2], '#8a5a2b', 0.25), 'glaze'), pts = [V3(0.04 * l, 0, 0), V3(-l * 0.6, h * 0.02, 0), V3(-l * 1.05, -h * 0.1, 0), V3(-l * 1.18, -h * 0.5, 0), V3(-l * 1.0, -h * 0.85, 0), V3(-l * 0.72, -h * 0.78, 0)];
-      C.tube('prop-hook', pts, h * 0.085, h * 0.075, m, { radial: 10, seg: 22 }, piv);
-      C.ball('prop-hook-end', pts[5], [h * 0.085, h * 0.085, h * 0.085], m, piv); return;
-    }
-    case 'ring': {   // 钥匙柄：三叶环 + 颈圈
-      const R = h * 0.62, cx = -l * 0.25 - R, pts = [];
-      for (let i = 0; i < 48; i++) { const t = (i / 48) * TAU, r = R * (0.84 + 0.16 * Math.cos(3 * t + PI)); pts.push([cx + Math.cos(t) * r, Math.sin(t) * r]); }
-      const br = solid(mixc(pal[0], '#d8b25e', 0.35), 'brass'), dep = R * 0.11;
-      C.add('prop-keybow', plateGeo(pts, dep, { bevel: dep * 0.3, holes: [circlePath(cx, 0, R * 0.36)], cs: 12 }), br, piv);
-      const nk = C.add('prop-keyneck', new THREE.CylinderGeometry(r0 * 0.8, r0 * 0.95, -cx - R * 0.75, 12), br, piv); nk.rotation.z = PI / 2; nk.position.x = (cx + R * 0.75) / 2;
-      const col = C.add('prop-keycollar', new THREE.TorusGeometry(r0 * 0.95, r0 * 0.28, 6, 16), br, piv); col.rotation.y = PI / 2; col.position.x = cx + R * 0.9;
-      return;
-    }
-    case 'shears': {   // 剪刃双尾 + 轴钉
-      const m = solid(mixc(pal[0], '#c9d0d6', 0.3), 'metal'), dep = h * 0.05;
-      for (const sd of [-1, 1]) {
-        const b = C.add('prop-blade', plateGeo([[0.04 * l, h * 0.07], [-l * 0.5, h * 0.09], [-l * 1.55, h * 0.01], [-l * 1.52, -h * 0.04], [-l * 0.5, -h * 0.1], [0.04 * l, -h * 0.12]], dep, { bevel: dep * 0.3, bs: 1 }), m, piv);
-        b.position.set(-l * 0.15, 0, sd * dep * 0.7); b.rotation.z = sd * 0.26;
-      }
-      const pv = C.add('prop-screw', new THREE.CylinderGeometry(h * 0.06, h * 0.06, dep * 3.2, 12), C.mat(pal[2], 'metal'), piv); pv.rotation.x = PI / 2; pv.position.x = -l * 0.15;
-      return;
-    }
-    case 'feather': {
-      const crv = new THREE.CatmullRomCurve3([V3(0.04 * l, 0, 0), V3(-l * 0.6, h * 0.05, 0), V3(-l * 1.4, h * 0.18, 0)]);
-      const N = 14, up = [], dn = [];
-      for (let i = 0; i <= N; i++) { const t = 0.08 + 0.92 * i / N, p = crv.getPointAt(t), tg = crv.getTangentAt(t), w = h * 0.55 * Math.sin(PI * clamp((t - 0.05) / 0.97, 0, 1)) ** 0.6; const nt = (i === 5 || i === 9) ? 0.5 : 1; up.push([p.x - tg.y * w * nt, p.y + tg.x * w * nt]); dn.push([p.x + tg.y * w, p.y - tg.x * w]); }
-      F2([[0.06 * l, 0], ...up, ...dn.reverse()], 'tail-feather');
-      C.tube('prop-rachis', crv.getPoints(8), h * 0.035, h * 0.008, C.mat(mixc(pal[1], '#ffffff', 0.3), 'satin'), { radial: 6, seg: 12 }, piv); return;
-    }
-    case 'anchor': {   // 锚：杆 + 横档 + 弧臂 + 锚爪
-      const m = solid(mixc(pal[0], '#4a5058', 0.3), 'metal'), rr = h * 0.05, Ra = h * 0.5, xe = -l * 0.85;
-      C.tube('prop-anchor', [V3(0.04 * l, 0, 0), V3(xe, 0, 0)], rr, rr, m, { radial: 8, seg: 2 }, piv);
-      const st = C.add('prop-anchor-stock', new THREE.CylinderGeometry(rr * 0.8, rr * 0.8, h * 0.6, 8), m, piv); st.rotation.x = PI / 2; st.position.x = -l * 0.22;
-      const arc = C.add('prop-anchor-arm', new THREE.TorusGeometry(Ra, rr, 8, 20, PI), m, piv); arc.rotation.z = PI / 2; arc.position.x = xe + Ra;
-      for (const sd of [-1, 1]) { const f = C.add('prop-anchor-fluke', new THREE.ConeGeometry(rr * 2.6, rr * 5, 4), m, piv); f.position.set(xe + Ra + rr * 1.5, sd * Ra, 0); f.rotation.z = -PI / 2 - sd * 0.5; f.scale.z = 0.4; }
-      return;
-    }
-    case 'curl': C.tube('syn-curl', [V3(0.04 * l, 0, 0), V3(-l * 0.35, -h * 0.02, 0), V3(-l * 0.7, h * 0.12, 0), V3(-l * 0.82, h * 0.42, 0), V3(-l * 0.68, h * 0.68, 0), V3(-l * 0.45, h * 0.66, 0), V3(-l * 0.4, h * 0.48, 0), V3(-l * 0.5, h * 0.42, 0)], r0, r0 * 0.12, C.skin(), { radial: 10, seg: 26 }, piv); return;
-    case 'leaf': {   // 枫叶：五裂掌状 + 细锯齿 + 叶柄
-      const cx = -l * 0.62, p = [[0.06 * l, 0]];
-      for (let i = 0; i <= 30; i++) { const th = lerp(-2.5, 2.5, i / 30), r = l * (0.3 + 0.42 * Math.abs(Math.cos(th * 1.25)) ** 1.6) * (i % 2 ? 0.95 : 1); p.push([cx - Math.cos(th) * r, Math.sin(th) * r * h / l]); }
-      F2(p, 'tail-leaf');
-      C.tube('prop-petiole', [V3(0.02 * l, 0, 0), V3(cx, 0, 0)], h * 0.03, h * 0.02, C.mat(shade(fin, 0.6), 'matte'), { radial: 5, seg: 2 }, piv); return;
-    }
-    case 'rocket': {   // 喷口 + 尾焰 + 三翼
-      const met = solid('#c8cdd2', 'metal'); r0 = Math.max(r0, h * 0.24);
-      const nz = C.add('prop-nozzle', lathe([[r0 * 0.95, 0], [r0 * 0.75, -l * 0.12], [r0 * 1.0, -l * 0.3], [r0 * 1.35, -l * 0.45], [r0 * 1.25, -l * 0.46]], 18), C.mat('#c8cdd2', 'metal', { side: THREE.DoubleSide }), piv); nz.rotation.z = -PI / 2;
-      void met;
-      const fl1 = new THREE.Mesh(new THREE.ConeGeometry(r0 * 1.15, l * 0.9, 14, 1, true), new THREE.MeshBasicMaterial({ color: '#ffae4a', transparent: true, opacity: 0.7, depthWrite: false, side: THREE.DoubleSide }));
-      fl1.name = 'flame'; fl1.rotation.z = PI / 2; fl1.position.x = -l * 0.45 - l * 0.45; piv.add(fl1);
-      const fl2 = new THREE.Mesh(new THREE.ConeGeometry(r0 * 0.6, l * 0.5, 12, 1, true), new THREE.MeshBasicMaterial({ color: '#fff4c8', transparent: true, opacity: 0.9, depthWrite: false }));
-      fl2.name = 'flame-core'; fl2.rotation.z = PI / 2; fl2.position.x = -l * 0.45 - l * 0.25; piv.add(fl2);
-      const fm = C.mat(pal[2], C.solidKind('glaze'));
-      for (let j = 0; j < 3; j++) {
-        const f = C.add('prop-rocketfin', plateGeo([[0.1 * l, 0], [-l * 0.42, h * 0.62], [-l * 0.55, h * 0.58], [-l * 0.42, 0]], h * 0.04, { bevel: h * 0.012, bs: 1 }), fm, piv);
-        f.rotation.x = (j / 3) * TAU + PI / 2; f.position.x = -l * 0.05;
-      }
-      return;
-    }
-    default: F2([[0.06 * l, 0], [-l, h], [-l * 0.87, h * 0.33], [-l * 0.46, 0], [-l * 0.87, -h * 0.33], [-l, -h]]);
-  }
+// ---- 胸鳍 / 腹鳍（左右严格镜像） ----
+function pectOutline(k, l, h) {
+  return {
+    std: [[0.04, 0], [-l, -h * 0.55], [-l * 0.75, h * 0.2], [0, h * 0.3]],
+    fan: [[0.04, 0], [-l * 0.55, -h * 0.75], [-l * 0.95, -h * 0.35], [-l * 1.0, h * 0.15], [-l * 0.6, h * 0.45], [0, h * 0.3]],
+    long: [[0.04, 0], [-l * 0.9, -h * 0.5], [-l * 1.75, -h * 0.85], [-l * 1.15, -h * 0.15], [-l * 0.3, h * 0.25], [0, h * 0.28]],
+    bow: [[0.04, 0], [-l * 0.5, -h * 0.78], [-l * 0.86, -h * 0.62], [-l * 0.6, 0], [-l * 0.86, h * 0.62], [-l * 0.5, h * 0.78], [0, h * 0.25]],
+  }[k] || [[0.04, 0], [-l, -h * 0.55], [-l * 0.75, h * 0.2], [0, h * 0.3]];
 }
-
-// ---------------- 胸鳍 ----------------
 function buildPect(C) {
-  const { g, F, L, H, S, pal, s } = C;
-  const k = shapeOf('pect', g.pect.k, 'std'); if (k === 'none') return;
-  const sK = clamp(+g.pect.s || 1, 0.3, 3.2);
-  const uP = clamp(F.pk + (1 - F.pk) * 0.08, 0.3, 0.85), aP = 0.66 * PI;
-  const pl0 = (0.38 * H + 0.22 * S) * sK, fin = C.finC;
+  const { g, s } = C, k = g.pect.k;
+  const uP = clamp(C.eye.u - 0.17, 0.55, 0.75), yf = -0.36;
+  const l = (0.11 + 0.3 * C.mhW) * g.pect.s * [1.08, 1.22, 1.38, 1.5][C.lux - 1], h = l * 0.62;
+  const z = surfZ(C, uP, yf) * 0.92, col = mixc(g.pal[3], g.pal[1], 0.22);
+  let pts = pectOutline(k, l, h);
+  if (g.scal && k !== 'std') pts = [pts[0], ...scallop(pts.slice(1, -1), l * 0.035), pts[pts.length - 1]];
   for (const side of [-1, 1]) {
-    const ks = 1 + C.asym * 0.35 * side, l = pl0 * ks, h = l * 0.5;
-    const p = F.pt(uP, side * aP); p.z *= 0.95;
-    const pos = [p.x, p.y, p.z];
-    const F2 = (pts, rot, name = `pectoral-${side}`, o = {}) => { const m = s.fin(C.nm(name), pts, o.color || fin, o.pos || pos, rot, s.root, o.thick || C.th); s.wiggle(m, 'x', o.amp ?? 0.17, 3.2, side * 0.65); return m; };
-    const std = (q = 1) => F2([[0.12 * l * q, 0], [-l * q, -h * q], [-l * 0.68 * q, h * 0.17 * q], [0.02 * l * q, h * 0.28 * q]], [side * 0.6, side * -0.32, 0]);
-    switch (k) {
-      case 'std': std(); break;
-      case 'long': F2([[0.12 * l, 0], [-l * 2.3, -h * 0.9], [-l * 2.1, -h * 0.55], [-l * 1.0, h * 0.1], [0.02 * l, h * 0.3]], [side * 0.75, side * -0.25, 0]); break;
-      case 'wing': {
-        if (g.mat === 'paper') {   // 纸鹤翼：折痕棱面
-          const m = C.add(`pectoral-wing-${side}`, plateGeo([[0.1 * l, 0], [-l * 0.2, h * 0.5], [-l * 1.5, h * 2.7], [-l * 1.15, h * 0.7], [-l * 0.5, -h * 0.1]], C.th * 1.4, { bevel: 0 }), C.mat(mixc(pal[0], pal[1], 0.4), 'paper', { side: THREE.DoubleSide }));
-          m.position.set(...pos); m.rotation.set(side * 1.15, side * -0.12, 0); s.wiggle(m, 'x', 0.22, 2.4, side * 0.65);
-        } else F2([[0.12 * l, 0], [-l * 0.5, h * 0.7], [-l * 1.5, h * 1.6], [-l * 2.1, h * 1.35], [-l * 1.9, h * 0.6], [-l * 1.2, -h * 0.05], [-l * 0.5, -h * 0.25]], [side * 1.15, side * -0.12, 0], `pectoral-wing-${side}`, { amp: 0.22 });
-        break;
-      }
-      case 'fan': { const q = [[0.12 * l, 0]]; for (let j = 0; j <= 10; j++) { const th = lerp(-1.3, 1.0, j / 10), r = l * 1.05 * (j % 2 ? 0.92 : 1); q.push([-Math.cos(th) * r * 0.9, Math.sin(th) * r * 0.75]); } F2(q, [side * 0.7, side * -0.35, 0]); break; }
-      case 'frill': {   // 裙边鳍：沿体侧的波浪薄膜
-        const u0 = 0.1, u1 = Math.min(F.pk + 0.22, 0.9), q = [], N = 16;
-        for (let i = 0; i <= N; i++) { const u = lerp(u1, u0, i / N); q.push([F.x(u), F.wz(u) * 0.85 + (0.16 * H + 0.12 * S) * sK * (0.75 + 0.25 * Math.sin(i * 1.7)) * Math.sin(PI * (i / N)) ** 0.5]); }
-        for (let i = N; i >= 0; i -= 4) { const u = lerp(u1, u0, i / N); q.push([F.x(u), F.wz(u) * 0.8]); }
-        F2(q, [side * (PI / 2 + 0.35), 0, 0], `pectoral-frill-${side}`, { pos: [0, F.yc(0.5) - 0.3 * F.hb(0.5), 0], amp: 0.04 });
-        break;
-      }
-      case 'leg': {   // 肉质叶状鳍（腔棘鱼）
-        const b = V3(...pos), e = b.clone().add(V3(-l * 0.55, -l * 0.42, side * l * 0.25));
-        C.tube('syn-leglobe', [b, b.clone().lerp(e, 0.5).add(V3(0, -l * 0.05, 0)), e], l * 0.17, l * 0.08, C.skin(mixc(pal[0], pal[1], 0.3)), { radial: 9, seg: 10 });
-        F2([[0.05 * l, 0], [-l * 0.55, -h * 0.5], [-l * 0.62, 0], [-l * 0.5, h * 0.4]], [side * 0.5, side * -0.5, -0.6], `pectoral-${side}`, { pos: [e.x, e.y, e.z] });
-        break;
-      }
-      case 'paddle': F2([[0.12 * l, 0], [-l * 0.4, -h * 0.6], [-l * 1.5, -h * 1.2], [-l * 1.7, -h * 0.95], [-l * 0.9, h * 0.15], [0.02 * l, h * 0.3]], [side * 1.0, side * -0.4, 0], `pectoral-paddle-${side}`, { thick: Math.max(0.05 * L / 1.6, 0.041) }); break;
-      case 'bow': {   // 领结：喉侧一枚缎面蝴蝶结 + 小胸鳍
-        std(0.6);
-        const uT = F.pk + (1 - F.pk) * 0.3, aT = side * 0.78 * PI, q0 = F.pt(uT, aT), n = F.nrm(uT, aT);
-        const b = clamp(0.3 * F.ht(uT) + 0.1 * S, 0.035 * L, 0.085 * L);
-        const grp = C.group('prop-bow', [0, 0, 0]); grp.position.copy(q0).addScaledVector(n, b * 0.05); grp.quaternion.copy(quatN(n));
-        const pts = [[0, 0.2 * b], [0.85 * b, 0.68 * b], [1.05 * b, 0.32 * b], [1.05 * b, -0.32 * b], [0.85 * b, -0.68 * b], [0, -0.2 * b], [-0.85 * b, -0.68 * b], [-1.05 * b, -0.32 * b], [-1.05 * b, 0.32 * b], [-0.85 * b, 0.68 * b]];
-        const sat = C.mat(pal[2], 'satin');
-        C.add('prop-bow', plateGeo(pts, b * 0.22, { smooth: 3, bevel: b * 0.12 }), sat, grp);
-        C.ball('prop-bow-knot', V3(0, 0, b * 0.14), [b * 0.24, b * 0.3, b * 0.2], sat, grp);
-        break;
-      }
-    }
+    const rot = k === 'bow' ? [side * 0.2, side * -0.55, 0] : [side * 0.6, side * -0.32, 0];
+    const fin = s.fin(`pectoral-${side}`, pts, col, [X(uP), C.Hh(uP) * yf, side * z], rot);
+    finSyn(fin);
+    s.wiggle(fin, 'x', 0.16, 3.0, side * 0.65);
   }
 }
-// ---------------- 腹鳍 / 臀鳍 ----------------
-function buildVentral(C) {
-  const { g, F, H, S, s } = C;
-  const fin = C.finC;
-  const pv = clamp(+g.pelv || 0, 0, 2), an = clamp(+g.anal || 0, 0, 2);
-  if (pv > 0.05 && g.plan !== 'eel') for (const side of [-1, 1]) {
-    const v = (0.24 * H + 0.14 * S) * pv, p = F.pt(clamp(F.pk - 0.05, 0.25, 0.8), side * 0.88 * PI);
-    const m = s.fin(C.nm(`ventral-${side}`), [[0.1 * v, 0], [-v, -v * 0.55], [-v * 0.75, -v * 0.05], [0, v * 0.1]], fin, [p.x, p.y, p.z * 0.9], [side * 0.3, side * -0.15, 0], s.root, C.th);
-    s.wiggle(m, 'x', 0.1, 2.6, side);
-  }
-  if (an > 0.05) {
-    if (g.plan === 'eel') medianFin(C, 'anal-fin', 0.55, 0.03, (0.3 * H + 0.12 * S) * an, [[0, 0], [0.05, 0.6], [0.5, 0.7], [0.95, 0.6], [1.05, 0.1]], fin, { down: true });
-    else medianFin(C, 'anal-fin', 0.36, 0.16, (0.32 * H + 0.12 * S) * an, OUT.anal, fin, { down: true });
-  }
-}
-
-// ---------------- 附肢 / 饰物（app） ----------------
-// 合并多块小几何（同材质的刺 / 珍珠 / 发光器 / 铆钉…）→ 1 个 draw call
-function mergeGeos(list) {
-  const pos = [], nor = [];
-  for (const g0 of list) {
-    const g = g0.index ? g0.toNonIndexed() : g0;
-    if (!g.getAttribute('normal')) g.computeVertexNormals();
-    pos.push(...g.getAttribute('position').array); nor.push(...g.getAttribute('normal').array);
-    if (g !== g0) g.dispose();
-    g0.dispose();
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
-  return geo;
-}
-const _M4 = new THREE.Matrix4(), _S3 = new THREE.Vector3();
-function placed(geo, pos, quat, scl) { _S3.set(...(Array.isArray(scl) ? scl : [scl, scl, scl])); return geo.applyMatrix4(_M4.compose(pos, quat || new THREE.Quaternion(), _S3)); }
-// y 轴 = dir、z 轴尽量贴近 zHint 的正交基
-function basisQ(yDir, zHint = AX.x) {
-  const y = yDir.clone().normalize();
-  let z = zHint.clone().addScaledVector(y, -zHint.dot(y));
-  if (z.lengthSq() < 1e-6) z = AX.z.clone().addScaledVector(y, -y.z);
-  z.normalize();
-  const x = y.clone().cross(z);
-  return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, z));
-}
-const ringPts = (F, u, ex, n = 20) => { const p = []; for (let i = 0; i < n; i++) p.push(F.pt(u, (i / n) * TAU + 1e-3, ex)); return p; };
-
-const APP_OK = new Set(['tentacle', 'arms', 'legs', 'claws', 'antennae', 'barbels', 'barbel', 'lure', 'horn', 'spikes', 'shell', 'crown', 'coronet', 'mane', 'tophat', 'pearls', 'photo', 'bells', 'band', 'plates', 'swirl', 'calyx', 'flower', 'strings', 'ribbons', 'gills']);
-export const SYN_APPS = [...APP_OK];
-
-function buildApps(C) {
-  const seen = new Set();
-  for (const raw of C.g.app) {
-    const [b0, v] = String(raw).split(':');
-    const b = b0 === 'barbel' ? 'barbels' : b0;
-    if (!APP_OK.has(b) || seen.has(b + ':' + (v || ''))) continue;
-    seen.add(b + ':' + (v || ''));
-    try { APP[b]?.(C, v); } catch (e) { console.warn('[synth] app', raw, e); }
+function buildPelv(C) {
+  const { g, s } = C, k = g.pelv.k;
+  const uV = clamp(C.eye.u - 0.27, 0.48, 0.66), yf = -0.8;
+  const l = (0.06 + 0.2 * C.mhW) * g.pelv.s, h = l, L = C.lux;
+  // 丝状腹鳍：史诗+ 变成细长飘带（斗鱼 / 神仙鱼式的腹鳍长丝）
+  const pts = k === 'fil'
+    ? [[0.03, 0], [-l * 0.3, -h * 0.55], [-l * (0.8 + 0.3 * L), -h * (1.0 + 0.22 * L)], [-l * (1.5 + 0.5 * L), -h * (1.4 + 0.32 * L)], [-l * (1.0 + 0.32 * L), -h * (0.8 + 0.2 * L)], [-l * 0.45, -h * 0.35], [-l * 0.12, -h * 0.05]]
+    : [[0.03, 0], [-l * 0.35, -h * 0.9], [-l * 0.7, -h * 0.75], [-l * 0.2, -h * 0.08]];
+  const z = surfZ(C, uV, yf) * 0.7;
+  for (const side of [-1, 1]) {
+    const fin = s.fin(`pelvic-${side}`, pts, g.pal[3], [X(uV), C.Hh(uV) * yf, side * z], [side * 0.3, 0, 0]);
+    finSyn(fin);
+    s.wiggle(fin, 'x', 0.1, 2.4, side * 0.5 + 1);
   }
 }
-
-const APP = {
-  tentacle(C, v) {
-    const { g, F, L, S, s, pal } = C;
-    const n = clamp(parseInt(v, 10) || 8, 2, 14);
-    const round = ['globe', 'disc', 'flat'].includes(g.plan) || g.head === 'dome';
-    const u0 = round ? clamp(F.pk * 0.9, 0.35, 0.6) : clamp(F.pk + 0.04, 0.35, 0.8), du = round ? 0.18 : 0.1;
-    const glass = ['crystal', 'glow'].includes(g.mat);
-    const len = (round ? 0.75 : 0.5) * L * (glass ? 1.25 : 1);
-    const r0 = clamp((glass ? 0.025 : 0.06) * S + 0.004 * L, 0.004 * L, 0.035 * L);
-    const m = glass ? C.mat(mixc(pal[2], '#ffffff', 0.3), 'glow', { glow: 0.4 + 0.6 * (g.glow || 0) }) : C.skin(mixc(pal[0], pal[3], 0.3));
-    for (let i = 0; i < n; i++) {
-      const ph = (i / n) * TAU + 0.3, cu = Math.cos(ph), su = Math.sin(ph);
-      const p = F.pt(clamp(u0 + cu * du, 0.05, 0.95), PI - 0.6 * su, 0.9);
-      const grp = C.group('tentacle', [p.x, p.y, p.z]);
-      const l = len * (0.8 + 0.4 * C.R()), out = V3(cu * 0.35, 0, su * 0.5);
-      const pts = [V3(0, 0.02 * L, 0), V3(out.x * l * 0.3 - 0.05 * l, -0.25 * l, out.z * l * 0.3), V3(out.x * l * 0.4 - 0.2 * l, -0.6 * l, out.z * l * 0.45), V3(out.x * l * 0.3 - 0.42 * l, -0.85 * l, out.z * l * 0.5 + 0.06 * l * Math.sin(i))];
-      C.tube('tentacle-arm', pts, r0, r0 * 0.12, m, { radial: 6, seg: 12 }, grp);
-      s.wiggle(grp, 'z', 0.12, 1.8, i * 0.8); s.wiggle(grp, 'x', 0.08, 1.3, i * 1.3);
-    }
-  },
-  arms(C, v) {   // 星状腕：水平放射、扁圆截面
-    const { g, F, L, H, s, pal } = C;
-    const n = clamp(parseInt(v, 10) || 5, 3, 9), c = V3(F.x(0.5), F.yc(0.5), 0);
-    const r0 = clamp(0.7 * H, 0.04 * L, 0.12 * L), len = 0.5 * L;
-    const m = C.skin(pal[0]);
-    for (let i = 0; i < n; i++) {
-      const ph = (i / n) * TAU;
-      const grp = C.group('arm', [c.x, c.y, c.z]); grp.rotation.y = ph;
-      const t = C.tube('arm-limb', [V3(0, 0, 0), V3(len * 0.5, 0.02 * L, 0), V3(len, -0.01 * L, 0)], r0, r0 * 0.18, m, { radial: 8, seg: 10 }, grp);
-      t.scale.y = 0.5;
-      s.wiggle(grp, 'z', 0.06, 1.2, i);
-    }
-  },
-  legs(C, v) {   // 节肢步足：大腿外展上抬 → 膝 → 小腿下插
-    const { g, F, L, S, s, pal } = C;
-    const n = clamp(parseInt(v, 10) || 6, 2, 10), per = Math.max(1, Math.round(n / 2));
-    const len = clamp(0.5 * S + 0.18 * L, 0.18 * L, 0.42 * L), r = clamp(0.035 * S + 0.006 * L, 0.006 * L, 0.025 * L);
-    const m = C.skin(mixc(pal[0], pal[3], 0.25)), jm = C.skin(shade(pal[0], 0.8));
-    for (const side of [-1, 1]) for (let j = 0; j < per; j++) {
-      const u = clamp(lerp(F.pk + 0.08, Math.max(F.pk - 0.32, 0.12), per > 1 ? j / (per - 1) : 0.5), 0.08, 0.92);
-      const p = F.pt(u, side * 0.64 * PI, 0.92);
-      const grp = C.group('leg', [p.x, p.y, p.z]);
-      const sw = (j - (per - 1) / 2) * 0.12;
-      const knee = V3(-sw * len, 0.22 * len, side * 0.5 * len), foot = V3(-sw * len * 1.6 - 0.05 * len, -0.6 * len + (F.bot(u) - p.y), side * 0.78 * len);
-      C.tube('leg-femur', [V3(0, 0, 0), knee.clone().multiplyScalar(0.5).add(V3(0, 0.04 * len, 0)), knee], r, r * 0.85, m, { radial: 6, seg: 6 }, grp);
-      C.tube('leg-tibia', [knee, knee.clone().lerp(foot, 0.5).add(V3(0, 0.02 * len, side * 0.05 * len)), foot], r * 0.85, r * 0.2, m, { radial: 6, seg: 8 }, grp);
-      C.ball('leg-knee', knee, [r * 1.05, r * 1.05, r * 1.05], jm, grp);
-      s.wiggle(grp, 'x', 0.05, 2.4, j * 1.4 + (side > 0 ? 0 : PI));
-    }
-  },
-  claws(C, v) {
-    const { g, F, L, S, s, pal } = C;
-    const q = clamp(0.35 * S + 0.07 * L, 0.08 * L, 0.2 * L), r = clamp(0.06 * q, 0.006 * L, 0.02 * L);
-    const m = C.skin(mixc(pal[0], pal[3], 0.2)), tipM = C.mat(shade(pal[2], 0.7), 'glaze');
-    const club = v === 'club';
-    for (const side of [-1, 1]) {
-      const p = F.pt(F.pk + (1 - F.pk) * 0.3, side * 0.6 * PI, 0.92);
-      const grp = C.group('claw', [p.x, p.y, p.z]);
-      const el = V3(0.25 * q, -0.08 * q, side * 0.45 * q), wr = V3(0.75 * q, 0.02 * q, side * 0.5 * q);
-      C.tube('claw-arm', [V3(0, 0, 0), el, wr], r * 1.1, r * 0.9, m, { radial: 7, seg: 10 }, grp);
-      if (club) {
-        C.ball('claw-club', wr.clone().add(V3(0.12 * q, 0, 0)), [0.2 * q, 0.15 * q, 0.15 * q], C.mat(mixc(pal[2], pal[0], 0.2), 'glaze'), grp);
-      } else {
-        C.ball('claw-palm', wr.clone().add(V3(0.15 * q, 0, 0)), [0.24 * q, 0.13 * q, 0.1 * q], m, grp);
-        const b = wr.clone().add(V3(0.32 * q, 0, 0));
-        C.tube('claw-finger', [b.clone().add(V3(0, 0.05 * q, 0)), b.clone().add(V3(0.22 * q, 0.08 * q, 0)), b.clone().add(V3(0.38 * q, 0.0, 0))], 0.08 * q, 0.01 * q, tipM, { radial: 7, seg: 8 }, grp);
-        C.tube('claw-finger', [b.clone().add(V3(0, -0.04 * q, 0)), b.clone().add(V3(0.18 * q, -0.07 * q, 0)), b.clone().add(V3(0.3 * q, -0.02 * q, 0))], 0.065 * q, 0.01 * q, m, { radial: 7, seg: 8 }, grp);
-      }
-      s.wiggle(grp, 'y', 0.12 * side, 1.5, side);
-    }
-  },
-  antennae(C) {
-    const { F, L, s, pal } = C;
-    const m = C.skin(shade(pal[3], 0.75));
-    for (const side of [-1, 1]) {
-      const p = F.pt(0.93, side * 0.3, 0.95), grp = C.group('antenna', [p.x, p.y, p.z]);
-      C.tube('antenna-whip', [V3(0, 0, 0), V3(0.1 * L, 0.12 * L, side * 0.04 * L), V3(0.02 * L, 0.26 * L, side * 0.12 * L), V3(-0.35 * L, 0.33 * L, side * 0.2 * L), V3(-0.75 * L, 0.26 * L, side * 0.26 * L)], 0.007 * L, 0.0012 * L, m, { radial: 5, seg: 20 }, grp);
-      s.wiggle(grp, 'x', 0.08, 2.2, side);
-    }
-  },
-  barbels(C) {
-    const { F, L, s, pal } = C;
-    const m = C.skin(shade(pal[3], 0.85)), rm = 0.006 * L;
-    for (const side of [-1, 1]) {
-      const b = F.pt(0.965, side * 0.72 * PI, 1.0), grp = C.group('barbel', [b.x, b.y, b.z]);
-      for (const j of [0, 1]) { const len = (0.2 - j * 0.07) * L; C.tube('barbel-whisker', [V3(0, 0, 0), V3(0.02 * L, -0.05 * L, side * 0.015 * L), V3(-len * 0.4, -len * 0.5, side * (0.04 + 0.03 * j) * L), V3(-len * 0.8, -len * 0.4, side * (0.05 + 0.05 * j) * L)], rm, rm * 0.2, m, { radial: 5, seg: 10 }, grp); }
-      s.wiggle(grp, 'z', 0.1, 1.6, side);
-    }
-  },
-  gills(C) {
-    const { F, L, pal } = C, u = F.pk + (1 - F.pk) * 0.45;
-    for (const side of [-1, 1]) { const pts = []; for (let i = 0; i <= 6; i++) pts.push(F.pt(u - 0.02 * Math.sin(PI * i / 6), side * lerp(0.25, 0.85, i / 6) * PI, 1.01)); C.tube('gill', pts, 0.004 * L, 0.004 * L, C.mat(shade(pal[0], 0.55), 'matte'), { radial: 5, seg: 10 }); }
-  },
-  lure(C) {   // 头顶钓竿 + 发光饵球
-    const { g, F, L, s, pal } = C;
-    const b = C.headTop(F.pk + (1 - F.pk) * 0.6), grp = C.group('lure', [b.x, b.y - 0.005 * L, 0]);
-    const tip = V3(0.26 * L, 0.13 * L, 0);
-    C.tube('lure-rod', [V3(0, 0, 0), V3(0.05 * L, 0.15 * L, 0), V3(0.18 * L, 0.22 * L, 0), tip], 0.008 * L, 0.003 * L, C.skin(shade(pal[0], 0.85)), { radial: 6, seg: 14 }, grp);
-    const gm = physMat(mixc(pal[2], '#fff6c8', 0.25), 'glow', { glow: 1.6 + (g.glow || 0), glowColor: mixc(pal[2], '#fff2b0', 0.4) });
-    C.ball('lure-bulb', tip.clone().add(V3(0, -0.02 * L, 0)), [0.035 * L, 0.04 * L, 0.035 * L], gm, grp);
-    s.wiggle(grp, 'z', 0.1, 1.4); s.wiggle(grp, 'x', 0.08, 1.1, 0.6);
-  },
-  horn(C, v) {
-    const { g, F, L, S, s, pal } = C;
-    const ivory = C.mat(mixc(pal[1], '#f2e8d2', 0.6), C.solidKind('glaze'));
-    if (v === 'bill') {
-      if (C.billEnd) return;
-      const u = 0.965, r0 = Math.max(0.3 * F.ht(u), 0.012 * L), b = V3(F.x(u), F.yc(u) + 0.15 * F.ht(u), 0), len = 0.3 * L;
-      C.tube('syn-bill', [b, b.clone().add(V3(len * 0.5, -0.004 * L, 0)), b.clone().add(V3(len, 0.004 * L, 0))], r0, r0 * 0.08, C.skin(shade(pal[0], 0.85)), { radial: 10, seg: 12 });
-      return;
-    }
-    if (v === 'cephalic') {   // 蝠鲼头鳍：两片向前卷的厚膜
-      for (const side of [-1, 1]) {
-        const p = F.pt(0.975, side * 0.5 * PI, 0.9), l = clamp(0.12 * L, 0.05 * L, 0.2 * L);
-        const m = s.fin(C.nm(`horn-cephalic-${side}`), [[0, 0.01 * L], [l * 0.6, 0.02 * L], [l, -0.005 * L], [l * 0.95, -0.04 * L], [l * 0.4, -0.05 * L], [0, -0.03 * L]], C.finC, [p.x, p.y, p.z], [side * 1.1, side * 0.15, 0], s.root, Math.max(C.th * 3.5, 0.041));
-        s.wiggle(m, 'x', 0.08, 1.7, side);
-      }
-      return;
-    }
-    // 螺旋长角（独角鲸 / 独角兽）：棱纹螺旋锥
-    const fore = !!C.billEnd || g.head === 'spout';
-    const b = fore ? V3(F.x(0.9), F.top(0.9) - 0.01 * L, 0) : V3(F.x(0.985), F.yc(0.985) + 0.35 * F.ht(0.975), 0);
-    const dir = fore ? V3(0.8, 0.6, 0).normalize() : V3(1, 0.05, 0).normalize(), len = 0.5 * L;
-    const r0 = clamp(0.25 * S, 0.012 * L, 0.035 * L);
-    C.tube('horn-spiral', [b, b.clone().addScaledVector(dir, len * 0.5), b.clone().addScaledVector(dir, len)], r0, r0 * 0.06, ivory, { radial: 10, seg: 36, rib: 0.16, ribN: 2, twist: 48 });
-  },
-  spikes(C) {   // 满身棘刺（斐波那契分布、沿法线）
-    const { F, L, S, pal } = C, geos = [], cone = new THREE.ConeGeometry(1, 1, 6); cone.translate(0, 0.5, 0);
-    const n = 30, len = clamp(0.22 * S, 0.02 * L, 0.07 * L);
-    for (let i = 0; i < n; i++) {
-      const u = lerp(0.14, 0.9, (i + 0.5) / n), a = ((i * 2.39996) % TAU) - PI;
-      if (Math.abs(a) > 0.86 * PI) continue;
-      const p = F.pt(u, a, 0.96), nn = F.nrm(u, a).add(V3(-0.35, 0, 0)).normalize();
-      const k = 0.7 + 0.3 * Math.sin(i * 1.7);
-      geos.push(placed(cone.clone(), p, quatY(nn), [len * 0.16, len * k, len * 0.16]));
-    }
-    cone.dispose();
-    C.add('prop-spikes', mergeGeos(geos), C.mat(mixc(C.finC, pal[2], 0.4), C.solidKind('glaze')));
-  },
-  shell(C) {   // 背甲 + 六角盾片
-    const { F, L, pal } = C, u0 = Math.max(F.pk - 0.34, 0.08), u1 = Math.min(F.pk + 0.16, 0.9);
-    const sm = C.mat(mixc(pal[3], pal[2], 0.35), C.solidKind('glaze'));
-    C.add('prop-shell', shellGeometry(F, u0, u1, 1.3, 1.14, 14, 18), sm);
-    const hex = new THREE.CylinderGeometry(1, 1, 1, 6), geos = [];
-    for (const [t, a] of [[0.2, 0], [0.5, 0], [0.8, 0], [0.33, 0.62], [0.67, 0.62], [0.33, -0.62], [0.67, -0.62]]) {
-      const u = lerp(u0, u1, t), p = F.pt(u, a, 1.15), nn = F.nrm(u, a), rr = clamp(0.24 * (F.ht(u) + F.wz(u)) * 0.5, 0.02 * L, 0.08 * L);
-      geos.push(placed(hex.clone(), p, quatY(nn), [rr, 0.12 * rr, rr]));
-    }
-    hex.dispose();
-    C.add('prop-scutes', mergeGeos(geos), C.mat(mixc(pal[3], pal[1], 0.25), C.solidKind('glaze')));
-  },
-  crown(C) {
-    const { F, L, pal } = C, u = F.pk + (1 - F.pk) * 0.45, b = C.headTop(u);
-    const rc = clamp(0.5 * F.wz(u) + 0.15 * F.ht(u), 0.035 * L, 0.1 * L), hc = rc * 0.55;
-    const gold = C.mat('#e0b64e', 'gold', { side: THREE.DoubleSide });
-    const grp = C.group('prop-crown', [b.x, b.y - hc * 0.25, 0]); grp.rotation.z = -0.12;
-    C.add('prop-crown', new THREE.CylinderGeometry(rc * 1.12, rc, hc, 16, 1, true), gold, grp).position.y = hc / 2;
-    const gem = physMat(mixc(pal[2], '#ff3a5a', 0.3), 'crystal', { glow: 0.35, glowColor: pal[2] });
-    const cone = new THREE.ConeGeometry(1, 1, 5), geos = [];
-    for (let i = 0; i < 6; i++) { const a = (i / 6) * TAU; geos.push(placed(cone.clone(), V3(Math.cos(a) * rc * 1.1, hc + rc * 0.22, Math.sin(a) * rc * 1.1), null, [rc * 0.2, rc * 0.45, rc * 0.2])); }
-    cone.dispose();
-    C.add('prop-crown-tips', mergeGeos(geos), gold, grp);
-    for (let i = 0; i < 6; i++) { const a = (i / 6) * TAU + PI / 6; C.ball('prop-crown-gem', V3(Math.cos(a) * rc * 1.06, hc * 0.45, Math.sin(a) * rc * 1.06), [rc * 0.09, rc * 0.09, rc * 0.09], gem, grp); }
-  },
-  coronet(C) {
-    const { F, L, pal } = C, b = C.headTop(F.pk + (1 - F.pk) * 0.35), r = clamp(0.25 * F.ht(F.pk), 0.012 * L, 0.04 * L);
-    const cone = new THREE.ConeGeometry(1, 1, 6), geos = [];
-    for (let i = 0; i < 5; i++) { const a = (i / 5) * TAU; geos.push(placed(cone.clone(), b.clone().add(V3(Math.cos(a) * r * 0.6, r * 0.7, Math.sin(a) * r * 0.6)), quatY(V3(Math.cos(a) * 0.5, 1, Math.sin(a) * 0.5)), [r * 0.3, r * 1.3, r * 0.3])); }
-    geos.push(placed(new THREE.CylinderGeometry(1, 1.2, 1, 8), b.clone().add(V3(0, r * 0.3, 0)), null, [r * 0.7, r * 0.8, r * 0.7]));
-    cone.dispose();
-    C.add('prop-coronet', mergeGeos(geos), C.skin(mixc(pal[0], pal[2], 0.3)));
-  },
-  mane(C, v) {
-    const { g, F, L, S, s, pal } = C, u = C.uNeck;
-    if (v === 'knit') {   // 针织麻花领：两圈螺旋棱纹管
-      const m = C.mat(mixc(pal[2], pal[1], 0.2), 'matte');
-      for (const [du, ex] of [[0, 1.12], [-0.035, 1.1]]) C.tube('prop-knit', ringPts(F, clamp(u + du, 0.05, 0.95), ex, 16), clamp(0.18 * S, 0.018 * L, 0.05 * L), 0, m, { closed: true, radial: 8, seg: 40, prof: () => clamp(0.18 * S, 0.018 * L, 0.05 * L), rib: 0.22, ribN: 3, twist: 90 });
-      return;
-    }
-    if (v === 'crest') {   // 头顶红色冠鬃：一排拉长鳍条
-      const out = [[0, 0]], N = 7;
-      for (let i = 0; i < N; i++) { const t = i / (N - 1); out.push([0.06 + t * 0.9, 1 - 0.55 * t + 0.25 * Math.sin(i * 2.1)], [0.1 + t * 0.9, 0.3 * (1 - t)]); }
-      out.push([1.05, 0.03]);
-      const r = medianFin(C, 'mane-crest', Math.min(0.99, F.pk + (1 - F.pk) * 0.85), F.pk + (1 - F.pk) * 0.25, 0.22 * L, out, mixc(pal[2], '#e2484f', 0.4));
-      s.wiggle(r.fin, 'x', 0.05, 2.1);
-      return;
-    }
-    // 花瓣鬃 / 毒棘长鬃：一圈向外后方展开的片
-    const spine = v === 'spine', n = spine ? 9 : 12, col = spine ? mixc(pal[2], C.finC, 0.3) : mixc(pal[2], pal[1], 0.3);
-    for (let i = 0; i < n; i++) {
-      const a = spine ? lerp(-0.8, 0.8, i / (n - 1)) * PI : (i / n) * TAU + 0.2;
-      const p = F.pt(u, a, 0.95), nn = F.nrm(u, a), dir = nn.clone().multiplyScalar(spine ? 0.75 : 0.9).add(V3(spine ? -0.7 : -0.35, 0, 0)).normalize();
-      const grp = C.group('mane', [p.x, p.y, p.z]); grp.quaternion.copy(basisQ(dir, AX.x));
-      const l = spine ? clamp(0.6 * S + 0.12 * L, 0.12 * L, 0.36 * L) : clamp(0.35 * S + 0.04 * L, 0.05 * L, 0.16 * L), w = spine ? l * 0.09 : l * 0.4;
-      const pts = spine ? [[-w, 0], [-w * 0.6, l * 0.6], [0, l], [w * 0.8, l * 0.5], [w, 0]] : [[-w * 0.4, 0], [-w, l * 0.45], [-w * 0.6, l * 0.9], [0, l], [w * 0.6, l * 0.9], [w, l * 0.45], [w * 0.4, 0]];
-      s.fin(C.nm(spine ? 'mane-spine' : 'mane-petal'), pts, col, [0, 0, 0], [0, 0, 0], grp, C.th);
-      if (spine) C.tube('mane-ray', [V3(0, 0, 0), V3(0, l * 1.04, 0)], w * 0.25, w * 0.05, C.mat(shade(col, 0.6), 'matte'), { radial: 5, seg: 2 }, grp);
-      s.wiggle(grp, 'x', 0.05, 1.8, i * 0.6);
-    }
-  },
-  tophat(C) {
-    const { F, L, pal } = C, u = F.pk + (1 - F.pk) * 0.4, b = C.headTop(u);
-    const rc = clamp(0.45 * F.wz(u) + 0.2 * F.ht(u), 0.04 * L, 0.11 * L);
-    const blk = C.mat('#1d1b22', 'satin'), band = C.mat(pal[2], 'satin');
-    const grp = C.group('prop-tophat', [b.x, b.y - rc * 0.12, 0]); grp.rotation.z = -0.16; grp.rotation.x = 0.06;
-    C.add('prop-hat-brim', new THREE.CylinderGeometry(rc * 1.6, rc * 1.6, rc * 0.07, 24), blk, grp);
-    C.add('prop-hat-crown', new THREE.CylinderGeometry(rc * 1.02, rc * 0.95, rc * 1.35, 24), blk, grp).position.y = rc * 0.7;
-    C.add('prop-hat-band', new THREE.CylinderGeometry(rc * 0.985, rc * 0.97, rc * 0.25, 24), band, grp).position.y = rc * 0.18;
-  },
-  pearls(C) {
-    const { F, L, S, pal } = C, u = C.uNeck, n = 20, ring = ringPts(F, u, 1.04, n), geos = [], sp = new THREE.SphereGeometry(1, 10, 8);
-    const r = clamp(0.07 * S + 0.004 * L, 0.009 * L, 0.024 * L);
-    ring.forEach((p) => geos.push(placed(sp.clone(), p, null, r)));
-    const low = F.pt(u, PI, 1.04);
-    geos.push(placed(sp.clone(), low.clone().add(V3(0.005 * L, -r * 2.4, 0)), null, r * 1.8));
-    sp.dispose();
-    C.add('prop-pearls', mergeGeos(geos), C.mat(mixc(pal[1], '#f4efe6', 0.6), 'pearl'));
-  },
-  photo(C) {   // 体侧发光器阵列
-    const { g, F, L, pal } = C, geos = [], sp = new THREE.SphereGeometry(1, 8, 6), r = 0.009 * L;
-    for (const a of [0.62, 0.8]) for (const side of [-1, 1]) for (let i = 0; i < 10; i++) {
-      const u = lerp(0.12, Math.min(F.pk + 0.3, 0.92), i / 9), p = F.pt(u, side * a * PI, 1.0);
-      geos.push(placed(sp.clone(), p, null, r * (a > 0.7 ? 0.8 : 1)));
-    }
-    sp.dispose();
-    C.add('prop-photophores', mergeGeos(geos), physMat(mixc(pal[2], '#ffffff', 0.25), 'glow', { glow: 1.4 + (g.glow || 0), glowColor: pal[2] }));
-  },
-  bells(C) {   // 双铃头冠（闹钟）
-    const { F, L, pal } = C, u = F.pk + (1 - F.pk) * 0.4, b = C.headTop(u), rb = clamp(0.3 * F.wz(u) + 0.2 * F.ht(u), 0.03 * L, 0.08 * L);
-    const met = C.mat(mixc(pal[3], '#d8b25e', 0.35), C.solidKind('brass'));
-    for (const side of [-1, 1]) {
-      const grp = C.group('prop-bell', [b.x, b.y + rb * 0.15, side * rb * 0.75]); grp.rotation.x = -side * 0.55;
-      const bell = C.add('prop-bell', lathe([[0, rb * 0.95], [rb * 0.35, rb * 0.92], [rb * 0.75, rb * 0.65], [rb * 0.92, rb * 0.25], [rb * 1.0, 0], [rb * 0.9, rb * 0.02], [rb * 0.7, rb * 0.5], [0, rb * 0.75]], 18), met, grp); bell.position.y = rb * 0.2;
-      C.ball('prop-bell-knob', V3(0, rb * 1.2, 0), [rb * 0.13, rb * 0.13, rb * 0.13], met, grp);
-    }
-    const arc = C.add('prop-bell-hammer', new THREE.TorusGeometry(rb * 0.8, rb * 0.06, 6, 16, PI), met); arc.position.set(b.x, b.y + rb * 0.75, 0); arc.rotation.y = PI / 2;
-  },
-  band(C) {   // 腰环 / 颈环
-    const { g, F, L, S } = C, u = g.waist > 0.1 || g.plan === 'hourglass' ? 0.47 : Math.max(C.uNeck - 0.06, 0.3);
-    const r = clamp(0.06 * S + 0.006 * L, 0.008 * L, 0.03 * L), gold = C.mat(mixc(g.pal[2], '#caa55a', 0.5), C.solidKind('brass'));
-    for (const du of [-0.012, 0.012]) C.tube('prop-band', ringPts(F, clamp(u + du * (r / (0.02 * L)), 0.03, 0.97), 1.01, 24), r * 0.7, r * 0.7, gold, { closed: true, radial: 6, seg: 40 });
-    C.tube('prop-band', ringPts(F, u, 1.0, 24), r * 1.1, r * 1.1, C.mat(shade(g.pal[2], 0.8), C.solidKind('metal')), { closed: true, radial: 6, seg: 40 });
-  },
-  plates(C) {   // 铆接甲板：沿背部叠瓦
-    const { F, L, pal } = C, n = 5, u0 = 0.14, u1 = Math.min(F.pk + 0.2, 0.9), m = C.mat(mixc(pal[3], '#8a949c', 0.3), C.solidKind('metal'));
-    const rv = [], sp = new THREE.SphereGeometry(1, 6, 4);
-    for (let i = 0; i < n; i++) {
-      const a0 = lerp(u0, u1, i / n), a1 = lerp(u0, u1, (i + 1.25) / n);
-      C.add('prop-plate', shellGeometry(F, a0, Math.min(a1, 0.95), 1.15, 1.04 + i * 0.008, 6, 12), m);
-      for (let j = -2; j <= 2; j++) rv.push(placed(sp.clone(), F.pt(Math.min(a1, 0.95) - 0.012, j * 0.42, 1.05 + i * 0.008), null, 0.006 * L));
-    }
-    sp.dispose();
-    C.add('prop-rivets', mergeGeos(rv), C.mat('#cfd4d8', C.solidKind('metal')));
-  },
-  swirl(C) {   // 奶油旋顶：裱花螺旋
-    const { F, L, pal } = C, u = F.pk, b = C.headTop(u), R = clamp(0.5 * F.wz(u) + 0.2 * F.ht(u), 0.05 * L, 0.14 * L), h = R * 1.5, pts = [];
-    for (let i = 0; i <= 36; i++) { const t = i / 36, a = t * TAU * 3.2, rr = R * (1 - t * 0.92); pts.push(V3(b.x + Math.cos(a) * rr, b.y - R * 0.05 + h * t, Math.sin(a) * rr)); }
-    C.tube('prop-swirl', pts, R * 0.3, R * 0.06, C.mat(mixc(pal[1], '#fff8ec', 0.4), 'satin'), { radial: 8, seg: 72, prof: (t) => R * (0.3 - 0.22 * t) * (t > 0.95 ? (1 - t) * 20 : 1), rib: 0.18, ribN: 6, twist: 0 });
-  },
-  calyx(C) {   // 花萼领 + 果柄（辣椒）
-    const { F, L, S, s, pal } = C, u = 0.93, green = mixc(pal[2], '#3f6b2a', 0.5);
-    for (let i = 0; i < 6; i++) {
-      const a = (i / 6) * TAU + 0.3, p = F.pt(u, a, 1.0), nn = F.nrm(u, a), dir = nn.clone().multiplyScalar(0.45).add(V3(-0.9, 0, 0)).normalize();
-      const grp = C.group('calyx', [p.x, p.y, p.z]); grp.quaternion.copy(basisQ(dir, nn));
-      const l = clamp(0.5 * S, 0.05 * L, 0.14 * L), w = l * 0.32;
-      s.fin(C.nm('calyx-sepal'), [[-w * 0.5, 0], [-w, l * 0.4], [0, l], [w, l * 0.4], [w * 0.5, 0]], green, [0, 0, 0], [0, 0, 0], grp, Math.max(C.th * 3.5, 0.041));
-    }
-    const tip = V3(F.x(0.999), F.yc(0.999), 0), r = clamp(0.12 * S, 0.012 * L, 0.03 * L);
-    C.tube('prop-stem', [tip.clone().add(V3(-0.01 * L, 0, 0)), tip.clone().add(V3(0.08 * L, 0.02 * L, 0)), tip.clone().add(V3(0.12 * L, 0.09 * L, 0))], r, r * 0.7, C.mat(shade(green, 0.8), 'glaze'), { radial: 7, seg: 10 });
-  },
-  flower(C) {   // 头顶开花
-    const { F, L, s, pal } = C, b = C.headTop(F.pk + (1 - F.pk) * 0.35), r = clamp(0.35 * F.ht(F.pk), 0.04 * L, 0.09 * L);
-    const grp = C.group('prop-flower', [b.x, b.y, 0]); grp.rotation.z = -0.25;
-    C.tube('prop-flower-stem', [V3(0, -0.01 * L, 0), V3(0.01 * L, r * 0.6, 0), V3(0, r * 1.1, 0)], r * 0.07, r * 0.06, C.mat(mixc(pal[3], '#4f7a4a', 0.6), 'matte'), { radial: 5, seg: 6 }, grp);
-    const pm = C.mat(mixc(pal[2], '#f6b8c8', 0.3), 'satin');
-    for (let i = 0; i < 5; i++) { const a = (i / 5) * TAU; const p = C.ball('prop-petal', V3(Math.cos(a) * r * 0.5, r * 1.12, Math.sin(a) * r * 0.5), [r * 0.5, r * 0.1, r * 0.3], pm, grp); p.rotation.y = -a; p.rotation.z = 0.25; }
-    C.ball('prop-flower-heart', V3(0, r * 1.18, 0), [r * 0.22, r * 0.14, r * 0.22], C.mat('#f2c84b', 'matte'), grp);
-    s.wiggle(grp, 'x', 0.08, 1.5);
-  },
-  strings(C) {   // 琴弦：琴码 + 四根弦 + 弦轴
-    const { F, L, pal } = C, uB = 0.4, xB = F.x(uB), hB = 0.05 * L;
-    const wood = C.mat(mixc(pal[2], '#2a1d14', 0.4), 'glaze'), str = C.mat('#e6e1d3', 'metal');
-    const zs = [-1.5, -0.5, 0.5, 1.5].map((k) => k * clamp(0.12 * F.wz(uB), 0.004 * L, 0.012 * L));
-    for (const z of zs) {
-      const pts = [];
-      for (let i = 0; i <= 8; i++) { const u = lerp(0.9, 0.12, i / 8), lift = hB * Math.max(0, 1 - Math.abs(u - uB) / 0.5) ** 1.2 + 0.006 * L; pts.push(V3(F.x(u), F.top(u) + lift, z)); }
-      C.tube('prop-string', pts, 0.0022 * L, 0.0022 * L, str, { radial: 4, seg: 24 });
-    }
-    const bw = Math.abs(zs[0]) * 1.6, bp = [[-bw, 0], [-bw * 0.9, hB * 0.6], [-bw * 0.6, hB * 1.05], [bw * 0.6, hB * 1.05], [bw * 0.9, hB * 0.6], [bw, 0], [bw * 0.3, hB * 0.25], [-bw * 0.3, hB * 0.25]];
-    const br = C.add('prop-bridge', plateGeo(bp, 0.008 * L, { bevel: 0.002 * L, bs: 1 }), C.mat('#e9d7b0', 'matte')); br.rotation.y = PI / 2; br.position.set(xB, F.top(uB) - 0.004 * L, 0);
-    for (const z of zs) C.ball('prop-peg', V3(F.x(0.92), F.top(0.92) + 0.01 * L, z * 2.2), [0.008 * L, 0.012 * L, 0.008 * L], wood);
-  },
-  ribbons(C) {   // 拖地飘带
-    const { F, L, S, s, pal } = C;
-    for (const side of [-1, 1]) {
-      const p = F.pt(Math.max(F.pk - 0.12, 0.2), side * 0.25 * PI, 0.98), grp = C.group('ribbon', [p.x, p.y, p.z]); grp.rotation.x = side * 0.5;
-      const len = 0.8 * L, w = clamp(0.12 * S, 0.012 * L, 0.04 * L), up = [], dn = [], N = 18;
-      for (let i = 0; i <= N; i++) { const t = i / N, x = -t * len, y = Math.sin(t * 7 + side) * 0.05 * L * t - t * 0.12 * L, ww = w * (1 - 0.6 * t); up.push([x, y + ww]); dn.push([x, y - ww]); }
-      const m = s.fin(C.nm('ribbon-streamer'), [...up, ...dn.reverse()], mixc(pal[2], pal[1], 0.2), [0, 0, 0], [0, 0, 0], grp, C.th);
-      s.wiggle(grp, 'y', 0.12, 2.2, side); void m;
-    }
-  },
-};
-
-// =====================================================================================
-// 入口：buildSynthModel(v) → THREE.Group（与 createMarineModel 同结构：normalized-sculpture / marineRig / parts）
-// =====================================================================================
 const STAGES = [
-  ['head', buildHeadExtras], ['eyes', buildEyes], ['mouth', buildMouth],
-  ['dorsal', (C) => buildDorsal(C, C.g.dor, 'dorsal')],
-  ['dorsal2', (C) => { const d = C.g.dor2; if (d && d.k && d.k !== 'none') buildDorsal(C, { h: 0.7, l: 0.6, x: 0.3, ...d }, 'dorsal2'); }],
-  ['tail', buildTail], ['pect', buildPect], ['ventral', buildVentral], ['app', buildApps],
+  ['eyes', buildEyes], ['head', buildHead],
+  ['dorsal', (C) => medianFin(C, 'dorsal-fin', C.g.dor.k, 1, C.g.dor.h, null, C.g.pal[3])],
+  ['anal', (C) => { const k = C.g.anal.k, pl = ANAL_PLACE[k] || ANAL_PLACE.soft; medianFin(C, 'anal-fin', k, -1, pl[2] * C.g.anal.h, pl, C.g.pal[3]); }],
+  ['tail', buildTail], ['pect', buildPect], ['pelv', buildPelv],
 ];
+const RAR_LUX = { rare: 1, epic: 2, legendary: 3, mythic: 4 };
+export const SYN_SHAPES = FIN_KINDS;
+export const SYN_APPS = [];
 export function buildSynthModel(v) {
-  const src = v && typeof v === 'object' ? (v.syn || (v.plan ? v : null)) : null;
+  const src = v && typeof v === 'object' ? (v.syn || (v.base || v.plan ? v : null)) : null;
   const g = normGenome(src);
-  // 造型 id 归一（未知 → 兜底），保证下游 switch 永远命中
-  g.plan = shapeOf('plan', g.plan, 'fusiform'); g.head = shapeOf('head', g.head, 'round');
-  if (!MATS[g.mat]) g.mat = 'wet';
+  // 旧存档 / 外部基因组：华丽度按稀有度推导
+  if (g.lux == null) {
+    const lux = RAR_LUX[v?.rarity] || 1;
+    g.lux = lux; g.fil = lux >= 2 ? 1 : 0; g.scal = lux >= 3 ? 1 : 0; g.scl = Math.max(g.scl, lux >= 3 ? 0.6 : 0);
+    if (lux >= 4) g.glow = Math.max(g.glow, 0.5);
+  }
+  const lux = g.lux;
   const seed = (Number.isFinite(+v?.seed) ? +v.seed : hashStr(JSON.stringify(src || {}))) >>> 0;
-  const C = makeCtx(g, seed);
+  const C = makeCtx(g, seed, lux);
   buildBody(C);
+  C.eye = { u: 0.865, r: 0.04 };
   for (const [nm, fn] of STAGES) { try { fn(C); } catch (e) { console.warn('[synth] stage', nm, e); } }
   const s = C.s, model = new THREE.Group();
   model.name = 'synth-model';
-  // 归一化：最长水平维度 → 1.6；超长飘带 / 触手允许溢出（按身体长度封顶，避免身体被压成一粒）
   const bounds = new THREE.Box3().setFromObject(s.root), size = bounds.getSize(V3()), center = bounds.getCenter(V3());
   const bodyB = new THREE.Box3().setFromObject(C.body), bc = bodyB.getCenter(V3());
-  const span = clamp(Math.max(size.x, size.z, 0.01), C.L * 0.9, C.L * 1.55);
+  const span = clamp(Math.max(size.x, size.z, 0.01), BL * 1.0, BL * 1.42);
   const k = 1.6 / span;
   center.y = lerp(center.y, bc.y, 0.5);
   if (size.x > span) center.x = lerp(center.x, bc.x, 0.6);
@@ -1415,19 +667,29 @@ export function buildSynthModel(v) {
   model.userData.standardLength = 1.6;
   model.userData.lengthCm = Number.isFinite(+v?.cm) ? +v.cm : undefined;
   model.userData.normalizedDimensions = { x: size.x * k, y: size.y * k, z: size.z * k };
-  model.userData.synPat = { asp: clamp(C.L / Math.max(C.H * 2, 0.02), 1, 14), seed };
+  model.userData.synPat = { asp: clamp(1 / (2 * C.M.mh), 1.4, 6), seed, finA: Math.max(0.6, Math.min(g.finA ?? 1, [0.9, 0.82, 0.76, 0.72][lux - 1])), edge: 0.3 + 0.1 * lux };
+  model.userData.synLux = lux;
   model.userData.synGenome = g;
   model.userData.synSkin = SKINS[g.mat] || SKINS.wet;
   model.userData.tris = Math.round(tris);
   return model;
 }
-// Fish 用：skinFish 之后把器物质感（金属 / 瓷 / 纸…）的 PBR 参数还原、按材质换皮肤（鳞片 / 光滑）
+// Fish 用：skinFish 之后把器物质感的 PBR 参数还原、按材质换皮肤（鳞片 / 光滑）
 export function synthAfterSkin(model, swim) {
   const sk = model.userData.synSkin;
   if (swim?.U?.uSk0 && sk) { const u = swim.U.uSk0.value; u.x = sk.type; u.y = sk.den * 0.7; u.z = sk.bump; }
+  const lux = model.userData.synLux || 1, g = model.userData.synGenome;
+  const edgeC = g ? new THREE.Color(g.pal[4]).lerp(new THREE.Color(g.pal[2]), 0.3) : WHITE;
   model.traverse((o) => {
     if (!o.isMesh) return;
-    const m = o.material, p = m?.userData?.synKeep; if (!p) return;
+    const m = o.material;
+    // 鳍膜：薄纱珠光（虹彩 + 绒面掠射光，稀有度越高越强）
+    if (o.userData.synFin && m?.isMeshPhysicalMaterial) {
+      m.iridescence = [0.35, 0.55, 0.75, 0.9][lux - 1]; m.iridescenceIOR = 1.35; m.iridescenceThicknessRange = [300, 820];
+      m.sheen = 0.3 + 0.12 * lux; m.sheenRoughness = 0.35; m.sheenColor = edgeC.clone();
+      m.roughness = 0.34; m.clearcoat = Math.max(m.clearcoat, 0.45); m.clearcoatRoughness = 0.12;
+    }
+    const p = m?.userData?.synKeep; if (!p) return;
     for (const key in p) m[key] = p[key];
   });
 }
@@ -1436,6 +698,6 @@ export function synthBeforeSkin(model) {
   model.traverse((o) => {
     if (!o.isMesh) return;
     const m = o.material; if (!m?.userData?.synPBR || !m.isMeshPhysicalMaterial) return;
-    m.userData.synKeep = { metalness: m.metalness, roughness: m.roughness, clearcoat: m.clearcoat, clearcoatRoughness: m.clearcoatRoughness, iridescence: m.iridescence, sheen: m.sheen };
+    m.userData.synKeep = { metalness: m.metalness, roughness: m.roughness, clearcoat: m.clearcoat, clearcoatRoughness: m.clearcoatRoughness, iridescence: m.iridescence, iridescenceThicknessRange: m.iridescenceThicknessRange, sheen: m.sheen, sheenColor: m.sheenColor, sheenRoughness: m.sheenRoughness };
   });
 }

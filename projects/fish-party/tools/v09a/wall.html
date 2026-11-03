@@ -27,6 +27,7 @@ import { Fish, makeVariant, SPECIES_BY_ID } from '../../src/fishes.js';
 import { stylizeObject } from '../../src/toon.js';
 
 const qs = new URLSearchParams(location.search);
+{ let s = 12345; Math.random = () => ((s = Math.imul(s ^ (s >>> 15), 2246822519) + 0x6d2b79f5 >>> 0) / 4294967296); }   // 测试墙确定性
 const W = innerWidth, H = innerHeight;
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, +(qs.get('dpr') || 2)));
@@ -47,25 +48,23 @@ const rim = new THREE.DirectionalLight('#8fd0ff', 1.4); rim.position.set(-2.5, 1
 }
 
 const mk = (id) => makeVariant(SPECIES_BY_ID[id], 0);
+// 第 1 行：天然鱼对照；第 2~4 行：12 条合成鱼（覆盖典型杂交 / 合成×合成 / 道具 / 稀有度）
+const NAT = ['clownfish', 'blue-tang', 'lionfish', 'mahi-mahi'];
+const S = (a, b, item, seed, prompt = '') => synthesize({ a: typeof a === 'string' ? mk(a) : a, b: typeof b === 'string' ? mk(b) : b, item, prompt, seed, creator: '@墙' });
+const G1 = S('clownfish', 'great-white', 'suit', 101), G2 = S('pufferfish', 'butterflyfish', null, 102);
 const RECIPES = [
-  ['clownfish', 'tuna', 'suit'], ['pufferfish', 'salmon', 'toilet'], ['moray-eel', 'sardine', 'key'], ['tuna', 'barracuda', 'gear'],
-  ['sunfish', 'clownfish', 'teapot'], ['jellyfish', 'koi', 'umbrella'], ['lobster', 'mackerel', 'crown'], ['seahorse', 'blue-tang', 'icecream'],
-  ['anglerfish', 'sardine', 'bulb'], ['manta-ray', 'salmon', 'origami'], ['octopus', 'parrotfish', 'chili'], ['narwhal', 'swordfish', 'guitar'],
-  ['snow-crab', 'lionfish', 'rocket'], ['sea-turtle', 'pufferfish', 'mushroom'], null, null,
+  () => G1, () => S('pufferfish', 'lionfish', 'toilet', 103), () => S('jellyfish', 'salmon', null, 104, '梦幻 发光'), () => S('octopus', 'blue-tang', 'key', 105),
+  () => G2, () => S(G1, G2, null, 106), () => S(S(G1, 'lionfish', 'pearls', 107), G2, 'crown', 108), () => S('mackerel', 'clownfish', 'pizza', 109),
+  () => S('tuna', 'sailfish', 'veil', 110), () => S('sardine', 'mahi-mahi', null, 111, '金色'), () => S('seahorse', 'parrotfish', 'snowflake', 112), () => S(G2, 'manta-ray', 'crystalball', 113),
 ];
-const vs = RECIPES.map((r, i) => {
-  if (!r) return wildSynth(4242 + i * 17, '@墙');
-  const [a, b, item] = r;
-  const A = SPECIES_BY_ID[a] ? mk(a) : mk('salmon'), B = SPECIES_BY_ID[b] ? mk(b) : mk('sardine');
-  return synthesize({ a: A, b: B, item, seed: 100 + i, creator: '@墙' });
-});
+const vs = [...NAT.map((id) => (SPECIES_BY_ID[id] ? mk(id) : mk('salmon'))), ...RECIPES.map((f) => f())];
 const grid = document.getElementById('grid');
 const cells = [];
 let tris = 0, errs = 0;
 vs.forEach((v, i) => {
   const div = document.createElement('div'); div.className = 'cell';
   const s = v.syn || {};
-  div.innerHTML = `<div class="lab"><b>${v.name || v.nick || '合成物种'}</b><i>${v.synItem || (v.syn?.wild ? 'wild' : '')} · ${s.plan}/${s.head}/${s.dor?.k}/${s.tail?.k}${s.tail?.n > 1 ? '×2' : ''}/${s.pect?.k} · ${s.mat}/${s.pat?.k} · ${(s.app || []).join(',')}</i></div>`;
+  div.innerHTML = v.sp === 'synth' ? `<div class="lab"><b>${v.name}</b><i>${v.rarity} · ${s.base?.map((b) => b[0]).join('+')} · ${s.dor?.k}/${s.tail?.k}/${s.pect?.k} · ${s.mat}/${s.pat?.k}</i></div>` : `<div class="lab"><b>天然 · ${SPECIES_BY_ID[v.sp]?.name || v.sp}</b><i>对照</i></div>`;
   grid.appendChild(div);
   let f = null;
   try { f = new Fish(v, (o) => stylizeObject(o, { rim: 1.0 })); tris += f.model.userData.tris || 0; }

@@ -1,10 +1,9 @@
 // 道具系统 items.js（v0.9）—— 钓上来的「稀奇古怪的东西」（纯数据 + 掉落，零依赖，node 可直接 import）
 // 道具唯一用途：基因改造时放进「道具槽」，被合成进新物种的身体里（不是装扮！鱼不能被装扮）。
-// motif = 对基因组的具象影响（解释器见 synth.js applyMotif）：
-//   pal: [底色, 腹色, 点缀色, 鳍色]   mat: 皮肤材质 wet|matte|glaze|ceramic|metal|brass|gold|pearl|satin|glow|crystal|paper
-//   pat: 花纹 none|stripe|spots|grad|scale|marble|ring|ocelli|geo|tux|lateral|galaxy|sprinkle|dial|melon|sunburst|waffle
-//   plan: 体型 fusiform|deep|globe|eel|flat|box|seg|disc|hourglass|diamond     head / mouth / dorsal / tail / pect: 见 synth.js 形状表
-//   app: 附肢 ['bells', 'lure:bulb', 'mane:knit', ...]     eyes: { n, k, stalk, lens }     glow: 0~1     cm: 体长倍率
+// motif = 道具的「优雅转译」（v0.9.1，解释器见 synth.js applyMotif）：只影响配色 / 材质 / 纹样 / 鳍形气质，绝不贴器物零件
+//   pal: [背色, 腹色, 点缀色, 鳍色, 鳍缘高光]   mat: wet|satin|glaze|ceramic|metal|brass|gold|pearl|glow|crystal
+//   pat: none|grad|scale|koi|marble|cloud|stars|bands|tux|porcelain|crackle|fret|ocelli|neon|leopard|sunset|pearlline|mesh|speckle|spots   d: 纹样密度
+//   dor/tail/pect: 鳍型（synth_model.js FIN_KINDS 词表）   fx: { glow, irid, finA 鳍膜透明度, fil 丝状鳍条, scl 金属鳞缘 }
 //   tags: 「基因预感」/ 卡片标签用的具象性状描述     adj: 默认名用的两字定语
 export const ITEM_RARITY = {
   common: { label: '普通', short: 'N', color: '#9fd8e3', w: 0.70, pts: 5 },
@@ -15,11 +14,11 @@ export const ITEM_RARITY = {
 export const ITEM_RARITY_ORDER = ['common', 'rare', 'epic', 'legendary'];
 export const ITEM_CATS = {
   wear: { label: '衣物', emoji: '👔', order: 0, hint: '布料、剪裁与配色会长进鳍和花纹里' },
-  home: { label: '日用', emoji: '🏠', order: 1, hint: '器物的轮廓会变成躯干和背鳍' },
-  tool: { label: '工具', emoji: '🔧', order: 2, hint: '金属质感 + 机械结构的鳍' },
+  home: { label: '日用', emoji: '🏠', order: 1, hint: '器物的釉色与纹样会化进鳞片' },
+  tool: { label: '工具', emoji: '🔧', order: 2, hint: '金属鳞光与精密纹样' },
   food: { label: '美食', emoji: '🍽️', order: 3, hint: '诱人的配色与花纹' },
   nature: { label: '自然', emoji: '🌿', order: 4, hint: '植物与矿物的形态' },
-  curio: { label: '奇物', emoji: '🔮', order: 5, hint: '罕见的造型，容易引发狂野突变' },
+  curio: { label: '奇物', emoji: '🔮', order: 5, hint: '稀有的光泽与华丽长鳍' },
 };
 
 // ---------------- 道具表（38 种）----------------
@@ -28,86 +27,86 @@ const T = (id, name, emoji, cat, rarity, color, icon, desc, motif) => ({ id, nam
 export const ITEMS = [
   // ===== 衣物 wear =====
   T('suit', '西装', '🤵', 'wear', 'common', '#2a2d34', '一件被海水泡过的燕尾服', '口袋里还有半张晚宴请柬。',
-    { pal: ['#23262d', '#ece6da', '#7e1f2d', '#1d2026'], pat: 'tux', mat: 'satin', pect: 'bow', tail: 'swallow', dorsal: 'shark', tags: ['领结状胸鳍', '燕尾分叉尾', '黑白礼服配色'], adj: '燕尾' }),
+    { pal: ['#23262d', '#efe9de', '#9a2236', '#2a2d36', '#e8e2d6'], pat: 'tux', mat: 'satin', pect: 'bow', tail: 'swallow', tags: ['礼服黑白配色', '领结状胸鳍', '燕尾分叉尾'], adj: '燕尾' }),
   T('heels', '高跟鞋', '👠', 'wear', 'common', '#9e1f33', '一只红色漆皮细高跟', '另一只大概还在某个舞会上。',
-    { pal: ['#9b1f33', '#ead8d0', '#d6b26a', '#7b1828'], mat: 'glaze', tail: 'stiletto', head: 'pointed', plan: 'fusiform', slim: 1.25, tags: ['细跟尾刺', '红漆釉面', '尖头流线身'], adj: '细跟' }),
+    { pal: ['#9b1f33', '#f1dcd4', '#d8b56c', '#8a1a2c', '#f0c9c4'], mat: 'glaze', pat: 'grad', tail: 'lyre', fx: { irid: 0.45 }, tags: ['红漆釉面', '琴尾长丝', '金色描边'], adj: '绯漆' }),
   T('scarf', '毛线围巾', '🧣', 'wear', 'common', '#b8452f', '手织的粗棒针条纹围巾', '织到一半的线头还挂着。',
-    { pal: ['#b4472f', '#efe4d2', '#2f4f6b', '#a8402b'], pat: 'stripe', patD: 5, mat: 'matte', app: ['mane:knit'], tags: ['针织鬃领', '粗棒针条纹', '哑光绒感'], adj: '绒领' }),
+    { pal: ['#b4472f', '#f2e7d6', '#2f4f6b', '#a8402b', '#f0d2b4'], pat: 'bands', d: 4, mat: 'satin', dor: 'soft', tags: ['暖绒条纹', '柔缎鳞光', '围巾暖色'], adj: '绒纹' }),
   T('tophat', '礼帽', '🎩', 'wear', 'rare', '#1c1d22', '缎面黑礼帽，帽檐微卷', '魔术师说里面曾经住过一只兔子。',
-    { pal: ['#1d1e24', '#cfc8bb', '#8b6d3b', '#2a2b31'], mat: 'satin', app: ['tophat'], pat: 'grad', tags: ['礼帽状头冠', '缎面墨黑', '高耸头骨'], adj: '礼冠' }),
+    { pal: ['#1d1e24', '#d6cfc2', '#a8864a', '#26272e', '#cdb27a'], mat: 'satin', pat: 'grad', dor: 'sail', fx: { scl: 0.6 }, tags: ['墨缎高帆背鳍', '缎面墨黑', '古金鳞缘'], adj: '墨缎' }),
   T('pearls', '珍珠项链', '📿', 'wear', 'epic', '#e8e2d8', '一串温润的南洋珍珠', '每一颗都在月光下转过身。',
-    { pal: ['#e6dfd4', '#f7f3ec', '#c9b3d4', '#ddd3e2'], mat: 'pearl', pat: 'grad', app: ['pearls', 'photo'], tags: ['珍珠颈环', '珠母虹彩', '温润月白'], adj: '珠颈' }),
+    { pal: ['#e6dfd4', '#f8f4ee', '#c9b3d4', '#e4dbe8', '#ffffff'], mat: 'pearl', pat: 'pearlline', fx: { irid: 0.9, scl: 0.8 }, tags: ['珍珠侧线', '珠母虹彩', '温润月白'], adj: '珠母' }),
   T('veil', '婚纱头纱', '👰', 'wear', 'epic', '#f3efe9', '三米长的蕾丝拖尾头纱', '被风吹进海里，从此再也没有落地。',
-    { pal: ['#efe9e1', '#ffffff', '#d8c7b0', '#f4efe8'], mat: 'satin', tail: 'ribbon', dorsal: 'ribbon', pect: 'long', wild: ['ribbons'], tags: ['拖尾纱鳍', '象牙白缎', '飘逸长鳍'], adj: '纱尾' }),
+    { pal: ['#efe9e1', '#ffffff', '#d8c7b0', '#f6f1ea', '#ffffff'], mat: 'satin', pat: 'mesh', tail: 'veil', dor: 'veil', pect: 'long', fx: { finA: 0.42, fil: 1 }, tags: ['蕾丝纱鳍', '象牙白缎', '拖尾长鳍'], adj: '纱尾' }),
   // ===== 日用 home =====
   T('toilet', '马桶', '🚽', 'home', 'rare', '#eef0f2', '一只完好无损的白瓷马桶', '没人知道它是怎么漂到海里的。',
-    { pal: ['#f1efea', '#e2e5e7', '#a9b3b9', '#e9ebed'], mat: 'ceramic', pat: 'none', plan: 'globe', dorsal: 'lid', mouth: 'gape', tail: 'paddle', tags: ['马桶盖背鳍', '白瓷釉面', '圆碗形躯干'], adj: '瓷碗' }),
+    { pal: ['#f3f1ec', '#ffffff', '#3f6aa8', '#e6ebef', '#c9d6e6'], mat: 'ceramic', pat: 'porcelain', tail: 'round', tags: ['白瓷釉身', '青花细纹', '圆润扇尾'], adj: '白瓷' }),
   T('umbrella', '雨伞', '☂️', 'home', 'common', '#2d4a6b', '一把藏青色长柄伞', '撑开的时候会“啪”地一声。',
-    { pal: ['#2c4a6b', '#e7e2d6', '#c8a35a', '#2a4565'], mat: 'satin', pat: 'stripe', patD: 3, dorsal: 'canopy', tail: 'hook', tags: ['伞盖背鳍', '弯柄钩尾', '伞骨条纹'], adj: '伞骨' }),
+    { pal: ['#2c4a6b', '#ebe6db', '#c8a35a', '#2f4f72', '#d9c08a'], mat: 'satin', pat: 'grad', dor: 'fan', tags: ['伞面扇形背鳍', '藏青缎面', '伞骨鳍条'], adj: '伞鳍' }),
   T('bulb', '灯泡', '💡', 'home', 'common', '#ffd36b', '一颗还温热的钨丝灯泡', '拧上去之前，它自己亮了一下。',
-    { pal: ['#d8c38a', '#f6efd8', '#ffcf6a', '#d2bd84'], mat: 'glow', glow: 0.85, pat: 'lateral', app: ['lure:bulb'], head: 'blunt', plan: 'globe', tags: ['灯泡饵球', '钨丝光纹', '暖光体表'], adj: '钨光' }),
+    { pal: ['#d8c38a', '#f8f1dc', '#ffcf6a', '#e7d39a', '#fff2c0'], mat: 'glow', pat: 'neon', fx: { glow: 0.6 }, tags: ['暖光侧线', '钨丝金辉', '琥珀体光'], adj: '钨光' }),
   T('clock', '闹钟', '⏰', 'home', 'rare', '#c84b3c', '双铃铛的复古闹钟', '每天早上七点准时在海底响起。',
-    { pal: ['#c04a3c', '#f1ebe0', '#2a2a2e', '#b8892f'], mat: 'glaze', plan: 'disc', pat: 'dial', app: ['bells'], tail: 'fan', tags: ['双铃头冠', '表盘体侧', '圆盘身形'], adj: '铃顶' }),
+    { pal: ['#c04a3c', '#f4eee4', '#b8892f', '#b8453a', '#e9c87a'], mat: 'glaze', pat: 'ocelli', tail: 'round', fx: { scl: 0.5 }, tags: ['表盘眼斑', '复古红釉', '黄铜鳍缘'], adj: '铃纹' }),
   T('lipstick', '口红', '💄', 'home', 'common', '#a4243b', '金管丝绒口红，旋出一半', '色号叫「深海初吻」。',
-    { pal: ['#a3233b', '#f0d9d2', '#caa55a', '#8a1c30'], mat: 'glaze', head: 'bevel', app: ['band'], plan: 'fusiform', boxy: 2.8, tags: ['斜切吻部', '金属颈环', '丝绒红釉'], adj: '绯唇' }),
+    { pal: ['#a3233b', '#f3ddd6', '#caa55a', '#8a1c30', '#e8b0b0'], mat: 'satin', pat: 'grad', fx: { scl: 0.5 }, tags: ['丝绒绯红', '金管描边', '唇色渐变'], adj: '绯唇' }),
   T('teapot', '茶壶', '🫖', 'home', 'rare', '#8fb3a6', '一把青瓷小茶壶', '壶里还剩一口凉掉的乌龙。',
-    { pal: ['#8db2a5', '#e9efe9', '#5a7f74', '#9cbcb0'], mat: 'ceramic', head: 'spout', dorsal: 'handle', plan: 'globe', pat: 'none', tags: ['壶嘴长吻', '提梁背鳍', '青瓷釉色'], adj: '青瓷' }),
+    { pal: ['#8db2a5', '#eef3ee', '#5a7f74', '#a6c4b8', '#e2ece6'], mat: 'ceramic', pat: 'crackle', dor: 'soft', tags: ['青瓷釉色', '冰裂开片', '温润圆鳍'], adj: '青瓷' }),
   // ===== 工具 tool =====
   T('key', '钥匙', '🔑', 'tool', 'common', '#c99b45', '一把老式黄铜钥匙', '能打开哪扇门？海底也许知道。',
-    { pal: ['#b8893b', '#e2c67f', '#6e4c1e', '#c99b45'], mat: 'brass', dorsal: 'key', tail: 'ring', tags: ['钥匙齿背鳍', '圆环尾', '黄铜质感'], adj: '镀铜' }),
+    { pal: ['#b8893b', '#efdba6', '#6e4c1e', '#c99b45', '#f3d98e'], mat: 'brass', pat: 'fret', fx: { scl: 0.8 }, tags: ['黄铜鳞甲', '回纹暗花', '金属鳞缘'], adj: '鎏铜' }),
   T('gear', '齿轮', '⚙️', 'tool', 'common', '#7b8590', '从怀表里掉出来的齿轮', '还在以每秒一格的速度转动。',
-    { pal: ['#7b8590', '#c9ced3', '#b5763a', '#69737d'], mat: 'metal', dorsal: 'gear', app: ['plates'], pat: 'geo', tags: ['齿轮背鳍', '铆接甲板', '钢铁质感'], adj: '机芯' }),
+    { pal: ['#7b8590', '#d4d9de', '#b5763a', '#8a949e', '#e1c39a'], mat: 'metal', pat: 'scale', fx: { scl: 0.7 }, tags: ['银钢鳞片', '机芯铜缘', '精密鳞列'], adj: '机芯' }),
   T('telescope', '望远镜', '🔭', 'tool', 'rare', '#1f3554', '可伸缩的黄铜单筒望远镜', '镜片里映着一颗很远的星星。',
-    { pal: ['#1f3554', '#d9cdb4', '#b8893b', '#243d60'], mat: 'satin', eyes: { n: 1, lens: 1, k: 1.3 }, pat: 'grad', tags: ['伸缩望远眼', '黄铜镜筒', '深海军蓝'], adj: '远瞳' }),
+    { pal: ['#1f3554', '#ddd2bb', '#c8a04f', '#28426a', '#e6cc8a'], mat: 'satin', pat: 'stars', fx: { scl: 0.5 }, tags: ['星图斑点', '深海军蓝', '黄铜鳍缘'], adj: '远瞳' }),
   T('scissors', '剪刀', '✂️', 'tool', 'common', '#b9c2ca', '一把锃亮的裁缝剪', '咔嚓一声，剪断了一段浪花。',
-    { pal: ['#b7c0c8', '#e8ecef', '#2f3a46', '#9aa5af'], mat: 'metal', tail: 'shears', head: 'pointed', plan: 'fusiform', slim: 1.2, tags: ['剪刃双尾', '镜面钢', '锋利吻部'], adj: '剪尾' }),
+    { pal: ['#b7c0c8', '#eef1f3', '#2f3a46', '#a8b2bb', '#ffffff'], mat: 'metal', pat: 'grad', tail: 'swallow', dor: 'sickle', tags: ['镜面银鳞', '剪刃燕尾', '镰刀背鳍'], adj: '剪尾' }),
   T('quill', '羽毛笔', '🪶', 'tool', 'rare', '#2b2f4a', '蘸过墨的天鹅羽毛笔', '笔尖还挂着一滴没写完的诗。',
-    { pal: ['#2c304b', '#e8e2d3', '#5b6b9a', '#3a3f60'], mat: 'satin', pat: 'marble', dorsal: 'quill', tail: 'feather', tags: ['翎羽背鳍', '墨渍大理石纹', '羽片尾'], adj: '翎羽' }),
+    { pal: ['#2c304b', '#ece6d8', '#5b6b9a', '#3a3f60', '#c9cfe6'], mat: 'satin', pat: 'marble', dor: 'plume', fx: { fil: 1 }, tags: ['翎羽背鳍', '墨渍大理石纹', '羽丝鳍条'], adj: '翎羽' }),
   T('neon', '霓虹灯管', '🔆', 'tool', 'epic', '#ff5fa8', '一截还会闪的霓虹灯管', '弯成了一个看不懂的字。',
-    { pal: ['#1b1f2e', '#2a2f45', '#ff5fa8', '#3cd6e0'], mat: 'glow', glow: 1, pat: 'lateral', app: ['photo'], tags: ['霓虹侧线', '暗夜体色', '灯管发光纹'], adj: '霓虹' }),
+    { pal: ['#1b1f2e', '#2e3449', '#ff5fa8', '#2a3048', '#3cd6e0'], mat: 'glow', pat: 'neon', fx: { glow: 0.9 }, tags: ['霓虹侧线', '暗夜体色', '荧光鳍缘'], adj: '霓虹' }),
   T('anchor', '船锚', '⚓', 'tool', 'rare', '#3b4148', '一只长满藤壶的小铁锚', '它终于等到一条愿意带它走的鱼。',
-    { pal: ['#3b4148', '#a7adb3', '#9a5b2e', '#30363c'], mat: 'metal', pat: 'marble', tail: 'anchor', app: ['plates'], tags: ['锚爪尾', '铸铁质感', '锈斑纹'], adj: '铁锚' }),
+    { pal: ['#3b4148', '#b4babf', '#9a5b2e', '#454c54', '#c98a5a'], mat: 'metal', pat: 'cloud', tail: 'lunate', tags: ['铸铁深灰', '铜锈云纹', '新月锚尾'], adj: '铁锚' }),
   // ===== 美食 food =====
   T('pizza', '披萨', '🍕', 'food', 'common', '#e7b54f', '一角拉丝的意式披萨', '还热乎，芝士拉得老长。',
-    { pal: ['#e3b14e', '#f2dca0', '#b4352a', '#c98a3c'], mat: 'matte', pat: 'spots', patD: 0.8, dorsal: 'wedge', tags: ['披萨角背鳍', '意式香肠斑', '芝士暖黄'], adj: '芝士' }),
+    { pal: ['#e3b14e', '#f6e3ad', '#b4352a', '#e0a64a', '#f7d27a'], mat: 'wet', pat: 'spots', d: 2.2, tags: ['芝士暖金渐变', '番茄红圆斑', '烘烤金边'], adj: '芝士' }),
   T('watermelon', '西瓜', '🍉', 'food', 'common', '#3b7d47', '半个冰镇西瓜', '中间那一勺已经被谁挖走了。',
-    { pal: ['#2f6b3a', '#d9566a', '#14251a', '#3b7d47'], mat: 'glaze', pat: 'melon', plan: 'globe', tags: ['瓜皮条纹', '红瓤腹部', '瓜子斑点'], adj: '瓜纹' }),
+    { pal: ['#2f6b3a', '#f07d8a', '#14251a', '#e0606f', '#ffd0d4'], mat: 'glaze', pat: 'bands', d: 6, tags: ['瓜皮深绿条纹', '红瓤粉腹', '清甜釉光'], adj: '瓜纹' }),
   T('icecream', '冰淇淋甜筒', '🍦', 'food', 'rare', '#f1e4d0', '一支快要化掉的香草甜筒', '在海里居然一点都没化。',
-    { pal: ['#f0e3cf', '#f6dadf', '#c98d4a', '#eee0cc'], mat: 'satin', pat: 'waffle', app: ['swirl'], tags: ['奶油旋顶', '华夫格尾段', '香草奶油色'], adj: '甜筒' }),
+    { pal: ['#f0e3cf', '#fbe6ea', '#c98d4a', '#f3dfe4', '#ffffff'], mat: 'satin', pat: 'cloud', tail: 'veil', tags: ['香草奶油色', '奶霜云纹', '柔纱裙尾'], adj: '奶霜' }),
   T('donut', '甜甜圈', '🍩', 'food', 'common', '#d9708a', '一个粉色糖霜甜甜圈', '上面的彩针糖少了三根。',
-    { pal: ['#c48a55', '#e9c9a0', '#d46f8a', '#c48a55'], mat: 'glaze', pat: 'sprinkle', plan: 'globe', tags: ['糖霜背部', '彩针糖斑', '圆胖身形'], adj: '糖霜' }),
+    { pal: ['#d77c93', '#f5dcc0', '#7fc6d8', '#e797aa', '#fff0f4'], mat: 'glaze', pat: 'speckle', tags: ['粉糖霜背', '彩糖细点', '奶油腹面'], adj: '糖霜' }),
   T('chili', '辣椒', '🌶️', 'food', 'common', '#b3261e', '一根油亮的朝天椒', '只是看着它，鳃就开始发烫。',
-    { pal: ['#b1261e', '#d84a32', '#3f6b2a', '#9c2119'], mat: 'glaze', plan: 'fusiform', arch: 0.5, tail: 'curl', app: ['calyx'], tags: ['萼片头冠', '弯钩身形', '红釉亮皮'], adj: '赤椒' }),
+    { pal: ['#b1261e', '#f2c2a8', '#3f6b2a', '#c8331f', '#ff9a6a'], mat: 'glaze', pat: 'sunset', dor: 'sickle', tags: ['赤焰渐变', '红釉亮皮', '镰刀背鳍'], adj: '赤椒' }),
   T('croissant', '可颂', '🥐', 'food', 'common', '#d29a4a', '一只层次分明的黄油可颂', '咬一口，酥皮掉了满海底。',
-    { pal: ['#c98f43', '#efd29a', '#8a5420', '#d6a35a'], mat: 'glaze', plan: 'seg', arch: 0.35, pat: 'grad', tags: ['分节层酥躯干', '焦糖金色', '弯月身形'], adj: '层酥' }),
+    { pal: ['#c98f43', '#f3dca8', '#8a5420', '#d9a65e', '#f5d08a'], mat: 'glaze', pat: 'scale', tail: 'delta', tags: ['焦糖金色', '层酥鳞列', '半月裙尾'], adj: '层酥' }),
   // ===== 自然 nature =====
   T('cactus', '仙人掌', '🌵', 'nature', 'common', '#5b8754', '一盆开着小粉花的仙人掌', '浑身是刺，但花很温柔。',
-    { pal: ['#4f7a4a', '#8fae7a', '#e8a0b4', '#5b8754'], mat: 'matte', pat: 'lateral', app: ['spikes', 'flower'], tags: ['满身棘刺', '头顶开花', '纵棱纹'], adj: '棘花' }),
+    { pal: ['#4f7a4a', '#dfe8cf', '#e8a0b4', '#6a9a62', '#f5c6d4'], mat: 'satin', pat: 'speckle', dor: 'crest', tags: ['仙掌青绿', '粉花鳍梢', '细刺冠鳍'], adj: '棘花' }),
   T('maple', '枫叶', '🍁', 'nature', 'common', '#c75a2a', '一片红透了的枫叶', '从很远的秋天漂过来。',
-    { pal: ['#b6452a', '#e3a44a', '#7a2a1a', '#c75a2a'], pat: 'grad', dorsal: 'saw', tail: 'leaf', mat: 'matte', tags: ['枫叶尾鳍', '锯齿背鳍', '秋色渐变'], adj: '枫红' }),
+    { pal: ['#b6452a', '#f0c27a', '#7a2a1a', '#d4622e', '#f7b25a'], pat: 'sunset', dor: 'crest', mat: 'satin', tags: ['秋色渐变', '枫红冠鳍', '叶脉鳍条'], adj: '枫红' }),
   T('conch', '贝壳号角', '🐚', 'nature', 'rare', '#e3bfa9', '一只能吹响的螺号', '贴在耳边，能听见另一片海。',
-    { pal: ['#e6c7b3', '#f6e8dc', '#c07868', '#e2bea8'], mat: 'pearl', pat: 'ring', app: ['horn:spiral'], tags: ['螺旋号角', '珠母光泽', '螺纹环带'], adj: '螺号' }),
+    { pal: ['#e6c7b3', '#f8ece2', '#c07868', '#ecd0c0', '#fff4ec'], mat: 'pearl', pat: 'bands', d: 7, fx: { irid: 0.7 }, tags: ['珠母光泽', '螺纹环带', '贝粉鳍膜'], adj: '螺号' }),
   T('sunflower', '向日葵', '🌻', 'nature', 'rare', '#e0a92e', '一朵追着太阳转的向日葵', '在海里，它改成追着灯笼鱼转。',
-    { pal: ['#d9a12c', '#f2d16b', '#5a3a1e', '#d69a2a'], mat: 'matte', app: ['mane:petal'], pat: 'grad', tags: ['花瓣鬃领', '葵籽纹面', '金黄体色'], adj: '葵冠' }),
+    { pal: ['#d9a12c', '#f6dc85', '#5a3a1e', '#e9b43a', '#ffe08a'], mat: 'satin', pat: 'grad', pect: 'fan', dor: 'fan', tags: ['金黄体色', '花瓣扇鳍', '葵心暖棕'], adj: '葵冠' }),
   T('mushroom', '蘑菇', '🍄', 'nature', 'common', '#b6322b', '一朵红伞白点的小蘑菇', '童话书里掉出来的那种。',
-    { pal: ['#b1322b', '#efe6d6', '#f6efe4', '#c9bfae'], mat: 'matte', pat: 'spots', patD: 1.1, dorsal: 'cap', tags: ['菌盖背鳍', '红底白点', '奶白腹面'], adj: '菌伞' }),
+    { pal: ['#b1322b', '#f3ebdd', '#f8f2e8', '#c4473c', '#ffffff'], mat: 'satin', pat: 'spots', d: 1.6, dor: 'sail', tags: ['红底白点', '菌伞帆鳍', '奶白腹面'], adj: '菌伞' }),
   T('snowflake', '雪花', '❄️', 'nature', 'epic', '#cfe3ee', '一片永不融化的六角雪花', '据说来自北极最深的那个冬天。',
-    { pal: ['#c9dfeb', '#f3f8fb', '#7fb2cf', '#d8e7f0'], mat: 'crystal', pat: 'geo', dorsal: 'crystal', app: ['spikes'], glow: 0.25, tags: ['六角冰晶棘', '霜白晶体', '几何冰纹'], adj: '霜晶' }),
+    { pal: ['#c9dfeb', '#f5f9fc', '#7fb2cf', '#dcebf4', '#ffffff'], mat: 'crystal', pat: 'crackle', fx: { glow: 0.25, irid: 0.6, finA: 0.4 }, tags: ['霜白晶体', '冰裂细纹', '冰晶透鳍'], adj: '霜晶' }),
   // ===== 奇物 curio =====
   T('crown', '皇冠', '👑', 'curio', 'legendary', '#d4a94a', '一顶镶红宝石的旧王冠', '戴过它的国王，名字已经没人记得。',
-    { pal: ['#6b1d2f', '#d8c49a', '#d4a94a', '#5a1828'], mat: 'gold', app: ['crown', 'photo'], pat: 'grad', glow: 0.35, tags: ['王冠棘环', '鎏金鳍缘', '宝石发光器'], adj: '鎏金' }),
+    { pal: ['#6b1d2f', '#e4d3ac', '#d4a94a', '#7a2236', '#f1d27a'], mat: 'gold', pat: 'fret', dor: 'crest', tail: 'veil', fx: { glow: 0.3, scl: 1, fil: 1 }, tags: ['鎏金鳍缘', '王冠冠鳍', '宝石红体色'], adj: '鎏金' }),
   T('guitar', '吉他', '🎸', 'curio', 'epic', '#a5642f', '一把日落色木吉他', '第六根弦断了，但还能弹。',
-    { pal: ['#a8642c', '#e6c08a', '#2a1d14', '#7c4722'], mat: 'glaze', plan: 'hourglass', head: 'bill', app: ['strings'], pat: 'sunburst', tags: ['琴颈长吻', '琴弦背脊', '日落渐变漆面'], adj: '琴弦' }),
+    { pal: ['#a8642c', '#efd0a0', '#2a1d14', '#b8743a', '#f2c27a'], mat: 'glaze', pat: 'sunset', tail: 'lyre', fx: { fil: 1 }, tags: ['日落渐变漆面', '琴尾长丝', '弦状鳍条'], adj: '琴弦' }),
   T('rubik', '魔方', '🎲', 'curio', 'epic', '#2d5fa8', '一个只差一步就拼好的魔方', '最后一步，留给海浪去转。',
-    { pal: ['#c9302c', '#f2f2ee', '#2d5fa8', '#e8b72f'], mat: 'glaze', plan: 'box', pat: 'geo', tags: ['方块躯干', '六色棋盘格', '塑料亮面'], adj: '方格' }),
+    { pal: ['#2d5fa8', '#f3f3ef', '#e8b72f', '#c9302c', '#f4d36a'], mat: 'glaze', pat: 'koi', tags: ['三色锦鲤斑', '亮面撞色', '红黄鳍梢'], adj: '方格' }),
   T('rocket', '火箭', '🚀', 'curio', 'legendary', '#c2412d', '一枚还在冒烟的玩具火箭', '它本来要去月球，结果掉进了海里。',
-    { pal: ['#e9e6e0', '#c9cdd2', '#c2412d', '#d0d4d8'], mat: 'metal', head: 'pointed', tail: 'rocket', pat: 'ocelli', glow: 0.6, tags: ['尾焰喷口', '三翼尾鳍', '舷窗眼斑'], adj: '星舰' }),
+    { pal: ['#e9e6e0', '#f4f5f6', '#c2412d', '#d6dadf', '#ff8a4a'], mat: 'metal', pat: 'grad', tail: 'lunate', dor: 'sickle', fx: { glow: 0.5 }, tags: ['银白流线身', '尾焰发光鳍', '新月尾'], adj: '星舰' }),
   T('crystalball', '水晶球', '🔮', 'curio', 'legendary', '#6b5bb8', '一颗装着星云的占卜水晶球', '盯着看久了，会看见自己的鱼。',
-    { pal: ['#33295f', '#6f61ad', '#cbbcff', '#463b80'], mat: 'crystal', pat: 'galaxy', plan: 'globe', eyes: { n: 1, k: 1.4 }, glow: 0.7, wild: ['photo'], tags: ['体内星云', '晶体外壳', '预言独眼'], adj: '星象' }),
+    { pal: ['#33295f', '#8678c4', '#cbbcff', '#4b3f88', '#e8e0ff'], mat: 'crystal', pat: 'stars', fx: { glow: 0.6, irid: 0.8, finA: 0.38 }, tags: ['体内星云', '晶体鳞光', '星辉透鳍'], adj: '星象' }),
   T('hourglass', '沙漏', '⌛', 'curio', 'rare', '#d8b47a', '一只黄铜框的沙漏', '倒过来，时间就往回流。',
-    { pal: ['#d6b277', '#efe0bf', '#8a6a3a', '#c9a465'], mat: 'matte', plan: 'hourglass', pat: 'grad', app: ['band'], tags: ['细腰沙漏身', '流沙渐变', '黄铜腰环'], adj: '流沙' }),
+    { pal: ['#d6b277', '#f3e6c8', '#8a6a3a', '#dcbc84', '#f6dfa8'], mat: 'satin', pat: 'grad', fx: { scl: 0.6 }, tags: ['流沙渐变', '黄铜鳞缘', '暖沙体色'], adj: '流沙' }),
   T('origami', '千纸鹤', '🕊️', 'curio', 'rare', '#e9dfcf', '一只和纸折的千纸鹤', '翅膀上写着一个没人看得懂的愿望。',
-    { pal: ['#e8ddcc', '#f5efe4', '#b8423a', '#e2d6c3'], mat: 'paper', plan: 'diamond', pect: 'wing', tail: 'fork', pat: 'none', tags: ['折纸棱面', '鹤翼胸鳍', '和纸肌理'], adj: '纸鹤' }),
+    { pal: ['#e8ddcc', '#f8f3ea', '#b8423a', '#ece2d3', '#ffffff'], mat: 'satin', pat: 'none', pect: 'long', tail: 'fork', fx: { finA: 0.5 }, tags: ['和纸素白', '鹤翼长胸鳍', '朱红点睛'], adj: '纸鹤' }),
 ];
 export const ITEM_BY_ID = Object.fromEntries(ITEMS.map((x) => [x.id, x]));
 export const ITEM_IDS = ITEMS.map((x) => x.id);

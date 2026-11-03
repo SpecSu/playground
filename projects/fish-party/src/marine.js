@@ -751,7 +751,38 @@ function animateMarineModel(model, elapsedSeconds, supportProgress = 0) {
     motion.node.rotation[motion.axis] = motion.rest + Math.sin(elapsedSeconds * motion.speed + motion.phase) * motion.amplitude * (1 - THREE.MathUtils.clamp(supportProgress, 0, 1));
   }
 }
+// v0.9.1 A：合成物种「形态融合」用 —— 取天然物种主躯干的侧视轮廓（与天然模型同一套流线化采样）+ 背/腹色
+// 返回 { u:[], h:[], w:[], back, belly, L }：u∈[0,1] 尾→头，h/w = 半高/半宽 ÷ 体长；只读、带缓存，不影响天然鱼渲染
+const _BP = new Map();
+function marineBlueprint(speciesId) {
+  if (_BP.has(speciesId)) return _BP.get(speciesId);
+  const recipe = RECIPES[speciesId];
+  if (!recipe) return null;
+  const s = new Sculpture(), bodies = [], ob = s.body.bind(s);
+  s.body = (name, profile, back, belly, metal, parent) => { const m = ob(name, profile, back, belly, metal, parent); bodies.push({ profile, back, belly, root: !parent || parent === s.root }); return m; };
+  let out = null;
+  STREAM = STREAM_SP[speciesId] || 0; STREAM_ID = speciesId;
+  try {
+    recipe(s);
+    let best = null, bs = -1;
+    for (const b of bodies) {
+      if (!b.root || b.profile.length < 4) continue;
+      const S = profileSamples(b.profile), L = S[S.length - 1][0] - S[0][0];
+      const mh = Math.max(...S.map((q) => q[1]));
+      if (L * mh > bs) { bs = L * mh; best = { b, S, L }; }
+    }
+    if (best) {
+      const { S, L } = best, x0 = S[0][0];
+      out = { u: S.map((q) => (q[0] - x0) / L), h: S.map((q) => q[1] / L), w: S.map((q) => q[2] / L), back: best.b.back, belly: best.b.belly, L };
+    }
+  } catch (e) { out = null; } finally { STREAM = 0; }
+  s.root.traverse((o) => { if (o.geometry && o.geometry !== s.sphere) o.geometry.dispose(); });
+  _BP.set(speciesId, out);
+  return out;
+}
 export {
+  marineBlueprint,
+  bodyGeometry,
   animateMarineModel,
   createMarineModel,
   Sculpture   // v0.9 A：合成物种引擎（synth.js）复用同一套雕塑工具（薄膜鳍 / 眼睛 / 管状附肢）

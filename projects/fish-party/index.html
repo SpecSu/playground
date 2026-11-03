@@ -674,10 +674,11 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
 .rv-list .i{width:16px;height:16px;vertical-align:-3px;margin-right:4px;color:var(--grape-t)}
 .ib-it .ic .i{width:20px;height:20px;color:var(--ink2)}
 .eg-ic.fuse{background:radial-gradient(circle at 40% 35%,#fffdf4,#ffeac0 70%)}
-.eg-bar{height:12px;border-radius:var(--pill);background:var(--bg2);box-shadow:inset 0 0 0 1.5px var(--line);margin-top:14px;overflow:hidden}
+.eg-bar{height:10px;border-radius:var(--pill);background:var(--bg2);box-shadow:inset 0 0 0 1.5px var(--line);margin-top:16px;overflow:hidden}
 .eg-bar i{display:block;height:100%;width:0;border-radius:var(--pill);background:linear-gradient(90deg,var(--mint),var(--lemon));transition:width .25s linear}
-.eg-card .tk-btn.main{margin-top:14px}
-.eg-note{font-size:var(--f1);font-weight:600;color:var(--ink3);text-align:center;margin-top:8px;min-height:16px}
+/* v0.9.1：卵卡没有 .eg-card 类 → 原 margin 从未生效，加速按钮贴着进度条。改为跟在进度条后的兄弟选择器，进度条与按钮间留 22px 呼吸 */
+.eg-bar + .tk-btn.main{margin-top:22px}
+.eg-note{font-size:var(--f1);font-weight:600;color:var(--ink3);text-align:center;margin-top:10px;min-height:16px}
 .lb-hd b{display:block;font-size:var(--f3);font-weight:800}
 .lb-hd span{font-size:var(--f1);color:var(--ink2);font-weight:600}
 .lb-tabs{display:flex;gap:4px;background:var(--bg2);border-radius:var(--pill);padding:4px;box-shadow:inset 0 0 0 1.5px var(--line)}

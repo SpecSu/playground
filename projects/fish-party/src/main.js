@@ -615,9 +615,17 @@ joyEl.addEventListener('pointerup', joyEnd); joyEl.addEventListener('pointercanc
 // 镜头拖拽（画面空白处）
 const cam = { yaw: 0, pitch: 0.3, dist: 5.4, userT: 0 };
 let drag = null;
-canvas.addEventListener('pointerdown', (e) => { if (tankUI.isOpen) return; drag = { id: e.pointerId, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, t0: performance.now() }; canvas.setPointerCapture(e.pointerId); initAudio(); });
+// v0.9.1 双指缩放：只跟踪落在 canvas 上的指针（摇杆/主按钮各自 capture，不会进入这里）
+const camPts = new Map(); let pinch = null; cam.zoom = 1; // zoom：用户缩放倍率，乘在各阶段 wantDist 上
+const setZoom = (z) => { cam.zoom = clamp(z, 0.55, 1.7); };
+const ptsDist = () => { const [a, b] = [...camPts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+canvas.addEventListener('pointerdown', (e) => { if (tankUI.isOpen) return; camPts.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (camPts.size === 2) { drag = null; pinch = { d: ptsDist(), z: cam.zoom }; } });
+canvas.addEventListener('pointermove', (e) => { const p = camPts.get(e.pointerId); if (!p) return; p.x = e.clientX; p.y = e.clientY; if (pinch && camPts.size >= 2) { setZoom(pinch.z * pinch.d / ptsDist()); cam.userT = 2.5; } });
+const ptEnd = (e) => { camPts.delete(e.pointerId); if (camPts.size < 2) pinch = null; };
+canvas.addEventListener('pointerup', ptEnd); canvas.addEventListener('pointercancel', ptEnd);
+canvas.addEventListener('pointerdown', (e) => { if (tankUI.isOpen) return; if (camPts.size > 1 || pinch) return; drag = { id: e.pointerId, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, t0: performance.now() }; canvas.setPointerCapture(e.pointerId); initAudio(); });
 canvas.addEventListener('pointermove', (e) => {
-  if (!drag || drag.id !== e.pointerId) return;
+  if (!drag || drag.id !== e.pointerId || pinch) return;
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
   cam.yaw -= dx * 0.008; cam.pitch = clamp(cam.pitch + dy * 0.005, 0.05, 1.0); cam.userT = 2.5;
 });
@@ -631,7 +639,7 @@ const dragEnd = (e) => {
   else if (a && a.isPlayer && watch) endWatch();
 };
 canvas.addEventListener('pointerup', dragEnd); canvas.addEventListener('pointercancel', dragEnd);
-canvas.addEventListener('wheel', (e) => { cam.dist = clamp(cam.dist + e.deltaY * 0.004, 3, 9); }, { passive: true });
+canvas.addEventListener('wheel', (e) => { if (tankUI.isOpen) return; setZoom(cam.zoom * Math.exp(e.deltaY * 0.0012)); }, { passive: true });
 
 // 按钮：菜单（v1.3：先到 2×2 大卡首页，卡片上带红点/摘要，再进子页；子页统一「‹ 返回」）
 let lastTab = 'home';
@@ -1193,7 +1201,8 @@ function updateCamera(dt) {
   if (wantYaw !== null && auto) cam.yaw += angDelta(wantYaw, cam.yaw) * kk;
   if (wantPitch !== null && auto) cam.pitch += (wantPitch - cam.pitch) * kk;
   else if (auto && wantPitch === null) cam.pitch += (0.3 - cam.pitch) * kk * 0.5;
-  cam.dist += (wantDist - cam.dist) * (1 - Math.exp(-dt * 3));
+  wantDist = clamp(wantDist * cam.zoom, 2.2, 10.5);
+  cam.dist += (wantDist - cam.dist) * (1 - Math.exp(-dt * (pinch ? 12 : 3)));
   const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
   const back = tv.set(-Math.sin(cam.yaw) * cp, sp, -Math.cos(cam.yaw) * cp);
   desired.copy(camTarget).addScaledVector(back, cam.dist);

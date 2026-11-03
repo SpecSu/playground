@@ -467,6 +467,18 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
     if (visit) { showVisitCard(x); setHint(); return; }
     x.egg ? showEggCard(x) : showFishCard(x);
     setHint();
+    if (!x.egg) setTimeout(orbitTip, 450);
+  }
+  // v0.9.1：首次选中鱼 → 鱼卡上方一次性手势提示（3s 淡出）
+  function orbitTip() {
+    if (tut.get('orbit')) return; tut.set('orbit');
+    const el = document.createElement('div');
+    el.textContent = '拖动可 360° 查看 · 双指缩放';
+    const r = card.getBoundingClientRect(), bottom = r.height > 0 ? (innerHeight - r.top + 10) : 220;
+    el.style.cssText = `position:fixed;left:50%;bottom:${bottom}px;transform:translateX(-50%);z-index:60;pointer-events:none;padding:6px 14px;border-radius:999px;background:rgba(10,24,40,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#eaf6ff;font-size:12px;letter-spacing:.5px;white-space:nowrap;opacity:0;transition:opacity .45s ease`;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => { el.style.opacity = '1'; });
+    setTimeout(() => { el.style.opacity = '0'; }, 3000); setTimeout(() => el.remove(), 3600);
   }
 
   // ---------------- 鱼卡 ----------------

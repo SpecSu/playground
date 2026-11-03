@@ -30,17 +30,17 @@ for (let i = 0; i < 60; i++) run(wildSynth(1000 + i), `wild:${i}`);
 // 强制覆盖每个造型值
 const base = synthesize({ a: mk('clownfish'), b: mk('tuna'), seed: 5 });
 const force = (patch, tag) => run({ ...base, syn: { ...base.syn, ...patch } }, tag);
-for (const k of SHAPES.plan) force({ plan: k }, 'plan:' + k);
-for (const k of SHAPES.head) force({ head: k }, 'head:' + k);
-for (const k of SHAPES.mouth) force({ mouth: k }, 'mouth:' + k);
-for (const k of SHAPES.dor) force({ dor: { k, h: 1, l: 1, x: 0.5 }, dor2: { k: 'shark', h: 0.6, l: 0.6, x: 0.28 } }, 'dor:' + k);
-for (const k of SHAPES.tail) { force({ tail: { k, s: 1 } }, 'tail:' + k); force({ tail: { k, s: 1.4, n: 2 } }, 'tail2:' + k); }
+for (const k of SHAPES.dor) force({ dor: { k, h: 1.2 } }, 'dor:' + k);
+for (const k of SHAPES.tail) force({ tail: { k, s: 1.3 } }, 'tail:' + k);
 for (const k of SHAPES.pect) force({ pect: { k, s: 1.2 } }, 'pect:' + k);
-for (const a of SHAPES.app) force({ app: [a.replace(':N', ':8')] }, 'app:' + a);
-for (const n of [0, 1, 3, 5, 8]) force({ eyes: { n, k: 1, stalk: n === 3 ? 1 : 0, lens: n === 5 ? 1 : 0 } }, 'eyes:' + n);
-force({ asym: 1 }, 'asym');
-force({ mat: 'paper', pect: { k: 'wing', s: 1.5 } }, 'paper-crane');
-force({ plan: 'nope', head: 'zzz', mouth: 42, dor: { k: 'what' }, tail: { k: '??' }, pect: { k: null }, app: ['foo:3', null, 'tentacle:abc'], mat: 'unobtainium' }, 'garbage');
+for (const k of SHAPES.pat) force({ pat: { k, d: 3, a: 0.9 } }, 'pat:' + k);
+for (const k of SHAPES.mat) force({ mat: k, lux: 4, fil: 1, scl: 1, glow: 0.8 }, 'mat:' + k);
+for (const sp of NATURAL_IDS) force({ base: [[sp, 1]] }, 'base:' + sp);
+// 旧 v0.9 存档基因（v1 格式）兼容
+const V1 = { plan: 'globe', head: 'spout', mouth: 'gape', dor: { k: 'lid', h: 1, l: 1, x: 0.5 }, dor2: { k: 'shark', h: 0.6 }, tail: { k: 'anchor', s: 1.4, n: 2 }, pect: { k: 'wing', s: 1.5 }, eyes: { n: 5, k: 1.3, stalk: 1, lens: 1 }, app: ['bells', 'lure:bulb', 'tentacle:8'], asym: 1, wild: ['photo'], pat: { k: 'dial', d: 3 }, mat: 'paper', pal: ['#c04a3c', '#f1ebe0', '#2a2a2e', '#b8892f'], anc: { pufferfish: 0.5, swordfish: 0.5 }, tags: ['a', 'b', 'c'] };
+run({ sp: 'synth', syn: V1, rarity: 'epic', cm: 50 }, 'legacy-v1');
+for (const plan of ['fusiform', 'deep', 'globe', 'eel', 'flat', 'box', 'seg', 'disc', 'hourglass', 'diamond']) run({ sp: 'synth', syn: { ...V1, plan, anc: undefined }, rarity: 'rare' }, 'legacy-plan:' + plan);
+force({ base: [['nope', 1]], dor: { k: 'what' }, tail: { k: '??' }, pect: { k: null }, pal: [1, null], pat: 7, mat: 'unobtainium', len: NaN, ht: 'x' }, 'garbage');
 run({ sp: 'synth' }, 'no-syn');
 run({ sp: 'synth', syn: null, cm: 2400 }, 'null-syn');
 
@@ -55,4 +55,8 @@ const big = ok.filter((s) => s.tris > 6000).slice(0, 12); if (big.length) consol
 for (const e of errs.slice(0, 6)) console.log('ERR', e.tag, e.err.split('\n').slice(0, 3).join(' | '));
 for (const w of [...new Set(warns)].slice(0, 8)) console.log('WARN', w.slice(0, 220));
 const miss = (kind) => SHAPES[kind].filter((x) => !SYN_SHAPES[kind].includes(x));
-console.log('vocab gaps:', JSON.stringify({ plan: miss('plan'), head: miss('head'), mouth: miss('mouth'), dor: miss('dor'), tail: miss('tail'), pect: miss('pect'), app: SHAPES.app.map((a) => a.split(':')[0]).filter((a) => !SYN_APPS.includes(a)) }));
+console.log('vocab gaps:', JSON.stringify({ dor: miss('dor'), tail: miss('tail'), pect: miss('pect') }), 'apps:', SYN_APPS.length);
+// 天然鱼三角数对照
+const { createMarineModel } = await import('../../src/marine.js');
+const nt = []; for (const sp of NATURAL_IDS) { try { const m = createMarineModel(sp); if (!m) continue; let t = 0; m.traverse((o) => { if (o.isMesh) { const g = o.geometry; t += (g.index ? g.index.count : g.getAttribute('position').count) / 3; } }); nt.push(t); } catch (e) { } }
+console.log(`natural tris avg ${Math.round(nt.reduce((a, b) => a + b, 0) / nt.length)} (n=${nt.length})  synth avg ${Math.round(tr.reduce((a, b) => a + b, 0) / tr.length)}`);
