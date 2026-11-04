@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#fffaf3" />
+<title>神奇潜水 Fish Diving</title>
+<style>
+:root{
+  --bg:#fffaf3; --card:#ffffff; --bg2:#fff6ea; --line:#f1e6d6; --edge:#efe2d1;
+  --ink:#3a3330; --ink2:#7a6f65; --ink3:#a0948a;
+  --pri:#ff7a8a; --pri2:#ff97a3; --pri-d:#e65d70; --pri-l:#ffeef0;
+  --mint:#4fd6c0; --mint-d:#2fb7a1; --mint-l:#e3f8f3; --mint-t:#1f8f7d;
+  --lemon:#ffd45c; --lemon-d:#e8b42c; --lemon-l:#fff5d3; --lemon-t:#9a6b00;
+  --grape:#9b8cff; --grape-d:#7d6ce8; --grape-l:#efecff; --grape-t:#6455c9;
+  --sky:#6cc4ff; --sky-d:#45a7ea; --sky-l:#e5f4ff; --sky-t:#2f7fbf;
+  --red:#ff6b6b; --red-d:#e04d55;
+  --sh:0 6px 18px rgba(120,80,40,.12); --sh-s:0 2px 8px rgba(120,80,40,.08); --sh-l:0 18px 44px rgba(90,60,30,.20);
+  --thick:0 3px 0 var(--edge);
+  --font:ui-rounded,"SF Pro Rounded","PingFang SC",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;font-family:var(--font);color:var(--ink);user-select:none;touch-action:none;font-size:14px;font-weight:600;background:#000}
+#app { width:100%; height:100%; position:relative; }
+canvas { display:block; width:100%; height:100%; }
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="c"></canvas>
+</div>
+<script type="module" src="./src/diving_main.js"></script>
+</body>
+</html>
+

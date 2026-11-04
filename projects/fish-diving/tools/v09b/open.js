@@ -1,0 +1,20 @@
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+for (let i = 0; i < 80 && !document.querySelector('#start.ready'); i++) await sleep(250);
+document.querySelector('#start')?.click();
+await sleep(1200);
+document.querySelector('#modal.show .btn-p')?.click();
+const M = G.meta;
+for (const id of ['blue-tang', 'seahorse', 'mackerel', 'salmon']) { const sp = G.SPECIES.find((s) => s.id === id); if (!sp) continue; const v = G.makeVariant(sp, 0); v.traits = []; M.addToTank(v); }
+M.save();
+G.openTank();
+for (let i = 0; i < 240 && (G.tankUI.loading || !G.tankUI.isOpen); i++) await sleep(250);
+await sleep(1500);
+document.querySelector('.tk-tip button')?.click();
+const f = G.meta.tankFish()[0];
+G.tankUI.debugTap(f.uid);
+await sleep(400);
+document.querySelector('#fcGene').click();
+await sleep(400);
+const lab = document.querySelector('#tkLab');
+const r = lab.getBoundingClientRect();
+return 'tank ' + G.meta.tankFish().length + ' fish; lab=' + lab.classList.contains('show') + ' rect=' + Math.round(r.top) + '..' + Math.round(r.bottom) + ' vh=' + innerHeight + ' sh=' + lab.scrollHeight + '/' + lab.clientHeight;

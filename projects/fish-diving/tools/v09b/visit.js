@@ -1,0 +1,10 @@
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+document.querySelector('#nmDice')?.click(); await sleep(200);
+document.querySelector('#nmOk')?.click(); await sleep(600);
+const named = G.meta.S.tank.find((x) => x.syn && !x.egg);
+document.querySelector('#tkVisit').click(); await sleep(300);
+document.querySelector('#tkFriends [data-fr]').click();
+await sleep(300);
+for (let i = 0; i < 240 && (G.tankUI.loading || !G.tankUI.visiting); i++) await sleep(250);
+await sleep(1200);
+return 'named=' + (named && named.name) + ' unnamed=' + (named && named.unnamed) + ' visiting=' + G.tankUI.visiting + ' acts=' + document.querySelector('#tkVisitActs').innerText.replace(/\s+/g, ' ');

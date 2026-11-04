@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gene Lab · 派对基因测试页</title>
+<style>
+  :root { --ink: #2b1d4e; --pink: #ff5fa2; --lemon: #ffd23f; --mint: #2fe0c5; --grape: #7b5cff; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #fff4fb; color: var(--ink); }
+  header { padding: 18px 22px 8px; }
+  h1 { margin: 0; font-weight: 900; font-style: italic; font-size: 28px; letter-spacing: 1px; }
+  h1 small { font-size: 14px; font-style: normal; font-weight: 700; opacity: .7; margin-left: 8px; }
+  h2 { margin: 22px 22px 8px; font-size: 19px; font-weight: 900; display: inline-block; background: var(--lemon); border: 3px solid var(--ink); border-radius: 14px; padding: 4px 12px; box-shadow: 0 4px 0 var(--ink); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 14px; padding: 8px 22px 6px; }
+  .cell { background: linear-gradient(160deg, #bff6ff 0%, #d9ccff 55%, #ffd6ea 100%); border: 3px solid var(--ink); border-radius: 18px; box-shadow: 0 4px 0 var(--ink); overflow: hidden; }
+  .cell canvas { display: block; width: 100%; height: 178px; }
+  .grid.big { grid-template-columns: repeat(2, minmax(420px, 1fr)); }
+  .grid.big .cell canvas { height: 380px; }
+  .grid.strip { grid-template-columns: repeat(4, 1fr); }
+  .meta { background: #fff; border-top: 3px solid var(--ink); padding: 6px 9px 8px; min-height: 64px; }
+  .nm { font-weight: 900; font-size: 14px; line-height: 1.25; }
+  .sub { font-size: 11px; opacity: .65; font-weight: 700; margin-top: 1px; }
+  .chips { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 3px; }
+  .chip { font-size: 10.5px; font-weight: 800; background: #f1ebff; border: 1.5px solid var(--ink); border-radius: 9px; padding: 0 5px; }
+  .chip.mut { background: var(--lemon); }
+  .ch { font-size: 10.5px; margin-top: 3px; color: #6a4bd6; font-weight: 700; line-height: 1.3; }
+  table { margin: 6px 22px 30px; border-collapse: collapse; font-size: 12px; background: #fff; border: 3px solid var(--ink); border-radius: 12px; }
+  td, th { padding: 3px 9px; border-bottom: 1px solid #e8defa; text-align: left; }
+  #status { position: fixed; right: 12px; top: 10px; background: var(--ink); color: #fff; font-weight: 800; padding: 5px 10px; border-radius: 10px; font-size: 12px; z-index: 9; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body>
+<div id="status">loading…</div>
+<header><h1>🧬 GENE LAB <small>派对基因 · 部件 · 材质 · 改造 / 融合 / 变异 自测页</small></h1></header>
+<div id="root"></div>
+<script type="module">
+import * as THREE from 'three';
+import { SPECIES, SPECIES_BY_ID, Fish, makeVariant, displayName, holdLength, RARITY, rarityOf } from './src/fishes.js';
+import { stylizeObject } from './src/toon.js';
+import { EXTRA_IDS, EXTRAS, MAT_IDS, MATS, designFromPrompt, fuseFish, geneSummary, releaseValue, oceanCatch, rollMutation } from './src/genes.js';
+import { rng } from './src/ugc.js';
+
+const Q = new URLSearchParams(location.search);
+const SEED = +(Q.get('seed') || 20261101);
+const ONLY = Q.get('only');            // 只渲染某一节：wild/extras/mats/prompt/fuse/stress
+const ANIM = Q.has('anim');
+Math.random = rng(SEED);               // 可复现
+
+const W = 232 * 2, H = 178 * 2;
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.setClearColor(0x000000, 0);
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight('#ffffff', '#b7a6e0', 0.9));
+const dl = new THREE.DirectionalLight('#fff4e0', 3.0); dl.position.set(1.5, 3, 2.5); scene.add(dl);
+const fl = new THREE.DirectionalLight('#dff4ff', 0.8); fl.position.set(-2, 0.4, 1.2); scene.add(fl);
+// 简易环境：粉紫-天蓝渐变（PMREM）
+{
+  const pm = new THREE.PMREMGenerator(renderer);
+  const es = new THREE.Scene();
+  const g = new THREE.SphereGeometry(50, 32, 16);
+  const m = new THREE.ShaderMaterial({ side: THREE.BackSide, vertexShader: 'varying vec3 p; void main(){ p = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }', fragmentShader: 'varying vec3 p; void main(){ float y = normalize(p).y; vec3 c = mix(vec3(0.95,0.75,0.9), vec3(0.55,0.8,1.0), smoothstep(-0.2,0.8,y)); c = mix(vec3(0.35,0.3,0.5), c, smoothstep(-0.6,0.0,y)); gl_FragColor = vec4(c,1.0); }' });
+  es.add(new THREE.Mesh(g, m));
+  scene.environment = pm.fromScene(es, 0.04).texture; scene.environmentIntensity = 0.7;
+}
+const stylize = (o) => stylizeObject(o, { rim: 1.0 });
+const cam = new THREE.PerspectiveCamera(24, W / H, 0.05, 80);
+const root = document.getElementById('root');
+const cells = [];
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function section(title, id, cls = '') {
+  if (ONLY && !ONLY.split(',').includes(id)) return null;
+  const h = document.createElement('h2'); h.textContent = title; root.appendChild(h);
+  const g = document.createElement('div'); g.className = 'grid ' + cls; g.id = 'sec-' + id; root.appendChild(g);
+  return g;
+}
+function cell(grid, v, { sub = '', changes = null, big = false, dir = null, fixedT = null, anim = null, zoom = 1 } = {}) {
+  if (!grid) return;
+  const el = document.createElement('div'); el.className = 'cell';
+  const cw = big ? 920 : W, ch = big ? 760 : H;
+  const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch; el.appendChild(cv);
+  const sp = SPECIES_BY_ID[v.sp];
+  const tags = geneSummary(v);
+  const R = RARITY[rarityOf(v)];
+  el.insertAdjacentHTML('beforeend', `<div class="meta"><div class="nm">${esc(displayName(v))}</div>
+    <div class="sub">${esc(sp.name)} · <b style="color:${R.color}">${R.label}</b> · ${v.cm}cm · 抱 ${holdLength(v).toFixed(2)}m · 放生 ${releaseValue(v)}${sub ? ' · ' + esc(sub) : ''}</div>
+    <div class="chips">${tags.map((t) => `<span class="chip ${/变异/.test(t) ? 'mut' : ''}">${esc(t)}</span>`).join('')}</div>
+    ${changes ? `<div class="ch">${changes.map(esc).join('<br>')}</div>` : ''}</div>`);
+  grid.appendChild(el);
+  let f;
+  try { f = new Fish(v, stylize); } catch (e) { console.error('Fish build failed', v.sp, e); return; }
+  f.update(0.016, 'swim'); f.body.rotation.set(0, 0, 0);
+  if (fixedT != null) f.setSwimTime(fixedT, anim || undefined);
+  cells.push({ f, ctx: cv.getContext('2d'), v, cw, ch, dir, fixedT, anim, zoom });
+}
+function frame(c) {
+  const f = c.f;
+  if (renderer.domElement.width !== c.cw || renderer.domElement.height !== c.ch) { renderer.setSize(c.cw, c.ch, false); cam.aspect = c.cw / c.ch; }
+  scene.add(f.root); f.root.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(f.root), ctr = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
+  const dir = (c.dir ? new THREE.Vector3(...c.dir) : new THREE.Vector3(0.22, 0.32, 1)).normalize();
+  const asp = c.cw / c.ch;
+  const fitH = Math.max(sz.y + sz.z * 0.3, (sz.x + sz.z * 0.25) / asp) * 1.12 / c.zoom;
+  const dist = fitH / 2 / Math.tan(THREE.MathUtils.degToRad(12)) + sz.z * 0.5;
+  cam.position.copy(ctr).addScaledVector(dir, dist); cam.lookAt(ctr); cam.near = dist * 0.05; cam.far = dist * 4; cam.updateProjectionMatrix();
+  renderer.render(scene, cam);
+  c.ctx.clearRect(0, 0, c.cw, c.ch); c.ctx.drawImage(renderer.domElement, 0, 0);
+  scene.remove(f.root);
+}
+
+// ① 20 种野生鱼（含派对基因）
+const g1 = section('① 野生鱼 · 派对基因（20 种）', 'wild');
+for (const sp of SPECIES) cell(g1, makeVariant(sp));
+
+// ⓪ 物种原型（无花纹 / 无部件 / 无材质）：检查建模与 PBR 皮肤本身
+const g0 = section('⓪ 物种原型 · v3 写实风格化皮肤（20 种）', 'species');
+const bare = (id) => { const v = makeVariant(SPECIES_BY_ID[id]); v.gx = { ...v.gx, extras: [], mat: null, eyes: 2, eyeK: 1.15, stretch: [1, 1, 1] }; v.ugc = { ...v.ugc, decos: [], amt: 0.0, tint: 0.0 }; v.traits = []; v.hue = 0; v.sat = 1; v.light = 1; v.nick = SPECIES_BY_ID[id].name; return v; };
+for (const sp of SPECIES) cell(g0, bare(sp.id));
+// 近景特写
+const gC = section('⓪-b 近景特写（小丑鱼 / 金枪鱼 / 蝠鲼 / 章鱼）', 'close', 'big');
+for (const [id, dir, zm] of [['clownfish', [0.35, 0.18, 1], 1.0], ['tuna', [0.3, 0.22, 1], 1.0], ['manta-ray', [0.3, 0.9, 0.7], 1.0], ['octopus', [0.5, 0.35, 1], 1.0]]) cell(gC, bare(id), { big: true, dir, zoom: zm, fixedT: 0.37 });
+// 游动连续帧：同一条鱼 4 个时刻（俯视看脊柱波）
+const SW = (Q.get('swim') || 'clownfish,manta-ray,octopus,oarfish').split(',');
+for (const id of SW) {
+  const gS = section(`⓪-c 游动连续帧 · ${SPECIES_BY_ID[id]?.name || id}（t = 0 / ¼ / ½ / ¾ 周期，俯视）`, 'swim-' + id, 'strip');
+  const hz = { 'manta-ray': 0.55, octopus: 0.8, oarfish: 0.9 }[id] || 2.1;
+  for (let k = 0; k < 4; k++) cell(gS, bare(id), { fixedT: k / 4 / hz, dir: id === 'manta-ray' ? [0.05, 0.25, 1] : [0.0, 1, 0.12], sub: `t=${(k / 4 / hz).toFixed(2)}s` });
+}
+// 抱鱼挣扎帧
+const gH = section('⓪-d 抱鱼挣扎（mode: hold）· 金枪鱼 4 帧', 'hold', 'strip');
+for (let k = 0; k < 4; k++) cell(gH, bare('tuna'), { fixedT: k * 0.09, anim: { mode: 'hold', burst: 0.9 }, dir: [0.0, 1, 0.12], sub: 'hold' });
+
+// ② 每种部件一张（轮换宿主物种，检验自动贴合）
+const g2 = section(`② 代码生成部件（${EXTRA_IDS.length} 种）`, 'extras');
+const HOST = { wings: 'clownfish', flame: 'mackerel', horn: 'pufferfish', catEars: 'blue-tang', whiskers: 'salmon', propeller: 'pufferfish', gear: 'tuna', crystalSpikes: 'mahi-mahi', jellyTentacles: 'sardine', legs: 'sunfish', lightbulb: 'cuttlefish', flowers: 'manta-ray', candles: 'clownfish', mustache: 'hammerhead', starTail: 'sailfish', bubbleHelmet: 'clownfish', extraEyes: 'lobster', spots3d: 'octopus', antlers: 'squid', mohawk: 'swordfish' };
+for (const k of EXTRA_IDS) {
+  const v = makeVariant(SPECIES_BY_ID[HOST[k] || 'clownfish']);
+  v.gx = { ...v.gx, extras: [k], mat: null, eyes: 2 }; v.ugc.decos = [];
+  v.nick = `${EXTRAS[k].emoji} ${EXTRAS[k].label} · ${SPECIES_BY_ID[v.sp].name}`;
+  cell(g2, v, { sub: k });
+}
+
+// ③ 每种材质一张
+const g3 = section('③ 特殊材质（9 种）', 'mats');
+const MHOST = ['pufferfish', 'clownfish', 'tuna', 'sunfish', 'mahi-mahi', 'manta-ray', 'king-crab', 'blue-tang', 'octopus'];
+MAT_IDS.forEach((m, i) => {
+  const v = makeVariant(SPECIES_BY_ID[MHOST[i]]);
+  v.gx = { ...v.gx, extras: [], mat: m, eyes: 2 }; v.ugc.decos = [];
+  v.nick = `${MATS[m].emoji} ${MATS[m].label} · ${SPECIES_BY_ID[v.sp].name}`;
+  cell(g3, v, { sub: m });
+});
+
+// ④ 改造 / 融合 / 变异
+const g4 = section('④ 描述改造 · 融合 · 变异', 'prompt');
+const plain = (id) => { const v = makeVariant(SPECIES_BY_ID[id]); v.gx = { ...v.gx, extras: [], mat: null, eyes: 2, stretch: [1, 1, 1] }; v.ugc.decos = []; return v; };
+const prompts = [['clownfish', '长翅膀的彩虹果冻鱼'], ['pufferfish', '机械猫耳'], ['blue-tang', '火焰独角兽'], ['salmon', '今天天气不错'], ['sunfish', '戴头盔的宇航员 星空'], ['mackerel', '三眼 朋克 小短腿'], ['octopus', '毛绒 生日蜡烛'], ['sardine', '水母 粉色']];
+let sd = SEED;
+for (const [id, p] of prompts) { const r = designFromPrompt(plain(id), { prompt: p }, (sd = (sd * 1103515245 + 12345) >>> 0)); cell(g4, r.v, { sub: `“${p || '（空）'}”`, changes: r.changes }); }
+// 融合
+const fa = plain('clownfish'), fb = plain('sailfish'); fb.gx.extras = ['wings']; fb.gx.mat = 'holo';
+const fu = fuseFish(fa, fb, 777); cell(g4, fu.v, { sub: '融合 小丑鱼×旗鱼', changes: ['A: ' + fu.fromA.join('、'), 'B: ' + fu.fromB.join('、')] });
+const fc = plain('pufferfish'); fc.gx.extras = ['catEars']; const fd = plain('hammerhead'); fd.gx.mat = 'lava';
+const fu2 = fuseFish(fc, fd, 4242); cell(g4, fu2.v, { sub: '融合 河豚×双髻鲨', changes: ['A: ' + fu2.fromA.join('、'), 'B: ' + fu2.fromB.join('、')] });
+// 变异样例：找到 giant / rare / giant+rare 的种子
+for (const want of ['giant', 'rare', 'giant+rare']) {
+  for (let s = 1; s < 200000; s++) {
+    const r = designFromPrompt(plain(want === 'rare' ? 'mahi-mahi' : want === 'giant' ? 'clownfish' : 'blue-tang'), { prompt: want === 'giant' ? '翅膀' : '小短腿' }, s);
+    if (r.mut === want) { cell(g4, r.v, { sub: `变异 ${want} · seed ${s}`, changes: r.changes }); break; }
+  }
+}
+// 大海里别人的鱼
+for (const s of [11, 23]) { const v = oceanCatch(s); cell(g4, v, { sub: `oceanCatch · 来自 ${v.fromOcean.by}` }); }
+
+// ⑤ 贴合压力测试：每个物种 3 个随机部件 + 随机眼睛
+const g5 = section('⑤ 贴合压力测试（每种 3 个随机部件）', 'stress');
+if (g5) {
+  const rr = rng(SEED ^ 99);
+  for (const sp of SPECIES) {
+    const v = makeVariant(sp);
+    const pool = EXTRA_IDS.slice(); const ex = [];
+    while (ex.length < 3) { const k = pool.splice(Math.floor(rr() * pool.length), 1)[0]; ex.push(k); }
+    v.gx = { ...v.gx, extras: ex, eyes: [1, 2, 3, 4][Math.floor(rr() * 4)] };
+    v.nick = ex.map((k) => EXTRAS[k].emoji).join('') + ' ' + sp.name;
+    cell(g5, v);
+  }
+}
+
+// 抱鱼尺寸表
+if (!ONLY || ONLY === 'size') {
+  const h = document.createElement('h2'); h.textContent = '⑥ 抱鱼显示长度 holdLength（标准体长 / 巨型变异）'; root.appendChild(h);
+  const t = document.createElement('table');
+  t.innerHTML = '<tr><th>物种</th><th>标准 cm</th><th>旧 hold</th><th>新 hold</th><th>巨型变异</th></tr>' + SPECIES.map((s) => {
+    const old = Math.min(1.3, Math.max(0.48, 0.42 + s.cm / 100 * 0.38));
+    return `<tr><td>${s.name}</td><td>${s.cm}</td><td>${old.toFixed(2)}</td><td><b>${holdLength({ sp: s.id, cm: s.cm }).toFixed(2)}</b></td><td>${holdLength({ sp: s.id, cm: s.cm * 2, mut: 'giant' }).toFixed(2)}</td></tr>`;
+  }).join('');
+  root.appendChild(t);
+}
+
+const st = document.getElementById('status');
+let i = 0;
+function step() {
+  // 分批首帧渲染（软渲染也不卡死）
+  const t0 = performance.now();
+  while (i < cells.length && performance.now() - t0 < 60) frame(cells[i++]);
+  st.textContent = `rendered ${i}/${cells.length}`;
+  if (i < cells.length) requestAnimationFrame(step);
+  else { window.__ready = true; st.textContent = `✓ ${cells.length} fish`; if (ANIM) requestAnimationFrame(loop); }
+}
+let last = performance.now();
+function loop() { const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now; for (const c of cells) { if (c.fixedT == null) c.f.animate(dt, { speed: 1 }); frame(c); } requestAnimationFrame(loop); }
+window.__cells = cells;
+window.__animTo = (t) => { for (const c of cells) { if (c.fixedT == null) c.f.setSwimTime(t); frame(c); } };
+requestAnimationFrame(step);
+</script>
+</body>
+</html>
