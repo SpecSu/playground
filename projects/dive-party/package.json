@@ -1,7 +1,0 @@
-{
-  "type": "module",
-  "scripts": {
-    "setup-test": "mkdir -p node_modules/three && ln -sf ../../vendor/three.module.min.js node_modules/three/index.js && echo '{\"name\":\"three\",\"type\":\"module\",\"main\":\"./index.js\"}' > node_modules/three/package.json",
-    "test": "npm run setup-test && node src/logic_test.js"
-  }
-}
