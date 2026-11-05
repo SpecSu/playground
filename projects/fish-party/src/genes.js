@@ -13,7 +13,8 @@ const ME = '@我';   // 调用方可在 opts.creator 传入 '@' + 玩家名
 export const GENE_TAGS = [
   { id: 'wings', label: '翅膀', emoji: '🪽', kw: ['翅膀', '翼', '会飞', '飞天', '天使', '蝙蝠', 'wing', 'fly', 'angel'] },
   { id: 'jelly', label: '果冻', emoji: '🫧', kw: ['果冻', '布丁', '啫喱', '透明', '幽灵', '鬼魂', 'ghost', 'jelly', 'pudding'] },
-  { id: 'flame', label: '火焰', emoji: '🔥', kw: ['火焰', '火', '燃烧', '烈焰', 'fire', 'flame', 'burn'] },
+  { id: 'flame', label: '火焰', emoji: '🔥', kw: ['火焰', '火', '燃烧', '烈焰', 'fire', 'flame', 'burn'], not: ['火锅', '火腿', '火车', '火鸡', '火山', '火龙果'] },
+  { id: 'food', label: '美食', emoji: '🍰', kw: ['蛋糕', '火锅', '芝士', '奶酪', '寿司', '冰淇淋', '甜甜圈', '布丁', '汉堡', '披萨', '饺子', '奶茶', 'cake', 'cheese', 'sushi', 'donut', 'pizza'] },
   { id: 'mech', label: '机械', emoji: '🤖', kw: ['机械', '机器', '赛博', '铁皮', '齿轮', '蒸汽', '机甲', '钢铁侠', 'robot', 'mecha', 'mech', 'cyber', 'steampunk'] },
   { id: 'candy', label: '糖果', emoji: '🍬', kw: ['糖果', '棒棒糖', '甜甜', '糖', '甜', 'candy', 'sweet', 'lollipop'] },
   { id: 'galaxy', label: '宇宙', emoji: '🌌', kw: ['宇宙', '星空', '银河', '星云', '外星', 'galaxy', 'cosmic', 'nebula'] },
@@ -39,7 +40,7 @@ export const GENE_TAGS = [
   { id: 'tentacle', label: '触须', emoji: '🪼', kw: ['触须', '触手', '水母', 'tentacle', 'jellyfish'] },
   { id: 'spots', label: '波点', emoji: '🔴', kw: ['波点', '圆点', '疙瘩', '点点', 'polka', 'dots', 'spots'] },
   { id: 'antler', label: '鹿角', emoji: '🦌', kw: ['鹿角', '驯鹿', '圣诞', '鹿', 'antler', 'deer', 'christmas', 'reindeer'] },
-  { id: 'punk', label: '朋克', emoji: '🤘', kw: ['朋克', '摇滚', '鸡冠', '莫西干', 'punk', 'rock', 'mohawk'] },
+  { id: 'punk', label: '朋克', emoji: '🤘', kw: ['朋克', '摇滚', '鸡冠', '莫西干', 'punk', 'rock', 'mohawk'], not: ['赛博朋克', '蒸汽朋克', 'cyberpunk', 'steampunk'] },
   { id: 'long', label: '细长', emoji: '🥢', kw: ['细长', '长条', '面条', '苗条', 'long', 'noodle', 'slim'] },
   { id: 'round', label: '圆滚滚', emoji: '🍡', kw: ['圆滚滚', '胖', '圆', '球', '肥', '胖嘟嘟', 'chubby', 'round', 'fat', 'ball'] },
   { id: 'tiny', label: '迷你', emoji: '🤏', kw: ['迷你', '袖珍', '小只', 'mini', 'tiny'] },
@@ -93,6 +94,14 @@ const FX = {
   round: { nm: '圆滚滚', ch: '🍡 变得圆滚滚', fn: (g) => { g.stretch = [cl(g.stretch[0] * 0.85, 0.6, 1.7), cl(g.stretch[1] * 1.22, 0.6, 1.7), cl(g.stretch[2] * 1.22, 0.6, 1.7)]; } },
   tiny: { nm: '迷你', ch: '🤏 缩成迷你款', fn: (g, r, n) => { n.cm = r1(n.cm * 0.6); g.eyeK = Math.min(2, (g.eyeK || 1) + 0.25); } },
   zebra: { nm: '斑马', ch: '🦓 斑马条纹', pat: PAT.zebra, pal: PAL.zebra },
+  food: { nm: '美味', ch: '🍰 变成了一道看起来很好吃的菜', fn: (g, r) => {
+    const k = Math.floor(r() * 4) % 4;
+    if (k === 0) { g.mat = 'candy'; addX(g, 'spots3d'); g.palette = ['#fff2d6', '#ffb347', '#ff6f61']; }
+    else if (k === 1) { g.mat = 'jelly'; g.palette = ['#fff6e0', '#ffd23f', '#ff8a5c']; }
+    else if (k === 2) { g.mat = 'plush'; addX(g, 'candles'); g.palette = ['#fff8f0', '#f6c48a', '#ff8fbf']; }
+    else { g.mat = 'candy'; addX(g, 'flowers'); g.palette = ['#fffbe6', '#ffe08a', '#7fd6a0']; }
+    g.stretch = [cl(g.stretch[0] * 0.9, 0.6, 1.7), cl(g.stretch[1] * 1.15, 0.6, 1.7), cl(g.stretch[2] * 1.12, 0.6, 1.7)];
+  } },
 };
 const FUN_POOL = ['wings', 'flame', 'cat', 'horn', 'eyes', 'party', 'jelly', 'glow', 'legs', 'lantern', 'mustache', 'star', 'candy', 'punk', 'antler', 'tentacle', 'plush', 'astro', 'spots', 'round'];
 
@@ -152,7 +161,8 @@ function matchTags(prompt) {
   const hits = [];
   for (const t of GENE_TAGS) {
     let best = -1;
-    for (const k of t.kw) { const i = p.indexOf(k.toLowerCase()); if (i >= 0 && (best < 0 || i < best)) best = i; }
+    const q = t.not ? t.not.reduce((a, w) => a.split(w.toLowerCase()).join('＿'.repeat(w.length)), p) : p;   // 屏蔽「赛博朋克」这类复合词里的子串
+    for (const k of t.kw) { const i = q.indexOf(k.toLowerCase()); if (i >= 0 && (best < 0 || i < best)) best = i; }
     if (best >= 0) hits.push([best, t.id]);
   }
   // 互相包含的词去重：「独角兽」不算「角」…；「水母」同时触发果冻触须（tentacle）——jelly 关键词不含水母
@@ -222,6 +232,165 @@ function makeNick(sp, n, names, r) {
   if (n.mut && n.mut.includes('giant') && !nm.startsWith('巨型')) nm = '巨型' + nm;
   return nm;
 }
+
+// ================= v2.0 基因改造：一条鱼 + 一句话 + 1 颗能量宝石 → 失败 20% / 成功 60% / 稀缺 20% =================
+export const GENE_MOD_P = { fail: 0.2, ok: 0.6, rare: 0.2 };
+export const GENE_TIER = {
+  fail: { label: '翻车了', short: '失败', color: '#9db3c2', desc: '缩水了一圈，颜色也褪成了灰扑扑' },
+  ok: { label: '改造成功', short: '成功', color: '#4fd6c0', desc: '按你说的，悄悄变了点样子' },
+  rare: { label: '稀缺变异', short: '稀缺', color: '#ffb547', desc: '基因炸裂！华丽到发光' },
+};
+// 灵感库：模拟玩家脑洞（每条都至少命中一个基因关键词，保证改造有看得见的效果）
+export const PROMPT_LIB = [
+  '想当一只戴宇航头盔的太空喵', '背上插满生日蜡烛的派对狂鱼', '浑身镀金的土豪暴发户', '赛博朋克机械改造人', '圆滚滚的糖果汤圆',
+  '三只眼睛的外星来客', '长出翅膀想去天上看看', '毛茸茸的玩偶抱枕', '头顶亮着灯泡的深海夜班族', '岩浆火山里泡温泉的狠角色',
+  '会发光的霓虹蹦迪王', '穿越银河的星空漫游者', '戴八字胡的英伦绅士', '长出小短腿去跑马拉松', '彩虹独角兽本兽',
+  '透明果冻做的布丁鱼', '浑身水晶钻石的冰雪女王', '朋克摇滚鸡冠头', '开满樱花的春天限定款', '圣诞驯鹿上班中',
+  '面条一样细长的瑜伽大师', '镭射幻彩迪斯科球', '触手比腿还多的水母亲戚', '迷你袖珍的口袋宠物', '斑马条纹的黑白时装模特',
+  '可爱到犯规的大眼萌物', '一身波点的草莓小甜心', '喷火的小恶魔犄角', '宇宙尽头的星星许愿池', '深海灯笼鮟鱇的远房表哥',
+  '机甲战士齿轮全开', '巨大到挡住太阳的大块头', '粉色棉花糖味的云朵', '紫色葡萄味的宇宙果冻', '金光闪闪的流星雨',
+  '闪电带电的雷神之锤', '抹茶绿的毛绒团子', '黑色暗黑系哥特恶魔', '会走路的小胖球', '开着蒸汽朋克螺旋桨',
+  // v2.2 +10 类怪诞脑洞
+  // ① 打工人
+  '周一早高峰挤地铁的社畜', '加班到三点眼睛冒光', '戴八字胡的中年部门经理',
+  // ② 美食成精
+  '一只成精的草莓蛋糕', '会游泳的芝士火锅', '紫色葡萄味的果冻布丁',
+  // ③ 偶像练习生
+  '想出道的爱豆练习生 大眼放电', '舞台上闪亮的镭射偶像', '戴生日蜡烛皇冠的应援团长',
+  // ④ 外星人入侵
+  '偷了地球人头盔的外星使者', '三只眼的银河侦察兵', '星空飞碟里溜出来的',
+  // ⑤ 魔法学院
+  '喝错药水长出独角的魔法生', '会发光的魔杖精灵', '戴尖角帽的星星魔法师',
+  // ⑥ 怪兽电影
+  '火山里醒来的岩浆巨兽', '巨大到挡住整片海的大怪兽', '背上长满水晶刺的哥斯拉',
+  // ⑦ 童话反转
+  '变成小短腿的美人鱼', '被吻了之后长出鹿角', '迷你版的海底巨人',
+  // ⑧ 宠物伪装
+  '假装自己是一只猫', '毛茸茸的仓鼠伪装者', '学狗狗走路的小胖鱼',
+  // ⑨ 节日限定
+  '春节限定 浑身金色红包', '圣诞夜的驯鹿快递员', '万圣节的透明幽灵',
+  // ⑩ 赛博玄学
+  '开过光的锦鲤 金光闪闪', '机械齿轮做的转运神兽', '彩虹七彩的许愿流星',
+];
+export function randomPrompt(r = Math.random, not = null) {
+  for (let i = 0; i < 6; i++) { const p = PROMPT_LIB[Math.floor(r() * PROMPT_LIB.length) % PROMPT_LIB.length]; if (p !== not) return p; }
+  return PROMPT_LIB[0];
+}
+const DULL = [['#d8d3cb', '#a39d94', '#c7c1b8'], ['#cfd3d6', '#8f979c', '#bcc3c7'], ['#d6cfc2', '#9c9283', '#c4baa9']];
+const VIVID = [PAL.rainbow, PAL.neon, PAL.unicorn, PAL.candy, ['#fff4c2', '#ffb21a', '#ff5fa2'], ['#e8fbff', '#3fb2ff', '#c59bff']];
+const RARE_LOOK = ['holo', 'galaxy', 'gold', 'crystal'];
+// v2.2 多样化：同一个关键词每次落地方式不同（ALT 变体），成功档再附 0~1 个意外惊喜 + 体型微调，
+//   稀缺档从全部 20 种部件里抽（排除鱼身上已有的 / 上一次改造刚加过的），配合随机材质 · 配色 · 小装饰
+const ALT = {
+  punk: [['mohawk'], ['horn', 'spots3d'], ['flame']],
+  mech: [['propeller'], ['gear'], ['gear', 'lightbulb']],
+  flame: [['flame'], ['candles'], ['flame', 'spots3d']],
+  horn: [['horn'], ['antlers'], ['horn', 'catEars']],
+  wings: [['wings'], ['wings', 'starTail'], ['propeller']],
+  glow: [['lightbulb'], ['spots3d'], []],
+  star: [['starTail'], ['starTail', 'spots3d'], ['bubbleHelmet']],
+  cat: [['catEars', 'whiskers'], ['catEars'], ['whiskers', 'mustache']],
+  legs: [['legs'], ['legs', 'mustache'], ['legs', 'catEars']],
+  crystal: [['crystalSpikes'], ['crystalSpikes', 'horn'], []],
+  party: [['candles'], ['candles', 'starTail'], ['flowers', 'candles']],
+  flower: [['flowers'], ['flowers', 'antlers'], ['flowers', 'wings']],
+};
+const ALL_X = Object.keys(EXTRAS);
+const ALL_M = Object.keys(MATS);
+const SURPRISE = ['food', 'eyes', 'cute', 'round', 'long', 'spots', 'tiny', 'mustache', 'star', 'zebra', 'wings', 'legs', 'horn', 'cat', 'tentacle', 'flower', 'lantern', 'astro', 'antler', 'party', 'plush', 'jelly', 'candy'];
+const DECO_IDS = Object.keys(DECOS);
+const VIVID_X = [['#fff4c2', '#ff8a1f', '#7b5cff'], ['#e9fff6', '#00c9a7', '#ffd23f'], ['#fff0f6', '#ff3d8b', '#3fb2ff'], ['#f0e8ff', '#9b5cff', '#ffef5c'], ['#e8f9ff', '#00a3ff', '#ff6fb5'], ['#fff8e6', '#ffb000', '#ff4a1c']];
+function recentX(v) { const h = (v.history || []).slice(-2); return new Set(h.flatMap((x) => x.added || [])); }
+// 一个标签按随机变体落地：先尝试 ALT 变体（换掉 FX 默认部件），否则走原效果
+function applyTagVar(n, id, p, r, changes, sp) {
+  const alts = ALT[id], g = n.gx;
+  if (alts && r() < 0.62) {
+    const ok = alts.map((xs) => xs.filter((k) => extraOk(k, sp.id))).filter((xs) => xs.length || !FX[id].x);
+    const pickX = ok.length ? ok[Math.floor(r() * ok.length) % ok.length] : null;
+    if (pickX) {
+      const e = FX[id];
+      pickX.forEach((k) => addX(g, k));
+      if (e.mat) g.mat = e.mat[0];
+      if (e.pal) g.palette = e.pal.slice();
+      if (e.glow) g.glow = Math.max(g.glow || 0, e.glow);
+      if (e.pat != null) g.pattern = e.pat;
+      if (!e.x) e.fn?.(g, r, n, p);
+      const lb = pickX.map((k) => EXTRAS[k]?.label).filter(Boolean).join(' + ');
+      changes.push(lb ? `${GENE_TAGS.find((t) => t.id === id)?.emoji || '🧬'} 基因读到「${GENE_TAGS.find((t) => t.id === id)?.label}」→ 长出了${lb}` : e.ch);
+      return e.nm;
+    }
+  }
+  return applyTags(n, [id], p, r, changes, sp)[0] || null;
+}
+function jitterShape(g, r, amt) {
+  const k = () => 1 + (r() * 2 - 1) * amt;
+  g.stretch = [cl(g.stretch[0] * k(), 0.6, 1.7), cl(g.stretch[1] * k(), 0.6, 1.7), cl(g.stretch[2] * k(), 0.6, 1.7)];
+}
+export function geneMod(v, prompt = '', { creator = null, tier = null, seed = newSeed() } = {}) {
+  const r = rng((seed ^ 0x51ed2701) >>> 0);
+  const sp = SPECIES_BY_ID[v.sp] || SPECIES_BY_ID.salmon;
+  const n = child(v, seed, creator);
+  const g = n.gx;
+  const changes = [];
+  const before = new Set(g.extras);
+  if (!tier) { const x = r(); tier = x < GENE_MOD_P.fail ? 'fail' : x < GENE_MOD_P.fail + GENE_MOD_P.ok ? 'ok' : 'rare'; }
+  const { ids, p } = matchTags(prompt);
+  const ri = RARITY_ORDER.indexOf(rarityOf(n));
+  const avoid = new Set([...before, ...recentX(v)]);
+  const freshX = () => ALL_X.filter((k) => extraOk(k, sp.id) && !avoid.has(k) && !g.extras.includes(k));
+  let names = [];
+  if (tier === 'fail') {
+    const k = 0.55 + r() * 0.15;
+    n.cm = r1(n.cm * k); g.scale = cl((g.scale || 1) * 0.9, 0.3, 3);
+    g.palette = DULL[Math.floor(r() * DULL.length) % DULL.length].slice(); g.mat = null; g.glow = 0;
+    if (g.extras.length) g.extras.pop();
+    if (ri > 0) n.rarity = RARITY_ORDER[ri - 1];
+    jitterShape(g, r, 0.08);
+    changes.push(`💨 实验翻车！缩水到原来的 ${Math.round(k * 100)}%`, '🩶 颜色褪成了灰扑扑', ri > 0 ? '⬇️ 稀有度掉了一档' : '😶 看起来更普通了');
+    n.nick = pickOne(r, ['缩水', '灰扑扑', '蔫巴巴', '褪色', '打了个喷嚏的', '没睡醒的']) + sp.name;
+  } else if (tier === 'ok') {
+    // 成功：提示词里随机取 1~2 个读懂的词（每个按随机变体落地）+ 35% 意外惊喜 + 体型微调
+    const pool = ids.slice().sort(() => r() - 0.5);
+    let use = pool.slice(0, 1 + (r() < 0.5 ? 1 : 0));
+    if (!use.length) use = [SURPRISE[Math.floor(r() * SURPRISE.length) % SURPRISE.length]];
+    for (const id of use) { const nm = applyTagVar(n, id, p, r, changes, sp); if (nm) names.push(nm); }
+    if (r() < 0.35) {
+      const sx = SURPRISE.filter((id) => !use.includes(id) && (!FX[id].x || FX[id].x.some((k) => extraOk(k, sp.id) && !avoid.has(k))));
+      const id = sx[Math.floor(r() * sx.length) % sx.length];
+      if (id) { changes.push('🎲 基因自己加了点戏：'); applyTags(n, [id], '', r, changes, sp); }
+    }
+    const cw = colorWords(p); if (cw && !use.some((id) => FX[id]?.pal)) { g.palette = cw; changes.push('🎨 换上了你说的颜色'); }
+    else if (!g.palette && r() < 0.3) { g.palette = VIVID_X[Math.floor(r() * VIVID_X.length) % VIVID_X.length].slice(); changes.push('🎨 顺便换了身新配色'); }
+    jitterShape(g, r, 0.07);
+    g.scale = cl(Math.min(g.scale || 1, 1.25), 0.3, 3); n.cm = r1(n.cm * (0.95 + r() * 0.2));
+    if (!changes.length) changes.push('🧬 基因悄悄换了个样子');
+    n.nick = makeNick(sp, n, names, r);
+  } else {
+    // 稀缺：读懂的词全部生效（各自随机变体）+ 2~3 个全新的夸张部件（全 20 种里抽）+ 华丽材质 / 配色 / 小装饰
+    for (const id of ids.slice(0, 4)) { const nm = applyTagVar(n, id, p, r, changes, sp); if (nm) names.push(nm); }
+    const fx = freshX().sort(() => r() - 0.5).slice(0, 2 + (r() < 0.45 ? 1 : 0));
+    fx.forEach((k) => addX(g, k));
+    if (fx.length) changes.push(`🧬 基因炸裂，额外长出${fx.map((k) => EXTRAS[k].label).join('、')}`);
+    g.mat = r() < 0.75 ? RARE_LOOK[Math.floor(r() * RARE_LOOK.length) % RARE_LOOK.length] : ALL_M[Math.floor(r() * ALL_M.length) % ALL_M.length];
+    g.palette = (r() < 0.5 ? VIVID : VIVID_X)[Math.floor(r() * 6) % 6].slice();
+    g.pattern = r() < 0.5 ? Math.floor(r() * 16) : g.pattern;
+    g.glow = Math.max(g.glow || 0, 0.45 + r() * 0.3); g.eyeK = Math.min(2, Math.max(g.eyeK || 1, 1.25 + r() * 0.5));
+    if (r() < 0.3) g.eyes = pickOne(r, [1, 3, 4, 5]);
+    jitterShape(g, r, 0.16);
+    const k = 1.3 + r() * 0.4; g.scale = cl((g.scale || 1) * k, 0.3, 2.2); n.cm = r1(n.cm * k);
+    if (n.ugc && r() < 0.6) { const dk = DECO_IDS.filter((d) => decoOk(d, sp.id)); setDeco(n.ugc, dk[Math.floor(r() * dk.length) % dk.length]); changes.push('🎀 还给自己挑了个小饰品'); }
+    n.rarity = RARITY_ORDER[Math.max(ri + 2, r() < 0.4 ? 4 : 3)] || 'legendary';
+    n.mut = 'rare';
+    changes.unshift(`✨ 稀缺变异！${MATS[g.mat]?.label || '华丽'}外壳 · 体型 ×${k.toFixed(1)}`);
+    changes.push(`👑 稀有度飙升到「${n.rarity === 'legendary' ? '传说' : '史诗'}」`);
+    n.nick = pickOne(r, ['璀璨', '传说中的', '闪耀', '神级', '天选']) + (names.length ? names.slice(0, 2).join('') : '') + sp.name;
+  }
+  n.geneTier = tier; n.prompt = String(prompt).slice(0, 30);
+  n.sizeK = +(n.cm / sp.cm).toFixed(3); try { n.kg = kgOf(n); } catch (e) { n.kg = v.kg; }
+  n.history.push({ t: Date.now(), type: 'genemod', tier, prompt: n.prompt, from: v.uid || v.id, added: g.extras.filter((k) => !before.has(k)) });
+  return { v: n, changes, tier };
+}
+const pickOne = (r, a) => a[Math.floor(r() * a.length) % a.length];
 
 // ================= 道具改造（v1.1）：选 ≤3 个装饰物 → 确定性改造 gx =================
 const NOT_FISHY = new Set(['octopus', 'king-crab', 'snow-crab', 'manta-ray', 'lobster', 'squid', 'cuttlefish', 'starfish', 'jellyfish', 'mantis-shrimp', 'flounder']);   // 同 ugc.js：没有正常"脸/脖子"的体型

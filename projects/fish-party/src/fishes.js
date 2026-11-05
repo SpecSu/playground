@@ -112,7 +112,8 @@ function pickW(list, wf) { let s = 0; for (const x of list) s += wf(x); let r = 
 // v0.9 C：抽取池只有天然水生物（漂流瓶 / 小黄鸭 / 宝箱下线，allowOdd 参数保留但无效）；道具好运只做轻微加成（见 items.ITEM_LUCK_K）
 export function rollCatch({ luck = 0, forceMinRarity = null, maxRarity = null, featured = null, allowOdd = false, force = null, itemP = 0, item = null, itemLuck = 0 } = {}) {
   let sp;
-  if (!force && (item || (itemP > 0 && Math.random() < itemP))) {
+  const ITEMS_OFF = true;   // v2.0：道具系统下线 —— 任何调用方都只会钓到鱼
+  if (!ITEMS_OFF && !force && (item || (itemP > 0 && Math.random() < itemP))) {
     const got = rollItemCatch(Math.random, { p: 1, luck: itemLuck, force: item });
     const v = makeVariant(SPECIES_BY_ID[got.pod] || SPECIES_BY_ID.pod_kelp);
     v.item = { id: got.id, n: got.n }; v.nick = ITEM_BY_ID[got.id]?.name || '道具'; v.creator = '大海';
@@ -523,9 +524,9 @@ export class Fish {
       this.body.rotation.x = Math.sin(t * f * 0.6) * 0.08 * k;
       this.body.rotation.z = Math.sin(t * f * 0.45 + 1) * 0.1 * k;
       this.body.position.y = Math.abs(Math.sin(t * f * 0.5)) * 0.03 * k;
-    } else if (mode === 'air' || mode === 'fight') {
-      this.body.rotation.y = Math.sin(this.t * 14) * 0.18;
-      this.body.rotation.z = Math.sin(this.t * 9) * 0.22;
+    } else if (mode === 'air' || mode === 'fight' || mode === 'struggle') {
+      this.body.rotation.y = Math.sin(this.t * 22) * 0.35;
+      this.body.rotation.z = Math.sin(this.t * 14) * 0.28;
     } else { this.body.rotation.set(0, Math.sin(this.t * 3) * 0.04, 0); this.body.position.y = 0; }
   }
   dispose() {

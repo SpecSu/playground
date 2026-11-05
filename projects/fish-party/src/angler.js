@@ -12,6 +12,7 @@ const _a = V(), _b = V(), _c = V(), _q = new THREE.Quaternion();
 const rand = (a, b) => a + Math.random() * (b - a);
 export const PERFECT_CAST = [0.74, 0.9];
 export const BITE_WINDOW = 1.35;
+export const IDLE_ESCAPE = 5;   // v2.3：搏鱼中连续 5s 没收线 → 鱼挣脱跑掉（3s 起预警）
 const FIGHT_GOAL = { common: 2.9, uncommon: 3.4, rare: 4.1, epic: 8.4, legendary: 10.4 };   // 实测总时长 ≈ 目标 + 1.2s（扬竿 0.22s + 跃水 1s）
 export const SNAP_HOLD = 0.72;   // 张力顶满(>0.98)持续多久断线
 
@@ -63,7 +64,7 @@ export class Angler {
     this.pressing = true;
     switch (this.state) {
       case 'idle': this.set('charge'); this.power = 0; this.char.setMode('cast'); this.char.modeT = 0; this.emit('charge'); break;
-      case 'float': this.set('reelEmpty'); this.from.copy(this.bobber.position); this.char.setMode('reel'); this.emit('early', { nibbled: this.nibT >= 0 || this.recentNibble > 0 }); break;
+      case 'float': { const gone = !!this.baitGone; this.dropPre(); this.baitGone = false; this.set('reelEmpty'); this.from.copy(this.bobber.position); this.char.setMode('reel'); this.emit('early', { nibbled: this.nibT >= 0 || this.recentNibble > 0, baitGone: gone, probe: this.nibBig && this.nibT >= 0 }); break; }
       case 'bite': this.hookset(); break;
       case 'fight': this.reel = true; break;
       case 'hold': if (this.t > 0.6) this.release(); break;
@@ -79,13 +80,21 @@ export class Angler {
     this.power = power;
     this.perfectCast = power >= PERFECT_CAST[0] && power <= PERFECT_CAST[1];
     this.set('cast'); this.char.setMode('cast'); this.char.modeT = 0.3;
-    this.emit('cast', { power, perfect: this.perfectCast });
+    // 提前在半空中抽好鱼并让剖面预载
+    if (this.isPlayer && this.ctx.preRoll) { this.dropPre(); this.pre = this.ctx.preRoll(this); }
+    // v2.2：正式咬钩前 1~3 条稀缺大鱼过来试探碰饵（只碰不吃），抛竿时就抽好物种，海底剖面提前建模型
+    this.baitGone = false;
+    this.probes = this.isPlayer && this.ctx.probeRoll ? this.ctx.probeRoll(this, 1 + Math.floor(Math.random() * 3)) : [];
+    this.emit('cast', { power, perfect: this.perfectCast, pre: this.pre });
   }
+
+  // 放弃预抽的鱼（提前收线 / 鱼溜走换下一条）：海洋回流的合成鱼要退回海里
+  dropPre() { if (this.pre) { this.ctx.dropPre?.(this.pre); this.pre = null; } }
 
   hookset() {
     this.perfect = this.t < 0.42;
     this.luck = this.ctx.getLuck(this);
-    this.v = rollCatch(this.luck);
+    this.v = this.pre?.v || rollCatch(this.luck); this.pre = null;
     const f = this.fish = new Fish(this.v, this.ctx.stylize);
     f.root.visible = false; this.ctx.scene.add(f.root);
     const L = Math.min(this.v.cm / 100, 2.2); f.holdFit(Math.max(0.4, L)); // 跃水时的尺寸
@@ -98,7 +107,7 @@ export class Angler {
     // r2：小鱼搏鱼 1.7~2.5s 就结束、一次发力都没有（按住就赢）→ 第一次发力提前，每条鱼至少一次「松手」时刻
     // r3：修复——上一行注释把 snapT/slipping/jump/jumped 的重置也注释掉了（第 2 条鱼起不再跃水亮相、断线计时会继承上一条）
     this.tension = 0.35; this.surge = 0; this.warnT = 0; this.surgeCd = rand(0.7, 1.2);
-    this.snapT = 0; this.slipping = false; this.jump = null; this.jumped = false;
+    this.snapT = 0; this.slipping = false; this.jump = null; this.jumped = false; this.idleT = 0; this.idleWarn = false;
     // r3：搏鱼时长按稀有度定目标（实测 r2 小鱼 1.7~9s、SSR 6~10s，忽长忽短且跟抛竿远近强相关）
     //   收线速度 = 剩余距离 / 剩余目标时间（按 ~60% 时间在收线估算），小/普通鱼约 3.5~6s，SSR/UR 约 8~13s；
     //   拖线（红区硬收）会把目标时间往后推 —— 晚松手的代价是"白收 + 更久 + 离断线更近"
@@ -179,8 +188,18 @@ export class Angler {
             this.biteAt = fr ? rand(1.4, 3.2) : rand(3.2, 7.5) * (this.perfectCast ? 0.8 : 1);
             const n = 1 + Math.floor(Math.random() * 3);
             this.nibbles = Array.from({ length: n }, (_, i) => this.biteAt * (0.3 + 0.6 * (i + Math.random() * 0.6) / n)).sort((a, b) => a - b);
-            this.nibT = -1;
-            this.emit('plop', { at: this.bobber.position });
+            this.nibT = -1; this.nibBig = false; this.baitGone = false;
+            if (this.probes?.length) {
+              // 试探时间轴：入水 ~1.8s 后第一条大鱼碰饵，之后每 2.2~3s 一条；真咬钩在最后一条走后 1.8~3s
+              let tp = fr ? rand(1.0, 1.4) : rand(1.6, 2.2);
+              for (const pr of this.probes) { pr.t = tp; tp += fr ? rand(1.5, 2) : rand(2.2, 3.0); }
+              const last = this.probes[this.probes.length - 1].t;
+              this.biteAt = Math.max(this.biteAt, last + (fr ? rand(1.2, 1.8) : rand(1.8, 3.0)));
+              // 普通小鱼轻啄：避开大鱼试探的时间（±0.8s），最多留 1 次
+              const keep = this.nibbles.filter((x) => x < this.biteAt - 0.6 && this.probes.every((pr) => Math.abs(pr.t - x) > 0.8)).slice(0, 1);
+              this.nibbles = [...keep, ...this.probes.map((pr) => pr.t)].sort((a, b) => a - b);
+            }
+            this.emit('plop', { at: this.bobber.position, pre: this.pre });
           }
         }
         break;
@@ -189,12 +208,19 @@ export class Angler {
         const wy = waterHeight(this.bobber.position.x, this.bobber.position.z, t);
         let dip = 0;
         this.status = '等待咬钩…';
-        if (this.state === 'float') {
-          if (this.nibbles.length && this.t > this.nibbles[0]) { this.nibbles.shift(); this.nibT = 0; c.setMode('twitch'); this.recentNibble = 0.5; this.emit('nibble'); }
+        if (this.state === 'float' && this.baitGone) {
+          this.status = '鱼饵被吃掉了';   // v2.2：只能收线重抛（不能再等下一条鱼 → 防止反复刷到想要的鱼）
+        } else if (this.state === 'float') {
+          if (this.nibbles.length && this.t > this.nibbles[0]) {
+            const tn = this.nibbles.shift();
+            const pr = this.probes?.find((x) => Math.abs(x.t - tn) < 1e-6) || null;
+            this.nibT = 0; this.nibBig = !!pr; c.setMode('twitch'); this.recentNibble = 0.5;
+            this.emit('nibble', { probe: pr ? this.probes.indexOf(pr) : -1, v: pr?.v || null });
+          }
           if (this.nibT >= 0) {
             this.nibT += dt;
-            const k = this.nibT / 0.35;
-            dip = Math.sin(Math.min(k, 1) * Math.PI) * 0.07;
+            const k = this.nibT / (this.nibBig ? 0.5 : 0.35);
+            dip = Math.sin(Math.min(k, 1) * Math.PI) * (this.nibBig ? 0.16 : 0.07);   // 大鱼试探：浮漂沉得更深（像要咬了，其实不咬）
             bend = 0.12 + Math.sin(Math.min(k, 1) * Math.PI) * 0.25; bendTo = this.bobber.position;
             if (k >= 1) { this.nibT = -1; c.setMode('wait'); }
           }
@@ -206,9 +232,11 @@ export class Angler {
           bend = 0.55 + Math.abs(Math.sin(t * 9)) * 0.5; bendTo = this.bobber.position;
           if (c.mode !== 'twitch' || c.modeT > 0.25) { c.mode = 'twitch'; c.modeT = 0; }
           if (this.t > BITE_WINDOW) {
+            // v2.2（README 已知回归 #2）：没及时扬竿 = 鱼把饵吃了就跑 → 鱼饵没了，不会再有第二条鱼咬钩，只能收线重抛
             this.set('float'); c.setMode('wait');
-            this.biteAt = rand(3, 6); this.nibbles = [this.biteAt * 0.6];
-            this.emit('missed');
+            this.baitGone = true; this.biteAt = Infinity; this.nibbles = []; this.probes = [];
+            this.dropPre();
+            this.emit('missed', { baitGone: true });
           }
         }
         this.bobber.position.y = lerp(this.bobber.position.y, wy - dip, 0.35);
@@ -285,7 +313,7 @@ export class Angler {
       rod.tip.getWorldPosition(this.tipW);
       if (this.line.line.visible) {
         const to = this.state === 'fight' || this.state === 'hookset' ? this.hook : this.bobber.position;
-        this.line.set(this.tipW, to, this.state === 'fight' ? Math.max(0.02, 0.3 - this.tension * 0.3) : this.state === 'cast' ? 0.05 : 0.35);
+        this.line.set(this.tipW, to, this.state === 'fight' ? Math.max(0.02, 0.3 - this.tension * 0.3) : this.state === 'cast' ? 0.05 : this.state === 'float' ? (this.baitGone ? 0.45 : 0.85) : this.state === 'bite' ? 0.12 : 0.35);   // v2.3：等咬钩时鱼线松垂，咬钩 → 绷紧
       }
       if (this.state === 'fight' && this.reel) rod.crank.rotation.x -= dt * 22;
     } else if (this.line.line.visible && !this.fishing) this.line.line.visible = false;
@@ -319,7 +347,11 @@ export class Angler {
     else this.dist += (surging ? 1.7 * pw : 0.3) * dt;
     if (this.tension > 0.98) { this.snapT += dt; } else this.snapT = Math.max(0, this.snapT - dt * 2);
     if (this.snapT > SNAP_HOLD) { this.stopFight(); this.set('fail'); c.setMode('sad'); this.emit('snap'); return true; }
-    if (this.dist > this.startDist + 8) { this.stopFight(); this.set('fail'); c.setMode('sad'); this.emit('escape'); return true; }
+    // v2.3：没在收线就累计（收线立刻清零）；3s 预警 → 5s 挣脱
+    if (this.reel && !slip) { this.idleT = 0; if (this.idleWarn) { this.idleWarn = false; this.emit('idleOk'); } }
+    else this.idleT += dt;
+    if (!this.idleWarn && this.idleT > IDLE_ESCAPE - 2) { this.idleWarn = true; this.emit('idleWarn', { left: IDLE_ESCAPE - this.idleT }); }
+    if (this.idleT >= IDLE_ESCAPE || this.dist > this.startDist + 8) { this.stopFight(); this.set('fail'); c.setMode('sad'); this.emit('escape', { idle: this.idleT >= IDLE_ESCAPE }); return true; }
 
     // 鱼在水下蛇行；发力时横冲
     this.swimA += dt * (surging ? 2.2 : 0.9);
@@ -339,24 +371,13 @@ export class Angler {
     _a.copy(this.hook).sub(this.tipW.lengthSq() ? this.tipW : this.anchor).normalize();
     c.root.getWorldQuaternion(_q); _q.invert();
     c.fishDir.copy(_a).applyQuaternion(_q);
-    // 跃出水面：搏鱼中段一次，稀有以上必跳
-    const prog = 1 - this.dist / this.startDist;
-    if (!this.jumped && !this.jump && prog > 0.35 && (RARITY_ORDER.indexOf(f.sp.rarity) >= 2 || Math.random() < 0.35) && !surging) {
-      this.jumped = true;
-      this.jump = { t: 0, dur: 1.0, from: this.hook.clone(), h: 1.2 + pw * 0.8 };
-      f.root.visible = true;
-      this.emit('jump', { at: this.hook.clone() });
-    } else if (!this.jumped && prog > 0.5) this.jumped = true;
-    if (this.jump) {
-      const j = this.jump; j.t += dt;
-      const k = Math.min(j.t / j.dur, 1);
-      f.root.position.copy(j.from).addScaledVector(_b, k * 1.2);
-      f.root.position.y = j.from.y + Math.sin(k * Math.PI) * j.h;
-      f.root.rotation.set(0, Math.atan2(-_b.z, _b.x), Math.cos(k * Math.PI) * 0.9);
-      f.update(dt, 'air');
-      if (k >= 1) { f.root.visible = false; this.jump = null; this.emit('reenter', { at: f.root.position.clone() }); }
-    }
-    if (this.dist <= 1.0 && !this.jump) {
+    // 鱼不再跃水，直接在水下更新
+    f.root.visible = true;
+    f.update(dt, 'swim');
+    f.root.position.set(this.hook.x, this.hook.y - 1.2, this.hook.z);
+    f.root.rotation.set(0, Math.atan2(-_b.z, _b.x), 0);
+    
+    if (this.dist <= 1.0) {
       // 出水！
       this.set('land'); c.setMode('hookset'); c.modeT = 0.1;
       this.shadow.material.opacity = 0; this.line.line.visible = false;
@@ -400,7 +421,10 @@ export class Angler {
         if (this.t >= this.aiReact) { this.aiReact = 0; this.hookset(); }
         break;
       }
-      case 'float': this.aiReact = 0; break;
+      case 'float':
+        if (this.baitGone) { if (!this.aiReact) this.aiReact = this.t + rand(0.8, 1.8); if (this.t >= this.aiReact) { this.aiReact = 0; this.press(); } }
+        else this.aiReact = 0;
+        break;
       case 'fight': {
         const danger = this.warnT > 0 || this.surge > 0;
         if (danger) {

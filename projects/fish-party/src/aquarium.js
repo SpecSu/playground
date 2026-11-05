@@ -62,7 +62,7 @@ const rayTex = canvasTex(64, 512, (g, w, h) => {
 
 // 给鱼材质追加：焦散 + 鱼专用照明（key/rim）+ 弱化水体雾 + 饱和度分级 + 环境反射（保留其原有 onBeforeCompile：花纹/基因材质）
 // 透明鳍膜也注入（不加焦散），否则鳍会被场景雾吃成灰色
-function causFish(root, k = 0.55, envTex = null, envK = 0.9) {
+export function causFish(root, k = 0.55, envTex = null, envK = 0.9) {
   root.traverse((o) => {
     if (!o.isMesh) return;
     for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
@@ -78,7 +78,7 @@ function causFish(root, k = 0.55, envTex = null, envK = 0.9) {
   });
 }
 // 鱼专用环境贴图：顶部暖白柔光箱 + 青色水平带 + 深色下方 → 鱼身清漆/湿润高光、轮廓立体（布景不使用）
-function fishEnvTex(renderer) {
+export function fishEnvTex(renderer) {
   const es = new THREE.Scene();
   const g = new THREE.SphereGeometry(10, 48, 24); const P = g.attributes.position, cols = new Float32Array(P.count * 3), c = new THREE.Color();
   const top = new THREE.Color(1.3, 1.25, 1.15), hor = new THREE.Color(0.1, 0.3, 0.4), bot = new THREE.Color(0.02, 0.04, 0.06);
@@ -190,7 +190,7 @@ export function createAquarium({ renderer }) {
   const envCache = new Map();
   function setTheme(id) {
     id = themeOf(id).id;
-    if (id === themeId && env) return;
+    if (id === themeId && env) { env.activate(); return; }   // 海底剖面视角（seaview）共用水体 uniforms → 回到水族箱时恢复本主题
     if (!fishEnv) fishEnv = fishEnvTex(renderer);
     if (env) world.remove(env.group);
     themeId = id; th = themeOf(id);
@@ -382,21 +382,19 @@ export function createAquarium({ renderer }) {
     const core = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: '#f2a640', transparent: true, opacity: 0.45, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
     core.scale.setScalar(EGG_R * 1.9); core.renderOrder = 1; g.add(core);
     const silMat = new THREE.MeshBasicMaterial({ color: '#7a4d18', transparent: true, opacity: 0.4, depthWrite: false, fog: false });
-    // v0.9.1：卵里不再放「最终那条鱼」的剪影（会剧透孵化结果）。基因卵里只有一团看不清的胚胎光核；
-    // 旧 kind 卵（prompt/items/fuse 改造的是已知的鱼）保留原剪影。
-    let inner = null;
-    if (egg.kind !== 'synth') try {
-      inner = makeFish(egg.result);
-      inner.setScale(EGG_R * 1.25);
-      inner.root.traverse((o) => { if (o.isMesh) { o.material = silMat; o.renderOrder = 2; } });
-      g.add(inner.root);
-    } catch (err) { inner = null; }
-    // 基因卵：一团缓慢旋转、随进度长大的模糊胚胎（看不出任何形态）
-    let embryo = null;
-    if (!inner) {
-      embryo = new THREE.Mesh(new THREE.IcosahedronGeometry(EGG_R * 0.32, 2), silMat);
-      embryo.renderOrder = 2; g.add(embryo);
-    }
+    // ⚠️ 回归 BUG（已修两次，见 README「已知回归」#1）：卵里绝不能放 egg.result 的模型 / 剪影 —— 会在孵化前剧透最终样子。
+    //   v0.9.1 只给 kind==='synth' 换成了胚胎，v2.0 新增的 genemod 卵又走回了「放最终鱼剪影」的分支。
+    //   现在所有 kind 一律只放抽象胚胎（不读 egg.result），新增卵类型时不要再加剪影分支。
+    const inner = null;
+    // 抽象胚胎：一团会蠕动的光核 + 三颗绕行的小光点（随孵化进度长大、转快），看不出任何鱼的形态
+    const embryo = new THREE.Group(); embryo.renderOrder = 2; g.add(embryo);
+    const blob = new THREE.Mesh(new THREE.IcosahedronGeometry(EGG_R * 0.3, 3), silMat); blob.renderOrder = 2; embryo.add(blob);
+    { const P = blob.geometry.attributes.position; blob.userData.base = Float32Array.from(P.array); }
+    const motes = [0, 1, 2].map((i) => {
+      const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: ['#fff3c8', '#ffd27a', '#ffe9b0'][i], transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+      m.scale.setScalar(EGG_R * 0.32); m.renderOrder = 2; m.userData.ph = i * 2.094; embryo.add(m); return m;
+    });
+    embryo.userData = { blob, motes };
     const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: '#f0b45a', transparent: true, opacity: 0.25, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
     halo.scale.setScalar(EGG_R * 5); halo.renderOrder = 0; g.add(halo);
     const ringBg = new THREE.Mesh(new THREE.RingGeometry(0.548, 0.572, 64, 1), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.07, depthWrite: false, side: THREE.DoubleSide, fog: false }));
@@ -441,9 +439,20 @@ export function createAquarium({ renderer }) {
     e.shellM.uniforms.uB.value = b;
     if (e.inner) { e.inner.update(dt * 0.6, 'swim'); e.inner.root.position.set(Math.sin(t * 0.5 + e.ph) * 0.03, Math.sin(t * 0.8 + e.ph) * 0.02, 0); e.inner.root.rotation.y = Math.sin(t * 0.45 + e.ph) * 0.9; e.silMat.opacity = 0.4 + 0.3 * b; }
     if (e.embryo) {
-      const k = 0.7 + 0.6 * clamp(e.prog, 0, 1), w = 1 + 0.06 * Math.sin(t * 2.1 + e.ph);
-      e.embryo.scale.set(k * w * 1.15, k / w * 0.9, k * w);
+      const pr = clamp(e.prog, 0, 1), k = 0.7 + 0.6 * pr, w = 1 + 0.06 * Math.sin(t * 2.1 + e.ph);
+      e.embryo.scale.set(k * w, k / w, k * w);
       e.embryo.rotation.set(Math.sin(t * 0.4 + e.ph) * 0.6, t * 0.35, Math.cos(t * 0.3) * 0.4);
+      const { blob, motes } = e.embryo.userData;
+      // 光核表面缓慢蠕动（低频噪声位移，形状一直在变，不会定格成任何具体轮廓）
+      const P = blob.geometry.attributes.position, B = blob.userData.base;
+      for (let i = 0; i < P.count; i++) {
+        const x = B[i * 3], y = B[i * 3 + 1], z = B[i * 3 + 2];
+        const n = 1 + 0.16 * Math.sin(x * 22 + t * 1.7 + e.ph) * Math.sin(y * 19 - t * 1.3) + 0.1 * Math.sin(z * 25 + t * 2.3);
+        P.setXYZ(i, x * n, y * n, z * n);
+      }
+      P.needsUpdate = true;
+      const sp = 0.9 + pr * 1.6, rad = EGG_R * (0.42 + 0.08 * Math.sin(t * 1.1 + e.ph));
+      motes.forEach((m) => { const a = t * sp + m.userData.ph; m.position.set(Math.cos(a) * rad, Math.sin(a * 1.3) * rad * 0.45, Math.sin(a) * rad * 0.6); m.material.opacity = 0.45 + 0.4 * b; });
       e.silMat.opacity = 0.22 + 0.22 * b;
     }
     e.ringG.quaternion.copy(camera.quaternion);

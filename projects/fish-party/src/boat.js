@@ -101,19 +101,19 @@ function hullTexture() {
   });
 }
 
-// v0.8：船名 = 粉色手写体「Fish Party」（离线字体 assets/fonts/GreatVibes.woff2，加载完成后重绘贴图）
+// v2.1：船名 = 海蓝粗圆体「Fish Party」（离线字体 assets/fonts/Fredoka-Party.woff2，加载完成后重绘贴图）
 function drawName(g, w, h) {
   g.clearRect(0, 0, w, h);
   g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = `148px "FP Script", "Snell Roundhand", "Segoe Script", cursive`;
-  // 极细的暖白描边托底，在白色船尾上也能读出来；主体柔粉渐变
-  g.lineJoin = 'round'; g.lineWidth = 6; g.strokeStyle = 'rgba(255,250,244,.95)'; g.strokeText('Fish Party', w / 2, h * 0.45);
-  const gr = g.createLinearGradient(0, h * 0.2, 0, h * 0.85); gr.addColorStop(0, '#f4a3b4'); gr.addColorStop(1, '#e27d95');
-  g.fillStyle = gr; g.fillText('Fish Party', w / 2, h * 0.45);
+  g.font = `600 132px "FP Round", ui-rounded, "Arial Rounded MT Bold", sans-serif`;   // v2.1：品牌粗圆体 · 海蓝
+  // 暖白描边托底，在白色船尾上也能读出来；主体海蓝渐变
+  g.lineJoin = 'round'; g.lineWidth = 10; g.strokeStyle = 'rgba(255,252,246,.96)'; g.strokeText('Fish Party', w / 2, h * 0.47);
+  const gr = g.createLinearGradient(0, h * 0.2, 0, h * 0.8); gr.addColorStop(0, '#5cc4e8'); gr.addColorStop(0.55, '#2b97d4'); gr.addColorStop(1, '#1f78b8');
+  g.fillStyle = gr; g.fillText('Fish Party', w / 2, h * 0.47);
 }
 function nameTexture() {
   const t = canvasTex(1024, 256, drawName);
-  if (document.fonts?.load) document.fonts.load('160px "FP Script"').then(() => { const c = t.image; drawName(c.getContext('2d'), c.width, c.height); t.needsUpdate = true; }).catch(() => {});
+  if (document.fonts?.load) document.fonts.load('600 132px "FP Round"').then(() => { const c = t.image; drawName(c.getContext('2d'), c.width, c.height); t.needsUpdate = true; }).catch(() => {});
   return t;
 }
 

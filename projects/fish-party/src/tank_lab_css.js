@@ -151,7 +151,11 @@ export const GENE_LAB_CSS = `
 #tank .va-b:active{transform:translateY(2px);transition-duration:.06s}
 #tank #vaGive{color:var(--pri-d)}
 #tank .va-b em{font-style:normal;font-size:11px;font-weight:700;color:var(--ink3);margin-left:2px;padding-left:8px;border-left:1px solid var(--line);line-height:14px}
-#tank .va-b.off{color:var(--ink3);background:var(--bg2);box-shadow:0 0 0 1px var(--line) inset}
+#tank .va-b.spent{color:var(--ink3);background:var(--bg2);box-shadow:0 0 0 1px var(--line) inset}
+#tank .va-b.spent svg.i{opacity:.7}
+#tank .va-b.spent:active{transform:none}
+#tank .va-b.nope{animation:vaNope .36s ease-in-out}
+@keyframes vaNope{20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
 #tank .gv-sheet{display:flex;flex-direction:column;max-height:calc(100% - 78px - var(--st) - var(--sb))}
 #tank .gv-sheet .gl-grid{margin-top:14px;overflow-y:auto;max-height:46vh;padding:2px;touch-action:pan-y}
 #tank .gv-sheet .gl-foot{margin-top:12px}

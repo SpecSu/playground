@@ -8,6 +8,7 @@ import { STREAK_REWARDS, levelTitle } from './meta.js';
 import { sfx } from './sfx.js';
 import { ITEMS, ITEM_CATS, ITEM_RARITY } from './items.js';
 import { ic, CAT_IC, CAT_SHORT } from './icons.js';
+import { album } from './album.js';   // v2.1 相册（IndexedDB）
 
 export const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -17,7 +18,9 @@ let thumbMaker = null;
 export function setThumbMaker(fn) { thumbMaker = fn; }
 // 给 <img data-ugc=idx> 填上这条鱼独一无二的渲染图
 export function fillThumbs(root, list) { root.querySelectorAll('img[data-ugc]').forEach((el) => { const v = list[+el.dataset.ugc]; if (v && thumbMaker) thumbMaker(v, el); }); }
-export const thumb = (id) => (ODD_EMOJI[id] ? null : `assets/thumbs/${id}.webp`);
+// 单文件部署：资源内嵌为 blob URL（window.__FP_ASSETS），本地开发时原样返回相对路径
+export const assetURL = (p) => (window.__FP_ASSETS && window.__FP_ASSETS[p]) || p;
+export const thumb = (id) => (ODD_EMOJI[id] ? null : assetURL(`assets/thumbs/${id}.webp`));
 // v1.4：今日精选不再引用静态 webp（40 种里只有 20 张，缺图会裂）→ 统一走实时 3D 渲染缩略图，按物种缓存一条稳定的展示鱼
 let featV = null;
 const featVariant = (sp) => { if (!featV || featV.sp !== sp.id) { featV = makeVariant(sp, 0); featV.id = `feat-${sp.id}`; } return featV; };
@@ -44,6 +47,9 @@ export const ICON = {
   trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5.5a3 3 0 0 0 3 4M16 6h2.5a3 3 0 0 1-3 4M12 13v4M8.5 20h7"/>',
   list: '<path d="M10 6h10M10 12h10M10 18h10M4 6l1.2 1.2L7.5 5M4 12l1.2 1.2L7.5 11M4 18l1.2 1.2L7.5 17"/>',
   book: '<path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13"/>',
+  camera: '<path d="M4 8.5h3l2-3h6l2 3h3V19H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  trash: '<path d="M5 7h14M10 7V4.8h4V7M7 7l.8 12.2h8.4L17 7"/><path d="M10.5 10.5v5.5M13.5 10.5v5.5"/>',
+  dl: '<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/>',
   sad: '<circle cx="12" cy="12" r="8.5"/><path d="M9 15.5c1.8-1.6 4.2-1.6 6 0M9.5 10h.01M14.5 10h.01"/>',
 };
 export const svg = (name, cls = 'i') => `<svg class="${cls}" viewBox="0 0 24 24">${ICON[name] || ''}</svg>`;
@@ -154,6 +160,9 @@ export function updateTop(meta) {
   $('meXp').style.strokeDashoffset = 100 - Math.min(100, (S.xp / meta.levelXP()) * 100);
   const sn = $('scoreN'); const v = S.today.score;
   if (+sn.dataset.n !== v) { animateNum(sn, v); const me = $('me'); me.classList.remove('bump'); void me.offsetWidth; me.classList.add('bump'); }
+  // v2.0 能量宝石
+  const gn = $('gemN'), g = meta.gems ?? (S.gems || 0);
+  if (gn && gn.textContent !== String(g)) { const grew = +gn.textContent < g && gn.textContent !== '0'; gn.textContent = String(g); if (grew) { const e = $('meGem'); e.classList.remove('bump'); void e.offsetWidth; e.classList.add('bump'); } }
 }
 export function updateBadges(meta, newSpecies) {
   const nTask = meta.S.today.tasks.filter((t) => t.done && !t.claimed).length + (meta.streakGift ? 1 : 0);
@@ -337,7 +346,7 @@ export function closeSheet() { $('sheet').classList.remove('show'); sheetState.o
 export function sheetOpen() { return sheetState.open ? sheetState.tab : null; }
 
 function bindGoTank(ctx) { const b = $('shGoTank'); if (b) b.onclick = () => { sfx.tap(); closeSheet(); ctx.onOpenTank?.(); }; }
-const TABS = [['codex', 'book', '图鉴'], ['bag', null, '背包'], ['rank', 'trophy', '排行'], ['tasks', 'list', '任务']];
+const TABS = [['rank', 'trophy', '排行'], ['tasks', 'list', '任务'], ['codex', 'book', '图鉴'], ['album', 'camera', '相册']];   // v2.2：排行 / 任务放第一排
 const TAB_T = Object.fromEntries(TABS.map(([k, , l]) => [k, l]));
 // 图鉴/背包里的「去水族箱」：弱化为列表底部的轻量吸底胶囊（不再是顶部大横幅）
 const goTankPill = (txt) => `<div class="sh-go-w"><button class="sh-go" id="shGoTank">${ic('fish')}<span>${txt}</span><i>›</i></button></div>`;
@@ -350,7 +359,7 @@ function homeHTML(ctx) {
   const nDone = S.today.tasks.filter((t) => t.done).length;
   const info = {
     codex: [`${S.log.length} 条收藏`, `${spGot}/${SPECIES.length} 种`, badges.codex ? '新鱼' : ''],
-    bag: [`${meta.bagTotal()} 个道具`, '给鱼基因改造', ''],
+    album: [album.n ? `${album.n} 张照片` : '还没有照片', '钓到鱼后合影', ''],
     rank: [me ? `今日第 ${me.rank} 名` : '今日积分榜', `${S.today.score} 分`, ''],
     tasks: [nTask ? `${nTask} 个奖励可领` : `${nDone}/${S.today.tasks.length} 完成`, `连续出海 ${S.streak.days} 天`, nTask ? String(nTask) : ''],
   };
@@ -383,6 +392,53 @@ export function bindBag(root, st, rerender) {
   root.querySelectorAll('[data-bcat]').forEach((b) => b.onclick = () => { if (st.cat === b.dataset.bcat) return; sfx.tap(); st.cat = b.dataset.bcat; rerender(); });
   root.querySelectorAll('[data-bag]').forEach((b) => b.onclick = () => { sfx.tap(); st.sel = b.dataset.bag; rerender(); });
 }
+// ---------------- v2.1 相册：拍立得网格（新的在前）→ 点开大图 · 保存到手机 · 删除 ----------------
+let albumURLs = [];
+const fmtDay = (t) => { const d = new Date(t); return `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+async function renderAlbum(body) {
+  const tok = (renderAlbum.tok = (renderAlbum.tok || 0) + 1);
+  body.innerHTML = '<div class="al-load">翻相册中…</div>';
+  let list = [];
+  try { list = await album.list(); } catch (e) { list = null; }
+  if (tok !== renderAlbum.tok || sheetState.tab !== 'album' || !sheetState.open) return;
+  albumURLs.forEach((u) => URL.revokeObjectURL(u)); albumURLs = [];
+  if (list === null) { body.innerHTML = '<div class="blk cx-empty">' + svg('camera') + '<b>相册打不开</b>当前浏览器不支持本地存储（无痕模式？）</div>'; return; }
+  if (!list.length) {
+    body.innerHTML = `<div class="blk cx-empty al-empty">${svg('camera')}<b>还没有照片</b>钓到鱼后，点钓获卡右上角的相机<br>和你的鱼合影，照片会自动存到这里</div>`;
+    return;
+  }
+  const urls = list.map((r) => { const u = URL.createObjectURL(r.blob); albumURLs.push(u); return u; });
+  body.innerHTML = `<div class="al-hd"><b class="num">${list.length}</b> 张合影 · 只保存在这台设备上</div>
+    <div class="al-grid">${list.map((r, i) => `<button class="al-pol" data-i="${i}" style="--r:${(i % 3 - 1) * 1.4}deg"><img src="${urls[i]}" alt=""><span class="al-nm">${esc(r.name || '我的鱼获')}</span><span class="al-dt">${r.cm ? esc(fmtLenTxt(r.cm)) + ' · ' : ''}${fmtDay(r.t)}</span>${r.rar ? `<i class="rb" style="background:${r.rarC || '#9db3c2'}">${esc(r.rar)}</i>` : ''}</button>`).join('')}</div>`;
+  body.querySelectorAll('.al-pol').forEach((b) => b.onclick = () => { sfx.tap(); openPhoto(list[+b.dataset.i], urls[+b.dataset.i], body); });
+}
+function openPhoto(r, url, body) {
+  let v = $('alView');
+  if (!v) { v = document.createElement('div'); v.id = 'alView'; document.getElementById('app').appendChild(v); }
+  v.innerHTML = `<div class="al-big"><img src="${url}" alt=""><div class="al-cap"><b>${esc(r.name || '我的鱼获')}</b><small>${r.cm ? esc(fmtLenTxt(r.cm)) + ' · ' : ''}${esc(r.who || '')} · ${fmtDay(r.t)}</small></div></div>
+    <div class="al-acts"><button class="al-b" id="alDel">${svg('trash')}删除</button><button class="al-b main" id="alSave">${svg('dl')}保存到手机</button><button class="al-b" id="alX">${svg('check')}好的</button></div>`;
+  requestAnimationFrame(() => v.classList.add('show'));
+  const close = () => { v.classList.remove('show'); };
+  v.onclick = (e) => { if (e.target === v) { sfx.close(); close(); } };
+  v.querySelector('#alX').onclick = () => { sfx.close(); close(); };
+  v.querySelector('#alSave').onclick = async () => {
+    sfx.tap();
+    const fn = `FishParty-${(r.name || 'photo').replace(/[\\/:*?"<>|\s]/g, '')}-${new Date(r.t).toISOString().slice(0, 10)}.jpg`;
+    try {
+      const file = new File([r.blob], fn, { type: 'image/jpeg' });
+      if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: 'Fish Party 合影' }); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+    const a = document.createElement('a'); a.href = url; a.download = fn; document.body.appendChild(a); a.click(); a.remove();
+    toast('照片已保存<small>在浏览器的下载里可以找到</small>', true, 2200);
+  };
+  v.querySelector('#alDel').onclick = async () => {
+    const b = v.querySelector('#alDel');
+    if (!b.classList.contains('sure')) { sfx.tap(); b.classList.add('sure'); b.innerHTML = `${svg('trash')}再点删除`; return; }
+    sfx.close(); try { await album.remove(r.id); } catch (e) { /* */ }
+    close(); renderAlbum(body);
+  };
+}
+
 export function renderSheet(ctx) {
   if (!sheetState.open) return;
   const { meta } = ctx; const S = meta.S;
@@ -460,6 +516,8 @@ export function renderSheet(ctx) {
       bindGoTank(ctx); bindBag(body, st, draw); body.scrollTop = sc;
     };
     draw();
+  } else if (tab === 'album') {
+    renderAlbum(body);
   } else if (tab === 'rank') {
     const rows = meta.board(ctx.live);
     const mates = ctx.anglers.filter((a) => !a.isPlayer);
@@ -470,7 +528,7 @@ export function renderSheet(ctx) {
       // r2：在线好友状态与上方房间卡一致；我这一行直接告诉"离上一名还差多少"（冲榜目标）
       const above = rows[r.rank - 2], mate = r.online && !r.you ? mates.find((a) => a.id === r.id) : null;
       const st = r.you ? (above ? `距第 ${above.rank} 名还差 ${above.score - r.score} 分` : `今日第一 · Lv.${S.level}`) : mate ? friendStatus(mate) : r.online ? '在船上' : '今天来过';
-      return `<div class="li ${r.you ? 'you' : ''}${r.you && performance.now() < (sheetState.hlUntil || 0) ? ' hl' : ''}"><span class="no ${r.rank <= 3 ? 'g' + r.rank : ''}">${r.rank}</span>${avHTML(r.id, r.color, r.name)}<div class="m"><b>${r.online ? '<span class="on-dot"></span>' : ''}${esc(r.name)}${r.you ? '（我）' : ''}</b><span>${esc(st)}</span></div><b class="sc num">${r.score}</b></div>`;
+      return `<div class="li ${r.you ? 'you' : ''}${r.you && performance.now() < (sheetState.hlUntil || 0) ? ' hl' : ''}"><span class="no ${r.rank <= 3 ? 'g' + r.rank : ''}">${r.rank}</span><span class="avw-on">${avHTML(r.id, r.color, r.name)}${r.online ? '<i class="on-dot" title="在线"></i>' : ''}</span><div class="m"><b>${esc(r.name)}${r.you ? '（我）' : ''}</b><span>${esc(st)}</span></div><b class="sc num">${r.score}</b></div>`;
     }).join('');
     const sc = body.scrollTop; body.innerHTML = html; body.scrollTop = sc;   // 好友实时刷新榜单时保持滚动位置
     body.querySelectorAll('[data-watch]').forEach((m) => m.onclick = () => { sfx.tap(); const a = ctx.anglers.find((x) => x.id === m.dataset.watch); closeSheet(); ctx.onWatch?.(a); });
@@ -480,14 +538,14 @@ export function renderSheet(ctx) {
     let html = `<div class="blk"><div class="room"><span class="h">连续出海 ${S.streak.days} 天</span><span class="cap">第 7 天有大礼</span></div><div class="week">`;
     STREAK_REWARDS.forEach((r, i) => {
       const got = i < idx || (i === idx && claimed);
-      html += `<div class="${got ? 'got' : ''} ${i === idx ? 'today' : ''}">${got ? svg('check') : svg(r.pts ? 'gift' : 'spark')}<span>${i + 1}天</span></div>`;
+      html += `<div class="${got ? 'got' : ''} ${i === idx ? 'today' : ''}">${got ? svg('check') : svg(r.pts || r.gems ? 'gift' : 'spark')}<span>${i + 1}天</span></div>`;
     });
     html += '</div>';
     if (meta.streakGift) html += `<button class="btn-p" id="claimStreak" style="margin-top:12px">领取今日出海奖励</button>`;
     html += `</div><div class="sect">今日任务 · 每天刷新</div>`;
     for (const t of S.today.tasks) {
       const d = meta.taskDef(t.id);
-      const rw = [d.reward.bait ? `好运 +${d.reward.bait}` : '', d.reward.pts ? `+${d.reward.pts} 分` : '', d.reward.item ? `🎁${{ common: '普通', rare: '稀有', epic: '史诗', legendary: '传说' }[d.reward.item] || ''}道具` : ''].filter(Boolean).join(' · ');
+      const rw = [d.reward.gems ? `💎 宝石 +${d.reward.gems}` : '', d.reward.bait ? `好运 +${d.reward.bait}` : '', d.reward.pts ? `+${d.reward.pts} 分` : ''].filter(Boolean).join(' · ');
       html += `<div class="li task"><div class="m"><b>${esc(d.text)}</b><span>${t.n}/${d.goal} · ${rw}</span><div class="bar"><i style="width:${(t.n / d.goal) * 100}%"></i></div></div><button data-claim="${t.id}" class="${t.claimed ? 'ok' : t.done ? 'go' : ''}">${t.claimed ? '已领取' : t.done ? '领取' : '进行中'}</button></div>`;
     }
     html += `<div class="cap" style="margin:12px 4px">好运值：攒满 9 点，下一条必出「稀有」以上</div>`;

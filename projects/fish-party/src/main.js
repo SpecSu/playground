@@ -22,9 +22,13 @@ import { SPECIES_BY_ID, RARITY, RARITY_ORDER, scoreOf, displayName, rollCatch, T
 import { createMeta, ROOM, levelTitle, TANK_MAX } from './meta.js';
 import { initAudio, toggleMute, setMuted, sfx } from './sfx.js';
 import * as UI from './ui.js';
+import { assetURL } from './ui.js';
+import { album } from './album.js';   // v2.1 相册
+album.init();
 import { ic } from './icons.js';
 import { createAquarium } from './aquarium.js';     // v1.0 水族箱（B）
 import { createTankUI, tut } from './tank_ui.js';
+import { createSeaView } from './seaview.js';   // 海底剖面视角（抛竿后）
 const { $ } = UI;
 
 const Q = new URLSearchParams(location.search);
@@ -75,6 +79,7 @@ function buildComposer() {
   if (composer && key === builtKey) {
     composer.setPixelRatio(dpr); composer.setSize(W, H);
     applyGrade(); setOutlineQuality(q.outline, W, H);
+    try { sea.resize(W, H); } catch (e) { /* 尚未创建 */ }
     return;
   }
   builtKey = key;
@@ -89,6 +94,7 @@ function buildComposer() {
   gradePass = new ShaderPass(GradeShader); composer.addPass(gradePass);
   applyGrade();
   setOutlineQuality(q.outline, W, H);
+  try { sea.resize(W, H); } catch (e) { /* 尚未创建 */ }
   try { fx.setQuality?.(quality); } catch (e) { /* fx 尚未创建 */ }
   try { godRays.mesh.visible = !!q.godrays; sun.shadow.autoUpdate = quality !== 'low'; sun.shadow.needsUpdate = true; if (sun.shadow.mapSize.x !== q.shadow) { sun.shadow.mapSize.setScalar(q.shadow); sun.shadow.map?.dispose(); sun.shadow.map = null; } } catch (e) { /* 尚未创建 */ }
 }
@@ -213,6 +219,26 @@ const ctx = {
   frenzy: () => frenzy.on,
   stylize: stylizeFish,
   emit: (a, type, data) => onEvent(a, type, data || {}),
+  // 海底剖面：浮漂入水时预抽这一杆的鱼（含海洋回流的合成鱼 / 道具），剖面里游来咬钩的就是它；hookset 时直接用
+  // v2.2：试探的稀缺大鱼（只碰饵不吃）：稀有 / 史诗 / 传说里抽 n 种互不相同、也不同于这一杆真钓获的物种
+  probeRoll(a, n) {
+    const out = [], used = new Set([a.pre?.show?.sp, a.pre?.v?.sp]);
+    for (let i = 0; i < 24 && out.length < n; i++) {
+      const v = rollCatch({ luck: 0.6, forceMinRarity: i < 12 ? 'epic' : 'rare' });
+      if (!v || v.item || used.has(v.sp) || SPECIES_BY_ID[v.sp]?.odd) continue;
+      used.add(v.sp); out.push({ v, t: 0 });
+    }
+    return out;
+  },
+  preRoll(a) {
+    const can = !baitOn && !dbg.force && !Q.get('force') && !dbg.item && !Q.get('item') && meta.S.catches >= 1;
+    let ov = null;
+    if (can) { try { ov = meta.rollOceanCatch({ p: dbg.ocean ?? (Q.has('ocean') ? 1 : undefined), own: dbg.oceanOwn, luck: meta.castLuck({ perfectCast: a.perfectCast, tide: frenzy.on }).luck }); } catch (err) { ov = null; } }
+    a._ocean = ov;
+    let v; try { v = rollCatch(this.getLuck(a)); } finally { a._ocean = null; }
+    return { v, ov, show: ov && !v.item ? ov : v };
+  },
+  dropPre(pre) { if (pre?.ov) { try { meta.undoOceanCatch?.(pre.ov); } catch (err) { /* ignore */ } } },
   getLuck(a) {
     if (a.isPlayer) {
       const forced = Q.get('force');
@@ -228,10 +254,8 @@ const ctx = {
         const rr = RARITY_ORDER.includes(ov.rarity) ? ov.rarity : 'legendary';   // mythic 等 → 按传说手感
         return { luck: L.luck, forceMinRarity: rr, maxRarity: rr };
       }
-      // v0.9 C：~7% 钓上来的是道具（海藻包裹；第 1 杆 / 用了幸运饵 / 强制物种时不出；?item=<id> 或 G.dbg.item 强制）。道具好运只取 1/2
-      const itemForce = dbg.item || Q.get('item') || null;
-      const itemP = dbg.itemP ?? (usedBait || dbg.force || forced || meta.S.catches < 1 ? 0 : meta.genes.ITEM_CATCH_P);
-      return { luck: L.luck, forceMinRarity: min, featured: meta.featured.id, force: dbg.force || forced, itemP, item: itemForce && meta.genes.ITEM_BY_ID[itemForce] ? itemForce : null, itemLuck: L.luck * 0.5 };
+      // v2.0：道具系统下线 —— 只会钓到鱼
+      return { luck: L.luck, forceMinRarity: min, featured: meta.featured.id, force: dbg.force || forced, itemP: 0, item: null, itemLuck: 0 };
     }
     // r3：好友以前 luck≈0.3（玩家 0~0.15）→ 好友 SSR 率约 24%、玩家约 9~16%，落差大 → 好友略低于玩家，且全房间好友 SSR/UR 至少间隔 80s
     return { luck: 0.02 + a.skill * 0.06 + (frenzy.on ? 0.12 : 0), featured: meta.featured.id, maxRarity: time - friendSSR.last < 80 ? 'rare' : null };
@@ -241,7 +265,7 @@ const ctx = {
 async function loadCrew(progress) {
   const loader = new GLTFLoader();
   let done = 0;
-  const gltfs = await Promise.all(ROOM.map((r) => loader.loadAsync(`assets/crew/${r.file}.glb`).then((g) => { done++; progress(0.15 + (done / ROOM.length) * 0.6, `正在接上 ${r.name}…`); return g; })));
+  const gltfs = await Promise.all(ROOM.map((r) => loader.loadAsync(assetURL(`assets/crew/${r.file}.glb`)).then((g) => { done++; progress(0.15 + (done / ROOM.length) * 0.6, `正在接上 ${r.name}…`); return g; })));
   ROOM.forEach((r, i) => {
     const rod = makeRod(); stylizeObject(rod.group);
     const c = new Character(gltfs[i].scene, { name: r.name, color: r.color, rod });
@@ -333,12 +357,13 @@ function renderPortrait(id, c) {
 
 // ---- UGC 鱼缩略图：按种子即时重建这条鱼（花纹+装饰），离屏渲染成透明 PNG，内存缓存 ----
 // 图鉴 / 钓获记录 / 卡片都用它，保证"看到的就是你钓到的那一条"
-const TW = 240, TH = 168;
-const thumbRT = new THREE.WebGLRenderTarget(TW, TH, { samples: 4 });
-thumbRT.texture.colorSpace = THREE.SRGBColorSpace;
+const TW0 = 240, TH0 = 168;
+const thumbRTs = {};   // v2.2：hd = 2 倍分辨率（基因实验室大图用）
+const thumbRTOf = (k) => thumbRTs[k] || (thumbRTs[k] = Object.assign(new THREE.WebGLRenderTarget(TW0 * k, TH0 * k, { samples: 4 }), {}));
 let thumbScene = null; const thumbCache = new Map(); const thumbQ = [];
-function fishThumb(v) {
-  const key = v.id || `${v.sp}-${v.seed}-${v.cm}`;
+function fishThumb(v, hd = false) {
+  const K = hd ? 2 : 1, TW = TW0 * K, TH = TH0 * K, thumbRT = thumbRTOf(K); thumbRT.texture.colorSpace = THREE.SRGBColorSpace;
+  const key = (v.id || `${v.sp}-${v.seed}-${v.cm}`) + (hd ? '@2x' : '');
   if (thumbCache.has(key)) return thumbCache.get(key);
   let url = null;
   try {
@@ -377,15 +402,17 @@ function fishThumb(v) {
 }
 // 异步队列：图鉴里一次只渲 2 张，避免打开时卡一帧
 UI.setThumbMaker((v, el) => {
-  const key = v.id || `${v.sp}-${v.seed}-${v.cm}`;
+  const hd = el.hasAttribute('data-hd');
+  const key = (v.id || `${v.sp}-${v.seed}-${v.cm}`) + (hd ? '@2x' : '');
   if (thumbCache.has(key)) { el.src = thumbCache.get(key) || ''; el.classList.add('ok'); return; }
-  thumbQ.push({ v, el });
+  thumbQ.push({ v, el, hd });
 });
-function pumpThumbs() { for (let i = 0; i < 2 && thumbQ.length; i++) { const { v, el } = thumbQ.shift(); if (!el.isConnected) continue; const u = fishThumb(v); if (u) { el.src = u; el.classList.add('ok'); } } }
+function pumpThumbs() { for (let i = 0; i < 2 && thumbQ.length; i++) { const { v, el, hd } = thumbQ.shift(); if (!el.isConnected) continue; const u = fishThumb(v, hd); if (u) { el.src = u; el.classList.add('ok'); } } }
 
 // ======================= v1.0 水族箱 / 养成循环（B · DESIGN §2） =======================
 // 钓到 → 「收进水族箱」（光点飞向左下角入口）/ 满了 → 腾位置面板；入口打开独立 3D 水族箱（钓鱼场景暂停）
 const aq = createAquarium({ renderer, stylize: stylizeFish });
+const sea = createSeaView({ renderer }); sea.resize(W, H);
 const tankUI = createTankUI({ meta, aq, genes: meta.genes, app, size: () => ({ W, H }), onExit: () => exitTank(), onChanged: () => refreshTankBtn() });
 const tankBtn = $('tankBtn'), keepBtn = $('cKeep');
 const TANK_LOCK = new Set(['charge', 'bite', 'hookset', 'fight', 'land', 'hold', 'release']);
@@ -413,6 +440,7 @@ function refreshTankBtn(bump = false) {
   bub.classList.toggle('tut', tutB && !popOn); bub.classList.toggle('hidden', !bt || TANK_LOCK.has(player?.state));
   if (bump) { tankBtn.classList.remove('bump'); void tankBtn.offsetWidth; tankBtn.classList.add('bump'); }
   const isItem = !!player?.v?.item;   // v1.1：钓到道具 → 「收进背包」（不进水族箱、不占容量）
+  if (freeBtn && player?.v && !isItem) { const fp = `+${meta.releaseValue(player.v)}`; const el = freeBtn.querySelector('.pt') || freeBtn.appendChild(Object.assign(document.createElement('b'), { className: 'pt num' })); if (el.textContent !== fp) el.textContent = fp; }
   const oddId = !isItem && SPECIES_BY_ID[player?.v?.sp]?.odd ? player.v.sp : null;   // 旧版漂流物（v0.9 已下线，仅兼容）→ 「收下」（不进水族箱）
   const key = isItem ? 'item' : oddId ? 'odd-' + oddId : full ? 'full' : 'n' + n;
   if (keepBtn.dataset.k !== key && oddId) {
@@ -453,12 +481,25 @@ function openTank() {
 function exitTank() { document.body.classList.remove('intank'); clock.getDelta(); refreshTankBtn(); refreshHUD(); rewardT = Math.max(rewardT, 1.0); }   // v1.1：回到钓鱼后先缓 1s 再放排队的奖励提示
 tankBtn.addEventListener('click', openTank);
 keepBtn.addEventListener('click', (e) => { e.stopPropagation(); keepCatch(); });
+// v2.1：钓到鱼后也可以直接「放生回海里」（不进水族箱）：+放生分 · 进大海（别的玩家可能钓到）· 沿用抛回大海演出
+const freeBtn = $('cFree');
+freeBtn.addEventListener('click', (e) => { e.stopPropagation(); freeCatch(); });
+function freeCatch() {
+  if (!player || player.state !== 'hold' || photo || tankUI.roomOpen() || player.t < 0.4) return;
+  const v = player.v; if (!v || v.item) return;
+  initAudio(); vibrate(30);
+  const pts = meta.releaseFish(v);
+  UI.hideCatch(); catchCard.shown = false; $('polaroid').classList.remove('show');
+  player.release(); sfx.coin();
+  UI.toast(`『${displayName(v)}』被抛回了大海～<small>+${pts} 分 · 也许会被别人钓到</small>`, true, 2600);
+  refreshHUD(); refreshTankBtn();
+}
 
 function keepCatch() {
   if (!player || player.state !== 'hold' || photo || tankUI.roomOpen() || player.t < 0.4) return;
   initAudio();
   const v = player.v; if (!v) return;
-  if (v.item) { const it = meta.genes.ITEM_BY_ID[v.item.id]; if (it) meta.addItem(v.item.id, v.item.n || 1); stowCatch(); UI.toast(it ? `${it.emoji} ${it.name} 收进背包啦<small>基因改造时放进道具槽，会影响新物种的性状</small>` : '收下了<small>这件东西已经不存在了</small>', true, 2400); return; }
+  if (v.item) { stowCatch(); return; }
   // 旧版漂流物（v0.9 已下线，不会再钓到；旧存档兼容）不是鱼 → 不进水族箱
   const osp = SPECIES_BY_ID[v.sp];
   if (!isSynth(v) && (!osp || osp.odd)) {   // v0.9 C：合成鱼 sp 可能是 'synth'（不在 SPECIES_BY_ID）→ 照常进水族箱
@@ -515,8 +556,8 @@ function wrapOceanCatch(a) {
   const hs = a.hookset.bind(a);
   a.hookset = () => {
     const can = !baitOn && !dbg.force && !Q.get('force') && !dbg.item && !Q.get('item') && meta.S.catches >= 1;   // 强制物种 / 道具（调试）时不走海洋回流
-    let ov = null;
-    if (can) {
+    let ov = a.pre ? (a.pre.ov || null) : null;   // 海底剖面：入水时已经预抽过（preRoll）
+    if (!a.pre && can) {
       try { ov = meta.rollOceanCatch({ p: dbg.ocean ?? (Q.has('ocean') ? 1 : undefined), own: dbg.oceanOwn, luck: meta.castLuck({ perfectCast: a.perfectCast, tide: frenzy.on }).luck }); } catch (err) { console.warn('ocean roll', err); ov = null; }
     }
     a._ocean = ov;
@@ -645,6 +686,20 @@ canvas.addEventListener('wheel', (e) => { if (tankUI.isOpen) return; setZoom(cam
 let lastTab = 'home';
 $('menuBtn').addEventListener('click', () => { initAudio(); UI.openSheet('home', sheetCtx); });
 // v1.3 左上「今日积分」胶囊 → 直接打开排行，自动滚到「我」并高亮
+// v2.2 测试用 mock：双击首页宝石余额 → +10 颗（手机上 dblclick 不可靠 → 自己按两次点击间隔判断；单击仍是说明）
+const gemTap = { last: 0, tm: 0 };
+$('meGem')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const now = performance.now();
+  if (now - gemTap.last < 380) {
+    clearTimeout(gemTap.tm); gemTap.last = 0;
+    meta.addGems(10); sfx.coin(); vibrate(30); refreshHUD();
+    UI.toast(`💎 +10 能量宝石（测试）<small>现在有 ${meta.gems} 颗</small>`, true, 1800);
+    return;
+  }
+  gemTap.last = now;
+  gemTap.tm = setTimeout(() => { sfx.tap(); UI.toast(`💎 能量宝石 ×${meta.gems}<small>每天登录 +1 · 每日任务 +1 · 去水族箱点一条鱼做基因改造</small>`, true, 2600); }, 380);
+});
 $('me').addEventListener('click', () => {
   if (!started || tankUI.isOpen || photo || UI.modalOpen()) return;
   initAudio(); UI.openSheet('rank', sheetCtx, { focusMe: true });
@@ -653,7 +708,7 @@ $('shX').onclick = () => { lastTab = UI.sheetOpen() || lastTab; UI.closeSheet();
 $('sheet').addEventListener('click', (e) => { if (e.target === $('sheet')) { lastTab = UI.sheetOpen() || lastTab; UI.closeSheet(); } });
 function toggleSound() { const m = toggleMute(); meta.S.muted = m; meta.save(); UI.renderSheet(sheetCtx); if (!UI.sheetOpen()) UI.toast(m ? '已静音' : '声音已开启'); }
 $('sndBtn').onclick = () => { initAudio(); toggleSound(); };
-const fmtReward = (r) => [r.bait ? `好运 +${r.bait}` : '', r.pts ? `+${r.pts} 分` : '', r.itemGot ? meta.genes.itemLabel(r.itemGot) : ''].filter(Boolean).join(' · ');
+const fmtReward = (r) => [r.gems ? `💎 能量宝石 +${r.gems}` : '', r.bait ? `好运 +${r.bait}` : '', r.pts ? `+${r.pts} 分` : ''].filter(Boolean).join(' · ');
 $('photoBtn').onclick = () => takePhoto();
 // 点过的按钮立刻失焦：避免之后按空格（主操作）误触发它
 document.addEventListener('click', (e) => { const b = e.target.closest?.('button'); if (b) setTimeout(() => b.blur(), 0); }, true);
@@ -688,7 +743,12 @@ function finishPhoto(dataURL) {
   sfx.shutter();
   const v = player.v;
   $('polImg').src = dataURL;
-  $('polCap').innerHTML = `${UI.fmtLenTxt(v.cm)} 的 ${displayName(v)}<small>${ROOM[0].name} @ 果冻湾 · ${new Date().toLocaleDateString()} · 朋友钓鱼</small>`;
+  $('polCap').innerHTML = `${UI.fmtLenTxt(v.cm)} 的 ${displayName(v)}<small>${ROOM[0].name} @ 果冻湾 · ${new Date().toLocaleDateString()} · 朋友钓鱼</small><em class="pol-saved">存入相册中…</em>`;
+  // v2.1：存进相册（菜单 › 相册）
+  const R = RARITY[SPECIES_BY_ID[v.sp]?.rarity] || null;
+  album.add(dataURL, { name: displayName(v), cm: v.cm, sp: v.sp, who: ROOM[0].name, rar: R?.short || '', rarC: R?.color || '' })
+    .then(() => { const e = $('polCap').querySelector('.pol-saved'); if (e) { e.textContent = `✓ 已存入相册 · 第 ${album.n} 张`; e.classList.add('ok'); } })
+    .catch((err) => { console.warn('album', err); const e = $('polCap').querySelector('.pol-saved'); if (e) e.textContent = '这台设备暂时存不了照片'; });
   setTimeout(() => { $('polaroid').classList.add('show'); document.body.classList.remove('photo'); catchCard.walkHide = 0.01; }, 350);
   meta.S.photos++; taskDone(meta.bumpTask('photo1'));
 }
@@ -743,6 +803,7 @@ function onEvent(a, type, d) {
   const me = a.isPlayer;
   evLog.push(`${time.toFixed(1)} ${a.id} ${type}`); if (evLog.length > 200) evLog.shift();
   const near = me || (a.char.root.getWorldPosition(tmp2).distanceTo(camera.position) < 14);
+  if (me && !watch) sea.event(type, d, a);
   switch (type) {
     case 'charge': if (me) { UI.clearToast(); hint.t = 0; fx.calm(); } break;
     case 'cast':
@@ -763,14 +824,20 @@ function onEvent(a, type, d) {
       // r2：弱抛竿提示不再拖进等待阶段（等待时注意力应在浮漂上）→ 落水后 0.5s 收起
       if (me) { sfx.plop(); if (weakCast.live) { weakCast.live = false; setTimeout(() => { if (player.state === 'float' || player.state === 'cast') UI.clearToast(); }, 500); } }
       break;
-    case 'nibble': if (me) { sfx.nibble(); shake(0.03); hint('有动静…别急，等浮漂猛沉'); } break;
+    case 'nibble':
+      if (me) {
+        sfx.nibble();
+        if (d.v) { shake(0.09); vibrate(30); const R = RARITY[SPECIES_BY_ID[d.v.sp]?.rarity]; UI.toast(`${R?.short ? R.short + ' · ' : ''}${SPECIES_BY_ID[d.v.sp]?.name || '大家伙'}在试探鱼饵…<small>稳住！它只是碰一碰</small>`, true, 1500); }
+        else { shake(0.03); hint('有动静…别急，等浮漂猛沉'); }
+      }
+      break;
     case 'bite':
       fx.splash(d.at, 0.8, 22);
       if (me) { sfx.bite(); shake(0.16); vibrate(80); document.body.classList.add('bite'); hint.t = 0; }
       break;
-    case 'missed': if (me) { document.body.classList.remove('bite'); sfx.slip(); UI.toast('慢了一拍<small>鱼还在附近，再等等</small>'); } break;
+    case 'missed': if (me) { document.body.classList.remove('bite'); sfx.slip(); vibrate(40); UI.toast('鱼饵被叼走了！<small>慢了一拍 · 收线，重新抛一竿</small>', false, 2600); } break;
     case 'early':
-      if (me) { sfx.slip(); UI.toast(d.nibbled ? '太早啦<small>轻轻一动是试探，等浮漂猛沉、出现「!」</small>' : '收回来了<small>等浮漂猛沉、出现「!」再扬竿</small>'); }
+      if (me) { sfx.slip(); UI.toast(d.baitGone ? '空钩收回来了<small>换个新饵，再抛一竿 · 鱼群也换了一批</small>' : d.probe ? '被大家伙骗啦<small>它只是碰一碰，等浮漂猛沉、出现「!」再扬竿</small>' : d.nibbled ? '太早啦<small>轻轻一动是试探，等浮漂猛沉、出现「!」</small>' : '收回来了<small>等浮漂猛沉、出现「!」再扬竿</small>'); }
       break;
     case 'hookset':
       fx.splash(a.hook, 1.1);
@@ -788,6 +855,8 @@ function onEvent(a, type, d) {
       break;
     case 'fight': break;
     case 'warn': if (me) { sfx.warn(); document.body.classList.add('surge'); vibrate(40); } break;
+    case 'idleWarn': if (me) { sfx.warn(); vibrate([30, 60, 30]); document.body.classList.add('slack'); UI.toast('鱼要挣脱了！<small>快按住收线</small>', false, 1600); } break;
+    case 'idleOk': if (me) document.body.classList.remove('slack'); break;
     case 'surge':
       fx.splash(a.hook, 0.7 * d.pw, 16);
       if (me) { sfx.splash(0.6); shake(0.12 * d.pw); }
@@ -808,8 +877,8 @@ function onEvent(a, type, d) {
     case 'reenter': fx.splash(d.at, 1.0, 26); if (me) sfx.splash(1); break;
     case 'snap': case 'escape':
       if (me) {
-        sfx.reel(false); document.body.classList.remove('surge', 'bite');
-        if (type === 'snap') { sfx.snap(); shake(0.3); UI.toast('线断了<small>按钮变红 = 鱼在发力，先松手，等它没劲再收</small>', false, 2600); } else { sfx.slip(); UI.toast('鱼跑掉了<small>按住收线，别让它游太远</small>'); }
+        sfx.reel(false); document.body.classList.remove('surge', 'bite', 'slack');
+        if (type === 'snap') { sfx.snap(); shake(0.3); UI.toast('线断了<small>按钮变红 = 鱼在发力，先松手，等它没劲再收</small>', false, 2600); } else { sfx.slip(); UI.toast(d.idle ? '鱼挣脱跑掉了<small>超过 5 秒没收线 · 按住按钮收线</small>' : '鱼跑掉了<small>按住收线，别让它游太远</small>', false, 2400); }
         sfx.sad();
         meta.breakCombo(); refreshHUD();
         setTimeout(() => friendsReact('fail'), 1200);
@@ -817,7 +886,7 @@ function onEvent(a, type, d) {
       break;
     case 'landing':
       fx.splash(d.at, 1.6, 40);
-      if (me) { sfx.splash(1.4); sfx.reel(false); sfx.landing(); slowmo(0.3, 0.55); shake(0.25); document.body.classList.remove('surge'); }
+      if (me) { sfx.splash(1.4); sfx.reel(false); sfx.landing(); slowmo(0.3, 0.55); shake(0.25); document.body.classList.remove('surge', 'slack'); }
       else if (near) sfx.splash(0.8);
       break;
     case 'caught': onCaught(a, d); break;
@@ -894,16 +963,7 @@ function onCaught(a, d) {
     UI.showCatch(v, { ...rec, score, bonus, chips, combo: meta.S.combo, spGot, n: syn ? 1 : meta.S.codex[v.sp]?.n || 1, prevBest, prevSame, featured }, n);
     catchCard.shown = true; catchCard.walkHide = 0;
     if (sp.odd) { $('cBy').textContent = '不是鱼 · 不占水族箱位置'; refreshTankBtn(); }   // 旧存档兜底（v0.9 起钓获池里已没有 odd）
-    // v1.1：12% 鱼嘴里叼着一个道具（直接进背包，卡片一行小字）
-    const mouthP = dbg.mouthP ?? (sp.odd || syn ? 0 : meta.genes.ITEM_MOUTH_P);
-    if (Math.random() < mouthP) {
-      const mid = meta.genes.rollItemDrop(Math.random, {}); const it = meta.genes.ITEM_BY_ID[mid];
-      meta.addItem(mid, 1); v.mouthItem = mid;
-      const ml = document.createElement('div'); ml.className = 'cMouth'; ml.id = 'cMouth';
-      ml.style.setProperty('--rc', meta.genes.ITEM_RARITY[it.rarity].color);
-      ml.innerHTML = `<i style="background:${it.color}66">${it.emoji}</i>鱼嘴里叼着：${it.name} ×1 <small>已放进背包</small>`;
-      $('cChips').appendChild(ml);
-    }
+    // v2.0：道具系统下线（不再有「鱼嘴里叼着道具」）
     sfx.catch(sp.rarity); if (ri >= 3) setTimeout(() => sfx.sparkle(), 400);
     vibrate(ri >= 3 ? [60, 40, 120] : 60);
     // 奖励排队：放生后依次出现（升级弹窗放最后）
@@ -1216,6 +1276,7 @@ function updateCamera(dt) {
   const lt = tv2.copy(camTarget);
   if (lookAt) lt.lerp(lookAt, lookMix);
   camDrop += (lookDrop - camDrop) * (1 - Math.exp(-dt * 3)); lt.y -= camDrop;
+  if (sea.on && focus === player && !watch) seaCamBlend(focus, desired, lt); else seaCam.locked = false;
   if (firstCam) { camPos.copy(desired); camLook.copy(lt); firstCam = false; }
   camPos.lerp(desired, 1 - Math.exp(-dt * 7));
   camLook.lerp(lt, 1 - Math.exp(-dt * 8));
@@ -1227,6 +1288,61 @@ function updateCamera(dt) {
     camera.rotation.y += (Math.random() - 0.5) * a * 0.06;
     camShake.amp *= Math.exp(-dt * 7);
   }
+}
+
+// ======================= 海底剖面：主镜头拉远到侧面，船和人缩小在画面上方，水线正好落在 SEA_FB =======================
+const SEA_FB = 0.27;   // 水线距屏幕顶部的比例（上方 = 水面上的远景，下方 = 剖面）
+const seaCam = { locked: false, mid: V(), perp: V(), D: 30, P: V(), L: V() };
+const _sc1 = V(), _sc2 = V();
+// v2.1：构图以「落点 / 鱼钩」为水平中心（鱼线永远从屏幕正中垂下去），船在一侧露出；等待 / 搏鱼时持续平滑跟随，鱼越拉越近镜头越推越近
+function seaTarget(focus) { return (focus.state === 'fight' || focus.state === 'hookset' || focus.state === 'land') ? focus.hook : focus.to; }
+function seaLock(focus, k = 1) {
+  const bc = B.position, target = seaTarget(focus);
+  _sc1.set(target.x - bc.x, 0, target.z - bc.z); let dist = _sc1.length();
+  if (dist < 0.5) { _sc1.copy(focus.outW).setY(0); dist = 0.5; }
+  _sc1.normalize();
+  const hf = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect);
+  // 半画面宽 ≈ 落点到船中心的距离 + 半个船身 → 船完整露在一侧，落点在正中
+  const fightK = focus.state === 'fight' || focus.state === 'hookset' ? clamp(1 - focus.dist / Math.max(0.5, focus.startDist), 0, 1) : 0;
+  const half = Math.max(dist + lerp(2.6, 1.8, fightK), lerp(5.5, 3.4, fightK));   // v2.2：鱼越拉越近 → 船越来越大
+  const wantD = clamp(half * 1.08 / Math.tan(hf / 2), 14, 80);
+  if (!seaCam.locked) {
+    seaCam.perp.set(-_sc1.z, 0, _sc1.x);
+    if ((camPos.x - target.x) * seaCam.perp.x + (camPos.z - target.z) * seaCam.perp.z < 0) seaCam.perp.negate();   // 从离当前镜头近的一侧看
+    seaCam.mid.set(target.x, 0, target.z); seaCam.D = wantD; seaCam.locked = true;
+  } else {
+    seaCam.mid.x += (target.x - seaCam.mid.x) * k; seaCam.mid.z += (target.z - seaCam.mid.z) * k;
+    seaCam.D += (wantD - seaCam.D) * k;
+  }
+}
+function seaCamBlend(focus, desired, lt) {
+  if (!seaCam.locked) { if (focus.bobber.visible || focus.state === 'float') seaLock(focus); else return; }
+  else seaLock(focus, focus.state === 'fight' ? 0.06 : 0.04);
+  const k = sea.camK; if (k <= 0) return;
+  const P = seaCam.P.copy(seaCam.mid).addScaledVector(seaCam.perp, seaCam.D); P.y = 1.15;
+  // 俯角：让船的吃水线正好落在 SEA_FB 那一行
+  const beta = Math.atan2(P.y - (B.position.y + 0.1), seaCam.D);
+  const fb = sea.waterFy ?? SEA_FB;   // v2.2：搏鱼时水线行由剖面镜头决定（镜头上浮 → 水线下移 → 船占的画面更大）
+  const up = Math.atan((1 - 2 * fb) * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+  const pitch = up + beta;
+  seaCam.L.copy(P).addScaledVector(seaCam.perp, -Math.cos(pitch) * 10); seaCam.L.y -= Math.sin(pitch) * 10;
+  desired.lerp(P, k); lt.lerp(seaCam.L, k);
+}
+// 每帧把主镜头的投影结果交给剖面：水线行、鱼线入水点、船身左右范围
+const _sf = V(), _sfC = [V(-2.35, 0, -7), V(2.35, 0, -7), V(-2.35, 0, 7.2), V(2.35, 0, 7.2)];
+function seaFrameInfo() {
+  const f = sea.frame;
+  // v2.3 摇杆 → 鱼饵漂移（右 = 屏幕右，上 = 往水面）；键盘方向键同样有效
+  let jx = joy.x, jy = joy.y; if (keys.KeyA || keys.ArrowLeft) jx -= 1; if (keys.KeyD || keys.ArrowRight) jx += 1; if (keys.KeyW || keys.ArrowUp) jy += 1; if (keys.KeyS || keys.ArrowDown) jy -= 1;
+  const jm = Math.hypot(jx, jy); if (jm > 1) { jx /= jm; jy /= jm; }
+  f.joyX = player.state === 'float' && jm > 0.12 ? jx : 0; f.joyY = player.state === 'float' && jm > 0.12 ? jy : 0;
+  camera.updateMatrixWorld();
+  _sf.set(B.position.x, B.position.y + 0.1, B.position.z).project(camera); f.edgeFy = (1 - _sf.y) / 2;
+  const p = player.state === 'fight' || player.state === 'hookset' || player.state === 'land' ? player.hook : player.bobber.visible ? player.bobber.position : player.to;
+  _sf.copy(p).project(camera); f.entryNdcX = clamp(_sf.x, -1.4, 1.4);
+  let x0 = 9, x1 = -9;
+  for (const c of _sfC) { _sf.copy(c).applyMatrix4(B.matrixWorld); _sf.y = B.position.y; _sf.project(camera); x0 = Math.min(x0, _sf.x); x1 = Math.max(x1, _sf.x); }
+  f.hullNdc = f.hullNdc || [0, 0]; f.hullNdc[0] = x0; f.hullNdc[1] = x1;
 }
 
 // 离镜头太近的其他角色临时隐藏（避免挡住画面）
@@ -1278,6 +1394,13 @@ function hideNearCamera(dt = 0.016) {
       if (r && fr) {
         if (dc < dF - 0.2) near = overlapRatio(r, fr, fr.y0 + fr.h * 0.45) > 0.1;
         else if (dc < dF + 4) near = overlapRatio(r, fr) > 0.15;
+      }
+      // v2.1：合影里好友站在镜头与主角之间（视线 1m 以内）→ 一律藏起来（相册里不再出现「后脑勺挡脸」）
+      if (!near) {
+        focus.char.root.getWorldPosition(_occP); _occP.y += 0.9;
+        const toF = _occF.copy(_occP).sub(camera.position), L = toF.length(); toF.multiplyScalar(1 / L);
+        const k = tmp.clone().sub(camera.position).dot(toF);
+        if (k > 0 && k < L + 0.3) { const perp = tmp.clone().sub(camera.position).addScaledVector(toF, -k).length(); if (perp < 1.0) near = true; }
       }
     } else if (!near && occ) {
       const r = charRect(a.char, _rA);
@@ -1339,6 +1462,7 @@ function updateUI(dt) {
   const st = player.state;
   // ---- 主按钮（上下文驱动）+ 外圈环形进度 ----
   let [cls, ic, lb] = ACT[st] || ACT.idle;
+  if (st === 'float' && player.baitGone) { cls = 'cast'; ic = 'reel'; lb = '收线'; }   // v2.2：鱼饵没了 → 主按钮变成「收线」
   let ring = 0;
   const tp = clamp(player.tension, 0, 1);
   const surge = document.body.classList.contains('surge');
@@ -1403,7 +1527,7 @@ function updateUI(dt) {
 
   // ---- 新手提示：只在前 2 次抛竿流程出现 ----
   hint.t -= dt;
-  let tx = hint.t > 0 ? hint.txt : tutOn(st) ? (TUT_TEXT[st] || '') : '';
+  let tx = hint.t > 0 ? hint.txt : st === 'float' && player.baitGone ? '鱼饵没了 · 点按钮收线，重新抛竿' : tutOn(st) ? (TUT_TEXT[st] || '') : '';
   if (UI.sheetOpen() || UI.modalOpen()) tx = '';
   if (tx && hintEl.textContent !== tx) hintEl.textContent = tx;
   hintEl.classList.toggle('off', !tx);
@@ -1428,7 +1552,10 @@ function updateUI(dt) {
 
   // ---- v1.3 常驻摇杆：能走路的阶段（idle / 抱鱼）常显；抛竿·搏鱼·弹窗时淡出并松开；
   // 抱鱼时钓获卡占底部 → 摇杆整体上移到卡片上沿（拖动中冻结位置，避免卡片收起/展开时摇杆在手指下跳走）
-  const joyOn = (st === 'idle' || st === 'hold') && !photo && !UI.modalOpen() && !UI.sheetOpen();
+  // v2.3：等咬钩（float）时摇杆也在 —— 用来让鱼饵在水里慢慢漂（不走路）；鱼饵被叼走后收起
+  const baitJoy = st === 'float' && sea.on && !player.baitGone && !watch;
+  const joyOn = (st === 'idle' || st === 'hold' || baitJoy) && !photo && !UI.modalOpen() && !UI.sheetOpen();
+  if (joyEl.classList.contains('bait') !== baitJoy) joyEl.classList.toggle('bait', baitJoy);
   if (joyEl.classList.contains('off') === joyOn) joyEl.classList.toggle('off', !joyOn);
   const joyHold = st === 'hold';
   if (joyEl.classList.contains('hold') !== joyHold) joyEl.classList.toggle('hold', joyHold);
@@ -1611,6 +1738,9 @@ function frame() {
     for (const a of anglers) a.update(dt, time);
     updateWorldEvents(dt);
     updateCamera(dt);
+    if (watch && sea.on) sea.cancel();
+    if (sea.on) { seaFrameInfo(); sea.update(Math.min(rawDt, 0.05), player); }
+    else if (player.state === 'idle' || player.state === 'hold') sea.idle();   // 空闲时后台预建下一批海底鱼
     hideNearCamera(dt);
     updateUI(rawDt);
     updateTankFlow(dt);
@@ -1633,6 +1763,7 @@ function frame() {
   if (photo) for (const a of anglers) if (!a.isPlayer) for (const o of [a.char.rod?.group, a.line.line, a.bobber]) if (o && o.visible) { o.visible = false; photoHid.push(o); }
   if (sun.shadow.autoUpdate === false) { shadowTick = (shadowTick + 1) % 2; sun.shadow.needsUpdate = shadowTick === 0; }   // v1.3 perf：仅 low 档隔帧更新阴影
   composer.render();
+  sea.render();   // 海底剖面叠在主画面下方（波浪水线以下）
   if (disposeLater.length) { for (const f of disposeLater) f(); disposeLater.length = 0; }
   // v1.3 perf：镜头角速度（与输入实现无关：直接比较相邻帧镜头朝向）→ 转视角时不做离屏缩略图 / 后台预热
   camera.getWorldDirection(_turnF); const turning = _turnF.dot(_turnPrev) < 0.99995; _turnPrev.copy(_turnF);
@@ -1686,6 +1817,7 @@ async function boot() {
   refreshHUD(); refreshTankBtn();
   lastRank = meta.board(live).find((r) => r.you).rank;
   cam.yaw = playerState.facing + B.rotation.y - Math.PI * 0.3;   // 从船尾斜后方看，避免左舷好友挡镜头
+  try { sea.resize(W, H); sea.prewarm(); } catch (e) { console.warn('sea prewarm', e); }   // 开屏遮挡时预建海底剖面
   UI.splashProgress(1, '大家都到齐啦');
   $('start').classList.add('ready'); $('splash').classList.add('ready');   // 开屏：细线进度淡出 → 胶囊按钮淡入
   const go = () => {
@@ -1696,10 +1828,12 @@ async function boot() {
     setTimeout(() => {
       const mates = anglers.filter((a) => !a.isPlayer);
       UI.feedPush({ whos: mates, html: `<b>${mates.map((a) => a.name).join('、')}</b> 都在船上`, icon: 'wave' });
+      const gg = meta.gemGift;
+      const gemModal = () => { if (!gg) return; meta.clearGemGift(); const n = (gg.daily || 0) + (gg.starter || 0); sfx.coin(); UI.modal({ icon: 'gift', title: gg.starter ? '基因改造升级啦！' : '今日能量宝石', reward: `💎 能量宝石 +${n}`, cta: gg.starter ? '去试试' : '收下', onCta: () => { refreshHUD(); if (gg.starter) setTimeout(() => UI.toast('去水族箱点一条鱼<small>一句话 + 1 颗宝石就能改造它</small>', true, 2800), 300); } }); };
       if (meta.streakGift) {
         const g = meta.streakGift;
-        UI.modal({ icon: 'gift', title: `连续出海第 ${g.day} 天`, reward: fmtReward(g.reward), cta: '领取', onCta: () => sheetCtx.onClaimStreak() });
-      }
+        UI.modal({ icon: 'gift', title: `连续出海第 ${g.day} 天`, reward: fmtReward(g.reward), cta: '领取', onCta: () => { sheetCtx.onClaimStreak(); setTimeout(gemModal, 450); } });
+      } else gemModal();
     }, 600);
     setTimeout(() => { const a = anglers.find((x) => x.id === 'gugu'); UI.say(a, '你来啦！一起钓！'); a.char.setMode('wave'); a.reactT = 2; a.lookAt = player; }, 1500);
   };
@@ -1707,5 +1841,5 @@ async function boot() {
   if (Q.has('autostart')) go();
 }
 
-window.G = { dbg, get player() { return player; }, warmStats, AQ, get warmLeft() { return warmQ.length; }, quality: () => quality, anglers, meta, live, camera, cam, get time() { return time; }, onEvent, evLog, renderer, scene, get composer() { return composer; }, playerState, frenzy, UI, catchCard, fishThumb, makeVariant, SPECIES, aq, tankUI, openTank, keepCatch, refreshTankBtn };
+window.G = { sea, dbg, get player() { return player; }, warmStats, AQ, get warmLeft() { return warmQ.length; }, quality: () => quality, anglers, meta, live, camera, cam, get time() { return time; }, onEvent, evLog, renderer, scene, get composer() { return composer; }, playerState, frenzy, UI, catchCard, fishThumb, makeVariant, SPECIES, aq, tankUI, openTank, keepCatch, refreshTankBtn };
 boot().catch((e) => { console.error(e); UI.splashProgress(1, '加载失败：' + e.message); });

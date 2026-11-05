@@ -9,6 +9,7 @@ import { ic } from './icons.js';
 import { THEMES, THEME_IDS, DEFAULT_THEME, themeLabel, themeForFriend } from './aqua_themes.js';
 import { ITEM_BY_ID, ITEM_RARITY } from './items.js';
 import { GENE_LAB_CSS } from './tank_lab_css.js';
+import { PROMPT_LIB, randomPrompt, GENE_TAGS, GENE_TIER, GENE_MOD_P } from './genes.js';   // v2.0 一条鱼 + 一句话 + 1 颗能量宝石
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const RAR_X = { mythic: { label: '神话', short: 'MR', color: '#c79a5b' } };   // v0.9 合成鱼可能出现 mythic（RARITY 表未定义时兜底）
@@ -84,7 +85,7 @@ const TL_CSS = `
 #tankLoading .tl-s{margin-top:12px;height:14px;font-size:11px;line-height:14px;font-weight:400;letter-spacing:.18em;padding-left:.18em;color:var(--tl-ink2);white-space:nowrap;animation:tlUp .8s var(--tl-ease) .22s both}
 @keyframes tlUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 #tankLoading .tl-tip{position:absolute;z-index:2;left:28px;right:28px;bottom:calc(9% + var(--sb,0px));text-align:center;font-size:11px;line-height:1.6;font-weight:400;letter-spacing:.12em;color:#c2b7ac;transition:opacity .4s var(--tl-ease)}
-#tankLoading .tl-brand{position:absolute;z-index:2;left:0;right:0;top:calc(9% + var(--st,0px));text-align:center;font:400 28px/1.2 'FP Script','Snell Roundhand','Brush Script MT',cursive;color:var(--tl-pink);opacity:.75}
+#tankLoading .tl-brand{position:absolute;z-index:2;left:0;right:0;top:calc(9% + var(--st,0px));text-align:center;font:600 28px/1.2 'FP Round',ui-rounded,'Arial Rounded MT Bold',sans-serif;color:#2b97d4;opacity:.85}
 @media (max-height:540px){#tankLoading .tl-brand{display:none}#tankLoading .tl-tip{bottom:calc(6% + var(--sb,0px))}}
 @media (prefers-reduced-motion:reduce){#tankLoading *{animation-duration:0s!important}}
 `;
@@ -155,7 +156,7 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
       </div>
     </div>
     <div class="tk-own" id="tkOwnCard">
-      <div class="ow-row"><div class="tk-owner" id="tkOwner"></div><button class="tk-bagb" id="tkBag" aria-label="背包">${ic('bag')}<span>背包</span><b class="n num" id="tkBagN">0</b></button></div>
+      <div class="ow-row"><div class="tk-owner" id="tkOwner"></div><button class="tk-bagb tk-gem" id="tkBag" aria-label="能量宝石"><em class="gm">💎</em><span>宝石</span><b class="n num" id="tkBagN">0</b></button></div>
       <div class="ow-stats" id="tkStats"></div>
       <div class="ow-acts" id="tkVisitActs"></div>
     </div>
@@ -280,7 +281,7 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
     const left = meta.stealLeft(), k = `${visit.owner.id}|${left}`;
     if (actsKey === k) return; actsKey = k;
     el.innerHTML = `<button class="va-b" id="vaGive">${ic('gift')}<span>送鱼</span></button>
-      <button class="va-b ${left ? '' : 'off'}" id="vaSteal">${ic('hand')}<span>${left ? '偷鱼' : '今日已偷'}</span><em class="num">${left ? `今日 ${left}/1` : '明日再来'}</em></button>`;
+      <button class="va-b ${left ? '' : 'spent'}" id="vaSteal">${ic(left ? 'hand' : 'lock')}<span>偷鱼</span><em class="num">${left ? `今日 ${left}/1` : '明日再来'}</em></button>`;   // ⚠️ 别用 .off（全局 .off = opacity:0，会把按钮整个藏掉）
     el.querySelector('#vaGive').onclick = () => openGive();
     el.querySelector('#vaSteal').onclick = () => doSteal();
   }
@@ -315,7 +316,7 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
   async function doSteal() {
     if (busy || !visit) return;
     const left = meta.stealLeft();
-    if (!left) { notify('今天已经偷过一次了<small>明天再来</small>', false, 2000); return; }
+    if (!left) { sfx.tap(); vib(12); const b = $('vaSteal'); b?.classList.remove('nope'); void b?.offsetWidth; b?.classList.add('nope'); notify('今天的偷鱼机会用完啦<small>每天 1 次 · 明天再来</small>', false, 2200); return; }
     if (S.tank.length >= TANK_MAX) { notify('你的水族箱满了<small>先腾出一个位置再来</small>', false, 2200); return; }
     const o = visit.owner;
     const r = meta.stealFish(o.id);
@@ -387,25 +388,16 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
   }
   $('tkBell').onclick = openInbox;
 
-  // ---------------- 背包（水族箱内）：查看道具 · 提示去点鱼使用 ----------------
-  const bagSt = { cat: 'all', sel: null };
+  // ---------------- v2.0 能量宝石（背包 / 道具已下线）：点一下说明怎么获得 / 怎么用 ----------------
   function openBag() {
     if (busy) return;
-    sfx.open(); hideAll();
-    const draw = () => {
-      const sc = bagSh.scrollTop;
-      bagSh.innerHTML = `<button class="tk-x" aria-label="关闭">${ic('close')}</button>
-        <div class="dr-hd" style="margin-bottom:10px"><span class="bd" style="background:var(--lemon-l);color:var(--lemon-t)">${ic('bag')}</span><div class="t"><b>我的背包 · ${meta.bagTotal()} 个道具</b><span>道具只有一个用途：在基因改造中影响新生命</span></div></div>
-        ${bagView(meta, bagSt)}`;
-      bagSh.querySelector('.tk-x').onclick = () => { sfx.close(); bagSh.classList.remove('show'); setHint(); };
-      bindBag(bagSh, bagSt, draw); bagSh.scrollTop = sc;
-    };
-    draw(); bagSh.classList.add('show'); setHint();
+    sfx.tap(); vib(8);
+    notify(`💎 能量宝石 ×${meta.gems}<small>每天登录 +1 · 完成每日任务 +1 · 点一条鱼，用 1 颗做基因改造</small>`, true, 3200);
   }
   $('tkBag').onclick = openBag;
 
   function refreshTop() {
-    const bn = String(meta.bagTotal()); if ($('tkBagN').textContent !== bn) $('tkBagN').textContent = bn;
+    const bn = String(meta.gems); if ($('tkBagN').textContent !== bn) $('tkBagN').textContent = bn;
     $('tkBag').classList.toggle('hidden', !!visit);
     if (!visit) { const o = ownerMe(); if (!o.avatar && avatars.me) o.avatar = avatars.me; renderOwner(o); }
     else { if (!visit.owner.avatar && avatars[visit.owner.id]) visit.owner.avatar = avatars[visit.owner.id]; renderOwner(visit.owner); }
@@ -441,7 +433,7 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
       // 新手引导（只一次）：首次进入水族箱 → "点一条鱼，试试基因改造"
       if (!tut.get('tankTip') && meta.tankFish().length) {
         tut.set('tankTip');
-        const tip = h(`<div class="tk-tip">点一条鱼，试试基因改造<small>两条鱼加一件道具，融合成全新的生命</small><button>知道了</button></div>`);
+        const tip = h(`<div class="tk-tip">点一条鱼，试试基因改造<small>写一句脑洞 + 1 颗宝石，把它变成新样子</small><button>知道了</button></div>`);
         root.appendChild(tip); setHint();
         const done = () => { tip.remove(); setHint(); };
         tip.querySelector('button').onclick = () => { sfx.tap(); done(); };
@@ -503,12 +495,12 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
     else if (v.note) out.push(v.note);
     return out.slice(0, 2).join(' ');
   }
-  function plaqueHTML(v, kicker) {
+  function plaqueHTML(v, kicker, editable = false) {
     const sp = SPECIES_BY_ID[v.sp], R = rarInfo(v), syn = isSyn(v), tags = syn ? synTags(v) : oldTags(v);
     return `<button class="tk-x" aria-label="关闭">${ic('close')}</button>
       <div class="pl-k"><i></i>${esc(kicker)}</div>
       <div class="pl-hd"><img class="fc-th" data-ugc="0" alt=""><div class="fc-m">
-        <div class="pl-nm">${esc(displayName(v))} ${rb(v)}</div>
+        <div class="pl-nm" id="plNm"><span class="pl-nmt">${esc(displayName(v))}</span> ${rb(v)}${editable ? `<button class="pl-ed" id="plEd" aria-label="改名字">${ic('pencil')}</button>` : ''}</div>
         <div class="pl-meta"><span>${syn ? '新物种' : esc(sp?.name || '')}</span><span>${R.label}</span><span><b>${fmtLenTxt(v.cm)}</b></span>${v.gen ? `<span>第 ${v.gen} 代</span>` : ''}${v.mut ? '<span class="mut">突变</span>' : ''}</div>
       </div></div>
       <div class="pl-desc">${esc(plaqueDesc(v))}</div>
@@ -518,14 +510,40 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
   function showFishCard(v) {
     if (v.unnamed && isSyn(v)) { showNaming(v, null); return; }   // 命名前离开过：先补上命名这一步
     const pts = meta.releaseValue(v);
-    card.innerHTML = `${plaqueHTML(v, isSyn(v) ? '新物种 · 全宇宙唯一' : '水族箱藏品')}
+    card.innerHTML = `${plaqueHTML(v, isSyn(v) ? '新物种 · 全宇宙唯一' : '水族箱藏品', true)}
       <div class="pl-acts"><button class="tk-btn main" id="fcGene">${ic('dna')}基因改造</button>
       <button class="tk-btn sub" id="fcRel">${ic('wave')}放生 <b>+${pts}</b></button></div>`;
     fillThumbs(card, [v]);
     card.querySelector('.tk-x').onclick = () => { sfx.close(); hideAll(); setHint(); };
     card.querySelector('#fcGene').onclick = () => { sfx.open(); openLab(v); };
     card.querySelector('#fcRel').onclick = () => confirmRelease(v, pts);
+    card.querySelector('#plEd').onclick = () => editName(v);
     card.classList.add('show');
+  }
+  // v2.3：自己水族箱里的鱼可以改名（✏️ → 卡片上就地变输入框 · 🎲 随机一个 · 回车 / ✓ 保存 · ✕ 取消）
+  function editName(v) {
+    const NAME_MAX = 14, box = card.querySelector('#plNm'); if (!box) return;
+    sfx.tap(); vib(8);
+    const def = displayName(v);
+    box.classList.add('editing');
+    box.innerHTML = `<input id="plIn" type="text" maxlength="${NAME_MAX}" enterkeyhint="done" autocomplete="off" value="${esc(def)}" aria-label="新名字">
+      <button class="pl-eb dice" id="plDice" aria-label="随机一个">${DICE}</button>
+      <button class="pl-eb ok" id="plOk" aria-label="保存">${ic('check')}</button>
+      <button class="pl-eb no" id="plNo" aria-label="取消">${ic('close')}</button>`;
+    const inp = box.querySelector('#plIn');
+    setTimeout(() => { try { inp.focus(); inp.setSelectionRange(0, inp.value.length); } catch (e) { /* iOS 需要用户手势 */ } }, 30);
+    const done = (save) => {
+      if (save) {
+        const nm = inp.value.replace(/\s+/g, ' ').trim();
+        if (nm && nm !== def) { meta.nameFish(v.uid, nm); sfx.coin(); vib(16); notify(`改好啦，它现在叫『${esc(nm)}』`, false, 1800); onChanged?.(); }
+      } else sfx.close();
+      const nv = meta.findTank(v.uid); if (nv && !nv.egg) showFishCard(nv);
+    };
+    inp.addEventListener('input', () => { if (inp.value.length > NAME_MAX) inp.value = inp.value.slice(0, NAME_MAX); });
+    ['keydown', 'keyup', 'keypress'].forEach((t) => inp.addEventListener(t, (e) => { e.stopPropagation(); if (t === 'keydown' && e.key === 'Enter') { e.preventDefault(); done(true); } if (t === 'keydown' && e.key === 'Escape') done(false); }));
+    box.querySelector('#plDice').onclick = () => { sfx.tap(); vib(8); inp.value = rollName(v, inp.value).slice(0, NAME_MAX); inp.classList.remove('roll'); void inp.offsetWidth; inp.classList.add('roll'); };
+    box.querySelector('#plOk').onclick = () => done(true);
+    box.querySelector('#plNo').onclick = () => done(false);
   }
 
   // 串门：只读鱼卡（点赞）
@@ -579,7 +597,7 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
     card.classList.add('show');
     updateEggCard();
   }
-  const eggName = (egg) => (egg.kind === 'synth' ? '基因卵' : egg.kind === 'fuse' ? '融合卵' : '改造卵');
+  const eggName = (egg) => (egg.kind === 'genemod' ? '基因改造卵' : egg.kind === 'synth' ? '基因卵' : egg.kind === 'fuse' ? '融合卵' : '改造卵');
   function eggSrcHTML(egg) {
     const ps = (egg.src || []).filter(Boolean).slice(0, 2), it = itemOf(egg.synItem);
     return `<div class="eg-src">${ps.map((x) => `<span>『${esc(displayName(x))}』</span>`).join('<i>×</i>')}${it ? `<i>·</i><span>${esc(it.name)}</span>` : ''}</div>`;
@@ -605,20 +623,21 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
     const res = meta.hatchEgg(uid); if (!res) { busy = false; return; }
     sfx.eggShake();
     const pHatch = aq.playHatch(uid, res.v);
-    setTimeout(() => { if (res.v.mut) { try { mutBurst(res.v.mut); } catch (e) { console.warn(e); } } try { sfx.hatch(); if (res.v.mut) sfx.mutate(); } catch (e) {} }, 1300);
+    setTimeout(() => { if (res.v.geneTier === 'fail') { try { sfx.slip?.(); } catch (e) {} } if (res.v.mut) { try { mutBurst(res.v.mut, res.egg.kind === 'genemod'); } catch (e) { console.warn(e); } } try { sfx.hatch(); if (res.v.mut) sfx.mutate(); } catch (e) {} }, 1300);
     await pHatch;
     if (res.v.mut) await new Promise((r) => setTimeout(r, 900)); else sfx.catch(rarOf(res.v));
     busy = false;
-    if (res.egg.kind === 'synth') showSynthReveal(res.v, res.egg);   // v0.9：揭晓 → 必经命名（命名后再写动态）
+    if (res.egg.kind === 'genemod') { meta.pushInbox(`基因改造：『${displayName(res.v)}』${GENE_TIER[res.v.geneTier]?.short || ''}`, 'hatch'); showGeneReveal(res.v, res.egg); }
+    else if (res.egg.kind === 'synth') showSynthReveal(res.v, res.egg);   // v0.9：揭晓 → 必经命名（命名后再写动态）
     else { meta.pushInbox(`${eggName(res.egg)}孵出了『${displayName(res.v)}』${res.v.mut ? '（突变）' : ''}`, 'hatch'); showReveal(res.v, res.egg); }
     refreshTop(); onChanged?.();
   }
 
   // 突变专属：全屏闪光 + "突变！"大字（配合 3D 光柱与 sfx.mutate）
-  function mutBurst(mut) {
+  function mutBurst(mut, gene = false) {
     const m = String(mut);
-    const sub = m.includes('giant') && m.includes('rare') ? '巨型 + 珍稀 双重突变！' : m.includes('giant') ? '巨型变异 · 体型暴涨！' : '珍稀变异 · 专属材质！';
-    const fl = h('<div class="mut-flash"></div>'), tx = h(`<div class="mut-burst">突变！<small>${sub}</small></div>`);
+    const sub = gene ? '稀缺变异 · 华丽到发光！' : m.includes('giant') && m.includes('rare') ? '巨型 + 珍稀 双重突变！' : m.includes('giant') ? '巨型变异 · 体型暴涨！' : '珍稀变异 · 专属材质！';
+    const fl = h('<div class="mut-flash"></div>'), tx = h(`<div class="mut-burst">${gene ? '稀缺！' : '突变！'}<small>${sub}</small></div>`);
     const dim = h('<div class="mut-dim"></div>'), rays = h('<div class="mut-rays"></div>');
     root.appendChild(dim); root.appendChild(rays); root.appendChild(fl); root.appendChild(tx); vib([40, 60, 80]);
     const sparks = [];
@@ -632,6 +651,28 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
     const app = document.getElementById('app');
     if (app) { app.classList.remove('mut-shake'); void app.offsetWidth; app.classList.add('mut-shake'); setTimeout(() => app.classList.remove('mut-shake'), 700); }
     setTimeout(() => { fl.remove(); sparks.forEach((s) => s.remove()); }, 1300); setTimeout(() => { tx.remove(); dim.remove(); rays.remove(); }, 2300);
+  }
+
+  // ---------------- v2.0 基因改造揭晓：失败 / 成功 / 稀缺 三档 ----------------
+  function showGeneReveal(v, egg) {
+    const tier = v.geneTier || egg.tier || 'ok', T = GENE_TIER[tier] || GENE_TIER.ok;
+    const src = (egg.src || []).filter((x) => x && x.sp && !x.egg).slice(0, 1);
+    const R = rarInfo(v), ch = egg.changes || [];
+    const head = { fail: '哎呀，翻车了…', ok: '改造成功！', rare: '✨ 稀缺变异！' }[tier];
+    reveal.innerHTML = `<div class="rv-card gm-rv ${tier}" style="--tc:${T.color}">
+      <div class="gm-badge">${esc(T.short)}</div>
+      <div class="rv-big">${head}</div>
+      ${egg.prompt ? `<div class="gm-q">“${esc(egg.prompt)}”</div>` : ''}
+      ${src.length ? `<div class="rv-ba"><div class="o"><img data-ugc="0" alt=""><span>改造前</span></div><em class="ar">➜</em><div class="n"><img data-ugc="1" alt=""><span>${tier === 'fail' ? '缩水版' : 'NEW'}</span></div></div>` : ''}
+      <div class="rv-nm">${esc(displayName(v))} ${rb(v)}</div>
+      <div class="rv-sub">${R.label} · ${fmtLenTxt(v.cm)}${src[0] ? ` · 原来 ${fmtLenTxt(src[0].cm)}` : ''}</div>
+      <div class="rv-list">${ch.map((c) => `<div>${esc(c)}</div>`).join('')}</div>
+      <button class="tk-btn main" id="rvOk">${tier === 'fail' ? `${ic('check')}收下吧，也挺可爱` : `${ic('check')}收下它！`}</button>
+      ${meta.gems > 0 ? `<button class="tk-btn ghost" id="rvAgain">${ic('dna')}再改一次 · 剩 💎${meta.gems}</button>` : ''}</div>`;
+    if (src.length) fillThumbs(reveal.querySelector('.rv-ba'), [...src, v]);
+    reveal.classList.add('show'); setHint(); aq.select(v.uid);
+    reveal.querySelector('#rvOk').onclick = () => { sfx.tap(); reveal.classList.remove('show'); aq.select(null); setHint(); };
+    const ag = reveal.querySelector('#rvAgain'); if (ag) ag.onclick = () => { sfx.open(); reveal.classList.remove('show'); const f = meta.findTank(v.uid); if (f) { cur = f.uid; openLab(f); } };
   }
 
   // ---------------- 揭晓卡 ----------------
@@ -654,13 +695,14 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
 
   // ---------------- 基因改造实验室（v0.9 唯一入口）----------------
   // 主鱼 + 鱼槽（必选，另一条自己的鱼）+ 道具槽（可选，背包任意一件）+ 一句话（可选，≤30 字）+ 基因预感 → 基因卵（两条亲本被消耗，道具消耗 1）
-  const INSP = ['想让它在夜里发光', '像一只穿西装的绅士', '尾巴长成一把钥匙', '带一点深海的冷色调', '圆滚滚，像颗汤圆', '鳍像丝绸一样飘', '有一身古董瓷器的花纹', '长出第三只眼睛', '像刚从火山口游出来', '安静、优雅、修长', '身上有星空', '像一块会游泳的琥珀'];
+  const INSP = PROMPT_LIB;   // v2.0：灵感库（模拟玩家脑洞，见 genes.PROMPT_LIB）
   const PROMPT_MAX = 30;
   const DICE = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.1" fill="currentColor" stroke="none"/><circle cx="9" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg>';
   const labOthers = (v) => meta.tankFish().filter((x) => x.uid !== v.uid);
   function openLab(v) {
     const others = labOthers(v);
-    labState = { v, mate: null, item: null, prompt: '', mode: 'fish', insp: (Math.random() * INSP.length) | 0, nOthers: others.length };
+    const first = randomPrompt();   // v2.0：打开就模拟一句玩家脑洞，可以直接改造，也可以换 / 自己改
+    labState = { v, mate: null, item: null, prompt: first, mode: 'fish', insp: Math.max(0, INSP.indexOf(first)), nOthers: others.length };
     card.classList.remove('show');
     renderLab(); lab.classList.add('show'); setHint();
   }
@@ -668,83 +710,54 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
   function nodeFish(v, i, label, extra = '') {
     return `<div class="gl-th">${v ? `<img data-ugc="${i}" alt="">` : ic('plus')}</div><b>${label}</b><span>${v ? esc(displayName(v)) : extra}</span>`;
   }
-  function fxHTML(L, m, it) {
-    return `<div class="gl-fx">
-      <div class="gl-node main">${nodeFish(L.v, 0, '主鱼')}</div>
-      <i class="gl-op">×</i>
-      <button class="gl-node ${L.mode === 'fish' ? 'act' : ''} ${m ? 'f' : 'need'}" data-slot="fish">${nodeFish(m, 1, '鱼槽 · 必选', '选一条鱼')}</button>
-      <i class="gl-op">+</i>
-      <button class="gl-node ${L.mode === 'item' ? 'act' : ''} ${it ? 'f' : ''}" data-slot="item"><div class="gl-th">${it ? `<em class="gl-ico lg" style="--ic:${it.color}">${it.emoji}</em>` : ic('plus')}</div><b>道具 · 可选</b><span>${it ? esc(it.name) : '可以不放'}</span></button>
-    </div>`;
+  // 一句话命中了哪些基因关键词（实时预览）
+  function tagHits(prompt) {
+    const p = String(prompt || '').toLowerCase();
+    return GENE_TAGS.filter((t) => t.kw.some((k) => p.includes(k.toLowerCase()))).slice(0, 4);
   }
-  function pickerHTML(L, others) {
-    const bag = meta.bagList();
-    const seg = `<div class="gl-seg"><button data-mode="fish" class="${L.mode === 'fish' ? 'on' : ''}">选鱼<small class="num">${others.length}</small></button><button data-mode="item" class="${L.mode === 'item' ? 'on' : ''}">选道具<small class="num">${meta.bagTotal()}</small></button></div>`;
-    let body;
-    if (L.mode === 'fish') {
-      body = others.length
-        ? `<div class="gl-grid">${others.map((x, i) => `<button class="gl-cell ${L.mate === x.uid ? 'on' : ''}" data-mate="${x.uid}"><img data-ugc="${i}" alt=""><span>${esc(displayName(x))}</span>${isSyn(x) ? '<i class="gl-syn">新物种</i>' : ''}</button>`).join('')}</div>`
-        : `<div class="gl-empty"><b>水族箱里只有它一条鱼</b><span>再钓一条回来，就能开始基因改造</span><button class="tk-btn ghost sm" id="glFish">${ic('rod')}去钓鱼</button></div>`;
-    } else {
-      body = `<div class="gl-grid it"><button class="gl-cell it none ${!L.item ? 'on' : ''}" data-item=""><span class="gl-ico">${ic('close')}</span><span>不放道具</span></button>${bag.map((x) => `<button class="gl-cell it ${L.item === x.id ? 'on' : ''}" data-item="${x.id}" title="${esc(x.desc || '')}"><span class="gl-ico" style="--ic:${x.color}">${x.emoji}</span><span>${esc(x.name)}</span><em class="num">×${x.n}</em><i class="gl-rd" style="background:${(ITEM_RARITY[x.rarity] || {}).color || '#ccc'}"></i></button>`).join('')}</div>
-        ${bag.length ? '' : '<div class="gl-note">背包里还没有道具 · 钓鱼时偶尔会钓上来</div>'}`;
-    }
-    return `${seg}<div class="gl-scroll" id="glScroll">${body}</div>`;
-  }
-  function preHTML(L, m) {
-    if (!m) return `<div class="gl-row"><span class="gl-lbl">基因预感</span></div><div class="gl-pre-e">先在鱼槽里放一条鱼，才能感知它们的基因</div>`;
-    let P = { tags: [], risk: 0.5 };
-    try { P = SYN.previewHints?.({ a: L.v, b: m, item: L.item, prompt: L.prompt }) || P; } catch (e) { console.warn('previewHints', e); }
-    const risk = Math.round(Math.max(0, Math.min(1, +P.risk || 0)) * 100);
-    const lv = risk >= 75 ? '极难预料' : risk >= 50 ? '难以预料' : risk >= 25 ? '略有悬念' : '大致可期';
-    return `<div class="gl-row"><span class="gl-lbl">基因预感</span><span class="gl-risk">${lv} · 不可预测度 <b class="num">${risk}%</b><i class="gl-meter"><i style="width:${risk}%"></i></i></span></div>
-      <ul class="gl-hints">${(P.tags || []).slice(0, 4).map((t) => `<li>${esc(cleanTag(t))}</li>`).join('')}</ul>`;
+
+  // v2.2 实验室（极简版）：大图看鱼 → 一句话脑洞（骰子换一个）→ 一个按钮「💎1 开始改造」；宝石是消耗，不占槽位
+  function labHitsHTML(L) {
+    const hits = tagHits(L.prompt);
+    return hits.length ? hits.map((t) => `<span>${t.emoji} ${esc(t.label)}</span>`).join('') : '<span class="none">🧬 没读懂？基因会自己发挥</span>';
   }
   function renderLab() {
-    const L = labState, v = L.v, others = labOthers(v);
-    if (L.mate && !others.some((x) => x.uid === L.mate)) L.mate = null;
-    if (L.item && meta.itemCount(L.item) <= 0) L.item = null;
-    const m = L.mate ? others.find((x) => x.uid === L.mate) : null, it = itemOf(L.item);
-    const sc = lab.querySelector('#glScroll')?.scrollTop || 0;
+    const L = labState, v = L.v;
+    const gems = meta.gems, ok = gems >= 1;
     lab.innerHTML = `<button class="tk-x" aria-label="关闭">${ic('close')}</button>
-      <div class="gl-hd"><div class="gl-k">基因实验室</div><b>基因改造</b><span>两条鱼融合成一个全新的生命</span></div>
-      ${fxHTML(L, m, it)}
-      <div class="gl-pick">${pickerHTML(L, others)}</div>
-      <div class="gl-say">
-        <div class="gl-row"><span class="gl-lbl">一句话方向 · 可选</span><button class="gl-insp" id="glInsp">${ic('sparkle')}换个灵感</button></div>
-        <div class="gl-in"><input id="glIn" type="text" maxlength="${PROMPT_MAX}" enterkeyhint="done" autocomplete="off" placeholder="例如：${esc(INSP[L.insp % INSP.length])}" value="${esc(L.prompt)}"><em class="num" id="glCnt">${L.prompt.length}/${PROMPT_MAX}</em></div>
+      <div class="gx-hd"><b>基因改造</b><span>写一句脑洞，看看它会变成什么</span></div>
+      <div class="gx-stage"><div class="gx-glow"></div><div class="gx-fish"><img data-ugc="0" data-hd alt=""></div><div class="gx-nm">${esc(displayName(v))}</div></div>
+      <div class="gx-say">
+        <div class="gx-in"><textarea id="glIn" rows="2" maxlength="${PROMPT_MAX}" enterkeyhint="done" autocomplete="off" placeholder="写点离谱的，比如：${esc(INSP[L.insp % INSP.length])}">${esc(L.prompt)}</textarea>
+          <button class="gx-dice" id="glInsp" aria-label="换个脑洞">${DICE}</button></div>
+        <div class="gx-hits" id="glPre">${labHitsHTML(L)}</div>
       </div>
-      <div class="gl-pre" id="glPre">${preHTML(L, m)}</div>
-      <div class="gl-foot">
-        <p class="gl-warn">${m ? `『${esc(displayName(v))}』与『${esc(displayName(m))}』将融合为一个新生命，不再回到水族箱${it ? ` · 消耗 ${esc(it.name)} ×1` : ''}` : '两条鱼都会被消耗，融合为一个新生命'}</p>
-        <button class="tk-btn main" id="glGo" ${m ? '' : 'disabled'}>${m ? `${ic('dna')}开始孵化 · ${fmtSec(EGG_DUR.synth || 90)}` : '先选一条鱼放进鱼槽'}</button>
+      <div class="gx-foot">
+        <button class="tk-btn main" id="glGo" ${ok ? '' : 'disabled'}>${ok ? `<span class="gx-cost">💎 1</span>开始改造` : '能量宝石用完啦'}</button>
+        <div class="gx-odds">${ok ? `<span>失败 ${Math.round(GENE_MOD_P.fail * 100)}%</span><i></i><span>成功 ${Math.round(GENE_MOD_P.ok * 100)}%</span><i></i><span class="r">稀缺 ${Math.round(GENE_MOD_P.rare * 100)}%</span><em>剩余 💎 ${gems}</em>` : '<span>每天登录 +1 · 完成每日任务 +1</span>'}</div>
       </div>`;
-    fillThumbs(lab.querySelector('.gl-fx'), [v, m]);
-    if (L.mode === 'fish') { const g = lab.querySelector('.gl-grid'); if (g) fillThumbs(g, others); }
-    const s2 = lab.querySelector('#glScroll'); if (s2) s2.scrollTop = sc;
+    fillThumbs(lab.querySelector('.gx-stage'), [v]);
     lab.querySelector('.tk-x').onclick = () => { sfx.close(); closeLab(); };
-    lab.querySelectorAll('[data-slot]').forEach((b) => b.onclick = () => { sfx.tap(); L.mode = b.dataset.slot; renderLab(); });
-    lab.querySelectorAll('[data-mode]').forEach((b) => b.onclick = () => { if (L.mode === b.dataset.mode) return; sfx.tap(); L.mode = b.dataset.mode; renderLab(); });
-    lab.querySelectorAll('[data-mate]').forEach((b) => b.onclick = () => { sfx.tap(); vib(8); L.mate = L.mate === b.dataset.mate ? null : b.dataset.mate; renderLab(); });
-    lab.querySelectorAll('[data-item]').forEach((b) => b.onclick = () => { sfx.tap(); vib(8); const id = b.dataset.item || null; L.item = L.item === id ? null : id; renderLab(); });
-    const fb = lab.querySelector('#glFish'); if (fb) fb.onclick = () => { sfx.tap(); lab.classList.remove('show'); labState = null; hideAll(); close(); onExit?.(); };
-    const inp = lab.querySelector('#glIn'), cnt = lab.querySelector('#glCnt');
-    let preT = 0;
-    const refreshPre = () => { const box = lab.querySelector('#glPre'); if (!box || !labState) return; box.innerHTML = preHTML(L, L.mate ? labOthers(v).find((x) => x.uid === L.mate) : null); box.classList.remove('upd'); void box.offsetWidth; box.classList.add('upd'); };
-    inp.addEventListener('input', () => { if (inp.value.length > PROMPT_MAX) inp.value = inp.value.slice(0, PROMPT_MAX); L.prompt = inp.value; cnt.textContent = `${L.prompt.length}/${PROMPT_MAX}`; clearTimeout(preT); preT = setTimeout(refreshPre, 220); });
-    ['keydown', 'keyup', 'keypress'].forEach((t) => inp.addEventListener(t, (e) => { e.stopPropagation(); if (t === 'keydown' && e.key === 'Enter') inp.blur(); }));
-    lab.querySelector('#glInsp').onclick = () => { sfx.tap(); L.insp = (L.insp + 1 + ((Math.random() * (INSP.length - 2)) | 0)) % INSP.length; const t = INSP[L.insp]; inp.value = t; L.prompt = t; cnt.textContent = `${t.length}/${PROMPT_MAX}`; inp.placeholder = `例如：${t}`; refreshPre(); };
+    const inp = lab.querySelector('#glIn');
+    const refreshPre = () => { const box = lab.querySelector('#glPre'); if (box) box.innerHTML = labHitsHTML(L); };
+    inp.addEventListener('input', () => { if (inp.value.length > PROMPT_MAX) inp.value = inp.value.slice(0, PROMPT_MAX); inp.value = inp.value.replace(/\n/g, ''); L.prompt = inp.value; refreshPre(); });
+    ['keydown', 'keyup', 'keypress'].forEach((t) => inp.addEventListener(t, (e) => { e.stopPropagation(); if (t === 'keydown' && e.key === 'Enter') { e.preventDefault(); inp.blur(); } }));
+    lab.querySelector('#glInsp').onclick = () => {
+      sfx.tap(); vib(8);
+      const t = randomPrompt(Math.random, L.prompt); L.insp = INSP.indexOf(t); inp.value = t; L.prompt = t; refreshPre();
+      const d = lab.querySelector('#glInsp'); d.classList.remove('roll'); void d.offsetWidth; d.classList.add('roll');
+      inp.classList.remove('pop'); void inp.offsetWidth; inp.classList.add('pop');
+    };
     const go = lab.querySelector('#glGo');
     go.onclick = () => { if (!go.disabled) submitSynth(); };
-    const pre = lab.querySelector('#glPre'); pre.classList.add('upd');
   }
   async function submitSynth() {
     const L = labState; if (!L) return;
-    const a = L.v, b = meta.findTank(L.mate); if (!b) return;
-    const it = itemOf(L.item);
-    const egg = meta.startSynthEgg({ a, b, item: L.item, prompt: L.prompt });
-    if (!egg) { notify('改造没能开始<small>请检查鱼和道具是否还在</small>'); renderLab(); return; }
-    await toEgg([a.uid, b.uid], egg, `它们正在融合为一个新生命<small>${fmtSec(egg.dur)} 后孵化${it ? ` · 已消耗 ${esc(it.name)}` : ''}</small>`);
+    const a = L.v;
+    const prompt = L.prompt || INSP[L.insp % INSP.length];
+    const egg = meta.startGeneMod({ a, prompt });
+    if (!egg) { notify('改造失败<small>可能是宝石不足</small>'); renderLab(); return; }
+    await toEgg([a.uid], egg, `它正在变异中...<small>${fmtSec(egg.dur)} 后揭晓 · 已消耗 1 颗宝石</small>`);
   }
   async function toEgg(uids, egg, msg) {
     lab.classList.remove('show'); labState = null; hideAll(); busy = true; setHint(); sfx.eggify();
@@ -756,20 +769,19 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
 
   // ---------------- 合成鱼揭晓卡 → 命名（必经）----------------
   function showSynthReveal(v, egg) {
-    const ps = (egg.src || []).filter((x) => x && !x.egg).slice(0, 2), it = itemOf(egg.synItem ?? v.synItem);
-    const R = rarInfo(v), tags = synTags(v);
+    const ps = (egg.src || []).filter((x) => x && !x.egg).slice(0, 1);
+    const promptTag = v.prompt ? `<span>"${esc(v.prompt)}"</span>` : '';
     const ln = (x, i) => `<div class="ln"><img data-ugc="${i}" alt=""><span>${esc(displayName(x))}</span></div>`;
     reveal.innerHTML = `<div class="rv-card gl-rv">
-      <div class="gl-k">新物种 · 第 ${v.gen || 1} 代 · ${R.label}</div>
+      <div class="gl-k">变异完成 · ${v.rareMod ? '罕见奇迹' : v.successMod ? '成功变异' : v.failMod ? '变异失败(变普通)' : '神秘变异'}</div>
       <div class="gl-rv-nm">${esc(displayName(v))}</div>
-      <div class="gl-fp"><span class="num">№ ${esc(v.fp || '—')}</span><i></i><span>全宇宙唯一</span></div>
-      <div class="gl-lin ${it ? 'has-it' : ''}">
-        <div class="gl-lin-row">${ps[0] ? ln(ps[0], 0) : '<div class="ln"></div>'}${it ? `<div class="ln it"><em class="gl-ico" style="--ic:${it.color}">${it.emoji}</em><span>${esc(it.name)}</span></div>` : ''}${ps[1] ? ln(ps[1], 1) : '<div class="ln"></div>'}</div>
-        <svg class="gl-lin-svg" viewBox="0 0 300 34" preserveAspectRatio="none" aria-hidden="true"><path d="M50 0C50 20 150 14 150 34"/><path d="M250 0C250 20 150 14 150 34"/>${it ? '<path d="M150 0V34" class="it"/>' : ''}</svg>
-        <div class="gl-lin-new"><i></i><span>${fmtLenTxt(v.cm)} · ${esc(v.creator || ME_TAG())}</span></div>
+      <div class="gl-lin">
+        <div class="gl-lin-row" style="justify-content:center;">${ps[0] ? ln(ps[0], 0) : ''}</div>
+        <svg class="gl-lin-svg" viewBox="0 0 300 34" preserveAspectRatio="none" aria-hidden="true"><path d="M150 0V34" style="stroke: #ff7a8a; stroke-width: 2px;"/></svg>
+        <div class="gl-lin-new"><i></i><span>${fmtLenTxt(v.cm)} · 变异体</span></div>
       </div>
-      ${tags.length ? `<div class="chips gl-chips c">${tags.map((t) => `<span>${esc(cleanTag(t))}</span>`).join('')}</div>` : ''}
-      <button class="tk-btn main" id="rvName">为它命名</button></div>`;
+      <div class="chips gl-chips c" style="margin-top:10px;">${promptTag}</div>
+      <button class="tk-btn main" id="rvName" style="margin-top:16px;">确认并起名</button></div>`;
     fillThumbs(reveal.querySelector('.gl-lin-row'), ps);
     reveal.classList.add('show'); setHint(); aq.select(v.uid);
     reveal.querySelector('#rvName').onclick = () => { sfx.tap(); showNaming(v, egg); };

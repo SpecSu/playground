@@ -154,6 +154,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 #edge{position:absolute;inset:0;pointer-events:none;transition:box-shadow var(--dur)}
 body.bite #edge{box-shadow:inset 0 0 60px 8px rgba(255,122,138,.5);animation:edge .5s infinite alternate}
 body.surge #edge{box-shadow:inset 0 0 90px 18px rgba(255,107,107,.5);animation:edgeR .35s infinite alternate}
+body.slack #edge{box-shadow:inset 0 0 70px 12px rgba(255,180,71,.55);animation:edgeR .5s infinite alternate}   /* v2.3：没在收线 3s → 琥珀色预警边框 */
 body.strain #edge{box-shadow:inset 0 0 120px 30px rgba(255,80,90,.62);animation:edgeR .2s infinite alternate}
 body.frenzy-on #edge{box-shadow:inset 0 0 50px 4px rgba(255,212,92,.35)}
 @keyframes edgeR{to{box-shadow:inset 0 0 50px 6px rgba(255,107,107,.3)}}
@@ -243,6 +244,8 @@ body.frenzy-on #edge{box-shadow:inset 0 0 50px 4px rgba(255,212,92,.35)}
 /* v1.3 常驻摇杆：左下固定底盘（idle / 抱鱼时一直显示），从底盘内按下拖动走路；摇杆以外任意处拖动 = 转视角（可一指走一指转） */
 #joy{position:absolute;left:calc(2px + var(--sl));bottom:calc(8px + var(--sb));width:168px;height:168px;border-radius:50%;pointer-events:auto;touch-action:none;transform:translateY(calc(var(--joyLift,0px) * -1));transition:opacity .2s var(--ease),transform .3s var(--ease)}
 #joy.off{transform:translateY(calc(var(--joyLift,0px) * -1)) scale(.85)}
+#joy.bait #joyBase{box-shadow:0 0 0 4px #fff,0 6px 0 4px #bfe3f3,0 14px 26px rgba(60,140,190,.22);background:radial-gradient(circle at 50% 38%,rgba(232,247,255,.8) 0 45%,rgba(200,234,250,.65) 100%)}
+#joy.bait #joyKnob{background:radial-gradient(circle at 50% 35%,#fff 0 40%,#ffd9d2 100%)}
 #joy.hold:not(.on){opacity:.6;transform:translateY(calc(var(--joyLift,0px) * -1)) scale(.82);transform-origin:20% 100%}
 /* v1.4.1：摇杆底盘与主按钮统一「同尺寸 + 同结构」：104px 圆芯 + 4px 白描边 + 6px 底唇 → 视觉直径都是 112px；圆心同高（距底 92px），左右镜像（距屏边 86px） */
 #joyBase{position:absolute;left:50%;top:50%;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;background:radial-gradient(circle at 50% 38%,rgba(255,252,247,.72) 0 45%,rgba(255,244,232,.6) 100%);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 0 0 4px #fff,0 6px 0 4px var(--edge),0 14px 26px rgba(90,60,30,.18);transition:opacity .16s var(--ease),transform .16s var(--ease);pointer-events:none}
@@ -328,6 +331,15 @@ body[data-fish="hold"] #act{opacity:0;pointer-events:none;transform:scale(.6);tr
 #cDetail .note{margin-top:6px;padding:8px 10px;border-radius:12px;background:var(--lemon-l);color:var(--lemon-t);font-weight:700}
 #catch.open #cDetail{display:block}
 #cKeep{margin-top:8px;animation:wig 2.6s ease-in-out 1.2s infinite}
+/* v2.1 钓获卡：主按钮「收进水族箱」+ 次按钮「放生回海里」 */
+#catch .cActs{display:flex;gap:8px;align-items:stretch}
+#catch .cActs #cKeep{flex:1;min-width:0}
+#cFree{flex:none;margin-top:8px;width:76px;height:56px;border-radius:var(--rb);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:var(--f1);font-weight:800;color:var(--sky-t);background:linear-gradient(180deg,#f2faff,var(--sky-l));box-shadow:0 4px 0 rgba(69,167,234,.32),0 0 0 1.5px rgba(108,196,255,.45) inset;transition:transform .32s var(--spring),box-shadow .12s}
+#cFree svg.i{width:22px;height:22px;stroke-width:2.2}
+#cFree:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(69,167,234,.32),0 0 0 1.5px rgba(108,196,255,.45) inset;transition-duration:.06s}
+#cFree .pt{font-size:11px;font-weight:800;color:var(--pri-d);line-height:1}
+#catch.mini #cFree{height:46px;margin-top:6px;width:64px}
+#catch.mini #cFree .pt{display:none}
 #cKeep:active{animation:none}
 #cKeep.full{color:#6b4800;background:linear-gradient(180deg,#ffe48c,var(--lemon));box-shadow:0 4px 0 var(--lemon-d),0 10px 22px rgba(232,180,44,.3);text-shadow:none;font-size:var(--f2)}
 #cKeep .tc{font-size:var(--f1);font-weight:800;background:rgba(255,255,255,.28);padding:2px 9px;border-radius:var(--pill)}
@@ -423,7 +435,9 @@ body[data-fish="hold"] #act{opacity:0;pointer-events:none;transform:scale(.6);tr
 .li .sc{font-size:var(--f3)}
 .li.you{background:linear-gradient(90deg,var(--mint-l),#fff);box-shadow:0 3px 0 #cdeee6,0 0 0 2px var(--mint) inset}
 .li .av{width:38px;height:38px}
-.on-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mint);margin-right:6px;vertical-align:1px}
+.avw-on{position:relative;flex:none;display:inline-flex}
+.on-dot{position:absolute;right:-1px;top:-1px;width:12px;height:12px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 2.5px #fff;z-index:1}
+.li.you .on-dot{box-shadow:0 0 0 2.5px var(--mint-l)}
 .room{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .live{display:inline-flex;align-items:center;gap:6px;font-size:var(--f1);font-weight:700;color:var(--mint-t)}
 .live i{width:8px;height:8px;border-radius:50%;background:var(--mint);animation:breathe 1.4s infinite}
@@ -506,7 +520,8 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
 
 /* ---------- 开屏 v3：珍珠白留白 · Fish Party 手写品牌字 · 几条花纹各异的小鱼（UGC）慢慢游过 ----------
    动画只用 transform / opacity（合成线程），主线程加载 3D 时依旧顺滑；无 blur / backdrop-filter */
-@font-face{font-family:'FP Script';src:url(assets/fonts/GreatVibes.woff2) format('woff2');font-display:block}
+@font-face{font-family:'FP Round';src:url(assets/fonts/Fredoka-Party.woff2) format('woff2');font-weight:400 700;font-display:block}   /* v2.1 品牌字：Fredoka 粗圆体（OFL，已子集化只含 Fish Party） */
+:root{--fp-sea:#1f86c9;--fp-sea2:#3fb2e2;--fp-sea3:#7fd6ee;--fp-sea-d:#15649e}
 :root{--fp-bg:#fbf8f3;--fp-pink:#ec8fa3;--fp-pink2:#f4a7b6;--fp-ink:#8f847b;--fp-ink2:#b3a89e;--fp-line:#ebe3d9;--fp-ease:cubic-bezier(.22,.7,.2,1)}
 #splash{position:absolute;inset:0;z-index:40;overflow:hidden;background:var(--fp-bg);color:var(--fp-ink);font-family:var(--font);transition:opacity .65s var(--fp-ease)}
 #splash::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(140% 95% at 50% 44%,rgba(255,255,255,.6) 0%,rgba(255,255,255,0) 50%,rgba(238,227,214,.32) 100%)}
@@ -525,32 +540,35 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
 @keyframes spTail{from{transform:rotate(-11deg)}to{transform:rotate(11deg)}}
 #splash .sp-main{position:absolute;left:0;right:0;top:44%;z-index:2;display:flex;flex-direction:column;align-items:center;transform:translateY(-50%);transition:transform .7s var(--fp-ease)}
 #splash.out .sp-main{transform:translateY(calc(-50% - 14px)) scale(1.03)}
-#splash .sp-brand{margin:0;font:400 clamp(60px,18vw,92px)/1.2 'FP Script','Snell Roundhand','Brush Script MT','Segoe Script',cursive;letter-spacing:.005em;white-space:nowrap}
+#splash .sp-brand{margin:0;font:600 clamp(58px,19vw,88px)/.98 'FP Round',ui-rounded,'SF Pro Rounded','Arial Rounded MT Bold',var(--font);letter-spacing:.015em;text-align:center;filter:drop-shadow(0 3px 0 #8fcde9) drop-shadow(0 12px 18px rgba(90,180,225,.22))}
 /* 书写式揭示：外层窗口从左滑入、内层反向等速滑动 → 文字静止、右缘带柔边逐字"写"出来（纯 transform，合成线程） */
-#splash .sp-wipe{display:block;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 72px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 72px),transparent);transform:translateX(-100%);animation:spWipe 2.2s cubic-bezier(.5,.08,.3,1) .25s forwards}
-#splash .sp-ink{display:block;padding:.1em 72px .22em;transform:translateX(100%);animation:spWipe 2.2s cubic-bezier(.5,.08,.3,1) .25s forwards;
-  color:var(--fp-pink);background:linear-gradient(100deg,#e8879d 22%,var(--fp-pink) 40%,var(--fp-pink2) 66%,#f3b3aa 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#splash .sp-wipe{display:block}
+#splash .sp-ink{display:flex;flex-direction:column;align-items:center;gap:.02em;padding:.06em .1em .14em}
+#splash .sp-ln{display:flex;justify-content:center;white-space:nowrap}
+#splash .sp-ln{width:100%}
+#splash .sp-ink i{font-style:normal;display:inline-block;color:#7cc8ec;background:linear-gradient(180deg,#bfe9fa 0%,#8fd3f1 42%,#62b6e4 88%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transform:translateY(22px) scale(.6);animation:spLet .9s cubic-bezier(.3,1.6,.45,1) calc(.25s + var(--i) * .07s) forwards,spBob 3.6s ease-in-out calc(1.6s + var(--i) * .18s) infinite alternate}
+@keyframes spLet{to{opacity:1;transform:none}}
 @keyframes spWipe{to{transform:none}}
-#splash .sp-rule{width:26px;height:1px;margin:-4px 0 16px;background:var(--fp-pink);opacity:0;transform:scaleX(0);animation:spRule .9s var(--fp-ease) 1.5s forwards}
+#splash .sp-rule{width:30px;height:3px;border-radius:3px;margin:6px 0 16px;background:#a6dcf4;opacity:0;transform:scaleX(0);animation:spRule .9s var(--fp-ease) 1.5s forwards}
 @keyframes spRule{to{opacity:.55;transform:none}}
 #splash .sp-sub{font-size:13px;line-height:1;font-weight:300;letter-spacing:.62em;padding-left:.62em;color:var(--fp-ink);opacity:0;transform:translateY(6px);animation:spUp 1s var(--fp-ease) 1.7s forwards}
 @keyframes spUp{to{opacity:1;transform:none}}
 #splash .sp-load{position:absolute;left:50%;bottom:calc(15% + var(--sb));z-index:2;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);transition:opacity .5s var(--fp-ease),transform .6s var(--fp-ease)}
 #splash.ready .sp-load{opacity:0;transform:translate(-50%,8px);pointer-events:none}
 #splash .sp-track{position:relative;width:136px;height:1.5px;border-radius:1px;background:var(--fp-line)}
-#splash #loadBar{position:relative;display:block;width:0;height:100%;border-radius:1px;background:linear-gradient(90deg,var(--fp-pink2),var(--fp-pink));transition:width .7s var(--fp-ease)}
-#splash #loadBar::after{content:'';position:absolute;right:-2.5px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:var(--fp-pink);box-shadow:0 0 0 3px rgba(236,143,163,.16);animation:spDot 1.8s ease-in-out infinite}
+#splash #loadBar{position:relative;display:block;width:0;height:100%;border-radius:1px;background:linear-gradient(90deg,#bfe9fa,#7cc8ec);transition:width .7s var(--fp-ease)}
+#splash #loadBar::after{content:'';position:absolute;right:-2.5px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:#7cc8ec;box-shadow:0 0 0 3px rgba(124,200,236,.2);animation:spDot 1.8s ease-in-out infinite}
 @keyframes spDot{50%{transform:scale(.7);opacity:.7}}
 #splash #loadT{margin-top:16px;height:16px;font-size:11px;line-height:16px;font-weight:400;letter-spacing:.18em;color:var(--fp-ink2);white-space:nowrap}
 #splash #start{position:absolute;left:50%;bottom:calc(15% + var(--sb) - 18px);z-index:3;margin:0;gap:0;height:48px;min-width:172px;padding:0 40px 0 calc(40px + .34em);border-radius:999px;font-size:15px;font-weight:500;letter-spacing:.34em;color:#fff;text-shadow:none;
-  background:linear-gradient(100deg,var(--fp-pink),var(--fp-pink2));box-shadow:0 10px 22px -14px rgba(214,110,136,.6);opacity:0;transform:translate(-50%,10px);pointer-events:none;animation:none;
+  color:#fff;text-shadow:0 1px 0 rgba(60,140,190,.25);background:linear-gradient(100deg,#7cc8ec,#a6dcf4);box-shadow:0 10px 22px -14px rgba(90,180,225,.75);opacity:0;transform:translate(-50%,10px);pointer-events:none;animation:none;
   transition:opacity .8s var(--fp-ease) .15s,transform .8s var(--fp-ease) .15s,box-shadow .3s}
 #splash #start.ready{opacity:1;transform:translate(-50%,0);pointer-events:auto}
-@media (hover:hover){#splash #start.ready:hover{transform:translate(-50%,-1px);box-shadow:0 16px 30px -14px rgba(214,110,136,.85)}}
-#splash #start.ready:active{transform:translate(-50%,0) scale(.97);box-shadow:0 6px 14px -10px rgba(214,110,136,.7);transition-duration:.08s;transition-delay:0s}
+@media (hover:hover){#splash #start.ready:hover{transform:translate(-50%,-1px);box-shadow:0 16px 30px -14px rgba(90,180,225,.9)}}
+#splash #start.ready:active{transform:translate(-50%,0) scale(.97);box-shadow:0 6px 14px -10px rgba(90,180,225,.8);transition-duration:.08s;transition-delay:0s}
 #splash .sp-foot{position:absolute;left:0;right:0;bottom:calc(26px + var(--sb));z-index:2;text-align:center;font-size:10px;line-height:1;font-weight:300;letter-spacing:.32em;padding-left:.32em;color:#c6bbb0;opacity:0;animation:spUp 1.2s var(--fp-ease) 2.2s forwards}
-@media (max-height:540px){#splash .sp-main{top:40%}#splash .sp-brand{font-size:56px}#splash .sp-ink{padding-top:0;padding-bottom:.16em}#splash .sp-load{bottom:calc(12% + var(--sb))}#splash #start{bottom:calc(12% + var(--sb) - 18px)}#splash .sp-foot{display:none}}
-@media (prefers-reduced-motion:reduce){#splash .sp-wipe,#splash .sp-ink,#splash .sp-fish,#splash .sp-fb,#splash .sp-fish .tail{animation-duration:0s!important}}
+@media (max-height:540px){#splash .sp-main{top:40%}#splash .sp-brand{font-size:50px}#splash .sp-ink{padding-top:0;padding-bottom:.16em}#splash .sp-load{bottom:calc(12% + var(--sb))}#splash #start{bottom:calc(12% + var(--sb) - 18px)}#splash .sp-foot{display:none}}
+@media (prefers-reduced-motion:reduce){#splash .sp-wipe,#splash .sp-ink i,#splash .sp-ink,#splash .sp-fish,#splash .sp-fb,#splash .sp-fish .tail{animation-duration:0s!important}}
 </style>
 <style>
 /* ===================== 水族箱页（全屏水下 · 动森博物馆式）—— 与设计系统统一 ===================== */
@@ -597,6 +615,62 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
 #tank .tk-bagb .n{position:absolute;top:-7px;right:-3px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#fff;color:var(--lemon-t);font-size:11px;line-height:20px;text-align:center;box-shadow:0 0 0 1.5px var(--lemon)}
 #tank .tk-bagb:active{transform:translateY(2px);transition-duration:.06s}
 #tank .tk-bagb.hidden{display:none!important}
+/* v2.0 能量宝石（替代背包）：天空蓝软立体胶囊 */
+#tank .tk-gem{gap:5px;padding:0 12px 0 9px;color:var(--sky-t);background:linear-gradient(180deg,#f2faff,var(--sky-l));box-shadow:0 3px 0 rgba(69,167,234,.32),0 0 0 1.5px rgba(108,196,255,.45) inset}
+#tank .tk-gem .gm{font-style:normal;font-size:17px;line-height:1;filter:drop-shadow(0 1px 1px rgba(40,110,170,.25))}
+#tank .tk-gem .n{position:static;min-width:0;height:auto;padding:0;background:none;box-shadow:none;color:var(--sky-t);font-size:var(--f2);line-height:1}
+/* 顶栏：今日积分胶囊里的宝石数 */
+#me .gem{display:flex;align-items:center;gap:3px;margin-left:4px;padding:0 9px 0 7px;height:30px;border-radius:var(--pill);background:var(--sky-l);color:var(--sky-t);font-size:var(--f2);font-weight:800;box-shadow:0 0 0 1.5px rgba(108,196,255,.4) inset;white-space:nowrap}
+#me .gem i{font-style:normal;font-size:14px;line-height:1}
+#me .gem.bump{animation:tkbump .5s var(--spring)}
+/* 基因改造：命中关键词 / 三档概率 / 揭晓卡 */
+.gm-hits li{background:var(--grape-l)!important;color:var(--grape-t)!important}
+.gm-odds{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.gm-odd{border-radius:14px;padding:7px 8px 8px;background:color-mix(in srgb,var(--c) 16%,#fff);box-shadow:0 0 0 1.5px color-mix(in srgb,var(--c) 45%,transparent) inset;display:flex;flex-direction:column;gap:2px;min-width:0}
+.gm-odd b{font-size:var(--f2);font-weight:800;color:color-mix(in srgb,var(--c) 60%,#3a3330)}
+.gm-odd span{font-size:11px;line-height:1.3;color:var(--ink2);font-weight:600}
+#glIn.pop{animation:popIn .35s var(--spring)}
+.gm-rv{position:relative;overflow:hidden}
+.gm-rv .gm-badge{position:absolute;right:14px;top:14px;font-size:var(--f1);font-weight:900;color:#fff;background:var(--tc);padding:3px 10px;border-radius:var(--pill);box-shadow:0 2px 0 color-mix(in srgb,var(--tc) 70%,#000 0%)}
+.gm-rv .gm-q{margin:4px auto 8px;max-width:88%;font-size:var(--f2);font-weight:800;color:var(--grape-t);background:var(--grape-l);border-radius:14px;padding:6px 12px;line-height:1.4}
+.gm-rv .rv-big{margin-top:2px}
+.gm-rv.fail .rv-big{color:#6f7f8b;background:#eef2f5}
+.gm-rv.ok .rv-big{color:var(--mint-t);background:var(--mint-l)}
+.gm-rv.rare{background:linear-gradient(180deg,#fff8e2,#fff 46%)!important;box-shadow:0 0 0 2px #ffd88a inset,0 4px 0 #f3d08a,var(--sh-l)!important}
+.gm-rv.rare .rv-big{color:#fff;font-size:var(--f3);background:linear-gradient(90deg,#ffb547,#ff6fb5,#9b8cff,#3fb2e2);box-shadow:0 3px 0 rgba(200,120,40,.25)}
+/* 实验室：去掉选鱼区后，脑洞 + 预览放在中部，底部按钮贴底 */
+/* v2.2 基因实验室（极简）：大图 · 一句话 · 一个按钮 */
+#tkLab .gx-hd{flex:none;text-align:center;padding:4px 44px 0}
+#tkLab .gx-hd b{display:block;font-size:var(--f4);font-weight:900;color:var(--ink);line-height:1.2}
+#tkLab .gx-hd span{display:block;margin-top:4px;font-size:var(--f1);font-weight:700;color:var(--ink3)}
+#tkLab .gx-stage{position:relative;flex:1;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:10px 0 6px}
+#tkLab .gx-glow{position:absolute;left:50%;top:46%;width:min(92%,340px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(166,220,244,.55) 0%,rgba(155,140,255,.18) 48%,rgba(255,250,243,0) 70%);animation:breathe 3.2s ease-in-out infinite}
+#tkLab .gx-fish{position:relative;width:min(100%,360px);animation:bob 2.6s ease-in-out infinite alternate}
+#tkLab .gx-fish img{display:block;width:100%;aspect-ratio:240/168;object-fit:contain;transform:scale(1.22);filter:drop-shadow(0 10px 14px rgba(60,90,120,.18))}
+#tkLab .gx-nm{position:relative;margin-top:18px;font-size:var(--f2);font-weight:800;color:var(--ink2)}
+#tkLab .gx-say{flex:none}
+#tkLab .gx-in{position:relative}
+#tkLab .gx-in textarea{display:block;width:100%;resize:none;border:0;outline:none;-webkit-appearance:none;appearance:none;-webkit-user-select:text;user-select:text;touch-action:manipulation;font:800 var(--f3)/1.45 var(--font);color:var(--ink);background:#fff;border-radius:20px;padding:14px 60px 14px 16px;min-height:76px;box-shadow:0 3px 0 var(--edge),0 0 0 1.5px var(--line) inset}
+#tkLab .gx-in textarea:focus{box-shadow:0 3px 0 var(--edge),0 0 0 2px var(--grape) inset}
+#tkLab .gx-in textarea::placeholder{color:var(--ink3);font-weight:600;font-size:var(--f2)}
+#tkLab .gx-in textarea.pop{animation:popIn .35s var(--spring)}
+#tkLab .gx-dice{position:absolute;right:10px;bottom:10px;width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(180deg,#b3a8ff,var(--grape));box-shadow:0 3px 0 var(--grape-d)}
+#tkLab .gx-dice svg.i{width:22px;height:22px;stroke-width:2}
+#tkLab .gx-dice:active{transform:translateY(2px);box-shadow:0 1px 0 var(--grape-d)}
+#tkLab .gx-dice.roll svg{animation:diceRoll .45s var(--spring)}
+@keyframes diceRoll{0%{transform:rotate(0) scale(.8)}100%{transform:rotate(360deg) scale(1)}}
+#tkLab .gx-hits{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;min-height:28px;margin-top:10px}
+#tkLab .gx-hits span{font-size:var(--f1);font-weight:800;color:var(--grape-t);background:var(--grape-l);padding:4px 10px;border-radius:var(--pill)}
+#tkLab .gx-hits span.none{color:var(--ink3);background:var(--bg2)}
+#tkLab .gx-foot{flex:none;margin-top:14px}
+#tkLab .gx-foot .tk-btn.main{gap:10px}
+#tkLab .gx-cost{display:inline-flex;align-items:center;gap:3px;font-size:var(--f2);font-weight:900;color:var(--pri-d);background:#fff;padding:3px 10px 3px 8px;border-radius:var(--pill);text-shadow:none;box-shadow:0 2px 0 rgba(200,60,80,.18)}
+#tkLab .gx-odds{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin-top:10px;font-size:var(--f1);font-weight:700;color:var(--ink3)}
+#tkLab .gx-odds i{width:3px;height:3px;border-radius:50%;background:var(--line)}
+#tkLab .gx-odds .r{color:var(--lemon-t)}
+#tkLab .gx-odds em{font-style:normal;margin-left:8px;color:var(--sky-t);font-weight:800}
+.gm-rv.fail .rv-ba .n img{filter:grayscale(.55) brightness(.95)}
+.gm-rv .tk-btn.ghost{margin-top:8px}
 #tank .ow-stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:7px;padding-top:5px;border-top:1.5px solid var(--line)}
 #tank .ow-stats>div{display:flex;flex-direction:column;align-items:center;line-height:1.2;position:relative;min-width:0}
 #tank .ow-stats>div+div::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:1.5px;background:var(--line)}
@@ -658,6 +732,18 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
 .pl-k i{width:7px;height:7px;border-radius:50%;background:var(--pri)}
 .pl-hd{display:flex;align-items:center;gap:12px;margin-top:8px}
 .pl-nm{font-size:var(--f4);font-weight:800;line-height:1.25;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+/* v2.3 改名：✏️ 小按钮 → 就地输入框 */
+.pl-ed{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--ink2);background:var(--bg2);box-shadow:0 0 0 1.5px var(--line) inset;flex:none}
+.pl-ed svg.i{width:16px;height:16px;stroke-width:2.3}
+.pl-ed:active{transform:scale(.9)}
+.pl-nm.editing{flex-wrap:wrap;gap:6px;width:100%}
+.pl-nm.editing input{flex:1 1 100%;min-width:0;height:40px;border:0;outline:none;-webkit-appearance:none;appearance:none;-webkit-user-select:text;user-select:text;border-radius:12px;padding:0 10px;font:800 var(--f3)/1 var(--font);color:var(--ink);background:#fff;box-shadow:0 0 0 2px var(--grape) inset}
+.pl-nm.editing input.roll{animation:popIn .35s var(--spring)}
+.pl-eb{width:36px;height:36px;flex:none;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink2);background:var(--bg2)}
+.pl-eb svg.i{width:18px;height:18px;stroke-width:2.3}
+.pl-eb.ok{color:#fff;background:var(--mint);box-shadow:0 2px 0 var(--mint-d)}
+.pl-eb.dice{color:var(--grape-t);background:var(--grape-l)}
+.pl-eb:active{transform:translateY(1px)}
 .pl-meta{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:4px;font-size:var(--f1);font-weight:600;color:var(--ink2)}
 .pl-meta b{color:var(--ink);font-weight:800}
 .pl-meta .mut{color:var(--pri-d)}
@@ -887,6 +973,34 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
 .mh-bag{--mc:var(--lemon-t);--mc-l:var(--lemon-l);--mc-t:var(--lemon-t)}
 .mh-rank{--mc:var(--pri);--mc-l:var(--pri-l);--mc-t:var(--pri-d)}
 .mh-tasks{--mc:var(--mint-d);--mc-l:var(--mint-l);--mc-t:var(--mint-t)}
+.mh-album{--mc:var(--grape-d);--mc-l:var(--grape-l);--mc-t:var(--grape-t)}
+/* v2.1 相册：拍立得网格 + 大图查看 */
+.al-load{padding:40px 0;text-align:center;color:var(--ink3);font-weight:700}
+.al-hd{margin:2px 4px 10px;font-size:var(--f1);font-weight:700;color:var(--ink2)}
+.al-hd b{color:var(--grape-t);font-size:var(--f2)}
+.al-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 12px;padding:4px 2px 8px}
+.al-pol{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:1px;padding:7px 7px 9px;border-radius:12px;background:#fff;text-align:left;box-shadow:0 3px 0 var(--edge),var(--sh-s);transform:rotate(var(--r));transition:transform .32s var(--spring)}
+.al-pol:active{transform:rotate(0) scale(.96);transition-duration:.06s}
+.al-pol img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:7px;background:var(--bg2);margin-bottom:5px}
+.al-pol .al-nm{font-size:var(--f1);font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.al-pol .al-dt{font-size:11px;font-weight:600;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.al-pol .rb{position:absolute;left:12px;top:12px}
+.al-empty svg.i{stroke:var(--grape)!important}
+#alView{position:absolute;inset:0;z-index:28;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px 18px calc(20px + var(--sb));background:rgba(58,46,38,.55);opacity:0;pointer-events:none;transition:opacity var(--dur) var(--ease)}
+#alView.show{opacity:1;pointer-events:auto}
+#alView .al-big{width:min(86%,360px);background:#fff;padding:10px 10px 14px;border-radius:16px;box-shadow:var(--sh-l);transform:rotate(-2deg) scale(.86);transition:transform .4s var(--spring)}
+#alView.show .al-big{transform:rotate(-2deg)}
+#alView .al-big img{width:100%;display:block;aspect-ratio:4/5;object-fit:cover;border-radius:9px}
+#alView .al-cap{text-align:center;margin-top:9px;font-size:var(--f2);font-weight:800;color:var(--ink)}
+#alView .al-cap small{display:block;font-size:var(--f1);font-weight:600;color:var(--ink2);margin-top:2px}
+#alView .al-acts{display:flex;gap:10px;width:min(92%,380px)}
+#alView .al-b{flex:1;height:50px;border-radius:var(--rb);display:flex;align-items:center;justify-content:center;gap:5px;font-size:var(--f2);font-weight:800;color:var(--ink);background:#fff;box-shadow:0 3px 0 var(--edge)}
+#alView .al-b svg.i{width:19px;height:19px}
+#alView .al-b.main{flex:1.4;color:#fff;background:linear-gradient(180deg,var(--pri2),var(--pri));box-shadow:0 4px 0 var(--pri-d)}
+#alView .al-b.sure{color:#fff;background:var(--red);box-shadow:0 3px 0 var(--red-d)}
+#alView .al-b:active{transform:translateY(2px)}
+#polaroid .pol-saved{display:block;margin-top:6px;font-style:normal;font-size:var(--f1);font-weight:800;color:var(--ink3)}
+#polaroid .pol-saved.ok{color:var(--grape-t)}
 .mh-tip{margin:12px 4px 2px;font-size:var(--f1);font-weight:600;color:var(--ink3);text-align:center}
 .sh-go-w{position:sticky;bottom:0;display:flex;justify-content:center;padding:14px 0 2px;margin-top:4px;background:linear-gradient(180deg,rgba(255,250,243,0),var(--bg) 45%);pointer-events:none}
 .sh-go{pointer-events:auto;display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px 0 10px;border-radius:var(--pill);background:#fff;color:var(--mint-t);font-size:var(--f1);font-weight:800;white-space:nowrap;box-shadow:0 2px 0 var(--edge),0 0 0 1.5px var(--mint-l) inset}
@@ -911,6 +1025,7 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
       <button id="me" class="glass" aria-label="我的">
         <span class="avw"><svg class="xpr" viewBox="0 0 40 40"><circle class="t" cx="20" cy="20" r="18.5"/><circle class="v" id="meXp" cx="20" cy="20" r="18.5" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/></svg><span class="av" id="meAv"></span><span class="lv num" id="meLv">1</span></span>
         <span class="sc"><small>今日积分</small><b class="num" id="scoreN">0</b></span>
+        <span class="gem" id="meGem" title="能量宝石"><i>💎</i><b class="num" id="gemN">0</b></span>
       </button>
       <div class="tr">
         <button id="tankBtn" aria-label="水族箱"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M2.5 12c2.6-3.6 6-5.2 9.6-5 3 .2 5.3 2 6.4 5-1.1 3-3.4 4.8-6.4 5-3.6.2-7-1.4-9.6-5z"/><path d="M18.5 12l3-3.5v7z"/><circle cx="7.5" cy="11.2" r=".6"/></svg></span><span class="tx"><b>水族箱</b><span class="n num" id="tankN">0/12</span></span><i class="dot hidden" id="tankDot"></i><span class="bub hidden" id="tankBub">孵好了！</span><span class="plus">+1</span></button>
@@ -944,7 +1059,7 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
       <div id="cChips"></div>
       <button id="cMore"><span id="cBy"></span><span class="sp"></span>详情<svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
       <div id="cDetail"></div>
-      <button id="cKeep">收进水族箱</button>
+      <div class="cActs"><button id="cKeep">收进水族箱</button><button id="cFree" aria-label="抛回大海"><svg class="i" viewBox="0 0 24 24"><path d="M3 15c2 0 2-1.6 4.5-1.6S10 15 12 15s2-1.6 4.5-1.6S19 15 21 15"/><path d="M3 19c2 0 2-1.6 4.5-1.6S10 19 12 19s2-1.6 4.5-1.6S19 19 21 19"/><path d="M12 11V4m0 0l-3 3m3-3l3 3"/></svg><span>抛回大海</span></button></div>
     </div>
 
     <div id="flash"></div>
@@ -961,7 +1076,7 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
   <div id="splash">
     <div class="sp-sea" id="spSea" aria-hidden="true"></div>
     <div class="sp-main">
-      <h1 class="sp-brand" aria-label="Fish Party"><span class="sp-wipe"><span class="sp-ink">Fish Party</span></span></h1>
+      <h1 class="sp-brand" aria-label="Fish Party"><span class="sp-wipe"><span class="sp-ink"><span class="sp-ln"><i style="--i:0">F</i><i style="--i:1">i</i><i style="--i:2">s</i><i style="--i:3">h</i></span><span class="sp-ln"><i style="--i:4">P</i><i style="--i:5">a</i><i style="--i:6">r</i><i style="--i:7">t</i><i style="--i:8">y</i></span></span></span></h1>
       <i class="sp-rule"></i>
       <div class="sp-sub">神奇钓鱼派对</div>
     </div>

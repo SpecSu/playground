@@ -12,21 +12,20 @@ function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^=
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = Math.imul(s ^ (s >>> 15), 2246822519) + 0x6d2b79f5 >>> 0) / 4294967296); }
 
 export const TASK_POOL = [
-  { id: 'catch5', text: '钓到 5 条鱼', goal: 5, reward: { bait: 1, pts: 40 } },   // v0.9 C：道具稀缺化，任务少发道具
-  { id: 'catch10', text: '钓到 10 条鱼', goal: 10, reward: { bait: 2, pts: 80 } },
-  { id: 'rare1', text: '钓到 1 条「稀有」及以上', goal: 1, reward: { bait: 2, item: 'common' } },
-  { id: 'perfect3', text: '完美扬竿 3 次', goal: 3, reward: { pts: 80, bait: 1 } },
-  { id: 'pcast3', text: '完美抛竿 3 次', goal: 3, reward: { pts: 60 } },
-  { id: 'new1', text: '图鉴解锁 1 个新物种', goal: 1, reward: { bait: 1, pts: 50 } },
-  { id: 'cheer3', text: '给好友的鱼获点赞 3 次', goal: 3, reward: { pts: 30, bait: 1 } },
-  { id: 'photo1', text: '抱着鱼合影 1 次', goal: 1, reward: { pts: 60 } },
-  { id: 'trait2', text: '钓到 2 条带特质的 UGC 鱼', goal: 2, reward: { bait: 1, pts: 40 } },
-  { id: 'walk1', text: '抱着鱼在甲板上溜达 10 米', goal: 10, reward: { pts: 30 } },
+  { id: 'catch5', text: '钓到 5 条鱼', goal: 5, reward: { bait: 1, pts: 40, gems: 1 } },   // v2.0：每个每日任务都送能量宝石
+  { id: 'catch10', text: '钓到 10 条鱼', goal: 10, reward: { bait: 2, pts: 80, gems: 1 } },
+  { id: 'rare1', text: '钓到 1 条「稀有」及以上', goal: 1, reward: { bait: 2, gems: 2 } },
+  { id: 'perfect3', text: '完美扬竿 3 次', goal: 3, reward: { pts: 80, bait: 1, gems: 1 } },
+  { id: 'pcast3', text: '完美抛竿 3 次', goal: 3, reward: { pts: 60, gems: 1 } },
+  { id: 'new1', text: '图鉴解锁 1 个新物种', goal: 1, reward: { bait: 1, pts: 50, gems: 1 } },
+  { id: 'cheer3', text: '给好友的鱼获点赞 3 次', goal: 3, reward: { pts: 30, bait: 1, gems: 1 } },
+  { id: 'photo1', text: '抱着鱼合影 1 次', goal: 1, reward: { pts: 60, gems: 1 } },
+  { id: 'trait2', text: '钓到 2 条带特质的 UGC 鱼', goal: 2, reward: { bait: 1, pts: 40, gems: 1 } },
+  { id: 'walk1', text: '抱着鱼在甲板上溜达 10 米', goal: 10, reward: { pts: 30, gems: 1 } },
 ];
 export const STREAK_REWARDS = [
-  // v1.1：签到也送道具（item = 随机该稀有度的 1 个道具）
-  // v0.9 C：道具稀缺化 —— 7 天只送 2 个（普通 + 第 7 天稀有）
-  { bait: 1, item: 'common' }, { bait: 1 }, { bait: 2, pts: 40 }, { bait: 1, pts: 50 }, { bait: 2, pts: 60 }, { bait: 2, pts: 80 }, { bait: 3, pts: 150, item: 'rare' },
+  // v2.0：连签第 1 / 4 / 7 天送能量宝石（道具系统已下线）
+  { bait: 1, gems: 1 }, { bait: 1 }, { bait: 2, pts: 40 }, { bait: 1, pts: 50, gems: 1 }, { bait: 2, pts: 60 }, { bait: 2, pts: 80 }, { bait: 3, pts: 150, gems: 3 },
 ];
 
 // 房间里的好友（3D 角色）+ 不在线的好友（只在排行榜里）
@@ -42,7 +41,7 @@ export const OFFLINE = [
 ];
 
 export const TANK_MAX = 12;
-export const EGG_DUR = { prompt: 60, items: 60, fuse: 90, synth: 90 };   // v0.9 synth = 基因改造卵（沿用融合卵时长）
+export const EGG_DUR = { prompt: 60, items: 60, fuse: 90, synth: 90, genemod: 45 };   // v2.0 genemod = 一条鱼 + 一句话 + 1 颗能量宝石   // v0.9 synth = 基因改造卵（沿用融合卵时长）
 export const ME_TAG = () => '@' + ROOM[0].name;
 // v0.9 C 海洋回流概率：基础 3.5%，满好运 +1.5% → 最高 5%
 export const OCEAN_P = 0.035, OCEAN_LUCK_P = 0.015;
@@ -75,7 +74,8 @@ function fresh() {
     photos: 0, reactionsGiven: 0,
     // v1.0 水族箱 / 大海 / 创作分 / 我的动态（DESIGN §3）
     tank: null, ocean: [], creatorScore: 0, inbox: [], oceanNext: 0,
-    bag: null, starterAt: 0,   // v1.1 道具背包 { [itemId]: count }
+    gems: 0, gemDay: null, geneV2: 0,   // v2.0 能量宝石（基因改造唯一消耗）
+    bag: null, starterAt: 0,   // v1.1 宝石背包 { [itemId]: count }
     // v0.9 B 串门社交（见 docs/V09_CONTRACT.md §3）
     friendTanks: {}, stealDay: null, npcQueue: [], npcNext: 0, npcDay: null,
   };
@@ -132,18 +132,23 @@ export function createMeta() {
   if (!Array.isArray(S.npcQueue)) S.npcQueue = [];
   if (!S.npcDay || S.npcDay.d !== today) S.npcDay = { d: today, gift: 0, steal: 0 };
   if (!S.npcNext) S.npcNext = Date.now() + (12 + Math.random() * 18) * 60000;   // 首次 NPC 互动：12~30 分钟后
-  // ---------- v1.1 道具背包：新档 / 旧存档迁移都补发「新手装扮包」 ----------
+  // ---------- v1.1 宝石背包：新档 / 旧存档迁移都补发「新手装扮包」 ----------
   let starterNew = false;
+  // ---------- v2.0 基因改造大改版：道具 / 背包下线 → 清空旧背包，一次性补发 3 颗体验宝石 ----------
   if (!S.bag || typeof S.bag !== 'object' || Array.isArray(S.bag)) S.bag = {};
-  for (const k of Object.keys(S.bag)) if (!ITEM_BY_ID[k] || !(S.bag[k] > 0)) delete S.bag[k];
-  if (!S.starterAt) {
-    for (const [id, n] of Object.entries(STARTER_PACK)) S.bag[id] = (S.bag[id] || 0) + n;
-    S.starterAt = Date.now(); starterNew = true;
-    S.inbox.unshift({ t: Date.now(), text: '🎁 新手装扮包已放进背包：猫耳、胡子、珊瑚粉、海藻绿、果冻凝露、巨藻营养剂', kind: 'info' });
-    save();
+  S.gems = Math.max(0, Math.floor(+S.gems || 0));
+  let gemGift = null;   // 开局弹窗：{ daily, starter }
+  if (!S.geneV2) {
+    const had = Object.values(S.bag).reduce((a, b) => a + (b || 0), 0);
+    S.bag = {}; S.geneV2 = 1; S.starterAt = S.starterAt || Date.now();
+    S.gems += 3; gemGift = { starter: 3, daily: 0 };
+    S.inbox.unshift({ t: Date.now(), text: `💎 基因改造升级啦：一条鱼 + 一句话 + 1 颗能量宝石就能改造。送你 3 颗体验宝石${had ? `（旧道具 ${had} 件已回收）` : ''}`, kind: 'info' });
   }
-  const grantRolled = (tier) => { if (!tier) return null; const id = rollItemDrop(Math.random, { rarity: tier }); S.bag[id] = (S.bag[id] || 0) + 1; return id; };
-  // ---------- v4 修复：宝箱 / 漂流瓶 / 小黄鸭 / 道具漂流物曾被误收进水族箱 → 清出并折算奖励（幂等：没有脏数据就什么都不做） ----------
+  // 每天第一次登录 +1 颗能量宝石
+  if (S.gemDay !== today) { S.gemDay = today; S.gems += 1; gemGift = gemGift || { starter: 0, daily: 0 }; gemGift.daily = 1; }
+  save();
+  const grantRolled = () => null;   // v2.0：道具系统下线，任何奖励都不再发道具
+  // ---------- v4 修复：宝箱 / 漂流瓶 / 小黄鸭 / 宝石漂流物曾被误收进水族箱 → 清出并折算奖励（幂等：没有脏数据就什么都不做） ----------
   const isOddV = (v) => !v || !!v.item || (!isSynthV(v) && (!SPECIES_BY_ID[v.sp] || !!SPECIES_BY_ID[v.sp].odd));   // v0.9 C：合成鱼（sp 可能是 'synth'）不算杂物
   let oddFix = null;
   {
@@ -267,7 +272,7 @@ export function createMeta() {
 
   return {
     S, save, today, featured, featuredCreator, featuredTrait, get streakGift() { return streakGift; }, starterNew,
-    // ================= v1.1 道具背包 =================
+    // ================= v1.1 宝石背包 =================
     addItem(id, n = 1) { if (!ITEM_BY_ID[id] || !(n > 0)) return 0; S.bag[id] = (S.bag[id] || 0) + n; save(); return S.bag[id]; },
     itemCount: (id) => S.bag[id] || 0,
     bagTotal: () => Object.values(S.bag).reduce((a, b) => a + b, 0),
@@ -286,10 +291,14 @@ export function createMeta() {
       return rows;
     },
     taskDef, levelXP: () => LEVEL_XP(S.level),
+    // v2.0 能量宝石
+    get gems() { return S.gems || 0; },
+    addGems(n) { S.gems = Math.max(0, (S.gems || 0) + (n | 0)); save(); return S.gems; },
+    get gemGift() { return gemGift; }, clearGemGift() { gemGift = null; },
     claimStreak() {
       if (!streakGift) return null;
       const r = streakGift.reward; addLuck(r.bait || 0); if (r.pts) { S.today.score += r.pts; S.total += r.pts; }
-      const itemGot = grantRolled(r.item);
+      const itemGot = null; if (r.gems) S.gems = (S.gems || 0) + r.gems;   // v2.0 能量宝石
       S.streak.claimedDay = today; const g = { ...streakGift, reward: { ...r, itemGot } }; streakGift = null; save(); return g;
     },
     claimTask(id) {
@@ -297,7 +306,7 @@ export function createMeta() {
       if (!t || !t.done || t.claimed) return null;
       t.claimed = true; const r = taskDef(id).reward;
       addLuck(r.bait || 0); if (r.pts) { S.today.score += r.pts; S.total += r.pts; addXP(r.pts); }
-      const itemGot = grantRolled(r.item);
+      const itemGot = null; if (r.gems) S.gems = (S.gems || 0) + r.gems;   // v2.0 能量宝石
       save(); return { ...r, itemGot };
     },
     bumpTask,
@@ -364,7 +373,7 @@ export function createMeta() {
     findTank: (uid) => S.tank.find((x) => uidOf(x) === uid) || null,
     releaseValue: (v) => genes.releaseValue(v),
     oddFix,
-    // 收进水族箱（满了返回 false）；v4：宝箱 / 漂流瓶 / 小黄鸭 / 道具漂流物一律拒收
+    // 收进水族箱（满了返回 false）；v4：宝箱 / 漂流瓶 / 小黄鸭 / 宝石漂流物一律拒收
     addToTank(v) {
       if (isOddV(v)) return false;
       if (S.tank.length >= TANK_MAX) return false;
@@ -396,7 +405,7 @@ export function createMeta() {
       S.tank.splice(at, 0, egg);
       save(); return egg;
     },
-    // v1.1 道具改造一条龙：扣道具 → designFromItems → 变卵（history 记录用了哪些道具）；道具不足返回 null
+    // v1.1 宝石改造一条龙：扣宝石 → designFromItems → 变卵（history 记录用了哪些宝石）；宝石不足返回 null
     startItemEgg(v, itemIds, seed = (Math.random() * 4294967296) >>> 0) {
       const ids = genes.resolveItems(itemIds);
       if (!v || v.egg || !ids.length || !this.useItems(ids)) return null;
@@ -416,20 +425,17 @@ export function createMeta() {
     pushInbox(text, kind = 'info') { S.inbox.unshift({ t: Date.now(), text, kind }); if (S.inbox.length > 30) S.inbox.length = 30; save(); },
     // ================= v0.9 B 基因改造（合成）=================
     synth,
-    // 主鱼 a + 鱼槽 b（都必须在自己水族箱）+ 道具（可选，消耗 1）+ 一句话 → synthesize 立即算出结果存进卵；两条亲本都被消耗
-    startSynthEgg({ a, b, item = null, prompt = '' }) {
-      const A = a && this.findTank(uidOf(a)), B = b && this.findTank(uidOf(b));
-      if (!A || !B || A.egg || B.egg || A === B) return null;
-      if (item && (!ITEM_BY_ID[item] || (S.bag[item] || 0) < 1)) return null;
+    // 主鱼 a + 鱼槽 b（都必须在自己水族箱）+ 宝石（可选，消耗 1）+ 一句话 → synthesize 立即算出结果存进卵；两条亲本都被消耗
+    startGeneMod({ a, prompt = '', tier = null }) {
+      const A = a && this.findTank(uidOf(a));
+      if (!A || A.egg || isOddV(A)) return null;
+      if ((S.gems || 0) < 1) return null;
       prompt = String(prompt || '').replace(/\s+/g, ' ').trim().slice(0, 30);
-      let v = null;
-      try { v = synth.synthesize({ a: A, b: B, item: item || null, prompt, seed: (Math.random() * 4294967296) >>> 0, creator: ME_TAG() }); } catch (e) { console.error('synthesize failed', e); }
-      if (!v) return null;
-      if (item && !this.useItems([item])) return null;
-      v.creator = ME_TAG(); if (v.synItem === undefined) v.synItem = item || null; if (v.prompt === undefined) v.prompt = prompt;
-      if (!v.name) { try { v.name = synth.synthName(v); } catch (e) { v.name = v.nick || '无名新种'; } }
-      v.history = [{ t: Date.now(), type: 'synth', from: [A.uid, B.uid], item: item || null }];
-      return this.startEgg('synth', [A, B], v, { synItem: item || null, prompt });
+      let res = null;
+      try { res = genes.geneMod(A, prompt, { creator: ME_TAG(), tier }); } catch (e) { console.error('geneMod failed', e); }
+      if (!res || !res.v) return null;
+      S.gems -= 1;
+      return this.startEgg('genemod', [A], res.v, { changes: res.changes, tier: res.tier, prompt });
     },
     // 命名（揭晓后的必经一步）：写入 v.name（同步 nick，兼容旧显示逻辑）
     nameFish(uid, name) {
