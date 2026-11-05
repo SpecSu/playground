@@ -304,6 +304,7 @@ export function createSeaView({ renderer }) {
   let baitGone = false;                  // v2.2 鱼饵被叼走
   const drift = V(), driftV = V();       // v2.3 摇杆漂鱼饵：相对落点的偏移（米）+ 速度（带惯性）
   let slackK = 0;                        // 0 = 绷直，1 = 松弛
+  let reelOut = null;                    // v2.4 空钩收线：{ t, from } —— 鱼钩快速收回水面的过渡动画（之前是直接消失）
   const probeQ = [];                     // v2.2 待建模的试探大鱼
   let fresh = false;                     // 鱼群已在空闲时换好一批（下次抛竿不用再现场建）   // main.js 每帧写入（主镜头投影结果）
 
@@ -346,7 +347,7 @@ export function createSeaView({ renderer }) {
     if (target) { removeEnt(target); target = null; }
     for (const e of ents) { e.mode = 'swim'; e.pitch = 0; e.lane = laneFor(e); }
     if (!fresh) repopulate(); fresh = false;
-    drift.set(0, 0, 0); driftV.set(0, 0, 0); slackK = 0;
+    drift.set(0, 0, 0); driftV.set(0, 0, 0); slackK = 0; reelOut = null;
     camS.copy(CAM); camF = FOV; camLY = LOOK.y; Slock = null; bright = 0; baitGone = false; probeQ.length = 0;
     camera.fov = FOV; camera.updateProjectionMatrix();
     for (const e of [...ents]) if (e.probe) removeEnt(e);
@@ -439,7 +440,7 @@ export function createSeaView({ renderer }) {
       case 'snap': case 'escape':
         if (target) { target.mode = 'flee'; target.dir = Math.sign(target.pos.x - hullC()) || 1; target.isTarget = false; target.temp = true; target = null; }
         phase = 'lost'; exit(1.3); break;
-      case 'early': phase = 'reel'; probesAway(false); exit(0.55); break;
+      case 'early': reelOut = { t: 0, from: rigP.clone() }; probesAway(false); exit(0.8); break;   // 先看着鱼钩被快速收回水面，再落幕
     }
   }
   const hullC = () => (hullX[0] + hullX[1]) / 2;
@@ -590,7 +591,7 @@ export function createSeaView({ renderer }) {
     if (phase === 'exit') {
       exitT += dt;
       if (exitT > 0) { curtain = Math.max(0, curtain - dt / 0.45); if (curtain <= 0) camK = Math.max(0, camK - dt / 0.9); }
-      if (camK <= 0 && curtain <= 0) { on = false; phase = 'off'; Slock = null; bright = 0; camera.fov = FOV; camera.updateProjectionMatrix(); probesAway(true); repopulate(); fresh = true; rig.visible = line.visible = slack.visible = false; school.visible = false; if (target) { removeEnt(target); target = null; } for (const e of [...ents]) if (e.mode === 'leave' && !e.isTarget) e.mode = 'swim'; return; }
+      if (camK <= 0 && curtain <= 0) { on = false; phase = 'off'; reelOut = null; Slock = null; bright = 0; camera.fov = FOV; camera.updateProjectionMatrix(); probesAway(true); repopulate(); fresh = true; rig.visible = line.visible = slack.visible = false; school.visible = false; if (target) { removeEnt(target); target = null; } for (const e of [...ents]) if (e.mode === 'leave' && !e.isTarget) e.mode = 'swim'; return; }
     } else {
       camK = Math.min(1, camK + dt / 1.5);
       if (phase !== 'cast' || camK > 0.55) curtain = Math.min(1, curtain + dt / 0.8);   // 鱼饵还在空中时海底就升起来 → 入水那一刻直接看见鱼钩往下沉
@@ -616,7 +617,7 @@ export function createSeaView({ renderer }) {
     if (phase === 'float' && a.state === 'float' && !a.baitGone) for (const e of ents) if (e.mode === 'pwait' && e.probe?.t > 0 && e.probe.t - a.t < 2.6) launchProbe(e, a);
 
     // 钓组
-    if (phase === 'float' || phase === 'reel' || (phase === 'exit' && !target && a.state !== 'fight')) {
+    if (!reelOut && (phase === 'float' || phase === 'reel' || (phase === 'exit' && !target && a.state !== 'fight'))) {   // 空钩收线动画期间由 reelOut 接管鱼钩位置
       sinkT += dt;
       const k = ease(Math.min(1, sinkT / 2.8));
       let yy = lerp(depth0, hookDepth, k);
@@ -625,19 +626,26 @@ export function createSeaView({ renderer }) {
       const bite = a.state === 'bite' ? 0.12 + Math.abs(Math.sin(t * 14)) * 0.05 : 0;
       // v2.3：等待时摇杆控制鱼饵慢慢漂（左右 ±1.6m · 上下在海底和水面之间），松手后惯性滑一下停住；只改位置，不影响哪条鱼咬钩
       const jx = a.state === 'float' && !baitGone && phase === 'float' ? (frame.joyX || 0) : 0, jy = a.state === 'float' && !baitGone && phase === 'float' ? (frame.joyY || 0) : 0;
-      driftV.x += (jx * 0.7 - driftV.x) * Math.min(1, dt * 2.6);
-      driftV.y += (jy * 0.6 - driftV.y) * Math.min(1, dt * 2.6);
+      driftV.x += (jx * 1.25 - driftV.x) * Math.min(1, dt * 4.5);   // v2.4：更跟手
+      driftV.y += (jy * 1.05 - driftV.y) * Math.min(1, dt * 4.5);
       drift.x = clamp(drift.x + driftV.x * dt, -1.6, 1.6);
       const baseY = yy - nib - bite;
       drift.y = clamp(drift.y + driftV.y * dt, (FLOOR_Y + 0.55) - baseY, (S - 0.55) - baseY);
       if (phase === 'reel' || a.state === 'reelEmpty') { drift.multiplyScalar(1 - Math.min(1, dt * 3)); }
       rigP.set(entryX + drift.x + Math.sin(t * 0.9) * 0.05 * k, baseY + drift.y, 0);
     }
-    const showRig = on && (phase === 'float' || phase === 'fight' || phase === 'reel') && !(phase === 'fight' && jumpHide);
+    if (reelOut) {   // 空钩收线：0.6s 内沿缓出曲线拉回入水点（鱼钩轻甩），线随之变短
+      reelOut.t += dt;
+      const k = ease(Math.min(1, reelOut.t / 0.6));
+      _a.set(entryX, S + 0.12, 0);
+      rigP.lerpVectors(reelOut.from, _a, k); rigP.x += Math.sin(k * Math.PI) * 0.12;
+    }
+    const reeling = !!reelOut && reelOut.t < 0.64;
+    const showRig = on && (phase === 'float' || phase === 'fight' || phase === 'reel' || reeling) && !(phase === 'fight' && jumpHide);
     rig.visible = line.visible = showRig; if (!showRig) slack.visible = false;
     if (showRig) {
       rig.position.copy(rigP);
-      rig.rotation.z = phase === 'fight' ? Math.atan2(rigP.x - entryX, S - rigP.y) * 0.6 : Math.sin(t * 1.1) * 0.12;
+      rig.rotation.z = phase === 'fight' || reeling ? Math.atan2(rigP.x - entryX, S - rigP.y) * 0.6 : Math.sin(t * 1.1) * 0.12;
       worm.rotation.y = Math.sin(t * 2.2) * 0.4; worm.rotation.x = Math.sin(t * 1.7) * 0.25;
       sinker.visible = phase !== 'fight'; worm.visible = phase !== 'fight' && !baitGone;   // 鱼饵被叼走 → 只剩空钩
       baitGlow.visible = phase === 'float' && !baitGone;

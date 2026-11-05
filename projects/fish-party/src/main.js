@@ -469,17 +469,20 @@ function eggPopSeenInTank() {
   const fresh = meta.readyEggs().filter((x) => !eggPop.seen.has(x.uid));
   if (fresh.length) { for (const x of fresh) eggPop.seen.add(x.uid); eggPopSave(); }
 }
-function openTank() {
-  if (!started || !player || tankUI.isOpen || TANK_LOCK.has(player.state) || photo || UI.modalOpen()) return;
+function openTank(friendId = null) {
+  if (!started || !player || tankUI.isOpen || TANK_LOCK.has(player.state) || photo || UI.modalOpen()) {
+    if (friendId && TANK_LOCK.has(player?.state)) UI.toast('先把这一竿钓完<small>再去好友家串门</small>', false, 1800);
+    return;
+  }
   if (!tut.get('tankBub')) tut.set('tankBub');
   tankTut.pending = false; eggPop.pending = false; eggPop.until = 0;
   initAudio(); sfx.open(); sfx.reel(false);
   joyReset(); drag = null;
   document.body.classList.add('intank');
-  tankUI.open();
+  tankUI.open(friendId);
 }
 function exitTank() { document.body.classList.remove('intank'); clock.getDelta(); refreshTankBtn(); refreshHUD(); rewardT = Math.max(rewardT, 1.0); }   // v1.1：回到钓鱼后先缓 1s 再放排队的奖励提示
-tankBtn.addEventListener('click', openTank);
+tankBtn.addEventListener('click', () => openTank());
 keepBtn.addEventListener('click', (e) => { e.stopPropagation(); keepCatch(); });
 // v2.1：钓到鱼后也可以直接「放生回海里」（不进水族箱）：+放生分 · 进大海（别的玩家可能钓到）· 沿用抛回大海演出
 const freeBtn = $('cFree');
@@ -685,6 +688,9 @@ canvas.addEventListener('wheel', (e) => { if (tankUI.isOpen) return; setZoom(cam
 // 按钮：菜单（v1.3：先到 2×2 大卡首页，卡片上带红点/摘要，再进子页；子页统一「‹ 返回」）
 let lastTab = 'home';
 $('menuBtn').addEventListener('click', () => { initAudio(); UI.openSheet('home', sheetCtx); });
+// v2.4 右侧竖排入口：直接打开对应子页（无菜单首页）
+document.querySelectorAll('#rail [data-rtab]').forEach((b) => b.addEventListener('click', () => { initAudio(); sfx.tap(); UI.openSheet(b.dataset.rtab, sheetCtx, { direct: true, focusMe: b.dataset.rtab === 'rank' }); }));
+const railEl = $('rail');
 // v1.3 左上「今日积分」胶囊 → 直接打开排行，自动滚到「我」并高亮
 // v2.2 测试用 mock：双击首页宝石余额 → +10 颗（手机上 dblclick 不可靠 → 自己按两次点击间隔判断；单击仍是说明）
 const gemTap = { last: 0, tm: 0 };
@@ -719,6 +725,7 @@ const sheetCtx = {
   meta, live, anglers,
   onSeenCodex() { if (newSpecies) { newSpecies = 0; refreshHUD(); } },
   onWatch: (a) => onWatch(a),
+  onVisit: (id) => openTank(id),
   onOpenTank: () => setTimeout(openTank, 260),
   onClaimStreak() { const g = meta.claimStreak(); if (g) { sfx.coin(); UI.toast(`出海奖励 ${fmtReward(g.reward)}`, true); refreshHUD(); } },
   onClaimTask(id) { const r = meta.claimTask(id); if (r) { sfx.coin(); UI.toast(`领取成功 ${fmtReward(r)}`, true); refreshHUD(); } },
@@ -1239,7 +1246,7 @@ function updateCamera(dt) {
     // D：抱鱼放大到 0.75~2.8m 后，竖屏横向视野很窄 → 按水平 FOV 保证整条鱼（+两侧留白）进画面；扛肩时视线略抬
     if (focus.fish) {
       const hf = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect);
-      const need = (focus.fish.span * ({ yoke: 1.25, cradle: 1.2 }[c.held?.pose] || 0.95) + 0.5) / (2 * Math.tan(hf / 2));
+      const need = (focus.fish.span * ({ yoke: 1.25, cradle: 1.2, carry: 1.12 }[c.held?.pose] || 0.95) + 0.5) / (2 * Math.tan(hf / 2));
       wantDist = Math.max(wantDist, Math.min(need, photo ? 7.5 : 8.5));
       if (c.held?.pose === 'yoke') {
         // 举过头顶：竖向也要装下 人 + 头顶的鱼（卡片占底部 ~30%，可用约 62%）
@@ -1247,6 +1254,7 @@ function updateCamera(dt) {
         const needV = (1.75 + (c.held.h || 0.5)) / (2 * Math.tan(vf / 2) * 0.56);
         wantDist = Math.max(wantDist, Math.min(needV, 8.5));
         camTarget.y += 0.12 + (c.held.h || 0.5) * 0.3;
+        if (!photo) wantPitch = -0.02;   // v2.4：扛在肩后的鱼 → 镜头放低一点微仰，鱼身完整露在头顶上方
       }
     }
   }
@@ -1496,6 +1504,7 @@ function updateUI(dt) {
   // ---- 阶段可见性：顶栏 / 搏鱼胶囊 / 动态推送 ----
   const topOn = !FOCUS_HIDE_TOP.has(st) && !photo;
   topEl.classList.toggle('off', !topOn);
+  if (railEl.classList.contains('off') === topOn) railEl.classList.toggle('off', !topOn);
   uiRoot.classList.toggle('notop', !topOn);
   tankBtn.classList.toggle('off', TANK_LOCK.has(st) || !!photo || !!catchCard.shown);   // v1.0：钓鱼/抱鱼时让位
   const fighting = st === 'fight' || st === 'hookset';
@@ -1565,7 +1574,7 @@ function updateUI(dt) {
     if (st === 'hold' && catchCard.shown && card.classList.contains('show')) {
       const pr = joyEl.offsetParent.getBoundingClientRect(), cr = card.getBoundingClientRect();
       const baseBottom = pr.top + joyEl.offsetTop + joyEl.offsetHeight;   // 不含 transform 的原始位置（避免过渡动画中反馈抖动）
-      lift = Math.max(0, Math.round(baseBottom - 22 - cr.top + 6 + (feedEl.childElementCount ? 46 : 0)));   // 22 = 热区比底盘多出的一圈；有点赞胶囊时再让出一行
+      lift = Math.max(0, Math.round(baseBottom - 22 - cr.top + 6 + 22 + (feedEl.childElementCount ? 46 : 0)));   // v2.4：+22 → 底盘离卡片上沿 ~30px   // 22 = 热区比底盘多出的一圈；有点赞胶囊时再让出一行
     }
     if (Math.abs(lift - joyUI.lift) > 1) { joyUI.lift = lift; joyEl.style.setProperty('--joyLift', lift + 'px'); }
   }

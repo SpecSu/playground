@@ -314,10 +314,19 @@ export class Character {
       const wob = Math.sin(t * 13) * 0.012 * (H.burst || 0);
       const lift = ease(clamp(u / 0.45, 0, 1));
       if (H.pose === 'yoke') {
-        // D：举过头顶（奖杯式）—— 双手高举托住鱼腹，鱼整条在头顶上方：脸完全露出、鱼也完整可见，最有"炫耀"感
-        const top = rp.head.y + 0.36;
-        tL.set(0.2, lerp(0.56, top, lift) + wob, lerp(0.2, 0.06, lift)); tR.set(-0.2, lerp(0.56, top, lift) - wob, lerp(0.2, 0.06, lift));
-        P.spine[0] += 0.04 * lift; P.chest[0] += 0.05 * lift; P.head = [-0.1 + Math.sin(t * 2) * 0.03, Math.sin(t * 1.1) * 0.1, 0];
+        // v2.4 扛在肩上：Q 版手臂够不到头顶（旧版举过头顶时鱼腹离手 ~0.6m，像悬空）→ 双手抬到耳侧托住鱼腹，
+        //   鱼横担在肩后（在头后面，脸完全露出），两端从左右伸出、鱼背露在头顶上方；鱼的位置按手的实际到达点放
+        const sh = rp.shL.y + 0.25 + (H.yLift || 0) / this.scale;   // 手能到的最高点（Q 版手臂 ≈ 0.25）+ 托举抬高量（IK 会伸直到极限）
+        tL.set(0.2, lerp(0.56, sh, lift) + wob, lerp(0.2, -0.06, lift)); tR.set(-0.2, lerp(0.56, sh, lift) - wob, lerp(0.2, -0.06, lift));
+        P.spine[0] += 0.03 * lift; P.chest[0] += 0.04 * lift; P.head = [-0.05 + Math.sin(t * 2) * 0.03, Math.sin(t * 1.1) * 0.1, 0];
+      } else if (H.pose === 'carry') {
+        // v2.4 托大鱼：双手在胸前分开往前伸、掌心朝上托住鱼腹，身体微微后仰（鱼很重）；鱼挡住脸也没关系
+        const spread = clamp(H.len * 0.16 / sc, 0.14, 0.24);
+        const hz = clamp(0.2 + (H.w * 0.5) / sc * 0.5, 0.22, 0.34);
+        const hy = 0.5 + Math.sin(t * 2.2) * 0.006;
+        tL.set(spread, hy + wob, hz); tR.set(-spread, hy - wob, hz);
+        P.spine[0] -= 0.07 * lift; P.chest[0] -= 0.04 * lift;
+        P.head = [0.06 + Math.sin(t * 2) * 0.03, Math.sin(t * 1.1) * 0.12, 0];
       } else if (H.pose === 'cradle') {
         // D：横抱 —— 双手分开托住细长大鱼，放低到腰腹，鱼背不超过下巴
         const chin = rp.head.y - 0.02;
@@ -366,10 +375,27 @@ export class Character {
       // 手臂较短（Q 版），鱼贴近胸口一点，保证双手托在鱼腹下方而不是鱼悬在手前
       const chestFront = 0.12 * this.scale;
       if (H.pose === 'yoke') {
-        // 鱼腹压在头顶上方一点（Q 版大头顶 ≈ head + 0.42 模型米），水平居中，略靠前
+        // v2.4：鱼腹就压在两只手上（mid.y + belly），向后让出半个鱼身厚度 + 头的厚度 → 横担在肩后
         const sc = this.scale, k2 = ease(clamp(this.modeT / 0.45, 0, 1));
-        const yY = (this.rig.restPos.head.y + 0.33) * sc + H.belly;
-        H.obj.position.set(mid.x * 0.3, lerp(mid.y + H.belly, Math.max(yY, mid.y + H.belly), k2), lerp(Math.max(mid.z, chestFront + H.w * 0.5), 0.05 * sc, k2));
+        // 鱼腹压在两只手上；鱼往后放到后脑勺之后（不穿头）。若鱼不够高、会被大头整个挡住，
+        //   就把鱼往上抬到「鱼背高出头顶 ~25% 鱼高」，手跟着上抬托住（抬不到的部分用手掌往上托的姿态弥补，最多 0.18m）
+        const zBack = Math.min(mid.z - H.w * 0.3, -0.16 * sc - H.w * 0.5);
+        const headTop = (this.rig.restPos.head.y + 0.42) * sc;
+        const lift2 = clamp(headTop + H.h * 0.25 - (mid.y + H.h), 0, 0.18 * sc) * k2;
+        H.yLift = lift2;
+        H.obj.position.set(mid.x * 0.3, mid.y + H.belly - 0.005 + lift2, lerp(Math.max(mid.z, chestFront + H.w * 0.5), zBack, k2));
+      } else if (H.pose === 'carry') {
+        // 鱼腹压在两只手上；鱼身往前放：靠身体那一面最多压进脸前 ~25% 头部半径（穿一点点可以，头不会埋进鱼里）
+        const sc = this.scale, k2 = ease(clamp(this.modeT / 0.45, 0, 1));
+        const headR = 0.3 * sc;
+        const zc = Math.max(mid.z + H.w * 0.25, chestFront + H.w * 0.5, headR * 0.95 + H.w * 0.5 + clamp(this.speed / 2, 0, 1) * 0.06 * sc);   // 走路时头会前后晃 → 再让一点
+        H.obj.position.set(mid.x * 0.4, mid.y + H.belly + 0.01, lerp(Math.max(mid.z + 0.03, chestFront + H.w * 0.5), zc, k2));
+        // belly（模型最低点估计）对高背鳍 / 长吻的鱼偏大 → 用真实包围盒把鱼的最低点直接压到手掌上（每帧直接算，不累积）
+        H.obj.updateMatrixWorld(true);
+        const bb = this._bb || (this._bb = new THREE.Box3()); bb.setFromObject(H.obj, false);
+        const sy = this.root.getWorldScale(this._tmpW2).y || 1;
+        const palmW = Math.min(this.handW.L.y, this.handW.R.y) - 0.02 * sc;
+        H.obj.position.y -= ((bb.min.y - palmW) / sy) * k2;
       } else if (H.pose === 'cradle') {
         H.obj.position.set(mid.x, mid.y + H.belly + 0.01, Math.max(mid.z + 0.03, chestFront + H.w * 0.5));
       } else

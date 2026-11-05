@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
 <meta name="theme-color" content="#fffaf3" />
 <title>朋友钓鱼 · 神奇钓鱼派对 Friends Fishing Party</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%9F%3C/text%3E%3C/svg%3E" />
 <script>/* v1.3：不支持 100dvh 的旧浏览器 → 用可视区高度兜底（main.js 会在 resize / 地址栏变化时继续更新） */
 try { if (!(window.CSS && CSS.supports && CSS.supports('height', '100dvh'))) document.documentElement.style.setProperty('--vvh', Math.round((window.visualViewport && visualViewport.height) || innerHeight) + 'px'); } catch (e) {}</script>
 <style>
@@ -103,7 +104,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 #menuBtn .dot{top:2px;right:2px}
 
 /* ---------- 社交动态：顶部居中单条白胶囊 ---------- */
-#feed{position:absolute;left:50%;top:calc(72px + var(--st));transform:translateX(-50%);max-width:calc(100% - 32px);pointer-events:none;z-index:2;transition:top var(--dur) var(--ease)}
+#feed{position:absolute;left:50%;top:calc(72px + var(--st));transform:translateX(-50%);max-width:calc(100% - 32px - 132px);   /* v2.4：右侧有竖排入口 → 两边各让 66px */pointer-events:none;z-index:2;transition:top var(--dur) var(--ease)}
 .ui.notop #feed{top:calc(12px + var(--st))}
 #ui #feed.atcard{top:var(--ct);left:calc(14px + var(--sl));transform:none;max-width:calc(100% - 28px)}
 .fd{display:flex;align-items:center;gap:8px;min-height:40px;padding:4px 8px 4px 4px;border-radius:var(--pill);font-size:var(--f1);font-weight:700;white-space:nowrap;pointer-events:auto;color:var(--ink);background:#fff;box-shadow:var(--thick),var(--sh);animation:fdIn var(--dur) var(--ease) both}
@@ -265,6 +266,18 @@ body.frenzy-on #edge{box-shadow:inset 0 0 50px 4px rgba(255,212,92,.35)}
 
 /* ---------- v1.3 水族箱入口：挪到顶栏（今日积分 · [水族箱] · 菜单），保留红点 / 数量 / 满 / 「孵好了」一次性提示 ---------- */
 #top .tr{display:flex;align-items:center;gap:8px;pointer-events:none}
+/* v2.4 右侧竖排：排行 / 任务 / 图鉴 / 相册（原菜单抽屉首页的四个入口）—— 圆形图标 + 小字，与顶栏同一套软立体风格 */
+#rail{position:absolute;right:calc(12px + var(--sr));top:calc(74px + var(--st));z-index:3;display:flex;flex-direction:column;gap:10px;pointer-events:none;transition:opacity var(--dur) var(--ease),transform .32s var(--ease)}
+#rail.off{opacity:0;transform:translateX(14px)}
+#rail.off *{pointer-events:none!important}
+.rb-b{display:flex;flex-direction:column;align-items:center;gap:3px;width:52px;pointer-events:auto;transition:transform .3s var(--spring)}
+.rb-b:active{transform:scale(.9);transition-duration:.06s}
+.rb-ic{position:relative;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;color:var(--mc);box-shadow:0 3px 0 var(--edge),var(--sh)}
+.rb-ic svg.i{width:23px;height:23px;stroke-width:2.3}
+.rb-ic .dot{top:-1px;right:-1px;width:13px;height:13px}
+.rb-lb{font-size:12px;font-weight:800;color:#fff;line-height:1;padding:1px 2px;white-space:nowrap;letter-spacing:.02em;text-shadow:0 1px 2px rgba(0,0,0,.42),0 0 6px rgba(0,0,0,.22)}   /* v2.4：白字 + 淡黑阴影，去掉底色 */
+.rb-rank{--mc:var(--pri-d)}.rb-tasks{--mc:var(--mint-t)}.rb-codex{--mc:var(--sky-d)}.rb-album{--mc:var(--grape-t)}
+@media (max-height:600px){#rail{gap:6px}.rb-ic{width:40px;height:40px}.rb-lb{display:none}}
 #top.off *{pointer-events:none!important}
 #tankBtn{position:relative;height:52px;padding:0 14px 0 5px;border-radius:var(--pill);display:flex;align-items:center;gap:7px;pointer-events:auto;background:#fff;color:var(--ink);box-shadow:var(--thick),var(--sh);transition:opacity .2s,transform .32s var(--spring)}
 #tankBtn .ic{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#86e9d9,var(--mint));color:#fff;box-shadow:0 3px 0 var(--mint-d)}
@@ -334,10 +347,11 @@ body[data-fish="hold"] #act{opacity:0;pointer-events:none;transform:scale(.6);tr
 /* v2.1 钓获卡：主按钮「收进水族箱」+ 次按钮「放生回海里」 */
 #catch .cActs{display:flex;gap:8px;align-items:stretch}
 #catch .cActs #cKeep{flex:1;min-width:0}
-#cFree{flex:none;margin-top:8px;width:76px;height:56px;border-radius:var(--rb);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:var(--f1);font-weight:800;color:var(--sky-t);background:linear-gradient(180deg,#f2faff,var(--sky-l));box-shadow:0 4px 0 rgba(69,167,234,.32),0 0 0 1.5px rgba(108,196,255,.45) inset;transition:transform .32s var(--spring),box-shadow .12s}
+#cFree{flex:none;margin-top:8px;width:76px;height:56px;border-radius:var(--rb);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:var(--f2);white-space:nowrap;font-weight:800;color:var(--sky-t);background:linear-gradient(180deg,#f2faff,var(--sky-l));box-shadow:0 4px 0 rgba(69,167,234,.32),0 0 0 1.5px rgba(108,196,255,.45) inset;transition:transform .32s var(--spring),box-shadow .12s}
 #cFree svg.i{width:22px;height:22px;stroke-width:2.2}
 #cFree:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(69,167,234,.32),0 0 0 1.5px rgba(108,196,255,.45) inset;transition-duration:.06s}
-#cFree .pt{font-size:11px;font-weight:800;color:var(--pri-d);line-height:1}
+#cFree .pt{font-size:12px;font-weight:800;color:var(--pri-d);line-height:1}
+#cFree span{line-height:1.1}
 #catch.mini #cFree{height:46px;margin-top:6px;width:64px}
 #catch.mini #cFree .pt{display:none}
 #cKeep:active{animation:none}
@@ -433,6 +447,9 @@ body[data-fish="hold"] #act{opacity:0;pointer-events:none;transform:scale(.6);tr
 .li .no{width:26px;text-align:center;font-size:var(--f3);font-weight:900;color:var(--ink3)}
 .li .no.g1{color:var(--lemon-d)}.li .no.g2{color:#9db3c2}.li .no.g3{color:#e09a6a}
 .li .sc{font-size:var(--f3)}
+.li.vis{cursor:pointer;transition:transform .3s var(--spring)}
+.li.vis:active{transform:scale(.98);transition-duration:.06s}
+.li.vis::after{content:'›';flex:none;margin-left:2px;font-size:20px;font-weight:800;color:var(--ink3);line-height:1}
 .li.you{background:linear-gradient(90deg,var(--mint-l),#fff);box-shadow:0 3px 0 #cdeee6,0 0 0 2px var(--mint) inset}
 .li .av{width:38px;height:38px}
 .avw-on{position:relative;flex:none;display:inline-flex}
@@ -639,6 +656,18 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
 .gm-rv.rare{background:linear-gradient(180deg,#fff8e2,#fff 46%)!important;box-shadow:0 0 0 2px #ffd88a inset,0 4px 0 #f3d08a,var(--sh-l)!important}
 .gm-rv.rare .rv-big{color:#fff;font-size:var(--f3);background:linear-gradient(90deg,#ffb547,#ff6fb5,#9b8cff,#3fb2e2);box-shadow:0 3px 0 rgba(200,120,40,.25)}
 /* 实验室：去掉选鱼区后，脑洞 + 预览放在中部，底部按钮贴底 */
+/* v2.4 基因实验室：中间透明 → 直接看到水族箱里的 3D 鱼（拖动 360° 旋转）；上方标题胶囊 + 下方操作卡 */
+#tank #tkLab.gx-live{background:transparent;box-shadow:none;padding:0;pointer-events:none;overflow:visible}
+#tank #tkLab.gx-live .tk-x{pointer-events:auto;top:4px;right:4px;background:rgba(255,250,243,.94);box-shadow:var(--thick),var(--sh-s)}
+#tkLab.gx-live .gx-hd{align-self:center;margin-top:4px;padding:8px 18px 9px;border-radius:20px;background:rgba(255,250,243,.94);box-shadow:var(--thick),var(--sh-s);pointer-events:auto}
+#tkLab.gx-live .gx-hd b{font-size:var(--f3)}
+#tkLab.gx-live .gx-hd span{margin-top:2px}
+#tkLab.gx-live .gx-stage{pointer-events:none;justify-content:flex-end;padding-bottom:10px;margin:0}
+#tkLab.gx-live .gx-nm{margin:0;padding:5px 14px;border-radius:var(--pill);background:rgba(255,250,243,.9);color:var(--ink);box-shadow:var(--sh-s)}
+#tkLab .gx-drag{display:flex;align-items:center;gap:4px;margin-top:8px;font-size:var(--f1);font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,40,70,.45);opacity:.92;animation:breathe 2.4s ease-in-out infinite}
+#tkLab .gx-drag svg.i{width:14px;height:14px;stroke-width:2.6}
+#tkLab .gx-drag svg.i:first-child{transform:scaleX(-1)}
+#tkLab.gx-live .gx-panel{flex:none;pointer-events:auto;background:var(--bg);border-radius:28px;padding:16px 14px 14px;box-shadow:var(--sh-l)}
 /* v2.2 基因实验室（极简）：大图 · 一句话 · 一个按钮 */
 #tkLab .gx-hd{flex:none;text-align:center;padding:4px 44px 0}
 #tkLab .gx-hd b{display:block;font-size:var(--f4);font-weight:900;color:var(--ink);line-height:1.2}
@@ -1029,9 +1058,10 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
       </button>
       <div class="tr">
         <button id="tankBtn" aria-label="水族箱"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M2.5 12c2.6-3.6 6-5.2 9.6-5 3 .2 5.3 2 6.4 5-1.1 3-3.4 4.8-6.4 5-3.6.2-7-1.4-9.6-5z"/><path d="M18.5 12l3-3.5v7z"/><circle cx="7.5" cy="11.2" r=".6"/></svg></span><span class="tx"><b>水族箱</b><span class="n num" id="tankN">0/12</span></span><i class="dot hidden" id="tankDot"></i><span class="bub hidden" id="tankBub">孵好了！</span><span class="plus">+1</span></button>
-        <button id="menuBtn" class="glass" aria-label="菜单"><svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h9"/></svg><span class="dot hidden" id="menuDot"></span></button>
+        <button id="menuBtn" class="glass hidden" aria-label="菜单"><svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h9"/></svg><span class="dot hidden" id="menuDot"></span></button>
       </div>
     </div>
+    <div id="rail" class="fade"><button class="rb-b rb-rank" data-rtab="rank" aria-label="排行"><span class="rb-ic"><svg class="i" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5.5a3 3 0 0 0 3 4M16 6h2.5a3 3 0 0 1-3 4M12 13v4M8.5 20h7"/></svg><i class="dot hidden" id="rbDot_rank"></i></span><span class="rb-lb">排行</span></button><button class="rb-b rb-tasks" data-rtab="tasks" aria-label="任务"><span class="rb-ic"><svg class="i" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M4 6l1.2 1.2L7.5 5M4 12l1.2 1.2L7.5 11M4 18l1.2 1.2L7.5 17"/></svg><i class="dot hidden" id="rbDot_tasks"></i></span><span class="rb-lb">任务</span></button><button class="rb-b rb-codex" data-rtab="codex" aria-label="图鉴"><span class="rb-ic"><svg class="i" viewBox="0 0 24 24"><path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13"/></svg><i class="dot hidden" id="rbDot_codex"></i></span><span class="rb-lb">图鉴</span></button><button class="rb-b rb-album" data-rtab="album" aria-label="相册"><span class="rb-ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 8.5h3l2-3h6l2 3h3V19H4z"/><circle cx="12" cy="13" r="3.5"/></svg><i class="dot hidden" id="rbDot_album"></i></span><span class="rb-lb">相册</span></button></div>
     <div id="feed"></div>
 
     <div id="bang">!</div>
@@ -1059,7 +1089,7 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
       <div id="cChips"></div>
       <button id="cMore"><span id="cBy"></span><span class="sp"></span>详情<svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
       <div id="cDetail"></div>
-      <div class="cActs"><button id="cKeep">收进水族箱</button><button id="cFree" aria-label="抛回大海"><svg class="i" viewBox="0 0 24 24"><path d="M3 15c2 0 2-1.6 4.5-1.6S10 15 12 15s2-1.6 4.5-1.6S19 15 21 15"/><path d="M3 19c2 0 2-1.6 4.5-1.6S10 19 12 19s2-1.6 4.5-1.6S19 19 21 19"/><path d="M12 11V4m0 0l-3 3m3-3l3 3"/></svg><span>抛回大海</span></button></div>
+      <div class="cActs"><button id="cKeep">收进水族箱</button><button id="cFree" aria-label="抛回大海"><span>抛回大海</span></button></div>
     </div>
 
     <div id="flash"></div>

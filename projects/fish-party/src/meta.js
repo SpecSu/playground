@@ -47,7 +47,7 @@ export const ME_TAG = () => '@' + ROOM[0].name;
 export const OCEAN_P = 0.035, OCEAN_LUCK_P = 0.015;
 let lastOcean = null;
 // v0.9 B：可串门的 NPC 好友（水族箱 / 送鱼 / 偷鱼 / NPC 来信共用）
-export const FRIENDS = [...ROOM.slice(1), ...OFFLINE.slice(0, 2)];
+export const FRIENDS = [...ROOM.slice(1), ...OFFLINE];   // v2.4：排行榜里每个好友都能去串门（之前只有前 5 位有水族箱）
 export const STEAL_PER_DAY = 1;
 const fishName = (v) => (v && (v.name || v.nick)) || SPECIES_BY_ID[v?.sp]?.name || '鱼';
 const isSynthV = (v) => !!v && (v.sp === 'synth' || !!v.syn);

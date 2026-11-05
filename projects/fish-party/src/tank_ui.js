@@ -426,7 +426,10 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
   }
 
   // ---------------- 打开 / 关闭 ----------------
-  function openTank() {
+  function openTank(friendId = null) {
+    // v2.4：从排行榜点好友 → 直接进 TA 的水族箱（不先加载自己的）
+    const fr = friendId ? FRIENDS.find((x) => x.id === friendId) : null;
+    if (fr) { open = true; root.classList.remove('hidden'); visitFriend(fr); refreshBell(true); return; }
     open = true; root.classList.remove('hidden'); visit = null;
     hideAll(); refreshTop(); refreshBell(true); setHint();
     enterScene(S.tank, myTheme(), '正在放鱼入箱', false, () => {
@@ -706,7 +709,7 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
     card.classList.remove('show');
     renderLab(); lab.classList.add('show'); setHint();
   }
-  function closeLab() { lab.classList.remove('show'); labState = null; const v = cur && meta.findTank(cur); if (v && !v.egg) showFishCard(v); setHint(); }
+  function closeLab() { aq.setFocusFy(null); lab.classList.remove('show'); labState = null; const v = cur && meta.findTank(cur); if (v && !v.egg) showFishCard(v); setHint(); }
   function nodeFish(v, i, label, extra = '') {
     return `<div class="gl-th">${v ? `<img data-ugc="${i}" alt="">` : ic('plus')}</div><b>${label}</b><span>${v ? esc(displayName(v)) : extra}</span>`;
   }
@@ -726,8 +729,8 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
     const gems = meta.gems, ok = gems >= 1;
     lab.innerHTML = `<button class="tk-x" aria-label="关闭">${ic('close')}</button>
       <div class="gx-hd"><b>基因改造</b><span>写一句脑洞，看看它会变成什么</span></div>
-      <div class="gx-stage"><div class="gx-glow"></div><div class="gx-fish"><img data-ugc="0" data-hd alt=""></div><div class="gx-nm">${esc(displayName(v))}</div></div>
-      <div class="gx-say">
+      <div class="gx-stage"><div class="gx-nm">${esc(displayName(v))}</div><div class="gx-drag">${ic('chev')}拖动 360° 查看${ic('chev')}</div></div>
+      <div class="gx-panel"><div class="gx-say">
         <div class="gx-in"><textarea id="glIn" rows="2" maxlength="${PROMPT_MAX}" enterkeyhint="done" autocomplete="off" placeholder="写点离谱的，比如：${esc(INSP[L.insp % INSP.length])}">${esc(L.prompt)}</textarea>
           <button class="gx-dice" id="glInsp" aria-label="换个脑洞">${DICE}</button></div>
         <div class="gx-hits" id="glPre">${labHitsHTML(L)}</div>
@@ -735,8 +738,18 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
       <div class="gx-foot">
         <button class="tk-btn main" id="glGo" ${ok ? '' : 'disabled'}>${ok ? `<span class="gx-cost">💎 1</span>开始改造` : '能量宝石用完啦'}</button>
         <div class="gx-odds">${ok ? `<span>失败 ${Math.round(GENE_MOD_P.fail * 100)}%</span><i></i><span>成功 ${Math.round(GENE_MOD_P.ok * 100)}%</span><i></i><span class="r">稀缺 ${Math.round(GENE_MOD_P.rare * 100)}%</span><em>剩余 💎 ${gems}</em>` : '<span>每天登录 +1 · 完成每日任务 +1</span>'}</div>
-      </div>`;
-    fillThumbs(lab.querySelector('.gx-stage'), [v]);
+      </div></div>`;
+    // v2.4：中间是透明窗口 —— 透出水族箱里游到前景的那条真 3D 鱼（aq.select 已选中），拖动直接转它
+    lab.classList.add('gx-live'); aq.select(v.uid);
+    // 鱼放到「标题胶囊下沿 ~ 操作面板上沿」这块空白的正中间
+    requestAnimationFrame(() => {
+      // 面板此刻还在滑入动画中（translateY）→ 用累加的 offsetTop（不含 transform）算最终布局位置
+      const yIn = (el) => { let y = 0; for (let n = el; n && n !== root; n = n.offsetParent) y += n.offsetTop; return y; };
+      const hd = lab.querySelector('.gx-hd'), nm = lab.querySelector('.gx-nm'), pn = lab.querySelector('.gx-panel'), H = root.clientHeight;
+      if (!hd || !pn || !H) return;
+      const top = yIn(hd) + hd.offsetHeight, bot = Math.min(yIn(pn), nm ? yIn(nm) : 1e9);
+      aq.setFocusFy((top + bot) / 2 / H);
+    });
     lab.querySelector('.tk-x').onclick = () => { sfx.close(); closeLab(); };
     const inp = lab.querySelector('#glIn');
     const refreshPre = () => { const box = lab.querySelector('#glPre'); if (box) box.innerHTML = labHitsHTML(L); };
@@ -760,7 +773,7 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
     await toEgg([a.uid], egg, `它正在变异中...<small>${fmtSec(egg.dur)} 后揭晓 · 已消耗 1 颗宝石</small>`);
   }
   async function toEgg(uids, egg, msg) {
-    lab.classList.remove('show'); labState = null; hideAll(); busy = true; setHint(); sfx.eggify();
+    aq.setFocusFy(null); lab.classList.remove('show'); labState = null; hideAll(); busy = true; setHint(); sfx.eggify();
     await aq.playEggify(uids, egg);
     busy = false; sfx.sparkle(); refreshTop(); onChanged?.();
     notify(msg, false, 2600);

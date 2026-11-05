@@ -423,9 +423,9 @@ export class Fish {
     // D：按尺寸/体型选抱姿 —— hug 双手抱（<1.5m）/ cradle 横抱（细长大鱼）/ yoke 扛在肩上（高身大鱼 & 巨型变异，鱼在头后，不挡脸，可以更大）
     const giant = (this.v.mut && String(this.v.mut).includes('giant')) || (this.v.gx && this.v.gx.scale >= 1.8);
     const hAtL = this.h0 * (L / span0);
-    this.pose = L < 1.5 && !giant ? 'hug' : 'yoke';   // 走查：横抱(cradle)对 1.5m+ 的鱼仍会让鱼背挡下巴、镜头装不下 → 1.5m+ 一律举过头顶（cradle 保留在 rig 里备用）
-    const capP = this.pose === 'yoke' ? 0.8 + THREE.MathUtils.clamp(L - 1.5, 0, 1.3) * 0.4 : cap;
-    const k = Math.min(L / span0, capP / Math.max(this.h0, 0.01));
+    this.pose = L < 1.5 && !giant ? 'hug' : 'carry';   // v2.4：1.5m+ 大鱼 → 双手托在身前（可以挡住脸，但鱼身往前放，头不埋进鱼里）   // 走查：横抱(cradle)对 1.5m+ 的鱼仍会让鱼背挡下巴、镜头装不下 → 1.5m+ 一律举过头顶（cradle 保留在 rig 里备用）
+    const capP = this.pose === 'yoke' ? 0.8 + THREE.MathUtils.clamp(L - 1.5, 0, 1.3) * 0.4 : this.pose === 'carry' ? 0.75 + THREE.MathUtils.clamp(L - 1.5, 0, 1.3) * 0.25 : cap;
+    let k = Math.min(L / span0, capP / Math.max(this.h0, 0.01));
     this.root.scale.setScalar(k);
     this.wide = this.w0 > this.len0 * 1.05;
     this.span = span0 * k; this.depth = Math.min(this.len0, this.w0) * k;

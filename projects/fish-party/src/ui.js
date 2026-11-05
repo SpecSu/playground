@@ -168,6 +168,8 @@ export function updateBadges(meta, newSpecies) {
   const nTask = meta.S.today.tasks.filter((t) => t.done && !t.claimed).length + (meta.streakGift ? 1 : 0);
   badges.tasks = nTask > 0; badges.codex = newSpecies > 0;
   $('menuDot').classList.toggle('hidden', !(badges.tasks || badges.codex));
+  document.getElementById('rbDot_tasks')?.classList.toggle('hidden', !badges.tasks);
+  document.getElementById('rbDot_codex')?.classList.toggle('hidden', !badges.codex);
 }
 const badges = { codex: false, tasks: false };
 
@@ -322,7 +324,7 @@ export function catchMini(on) { $('catch').classList.toggle('mini', on); }
 let sheetState = { open: false, tab: 'home', sub: 'new', focusMe: false };
 export function openSheet(tab, ctx, opts = {}) {
   const wasOpen = sheetState.open;
-  sheetState.open = true; sheetState.tab = tab || 'home'; sheetState.focusMe = !!opts.focusMe;
+  sheetState.open = true; sheetState.tab = tab || 'home'; sheetState.focusMe = !!opts.focusMe; sheetState.direct = !!opts.direct;
   $('sheet').classList.add('show'); if (!wasOpen) sfx.open();
   renderSheet(ctx);
   $('shBody').scrollTop = 0;
@@ -449,7 +451,7 @@ export function renderSheet(ctx) {
   const home = tab === 'home', cardEl = $('sheet').querySelector('.card');
   cardEl.classList.toggle('home', home);
   $('shTitle').innerHTML = home ? '<b>菜单</b>' : `${tabIc(tab, TABS.find((t) => t[0] === tab)?.[1])}<b>${TAB_T[tab]}</b>`;
-  $('shBack').classList.toggle('hidden', home);
+  $('shBack').classList.toggle('hidden', home || !!sheetState.direct);   // v2.4：从右侧入口直接打开的子页 → 没有「返回菜单」
   $('shBack').onclick = () => { sfx.tap(); sheetState.tab = 'home'; renderSheet(ctx); body.scrollTop = 0; };
   $('sndBtn').innerHTML = svg(S.muted ? 'sndOff' : 'sndOn');
 
@@ -528,10 +530,11 @@ export function renderSheet(ctx) {
       // r2：在线好友状态与上方房间卡一致；我这一行直接告诉"离上一名还差多少"（冲榜目标）
       const above = rows[r.rank - 2], mate = r.online && !r.you ? mates.find((a) => a.id === r.id) : null;
       const st = r.you ? (above ? `距第 ${above.rank} 名还差 ${above.score - r.score} 分` : `今日第一 · Lv.${S.level}`) : mate ? friendStatus(mate) : r.online ? '在船上' : '今天来过';
-      return `<div class="li ${r.you ? 'you' : ''}${r.you && performance.now() < (sheetState.hlUntil || 0) ? ' hl' : ''}"><span class="no ${r.rank <= 3 ? 'g' + r.rank : ''}">${r.rank}</span><span class="avw-on">${avHTML(r.id, r.color, r.name)}${r.online ? '<i class="on-dot" title="在线"></i>' : ''}</span><div class="m"><b>${esc(r.name)}${r.you ? '（我）' : ''}</b><span>${esc(st)}</span></div><b class="sc num">${r.score}</b></div>`;
+      return `<div class="li ${r.you ? 'you' : 'vis'}${r.you && performance.now() < (sheetState.hlUntil || 0) ? ' hl' : ''}"${r.you ? '' : ` data-visit="${r.id}"`}><span class="no ${r.rank <= 3 ? 'g' + r.rank : ''}">${r.rank}</span><span class="avw-on">${avHTML(r.id, r.color, r.name)}${r.online ? '<i class="on-dot" title="在线"></i>' : ''}</span><div class="m"><b>${esc(r.name)}${r.you ? '（我）' : ''}</b><span>${esc(st)}</span></div><b class="sc num">${r.score}</b></div>`;
     }).join('');
     const sc = body.scrollTop; body.innerHTML = html; body.scrollTop = sc;   // 好友实时刷新榜单时保持滚动位置
     body.querySelectorAll('[data-watch]').forEach((m) => m.onclick = () => { sfx.tap(); const a = ctx.anglers.find((x) => x.id === m.dataset.watch); closeSheet(); ctx.onWatch?.(a); });
+    body.querySelectorAll('[data-visit]').forEach((m) => m.onclick = () => { sfx.tap(); closeSheet(); ctx.onVisit?.(m.dataset.visit); });   // v2.4：点排行榜里的好友 → 去 TA 家看水族箱
   } else {
     const idx = (S.streak.days - 1) % 7;
     const claimed = S.streak.claimedDay === meta.today;
