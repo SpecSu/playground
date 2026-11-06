@@ -844,7 +844,7 @@ function onEvent(a, type, d) {
       break;
     case 'missed': if (me) { document.body.classList.remove('bite'); sfx.slip(); vibrate(40); UI.toast('鱼饵被叼走了！<small>慢了一拍 · 收线，重新抛一竿</small>', false, 2600); } break;
     case 'early':
-      if (me) { sfx.slip(); UI.toast(d.baitGone ? '空钩收回来了<small>换个新饵，再抛一竿 · 鱼群也换了一批</small>' : d.probe ? '被大家伙骗啦<small>它只是碰一碰，等浮漂猛沉、出现「!」再扬竿</small>' : d.nibbled ? '太早啦<small>轻轻一动是试探，等浮漂猛沉、出现「!」</small>' : '收回来了<small>等浮漂猛沉、出现「!」再扬竿</small>'); }
+      if (me) { sfx.slip(); UI.toast(d.baitGone ? '这一把空军了，再接再厉<small>换个新饵，再抛一竿 · 鱼群也换了一批</small>' : d.probe ? '被大家伙骗啦<small>它只是碰一碰，等浮漂猛沉、出现「!」再扬竿</small>' : d.nibbled ? '太早啦<small>轻轻一动是试探，等浮漂猛沉、出现「!」</small>' : '收回来了<small>等浮漂猛沉、出现「!」再扬竿</small>'); }
       break;
     case 'hookset':
       fx.splash(a.hook, 1.1);
