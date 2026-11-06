@@ -74,8 +74,35 @@ export function attnQuiet(s) { quietT = Math.max(quietT, s); if (feedCur && !fee
 export const attnQuietLeft = () => quietT;
 const attnBusy = () => quietT > 0 || modalOpen() || toastOn() || !!attnBlocker?.();
 export function tickAttn(dt) { if (quietT > 0) quietT -= dt; if (!feedCur && feedQ.length) pumpFeed(); }
+// v2.6：提示条自动避让底部「当前可见」的控件（摇杆 / 抛竿按钮 / 钓获卡 / 水族箱资料卡…），永远落在它们上方 gap px
+// sels 里用类名把"显示中"写进选择器（如 '#catch.show'），元素本身在淡入过渡中也算可见；祖先被隐藏 / 淡出则跳过
+function shownTree(n) {
+  for (let e = n, self = true; e && e !== document.body; e = e.parentElement, self = false) {
+    const cs = getComputedStyle(e);
+    if (cs.display === 'none' || cs.visibility === 'hidden' || (!self && +cs.opacity < 0.15)) return false;
+  }
+  return true;
+}
+export function placeAbove(el, sels, gap = 14) {
+  const host = el.offsetParent || el.parentElement; if (!host) return;
+  const hr = host.getBoundingClientRect(); let top = hr.bottom;
+  for (const s of sels) for (const n of document.querySelectorAll(s)) {
+    if (!shownTree(n)) continue;
+    const r = n.getBoundingClientRect();
+    if (r.height < 2 || r.top >= hr.bottom - 2) continue;
+    top = Math.min(top, r.top);
+  }
+  const b = Math.round(Math.min(hr.height - 130, Math.max(0, hr.bottom - top) + gap));   // 再高也别顶到顶栏
+  if (el.dataset.pb === String(b)) return;
+  el.dataset.pb = b;
+  if (!el.classList.contains('show')) { el.style.transition = 'none'; el.style.bottom = b + 'px'; void el.offsetWidth; el.style.transition = ''; }
+  else el.style.bottom = b + 'px';
+}
+const TOAST_AVOID = ['#joyBase', '#act', '#catch.show', '#hint:not(.off)'];
 export function toast(msg, accent = false, ms = 1600) {
-  const t = $('toast'); t.innerHTML = msg; t.classList.toggle('accent', accent); t.classList.add('show');
+  const t = $('toast'); t.innerHTML = msg; t.classList.toggle('accent', accent);
+  placeAbove(t, TOAST_AVOID); t.classList.add('show');
+  clearTimeout(toast.pt); toast.pt = setTimeout(() => placeAbove(t, TOAST_AVOID), 420);   // 控件还在过渡 → 稳定后再校一次
   if (feedCur) preemptFeed();
   hideTalk();
   clearTimeout(toast.tm); toast.tm = setTimeout(() => t.classList.remove('show'), ms);
@@ -348,7 +375,7 @@ export function closeSheet() { $('sheet').classList.remove('show'); sheetState.o
 export function sheetOpen() { return sheetState.open ? sheetState.tab : null; }
 
 function bindGoTank(ctx) { const b = $('shGoTank'); if (b) b.onclick = () => { sfx.tap(); closeSheet(); ctx.onOpenTank?.(); }; }
-const TABS = [['rank', 'trophy', '排行'], ['tasks', 'list', '任务'], ['codex', 'book', '图鉴'], ['album', 'camera', '相册']];   // v2.2：排行 / 任务放第一排
+const TABS = [['rank', 'trophy', '排行'], ['tasks', 'list', '任务'], ['codex', 'book', '图鉴']];   // v2.5：相册合并进图鉴
 const TAB_T = Object.fromEntries(TABS.map(([k, , l]) => [k, l]));
 // 图鉴/背包里的「去水族箱」：弱化为列表底部的轻量吸底胶囊（不再是顶部大横幅）
 const goTankPill = (txt) => `<div class="sh-go-w"><button class="sh-go" id="shGoTank">${ic('fish')}<span>${txt}</span><i>›</i></button></div>`;
@@ -454,6 +481,12 @@ export function renderSheet(ctx) {
   $('shBack').classList.toggle('hidden', home || !!sheetState.direct);   // v2.4：从右侧入口直接打开的子页 → 没有「返回菜单」
   $('shBack').onclick = () => { sfx.tap(); sheetState.tab = 'home'; renderSheet(ctx); body.scrollTop = 0; };
   $('sndBtn').innerHTML = svg(S.muted ? 'sndOff' : 'sndOn');
+  if (tab === 'codex' || tab === 'album') {
+    // v2.5：图鉴与相册合并为双 Tab
+    const act = tab;
+    $('shTitle').innerHTML = `<div class="lb-tabs" style="margin:0; height:42px; padding:3px; gap:2px"><button class="${act === 'codex' ? 'on' : ''}" data-st="codex" style="height:36px; padding:0 20px">图鉴</button><button class="${act === 'album' ? 'on' : ''}" data-st="album" style="height:36px; padding:0 20px">相册</button></div>`;
+    $('shTitle').querySelectorAll('button').forEach((b) => b.onclick = () => { sfx.tap(); sheetState.tab = b.dataset.st; renderSheet(ctx); body.scrollTop = 0; });
+  }
 
   if (home) {
     body.innerHTML = homeHTML(ctx);

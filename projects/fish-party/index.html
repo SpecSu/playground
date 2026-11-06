@@ -85,8 +85,8 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .ib:active,.tk-x:active{transform:scale(.88);transition-duration:.06s}
 
 /* ---------- 顶栏：头像(等级环) + 今日积分 / 菜单 ---------- */
-#top{position:absolute;left:calc(12px + var(--sl));right:calc(12px + var(--sr));top:calc(10px + var(--st));display:flex;align-items:center;justify-content:space-between;gap:8px;pointer-events:none;z-index:3}
-#me{display:flex;align-items:center;gap:8px;height:52px;padding:0 16px 0 6px;border-radius:var(--pill);pointer-events:auto;transition:transform .3s var(--spring)}
+#top{position:absolute;left:calc(12px + var(--sl));right:calc(12px + var(--sr));top:calc(10px + var(--st));display:flex;align-items:center;justify-content:space-between;gap:5px;pointer-events:none;z-index:3}   /* v2.5：水族箱入口紧贴着积分栏，填满左侧区域 */
+#me{display:flex;align-items:center;gap:8px;height:52px;padding:0 16px 0 6px;border-radius:var(--pill);pointer-events:auto;transition:transform .3s var(--spring);flex:none;max-width:55%}
 #me:active,#menuBtn:active{transform:translateY(2px) scale(.96);transition-duration:.06s}
 #me .avw{position:relative;width:40px;height:40px;flex:none}
 #me .av{position:absolute;inset:4px;width:auto;height:auto;box-shadow:none}
@@ -104,8 +104,8 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 #menuBtn .dot{top:2px;right:2px}
 
 /* ---------- 社交动态：顶部居中单条白胶囊 ---------- */
-#feed{position:absolute;left:50%;top:calc(72px + var(--st));transform:translateX(-50%);max-width:calc(100% - 32px - 132px);   /* v2.4：右侧有竖排入口 → 两边各让 66px */pointer-events:none;z-index:2;transition:top var(--dur) var(--ease)}
-.ui.notop #feed{top:calc(12px + var(--st))}
+#feed{position:absolute;left:50%;bottom:calc(190px + var(--sb));transform:translateX(-50%);max-width:calc(100% - 32px);pointer-events:none;z-index:2;transition:bottom var(--dur) var(--ease);display:flex;flex-direction:column;align-items:center}   /* v2.5：好友动态下移到屏幕下半部 */
+.ui.notop #feed{bottom:calc(30px + var(--sb))}
 #ui #feed.atcard{top:var(--ct);left:calc(14px + var(--sl));transform:none;max-width:calc(100% - 28px)}
 .fd{display:flex;align-items:center;gap:8px;min-height:40px;padding:4px 8px 4px 4px;border-radius:var(--pill);font-size:var(--f1);font-weight:700;white-space:nowrap;pointer-events:auto;color:var(--ink);background:#fff;box-shadow:var(--thick),var(--sh);animation:fdIn var(--dur) var(--ease) both}
 .fd.out{animation:fdOut var(--dur) var(--ease) forwards}
@@ -125,7 +125,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .fd.cele.out{animation:fdOut var(--dur) var(--ease) forwards}
 @keyframes celeWig{25%{transform:rotate(-2deg) scale(1.03)}75%{transform:rotate(2deg) scale(1.03)}}
 .fd .fth{width:44px;height:30px;object-fit:contain;margin:0 -2px 0 -4px;opacity:0;transition:opacity .25s}.fd .fth.ok{opacity:1}
-.fd .like{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--pri-l);color:var(--pri-d);position:relative}
+.fd .like{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--pri-l);color:var(--pri-d);position:relative;flex:none}   /* v2.5：防止文字过长时点赞按钮被挤扁 */
 .fd .like::after{content:'';position:absolute;inset:-6px}
 .fd .like.done{background:var(--pri);color:#fff}
 .fd .like svg{width:17px;height:17px}
@@ -245,11 +245,11 @@ body.frenzy-on #edge{box-shadow:inset 0 0 50px 4px rgba(255,212,92,.35)}
 /* v1.3 常驻摇杆：左下固定底盘（idle / 抱鱼时一直显示），从底盘内按下拖动走路；摇杆以外任意处拖动 = 转视角（可一指走一指转） */
 #joy{position:absolute;left:calc(2px + var(--sl));bottom:calc(8px + var(--sb));width:168px;height:168px;border-radius:50%;pointer-events:auto;touch-action:none;transform:translateY(calc(var(--joyLift,0px) * -1));transition:opacity .2s var(--ease),transform .3s var(--ease)}
 #joy.off{transform:translateY(calc(var(--joyLift,0px) * -1)) scale(.85)}
-#joy.bait #joyBase{box-shadow:0 0 0 4px #fff,0 6px 0 4px #bfe3f3,0 14px 26px rgba(60,140,190,.22);background:radial-gradient(circle at 50% 38%,rgba(232,247,255,.8) 0 45%,rgba(200,234,250,.65) 100%)}
+#joy.bait #joyBase{box-shadow:0 0 0 3px rgba(255,255,255,.5),0 4px 0 3px rgba(191,227,243,.4),0 14px 26px rgba(60,140,190,.15);background:radial-gradient(circle at 50% 38%,rgba(232,247,255,.35) 0 45%,rgba(200,234,250,.25) 100%)}
 #joy.bait #joyKnob{background:radial-gradient(circle at 50% 35%,#fff 0 40%,#ffd9d2 100%)}
 #joy.hold:not(.on){opacity:.6;transform:translateY(calc(var(--joyLift,0px) * -1)) scale(.82);transform-origin:20% 100%}
 /* v1.4.1：摇杆底盘与主按钮统一「同尺寸 + 同结构」：104px 圆芯 + 4px 白描边 + 6px 底唇 → 视觉直径都是 112px；圆心同高（距底 92px），左右镜像（距屏边 86px） */
-#joyBase{position:absolute;left:50%;top:50%;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;background:radial-gradient(circle at 50% 38%,rgba(255,252,247,.72) 0 45%,rgba(255,244,232,.6) 100%);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 0 0 4px #fff,0 6px 0 4px var(--edge),0 14px 26px rgba(90,60,30,.18);transition:opacity .16s var(--ease),transform .16s var(--ease);pointer-events:none}
+#joyBase{position:absolute;left:50%;top:50%;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.2) 0 45%,rgba(255,255,255,.1) 100%);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);box-shadow:0 0 0 3px rgba(255,255,255,.4),0 4px 0 3px rgba(255,255,255,.3),0 14px 26px rgba(90,60,30,.12);transition:opacity .16s var(--ease),transform .16s var(--ease);pointer-events:none}   /* v2.5：极高透明度底座 */
 #joyBase::before{content:'';position:absolute;inset:14px;border-radius:50%;border:2px dashed rgba(200,170,140,.35)}
 #joyBase em{position:absolute;left:50%;top:50%;width:0;height:0;border:6px solid transparent;opacity:.9}
 #joyBase em:nth-of-type(1){margin:-49px 0 0 -6px;border-bottom:7px solid #e2c9ae;border-top:0}
@@ -265,9 +265,9 @@ body.frenzy-on #edge{box-shadow:inset 0 0 50px 4px rgba(255,212,92,.35)}
 #joyHint span{font-size:var(--f1);font-weight:700;color:var(--ink);background:rgba(255,250,243,.94);padding:5px 12px;border-radius:var(--pill);white-space:nowrap;box-shadow:var(--sh-s)}
 
 /* ---------- v1.3 水族箱入口：挪到顶栏（今日积分 · [水族箱] · 菜单），保留红点 / 数量 / 满 / 「孵好了」一次性提示 ---------- */
-#top .tr{display:flex;align-items:center;gap:8px;pointer-events:none}
+#top .tr{flex:1;min-width:0;display:flex;align-items:center;gap:8px;pointer-events:none}   /* v2.6：容器撑满，水族箱按钮才能拉到右边距 */
 /* v2.4 右侧竖排：排行 / 任务 / 图鉴 / 相册（原菜单抽屉首页的四个入口）—— 圆形图标 + 小字，与顶栏同一套软立体风格 */
-#rail{position:absolute;right:calc(12px + var(--sr));top:calc(74px + var(--st));z-index:3;display:flex;flex-direction:column;gap:10px;pointer-events:none;transition:opacity var(--dur) var(--ease),transform .32s var(--ease)}
+#rail{position:absolute;right:calc(12px + var(--sr));top:calc(84px + var(--st));z-index:3;display:flex;flex-direction:column;gap:10px;pointer-events:none;transition:opacity var(--dur) var(--ease),transform .32s var(--ease)}
 #rail.off{opacity:0;transform:translateX(14px)}
 #rail.off *{pointer-events:none!important}
 .rb-b{display:flex;flex-direction:column;align-items:center;gap:3px;width:52px;pointer-events:auto;transition:transform .3s var(--spring)}
@@ -279,7 +279,7 @@ body.frenzy-on #edge{box-shadow:inset 0 0 50px 4px rgba(255,212,92,.35)}
 .rb-rank{--mc:var(--pri-d)}.rb-tasks{--mc:var(--mint-t)}.rb-codex{--mc:var(--sky-d)}.rb-album{--mc:var(--grape-t)}
 @media (max-height:600px){#rail{gap:6px}.rb-ic{width:40px;height:40px}.rb-lb{display:none}}
 #top.off *{pointer-events:none!important}
-#tankBtn{position:relative;height:52px;padding:0 14px 0 5px;border-radius:var(--pill);display:flex;align-items:center;gap:7px;pointer-events:auto;background:#fff;color:var(--ink);box-shadow:var(--thick),var(--sh);transition:opacity .2s,transform .32s var(--spring)}
+#tankBtn{position:relative;flex:1;min-width:0;height:52px;padding:0 14px 0 5px;border-radius:var(--pill);display:flex;align-items:center;gap:7px;pointer-events:auto;background:#fff;color:var(--ink);box-shadow:var(--thick),var(--sh);transition:opacity .2s,transform .32s var(--spring)}
 #tankBtn .ic{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#86e9d9,var(--mint));color:#fff;box-shadow:0 3px 0 var(--mint-d)}
 #tankBtn .ic svg{width:25px;height:25px;stroke-width:2.3}
 #tankBtn .tx{display:flex;flex-direction:column;align-items:flex-start;line-height:1.08;white-space:nowrap}
@@ -525,9 +525,9 @@ body[data-fish="hold"] #act{opacity:0;pointer-events:none;transform:scale(.6);tr
 #polaroid img{width:100%;display:block;border-radius:8px;aspect-ratio:4/5;object-fit:cover}
 #polaroid .pc{font-size:var(--f2);font-weight:800;margin-top:8px;text-align:center}
 #polaroid .pc small{display:block;font-size:var(--f1);color:var(--ink2);font-weight:500;margin-top:2px}
-#toast{position:absolute;left:50%;top:calc(136px + var(--st));transform:translate(-50%,-50%) scale(.9);background:#fff;color:var(--ink);font-weight:800;font-size:var(--f2);padding:11px 20px;border-radius:20px;opacity:0;transition:opacity .2s,transform .36s var(--spring);pointer-events:none;white-space:nowrap;z-index:15;text-align:center;line-height:1.5;box-shadow:var(--thick),var(--sh-l)}
+#toast{position:absolute;left:50%;bottom:calc(136px + var(--sb));transform:translate(-50%,0) scale(.9);background:#fff;color:var(--ink);font-weight:800;font-size:var(--f2);padding:11px 20px;border-radius:20px;opacity:0;transition:opacity .2s,transform .36s var(--spring),bottom .25s var(--ease);pointer-events:none;z-index:15;text-align:center;line-height:1.5;box-shadow:var(--thick),var(--sh-l);white-space:normal;width:max-content;max-width:calc(100vw - 32px);word-break:break-word}   /* v2.5：提示组件下移，文字太长时自动换行居中 */   /* v2.5：通知移到下半屏，支持长文本换行 */
 #toast small{display:block;font-size:var(--f1);font-weight:600;color:var(--ink2)}
-#toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
 #toast.accent{background:linear-gradient(180deg,#fff,var(--lemon-l));box-shadow:0 3px 0 #f3dfa6,var(--sh-l)}
 #float{position:absolute;inset:0;pointer-events:none;z-index:14;overflow:hidden}
 .fp{position:absolute;font-weight:900;font-size:var(--f4);color:#fff;text-shadow:0 2px 0 var(--c,var(--pri-d)),0 0 12px rgba(90,60,30,.25);animation:fp 1.3s var(--ease) forwards;white-space:nowrap}
@@ -734,7 +734,7 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
 /* v1.3：旧版 ready 标签用 transform 无限 bob，会顶掉 JS 写入的定位 transform → 标签在卵和左上角之间来回「飞」。改为变黄时用独立 scale 属性弹一次，之后静止 */
 .tk-lb.ready{background:var(--lemon);color:#6b4800;box-shadow:0 0 0 2px #fff,var(--sh);animation:lbPop .45s var(--spring) 1}
 @keyframes lbPop{0%{scale:.6}60%{scale:1.12}100%{scale:1}}
-.tk-toast{position:absolute;left:0;right:0;margin:0 auto;width:max-content;max-width:90%;top:calc(64px + var(--st));transform:translateY(-8px);text-align:center;font-size:var(--f2);font-weight:800;color:var(--ink);background:#fff;border-radius:20px;padding:10px 16px;box-shadow:var(--thick),var(--sh-l);opacity:0;transition:opacity .2s,transform .36s var(--spring);z-index:3;line-height:1.45;pointer-events:none}
+.tk-toast{position:absolute;left:0;right:0;margin:0 auto;width:max-content;max-width:90%;bottom:calc(136px + var(--sb));transform:translateY(-8px);text-align:center;font-size:var(--f2);font-weight:800;color:var(--ink);background:#fff;border-radius:20px;padding:10px 16px;box-shadow:var(--thick),var(--sh-l);opacity:0;transition:opacity .2s,transform .36s var(--spring),bottom .25s var(--ease);z-index:3;line-height:1.45;pointer-events:none}
 .tk-toast small{display:block;font-size:var(--f1);color:var(--ink2);font-weight:600}
 .tk-toast.show{opacity:1;transform:none}
 .tk-toast.gold{background:linear-gradient(180deg,#fff,var(--lemon-l))}
@@ -982,7 +982,7 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
 /* v1.3 菜单：暖白圆角面板 · 首页 2×2 大卡 → 子页统一「‹ 返回 + 标题」；图鉴/背包的去水族箱入口弱化为吸底轻胶囊；排行「我」高亮 */
 #sheet .card.home{height:auto;max-height:80%}
 #sheet .hd{min-height:48px}
-.sh-tt{flex:1;min-width:0;display:flex;align-items:center;gap:7px;padding-left:6px;white-space:nowrap}
+.sh-tt{flex:1;min-width:0;display:flex;align-items:center;gap:7px;padding-left:6px;white-space:nowrap;justify-content:flex-start}
 .sh-tt b{font-size:20px;font-weight:900;color:var(--ink);letter-spacing:.02em}
 .sh-tt svg.i{width:22px;height:22px;color:var(--pri);stroke-width:2.3}
 #shBack{flex:none}
@@ -1061,7 +1061,7 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
         <button id="menuBtn" class="glass hidden" aria-label="菜单"><svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h9"/></svg><span class="dot hidden" id="menuDot"></span></button>
       </div>
     </div>
-    <div id="rail" class="fade"><button class="rb-b rb-rank" data-rtab="rank" aria-label="排行"><span class="rb-ic"><svg class="i" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5.5a3 3 0 0 0 3 4M16 6h2.5a3 3 0 0 1-3 4M12 13v4M8.5 20h7"/></svg><i class="dot hidden" id="rbDot_rank"></i></span><span class="rb-lb">排行</span></button><button class="rb-b rb-tasks" data-rtab="tasks" aria-label="任务"><span class="rb-ic"><svg class="i" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M4 6l1.2 1.2L7.5 5M4 12l1.2 1.2L7.5 11M4 18l1.2 1.2L7.5 17"/></svg><i class="dot hidden" id="rbDot_tasks"></i></span><span class="rb-lb">任务</span></button><button class="rb-b rb-codex" data-rtab="codex" aria-label="图鉴"><span class="rb-ic"><svg class="i" viewBox="0 0 24 24"><path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13"/></svg><i class="dot hidden" id="rbDot_codex"></i></span><span class="rb-lb">图鉴</span></button><button class="rb-b rb-album" data-rtab="album" aria-label="相册"><span class="rb-ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 8.5h3l2-3h6l2 3h3V19H4z"/><circle cx="12" cy="13" r="3.5"/></svg><i class="dot hidden" id="rbDot_album"></i></span><span class="rb-lb">相册</span></button></div>
+    <div id="rail" class="fade"><button class="rb-b rb-rank" data-rtab="rank" aria-label="排行"><span class="rb-ic"><svg class="i" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5.5a3 3 0 0 0 3 4M16 6h2.5a3 3 0 0 1-3 4M12 13v4M8.5 20h7"/></svg><i class="dot hidden" id="rbDot_rank"></i></span><span class="rb-lb">排行</span></button><button class="rb-b rb-tasks" data-rtab="tasks" aria-label="任务"><span class="rb-ic"><svg class="i" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10M4 6l1.2 1.2L7.5 5M4 12l1.2 1.2L7.5 11M4 18l1.2 1.2L7.5 17"/></svg><i class="dot hidden" id="rbDot_tasks"></i></span><span class="rb-lb">任务</span></button><button class="rb-b rb-codex" data-rtab="codex" aria-label="图鉴"><span class="rb-ic"><svg class="i" viewBox="0 0 24 24"><path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13"/></svg><i class="dot hidden" id="rbDot_codex"></i></span><span class="rb-lb">图鉴</span></button></div>
     <div id="feed"></div>
 
     <div id="bang">!</div>

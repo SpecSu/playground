@@ -3,7 +3,7 @@
 // v2：顶部 = 当前水族箱主人信息卡（owner 可替换：{ id, name, avatar, color, level, title, stats, readonly }）；可去好友水族箱串门（只读）
 import { SPECIES_BY_ID, RARITY, displayName } from './fishes.js';
 import { TANK_MAX, EGG_DUR, ROOM, levelTitle, ME_TAG, FRIENDS } from './meta.js';
-import { fillThumbs, fmtLenTxt, avatars, bagView, bindBag } from './ui.js';
+import { fillThumbs, fmtLenTxt, avatars, bagView, bindBag, placeAbove } from './ui.js';
 import { sfx } from './sfx.js';
 import { ic } from './icons.js';
 import { THEMES, THEME_IDS, DEFAULT_THEME, themeLabel, themeForFriend } from './aqua_themes.js';
@@ -418,8 +418,11 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
   }
   let toastT = 0;
   function notify(html, gold = false, ms = 3200) {
-    const t = $('tkToast'); t.innerHTML = html; t.classList.toggle('gold', gold); t.classList.add('show');
+    const t = $('tkToast'); t.innerHTML = html; t.classList.toggle('gold', gold);
+    const avoid = ['#tank .tk-own:not(.off)', '#tank .tk-sheet.show'];   // v2.6：落在资料卡 / 弹出面板上方
+    placeAbove(t, avoid); t.classList.add('show');
     clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms);
+    clearTimeout(notify.pt); notify.pt = setTimeout(() => placeAbove(t, avoid), 420);
   }
   function floatPts(txt) {
     const d = document.createElement('div'); d.className = 'tk-float'; d.textContent = txt; root.appendChild(d); setTimeout(() => d.remove(), 1600);

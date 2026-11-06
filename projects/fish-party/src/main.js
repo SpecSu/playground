@@ -844,7 +844,7 @@ function onEvent(a, type, d) {
       break;
     case 'missed': if (me) { document.body.classList.remove('bite'); sfx.slip(); vibrate(40); UI.toast('鱼饵被叼走了！<small>慢了一拍 · 收线，重新抛一竿</small>', false, 2600); } break;
     case 'early':
-      if (me) { sfx.slip(); UI.toast(d.baitGone ? '这一把空军了，再接再厉<small>换个新饵，再抛一竿 · 鱼群也换了一批</small>' : d.probe ? '被大家伙骗啦<small>它只是碰一碰，等浮漂猛沉、出现「!」再扬竿</small>' : d.nibbled ? '太早啦<small>轻轻一动是试探，等浮漂猛沉、出现「!」</small>' : '收回来了<small>等浮漂猛沉、出现「!」再扬竿</small>'); }
+      if (me) { sfx.slip(); UI.toast(d.baitGone ? '空钩收回来了<small>换个新饵，再抛一竿 · 鱼群也换了一批</small>' : d.probe ? '被大家伙骗啦<small>它只是碰一碰，等浮漂猛沉、出现「!」再扬竿</small>' : d.nibbled ? '太早啦<small>轻轻一动是试探，等浮漂猛沉、出现「!」</small>' : '收回来了<small>等浮漂猛沉、出现「!」再扬竿</small>'); }
       break;
     case 'hookset':
       fx.splash(a.hook, 1.1);
@@ -1574,7 +1574,7 @@ function updateUI(dt) {
     if (st === 'hold' && catchCard.shown && card.classList.contains('show')) {
       const pr = joyEl.offsetParent.getBoundingClientRect(), cr = card.getBoundingClientRect();
       const baseBottom = pr.top + joyEl.offsetTop + joyEl.offsetHeight;   // 不含 transform 的原始位置（避免过渡动画中反馈抖动）
-      lift = Math.max(0, Math.round(baseBottom - 22 - cr.top + 6 + 22 + (feedEl.childElementCount ? 46 : 0)));   // v2.4：+22 → 底盘离卡片上沿 ~30px   // 22 = 热区比底盘多出的一圈；有点赞胶囊时再让出一行
+      lift = Math.max(0, Math.round(baseBottom - 22 - cr.top + 6 + 42 + (feedEl.childElementCount ? 46 : 0)));   // v2.6：+42 → 底盘离卡片上沿留出明显空隙   // 22 = 热区比底盘多出的一圈；有点赞胶囊时再让出一行
     }
     if (Math.abs(lift - joyUI.lift) > 1) { joyUI.lift = lift; joyEl.style.setProperty('--joyLift', lift + 'px'); }
   }
