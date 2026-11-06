@@ -85,7 +85,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .ib:active,.tk-x:active{transform:scale(.88);transition-duration:.06s}
 
 /* ---------- 顶栏：头像(等级环) + 今日积分 / 菜单 ---------- */
-#top{position:absolute;left:calc(12px + var(--sl));right:calc(12px + var(--sr));top:calc(10px + var(--st));display:flex;align-items:center;justify-content:space-between;gap:5px;pointer-events:none;z-index:3}   /* v2.5：水族箱入口紧贴着积分栏，填满左侧区域 */
+#top{position:absolute;left:calc(12px + var(--sl));right:calc(12px + var(--sr));top:calc(10px + var(--st));display:flex;align-items:center;justify-content:space-between;gap:12px;pointer-events:none;z-index:3}   /* v2.5：水族箱入口紧贴着积分栏，填满左侧区域 */
 #me{display:flex;align-items:center;gap:8px;height:52px;padding:0 16px 0 6px;border-radius:var(--pill);pointer-events:auto;transition:transform .3s var(--spring);flex:none;max-width:55%}
 #me:active,#menuBtn:active{transform:translateY(2px) scale(.96);transition-duration:.06s}
 #me .avw{position:relative;width:40px;height:40px;flex:none}
@@ -1028,6 +1028,43 @@ body.photo .ui > :not(#flash):not(#polaroid){opacity:0;transition:opacity .2s}
 #alView .al-b.main{flex:1.4;color:#fff;background:linear-gradient(180deg,var(--pri2),var(--pri));box-shadow:0 4px 0 var(--pri-d)}
 #alView .al-b.sure{color:#fff;background:var(--red);box-shadow:0 3px 0 var(--red-d)}
 #alView .al-b:active{transform:translateY(2px)}
+/* v2.6 图鉴详情浮窗（与相册浮窗同一套遮罩 / 弹出节奏） */
+#cxView{position:absolute;inset:0;z-index:28;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px 18px calc(20px + var(--sb));background:rgba(58,46,38,.55);opacity:0;pointer-events:none;transition:opacity var(--dur) var(--ease)}
+#cxView.show{opacity:1;pointer-events:auto}
+#cxView .cxv-card{width:min(88%,360px);max-height:calc(100% - 110px);overflow:auto;background:#fff;border-radius:28px;box-shadow:var(--thick),var(--sh-l);transform:scale(.88);transition:transform .4s var(--spring);touch-action:pan-y;scrollbar-width:none}
+#cxView .cxv-card::-webkit-scrollbar{display:none}
+#cxView.show .cxv-card{transform:none}
+#cxView .cxv-card.in-r{animation:cxvR .34s var(--ease)}
+#cxView .cxv-card.in-l{animation:cxvL .34s var(--ease)}
+@keyframes cxvR{from{transform:translateX(26px);opacity:.3}to{transform:none;opacity:1}}
+@keyframes cxvL{from{transform:translateX(-26px);opacity:.3}to{transform:none;opacity:1}}
+#cxView .cxv-hero{position:relative;height:210px;display:flex;align-items:center;justify-content:center;background:radial-gradient(110% 95% at 50% 32%,#fff 0%,color-mix(in srgb,var(--rc) 30%,#fff6ea) 100%)}
+#cxView .cxv-hero::after{content:'';position:absolute;left:18%;right:18%;bottom:26px;height:16px;border-radius:50%;background:radial-gradient(closest-side,rgba(90,60,30,.16),transparent)}
+#cxView .cxv-hero img{position:relative;z-index:1;width:88%;height:86%;object-fit:contain;opacity:0;transition:opacity .3s;filter:drop-shadow(0 8px 10px rgba(90,60,30,.18))}
+#cxView .cxv-hero img.ok{opacity:1}
+#cxView .cxv-hero .em{font-size:84px}
+#cxView .cxv-hero .rb{position:absolute;left:14px;top:14px;z-index:2;line-height:24px;padding:0 10px;border-radius:12px}
+#cxView .cxv-x{position:absolute;right:12px;top:12px;z-index:2;width:36px;height:36px;border-radius:50%;font-size:22px;font-weight:700;line-height:1;color:var(--ink2);background:rgba(255,255,255,.92);box-shadow:var(--sh-s)}
+#cxView .cxv-idx{position:absolute;right:14px;bottom:12px;z-index:2;font-size:var(--f1);font-weight:800;color:var(--ink2);background:rgba(255,255,255,.85);padding:3px 9px;border-radius:var(--pill)}
+#cxView .cxv-bd{padding:14px 18px 18px}
+#cxView .cxv-nm{display:block;font-size:var(--f4);font-weight:900;color:var(--ink);line-height:1.2;word-break:break-word}
+#cxView .cxv-sp{margin-top:3px;font-size:var(--f1);font-weight:700;color:var(--ink2);line-height:1.4}
+#cxView .cxv-st{display:flex;align-items:center;margin:14px 0 12px;padding:10px 4px;border-radius:18px;background:color-mix(in srgb,var(--rc) 12%,#fff8ef)}
+#cxView .cxv-st em{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-style:normal}
+#cxView .cxv-st b{font-size:var(--f3);font-weight:900;color:var(--ink)}
+#cxView .cxv-st em:last-child b{color:var(--pri-d)}
+#cxView .cxv-st span{font-size:var(--f1);font-weight:700;color:var(--ink3)}
+#cxView .cxv-st i{width:1px;height:26px;background:var(--line)}
+#cxView dl{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;margin:0;font-size:var(--f1);line-height:1.45}
+#cxView dt{color:var(--ink3);font-weight:700}
+#cxView dd{margin:0;color:var(--ink);font-weight:700;word-break:break-word}
+#cxView .cxv-note{margin-top:12px;padding:9px 12px;border-radius:14px;background:var(--lemon-l);color:var(--lemon-t);font-weight:700;font-size:var(--f1);line-height:1.45}
+#cxView .cxv-acts{display:flex;gap:10px;width:min(88%,360px)}
+#cxView .cxv-b{flex:none;width:54px;height:50px;border-radius:var(--rb);display:flex;align-items:center;justify-content:center;gap:5px;font-size:var(--f2);font-weight:800;color:var(--ink);background:#fff;box-shadow:0 3px 0 var(--edge)}
+#cxView .cxv-b svg.i{width:20px;height:20px}
+#cxView .cxv-b.main{flex:1;width:auto;color:#fff;background:linear-gradient(180deg,var(--pri2),var(--pri));box-shadow:0 4px 0 var(--pri-d)}
+#cxView .cxv-b:disabled{opacity:.4}
+#cxView .cxv-b:active:not(:disabled){transform:translateY(2px)}
 #polaroid .pol-saved{display:block;margin-top:6px;font-style:normal;font-size:var(--f1);font-weight:800;color:var(--ink3)}
 #polaroid .pol-saved.ok{color:var(--grape-t)}
 .mh-tip{margin:12px 4px 2px;font-size:var(--f1);font-weight:600;color:var(--ink3);text-align:center}

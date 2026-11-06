@@ -9,6 +9,7 @@ import { buildEnv, W, aqMat, aqInject, FLOOR_Y, floorAt, AQ_Q } from './aqua_env
 import { themeOf } from './aqua_themes.js';
 import { causFish, fishEnvTex } from './aquarium.js';
 import { mergeGeometries } from '../vendor/addons/utils/BufferGeometryUtils.js';
+import { anchorsPlus } from './parts.js';
 
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp, sstep = THREE.MathUtils.smoothstep;
@@ -117,15 +118,35 @@ export function createSeaView({ renderer }) {
   }
   const rig = new THREE.Group(); rig.visible = false; world.add(rig);
   const metal = new THREE.MeshStandardMaterial({ color: '#dfe7ee', metalness: 1, roughness: 0.28 });
-  const hookM = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.013, 8, 20, Math.PI * 1.35), metal); hookM.rotation.z = Math.PI * 1.25; hookM.position.y = -0.09; rig.add(hookM);
-  const shank = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.16, 6), metal); shank.position.set(0.075, -0.02, 0); rig.add(shank);
+  // v2.6 鱼钩重新建模：钩眼（系线圈）→ 钩柄 → 弯钩 → 钩尖 + 倒刺。rig 原点 = 钩眼（鱼线系在这里），HOOK_BITE = 弯钩内侧（挂在鱼嘴上的那一点）
+  const HOOK_BITE = V(-0.04, -0.192, 0);
+  {
+    class HookArc extends THREE.Curve { getPoint(u, out = V()) { const a = -Math.PI * u; return out.set(-0.042 + 0.042 * Math.cos(a), -0.165 + 0.042 * Math.sin(a), 0); } }
+    const path = new THREE.CurvePath();
+    path.add(new THREE.LineCurve3(V(0, -0.015, 0), V(0, -0.165, 0)));
+    path.add(new HookArc());
+    path.add(new THREE.LineCurve3(V(-0.084, -0.165, 0), V(-0.079, -0.116, 0)));
+    const body = new THREE.Mesh(new THREE.TubeGeometry(path, 56, 0.0062, 8, false), metal); rig.add(body);
+    const eye = new THREE.Mesh(new THREE.TorusGeometry(0.0135, 0.0046, 8, 22), metal); eye.position.set(0, -0.0015, 0); rig.add(eye);
+    const tipDir = V(0.005, 0.049, 0).normalize();
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.0064, 0.03, 10), metal);
+    tip.quaternion.setFromUnitVectors(V(0, 1, 0), tipDir); tip.position.set(-0.079, -0.116, 0).addScaledVector(tipDir, 0.015); rig.add(tip);
+    const barbDir = V(0.55, -1, 0).normalize();   // 倒刺：钩尖内侧斜向下
+    const barb = new THREE.Mesh(new THREE.ConeGeometry(0.0042, 0.022, 8), metal);
+    barb.quaternion.setFromUnitVectors(V(0, 1, 0), barbDir); barb.position.set(-0.0745, -0.103, 0).addScaledVector(barbDir, 0.009); rig.add(barb);
+    const bead = new THREE.Mesh(new THREE.SphereGeometry(0.0085, 10, 8), new THREE.MeshStandardMaterial({ color: '#ff7a6b', roughness: 0.35, emissive: '#ff5a4a', emissiveIntensity: 0.25 }));
+    bead.position.set(0, 0.03, 0); rig.add(bead);   // 钩眼上方一颗小红珠（子线结）
+  }
+  const leader = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 1, 5, 1, true).translate(0, 0.5, 0), lineM);   // 铅坠 → 鱼钩的子线
+  leader.position.set(0, 0.012, 0); leader.scale.set(1, 0.27, 1); rig.add(leader);
   const sinker = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 8), aqMat({ color: '#7f8b96', roughness: 0.4, metalness: 0.6 }, { fish: true })); sinker.position.y = 0.32; rig.add(sinker);
-  const wormCurve = new THREE.CatmullRomCurve3([V(0.07, 0.04, 0), V(0.1, -0.06, 0.01), V(0.04, -0.16, 0), V(-0.05, -0.15, 0.01), V(-0.08, -0.06, 0), V(-0.11, -0.1, 0.02)]);
+  const wormCurve = new THREE.CatmullRomCurve3([V(0.03, -0.035, 0.012), V(0.012, -0.085, 0), V(0.016, -0.14, 0.01), V(-0.02, -0.2, 0), V(-0.066, -0.196, 0.01), V(-0.092, -0.15, 0), V(-0.118, -0.19, 0.015), V(-0.105, -0.235, 0.02)]);   // v2.6：穿在新鱼钩上（钩尖露一点）
   const worm = new THREE.Mesh(new THREE.TubeGeometry(wormCurve, 24, 0.028, 7, false), aqMat({ color: '#ff8f86', roughness: 0.45, emissive: '#ff6a5c', emissiveIntensity: 0.25 }, { fish: true }));
   rig.add(worm);
   const baitGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: canvasTex(64, 64, (g) => { const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,240,220,.9)'); gr.addColorStop(1, 'rgba(255,240,220,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }), transparent: true, opacity: 0.35, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
-  baitGlow.scale.setScalar(0.55); baitGlow.position.y = -0.1; rig.add(baitGlow);
-  const rigP = V(), entry = V(), mouth = V();
+  baitGlow.scale.setScalar(0.55); baitGlow.position.y = -0.14; rig.add(baitGlow);
+  const rigP = V(), entry = V(), mouth = V(), baitP = V(), hookW = V(), mouthW = V(), _hk = V();
+  let rigS = 1, rigRot = 0;   // v2.6：鱼钩缩放 / 转角（每帧先算好，鱼按它对齐嘴，最后统一摆放）
   const _a = V(), _b = V(), _q = new THREE.Quaternion(), _up = V(0, 1, 0);
   function segment(m, p0, p1, r) {
     _a.subVectors(p1, p0); const len = _a.length();
@@ -217,12 +238,40 @@ export function createSeaView({ renderer }) {
     world.add(f.root); place(e, 0);
     return e;
   }
+  // v2.6 鱼嘴锚点（鱼的本地坐标，未缩放）：临时把鱼摆回原点，用部件射线找鼻尖（嘴部高度），往里收一点 = 嘴角
+  function mouthLocal(e) {
+    if (e.mouthL) return e.mouthL;
+    const f = e.f, r = f.root, bd = f.body;
+    const P = r.position.clone(), Q = r.quaternion.clone(), Sc = r.scale.clone(), BP = bd.position.clone(), BQ = bd.quaternion.clone();
+    r.position.set(0, 0, 0); r.quaternion.identity(); r.scale.set(1, 1, 1); bd.position.set(0, 0, 0); bd.quaternion.identity();
+    const par = r.parent; if (par) par.remove(r);
+    r.updateMatrixWorld(true);
+    let m = null;
+    try { const A = f.anchors?.nose ? f.anchors : anchorsPlus(f); if (A?.nose) { m = A.nose.clone(); m.x -= (f.len0 || 1) * 0.025; m.z = 0; } } catch (err) { m = null; }
+    if (!m) { const b = f.b0 || new THREE.Box3().setFromObject(f.model); m = V(b.max.x - (b.max.x - b.min.x) * 0.03, (b.min.y + b.max.y) * 0.45, 0); }
+    if (par) par.add(r);
+    r.position.copy(P); r.quaternion.copy(Q); r.scale.copy(Sc); bd.position.copy(BP); bd.quaternion.copy(BQ);
+    r.updateMatrixWorld(true);
+    return (e.mouthL = m);
+  }
+  function mouthWorld(e, out) { e.f.root.updateMatrixWorld(true); return out.copy(mouthLocal(e)).applyMatrix4(e.f.root.matrixWorld); }
+  // 鱼钩「挂嘴点」的世界坐标（由钩眼位置 rigP + 当前转角 / 缩放推出）
+  function hookBiteW(out) { return out.copy(HOOK_BITE).multiplyScalar(rigS).applyAxisAngle(_zAx, rigRot).add(rigP); }
+  const _zAx = V(0, 0, 1);
   function place(e, dt) {
     const f = e.f;
     f.root.position.copy(e.pos);
-    f.root.rotation.set(0, e.yaw + Math.sin(e.t * 0.6 + e.ph) * 0.12, e.pitch);
-    if (e.mode === 'hooked' || e.mode === 'bite') f.update(dt, 'fight');
-    else if (typeof f.animate === 'function') f.animate(dt, { mode: 'swim' }); else f.update(dt, 'swim');
+    f.root.rotation.set(0, e.yaw + (e.mode === 'hooked' || e.mode === 'bite' ? 0 : Math.sin(e.t * 0.6 + e.ph) * 0.12), e.pitch);
+    if (e.mode === 'hooked' || e.mode === 'bite') {
+      f.update(dt, 'fight');
+      // v2.6：挣扎时身体的甩动以「嘴」为支点（鱼头被鱼钩拽住，甩的是身子和尾巴）→ 嘴和鱼钩不再有相对运动
+      const m = mouthLocal(e);
+      f.body.position.copy(m).sub(_hk.copy(m).applyQuaternion(f.body.quaternion));
+      e.pinned = true;
+    } else {
+      if (e.pinned) { f.body.position.set(0, 0, 0); e.pinned = false; }
+      if (typeof f.animate === 'function') f.animate(dt, { mode: 'swim' }); else f.update(dt, 'swim');
+    }
   }
   function removeEnt(e) { const i = ents.indexOf(e); if (i >= 0) ents.splice(i, 1); e.f.dispose(); if (target === e) target = null; }
 
@@ -470,7 +519,7 @@ export function createSeaView({ renderer }) {
     if (e.mode === 'pwait') { e.f.root.visible = false; return; }
     e.t += dt;
     const hw = hwAt(e.z);
-    const bait = rigP;
+    const bait = baitP.set(rigP.x, rigP.y - 0.08 * rigS, rigP.z);   // v2.6：鱼饵中心在钩眼下方
     const flee = fleeT > 0 && target && e !== target && Math.hypot(e.pos.x - target.pos.x, e.pos.y - target.pos.y) < 2.4 && Math.abs(e.z) < 3;
     switch (e.mode) {
       case 'swim': case 'leave': case 'flee': {
@@ -528,6 +577,7 @@ export function createSeaView({ renderer }) {
         e.pos.y += (bait.y - 0.09 - e.pos.y) * Math.min(1, dt * 14);
         e.pos.z += (0 - e.pos.z) * Math.min(1, dt * 6);
         e.pitch = Math.sin(e.t * 22) * 0.18;
+        e.biteGlue = true;   // 摆放后再把嘴精确贴到鱼钩上（见 updateFish 末尾）
         break;
       }
       case 'item': break;
@@ -554,6 +604,13 @@ export function createSeaView({ renderer }) {
     if (e.mode !== 'hooked') e.yaw = angTo(e.yaw, e.dir > 0 ? 0 : Math.PI, Math.min(1, dt * (e.mode === 'tease' || e.mode === 'bite' ? 8 : 3.5)));
     e.f.root.visible = !(e === target && jumpHide);
     place(e, dt);
+    if (e.biteGlue) {   // v2.6：咬饵 → 嘴贴住鱼钩（0.15s 内吸附过去，之后完全跟随）
+      e.biteGlue = false;
+      hookBiteW(hookW); mouthWorld(e, mouthW);
+      const k = Math.min(1, e.t / 0.15);
+      e.pos.x += (hookW.x - mouthW.x) * k; e.pos.y += (hookW.y - mouthW.y) * k; e.pos.z += (hookW.z - mouthW.z) * k;
+      e.f.root.position.copy(e.pos);
+    }
   }
 
   // 搏鱼：鱼钩挂在鱼嘴里；距离越近 → 越往上、越靠近船；鱼发力时横冲 / 下潜
@@ -580,8 +637,11 @@ export function createSeaView({ renderer }) {
     e.pos.z += (0 - e.pos.z) * Math.min(1, dt * 5);
     e.f.root.visible = !jumpHide;
     place(e, dt);
-    // 鱼嘴实际位置 → 鱼钩
-    rigP.set(e.pos.x + facing * Math.cos(e.pitch) * e.L * 0.47, e.pos.y + Math.sin(e.pitch) * e.L * 0.47, 0);
+    // v2.6 鱼嘴实际位置 → 鱼钩：转角对准鱼线，弯钩内侧正好挂在嘴上，钩眼（rigP）由此反推
+    mouthWorld(e, mouthW);
+    rigS += (clamp(0.5 + e.L * 0.4, 0.62, 1) - rigS) * Math.min(1, dt * 6);
+    rigRot = Math.atan2(mouthW.x - entryX, S - mouthW.y);
+    rigP.copy(mouthW).sub(_hk.copy(HOOK_BITE).multiplyScalar(rigS).applyAxisAngle(_zAx, rigRot));
   }
 
   function update(dt, a) {
@@ -643,23 +703,9 @@ export function createSeaView({ renderer }) {
     const reeling = !!reelOut && reelOut.t < 0.64;
     const showRig = on && (phase === 'float' || phase === 'fight' || phase === 'reel' || reeling) && !(phase === 'fight' && jumpHide);
     rig.visible = line.visible = showRig; if (!showRig) slack.visible = false;
-    if (showRig) {
-      rig.position.copy(rigP);
-      rig.rotation.z = phase === 'fight' || reeling ? Math.atan2(rigP.x - entryX, S - rigP.y) * 0.6 : Math.sin(t * 1.1) * 0.12;
-      worm.rotation.y = Math.sin(t * 2.2) * 0.4; worm.rotation.x = Math.sin(t * 1.7) * 0.25;
-      sinker.visible = phase !== 'fight'; worm.visible = phase !== 'fight' && !baitGone;   // 鱼饵被叼走 → 只剩空钩
-      baitGlow.visible = phase === 'float' && !baitGone;
-      entry.set(entryX, S + 0.05, 0);
-      _b.copy(rigP); if (phase !== 'fight') _b.y += 0.32;
-      // v2.3：等待时鱼线松弛（下垂 + 随水流轻摆，跟着鱼饵漂移的方向拖一点）；咬钩 / 搏鱼 / 收线时绷直
-      const wantSlack = phase === 'float' && (a.state === 'float') ? 1 : 0;
-      slackK += (wantSlack - slackK) * Math.min(1, dt * (wantSlack ? 2.5 : 9));
-      if (slackK > 0.04) {
-        const len = _b.distanceTo(entry);
-        setSlack(_b, entry, len * 0.16 * slackK, (Math.sin(t * 0.7) * 0.12 - driftV.x * 0.5) * slackK);
-        slack.visible = true; line.visible = false;
-      } else { slack.visible = false; segment(line, _b, entry, 0.0065); }
-      if (phase !== 'fight') { /* 铅坠到鱼钩那一小段 */ }
+    if (phase !== 'fight' && !(phase === 'exit' && target && target.mode === 'hooked')) {   // 非搏鱼：鱼钩轻摆，缩放回 1（搏鱼时由 updateFight 对准鱼线）
+      rigRot = reeling ? Math.atan2(rigP.x - entryX, S - rigP.y) * 0.6 : Math.sin(t * 1.1) * 0.12;
+      rigS += (1 - rigS) * Math.min(1, dt * 6);
     }
 
     // 好奇的鱼：每次轻点（nibble）前 ~1.3s 安排一条附近的鱼过来；等待期间也会有鱼路过看一眼
@@ -674,6 +720,24 @@ export function createSeaView({ renderer }) {
     for (const e of [...ents]) { if (e === target && e.mode === 'hooked') continue; updateFish(e, dt, a); }
     separateAll(dt);   // v2.3：鱼之间按躯干胶囊体做碰撞分离（鳍 / 腿不算）
     if (target && target.mode === 'hooked') updateFight(target, dt, a);
+    // v2.6：鱼都摆好之后再画鱼钩 / 鱼线（搏鱼时 rigP 刚由鱼嘴反推出来，同一帧对齐，不再滞后一帧）
+    if (showRig) {
+      rig.position.copy(rigP); rig.rotation.z = rigRot; rig.scale.setScalar(rigS);
+      worm.rotation.y = Math.sin(t * 2.2) * 0.12; worm.rotation.x = Math.sin(t * 1.7) * 0.08;
+      sinker.visible = leader.visible = phase !== 'fight'; worm.visible = phase !== 'fight' && !baitGone;   // 鱼饵被叼走 → 只剩空钩
+      baitGlow.visible = phase === 'float' && !baitGone;
+      entry.set(entryX, S + 0.05, 0);
+      _b.copy(rigP); if (phase !== 'fight') _b.y += 0.32 * rigS;
+      // v2.3：等待时鱼线松弛（下垂 + 随水流轻摆，跟着鱼饵漂移的方向拖一点）；咬钩 / 搏鱼 / 收线时绷直
+      const wantSlack = phase === 'float' && (a.state === 'float') ? 1 : 0;
+      slackK += (wantSlack - slackK) * Math.min(1, dt * (wantSlack ? 2.5 : 9));
+      if (slackK > 0.04) {
+        const len = _b.distanceTo(entry);
+        setSlack(_b, entry, len * 0.16 * slackK, (Math.sin(t * 0.7) * 0.12 - driftV.x * 0.5) * slackK);
+        slack.visible = true; line.visible = false;
+      } else { slack.visible = false; segment(line, _b, entry, 0.0065); }
+    }
+
     updateSchool(dt, t);
     env.update(t, camera);
     key.intensity = L.keyI * (1 + Math.sin(t * 1.7) * 0.05 + Math.sin(t * 2.9) * 0.035);
@@ -766,6 +830,7 @@ export function createSeaView({ renderer }) {
     get target() { return target; },
     get waterFy() { return Slock != null && on ? edge : null; },   // 搏鱼时水线所在的屏幕行（主镜头对齐它）
     dbg: () => ({ S: +S.toFixed(2), entryX: +entryX.toFixed(2), rig: rigP.toArray().map((x) => +x.toFixed(2)), rigVis: rig.visible, hw0: +hwAt(0).toFixed(2), tgt: target ? { m: target.mode, p: target.pos.toArray().map((x) => +x.toFixed(2)), vis: target.f.root.visible, sp: target.v.sp } : null, modes: ents.map((e) => e.mode.slice(0, 2)).join(' ') }),
+    hookGap: () => (target && (target.mode === 'hooked' || target.mode === 'bite') ? +hookBiteW(V()).distanceTo(mouthWorld(target, V())).toFixed(4) : null),   // v2.6 自测：鱼钩挂嘴点 ↔ 鱼嘴的距离
     begin, event, update, render, resize, prewarm, cancel, exit, idle,
   };
 }

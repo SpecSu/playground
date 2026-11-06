@@ -31,6 +31,7 @@ const fmtTime = (ts) => { const d = new Date(ts); return `${d.getMonth() + 1}/${
 
 // ---------------- 统一线性图标 ----------------
 export const ICON = {
+  chevL: '<path d="M15 6l-6 6 6 6"/>', chevR: '<path d="M9 6l6 6-6 6"/>',
   hook: '<circle cx="16.5" cy="3.5" r="1.5"/><path d="M16.5 5v8.5a5 5 0 0 1-10 0v-3l2.5 2.5"/>',
   bobber: '<circle cx="12" cy="9" r="3.2"/><path d="M12 2.5v3.3M3 17c3-2 6-2 9 0s6 2 9 0"/>',
   bang: '<path d="M12 4v10"/><path d="M12 19.2v.1"/>',
@@ -468,6 +469,51 @@ function openPhoto(r, url, body) {
   };
 }
 
+// v2.6 图鉴详情浮窗（参考相册）：大图 + 稀有度 + 三项数据 + 作品信息；‹ › 或左右滑动翻看同一列表里的上一条 / 下一条
+function openCodexView(list, idx) {
+  let v = $('cxView');
+  if (!v) { v = document.createElement('div'); v.id = 'cxView'; document.getElementById('app').appendChild(v); }
+  let i = idx, dirIn = 0;
+  const draw = () => {
+    const L = list[i], fv = L.v, sp = spOfV(fv), R = rarOfV(fv), u = fv.ugc;
+    const im = sp.odd ? `<div class="em">${ODD_EMOJI[sp.id]}</div>` : `<img data-ugc="0" data-hd alt="">`;
+    const rows = [
+      u ? ['外观', `${esc(PATTERN_NAMES[u.pat])}花纹 · ${esc(PALETTE_NAMES[u.pal])}配色${u.decos.length ? ' · ' + esc(decoText(u)) : ''}`] : null,
+      fv.traits?.length ? ['特性', fv.traits.map((t) => TRAITS[t].icon + TRAITS[t].label).join(' ')] : null,
+      ['钓获', `${fmtTime(L.ts)} · ${ago(L.ts)}`],
+      ['创作者', esc(fv.creator)],
+    ].filter(Boolean);
+    v.innerHTML = `<div class="cxv-card${dirIn ? (dirIn > 0 ? ' in-r' : ' in-l') : ''}" style="--rc:${R.color}">
+        <div class="cxv-hero"><span class="rb" style="background:${R.color}">${R.short} · ${R.label}</span><button class="cxv-x" aria-label="关闭">×</button>${im}
+          ${list.length > 1 ? `<span class="cxv-idx num">${i + 1} / ${list.length}</span>` : ''}</div>
+        <div class="cxv-bd">
+          <b class="cxv-nm">${esc(displayName(fv))}</b>
+          <div class="cxv-sp">${esc(sp.name)}${u ? ` · 《${esc(u.title)}》` : sp.desc ? ` · ${esc(sp.desc)}` : ''}</div>
+          <div class="cxv-st"><em><b class="num">${fmtLenTxt(fv.cm)}</b><span>体长</span></em><i></i><em><b class="num">${fv.kg}kg</b><span>体重</span></em><i></i><em><b class="num">+${L.score}</b><span>得分</span></em></div>
+          <dl>${rows.map(([k, val]) => `<dt>${k}</dt><dd>${val}</dd>`).join('')}</dl>
+          ${fv.note ? `<div class="cxv-note">${esc(fv.note)}</div>` : ''}
+        </div>
+      </div>
+      <div class="cxv-acts">${list.length > 1 ? `<button class="cxv-b" id="cxPrev" aria-label="上一条"${i === 0 ? ' disabled' : ''}>${svg('chevL')}</button>` : ''}<button class="cxv-b main" id="cxOk">${svg('check')}好的</button>${list.length > 1 ? `<button class="cxv-b" id="cxNext" aria-label="下一条"${i === list.length - 1 ? ' disabled' : ''}>${svg('chevR')}</button>` : ''}</div>`;
+    fillThumbs(v, [fv]);
+    v.querySelector('.cxv-x').onclick = v.querySelector('#cxOk').onclick = () => { sfx.close(); close(); };
+    const pv = v.querySelector('#cxPrev'), nx = v.querySelector('#cxNext');
+    if (pv) pv.onclick = () => go(-1);
+    if (nx) nx.onclick = () => go(1);
+    const card = v.querySelector('.cxv-card');
+    let sx = null, sy = 0;
+    card.addEventListener('pointerdown', (e) => { sx = e.clientX; sy = e.clientY; });
+    card.addEventListener('pointerup', (e) => { if (sx == null) return; const dx = e.clientX - sx, dy = e.clientY - sy; sx = null; if (Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(dy) * 1.3) go(dx < 0 ? 1 : -1); });
+  };
+  const go = (d) => { const n = i + d; if (n < 0 || n >= list.length) return; sfx.tap(); i = n; dirIn = d; draw(); };
+  const close = () => { v.classList.remove('show'); document.removeEventListener('keydown', onKey); };
+  const onKey = (e) => { if (!v.classList.contains('show')) return; if (e.key === 'Escape') { close(); } else if (e.key === 'ArrowLeft') go(-1); else if (e.key === 'ArrowRight') go(1); };
+  document.addEventListener('keydown', onKey);
+  v.onclick = (e) => { if (e.target === v) { sfx.close(); close(); } };
+  draw();
+  requestAnimationFrame(() => v.classList.add('show'));
+}
+
 export function renderSheet(ctx) {
   if (!sheetState.open) return;
   const { meta } = ctx; const S = meta.S;
@@ -511,7 +557,7 @@ export function renderSheet(ctx) {
       body.innerHTML = html + goTankPill('去水族箱看正在养的鱼'); bindGoTank(ctx); fillFeat(body, f);
     } else {
       html += `<div class="cx-bar"><span class="sect" style="margin:0">我的鱼获</span><div class="subseg"><button data-sub="new" class="${sortBy === 'new' ? 'on' : ''}">最新</button><button data-sub="rare" class="${sortBy === 'rare' ? 'on' : ''}">稀有</button></div></div>
-        <div id="cdDetail"></div><div class="cx-grid">`;
+        <div class="cx-grid">`;
       shown.forEach((L, i) => {
         const v = L.v, sp = spOfV(v), R = rarOfV(v);
         const im = sp.odd ? `<div class="em">${ODD_EMOJI[sp.id]}</div>` : `<img data-ugc="${i}" alt="">`;
@@ -521,26 +567,7 @@ export function renderSheet(ctx) {
       });
       body.innerHTML = html + '</div>' + goTankPill('去水族箱看正在养的鱼'); bindGoTank(ctx); fillFeat(body, f);
       fillThumbs(body, shown.map((L) => L.v));
-      body.querySelectorAll('.cx').forEach((c) => c.onclick = () => {
-        sfx.tap();
-        const L = shown[+c.dataset.i], v = L.v, sp = spOfV(v), R = rarOfV(v);
-        const im = sp.odd ? `<div class="em big">${ODD_EMOJI[sp.id]}</div>` : `<img data-ugc="0" alt="">`;
-        const u = v.ugc;
-        const rows = [
-          ['物种', `${esc(sp.name)} · ${R.label}`],
-          u ? ['作品', `《${esc(u.title)}》`] : null,
-          u ? ['外观', `${esc(PATTERN_NAMES[u.pat])}花纹 · ${esc(PALETTE_NAMES[u.pal])}配色${u.decos.length ? ' · ' + esc(decoText(u)) : ''}`] : null,
-          ['体型', `${fmtLenTxt(v.cm)} · ${v.kg}kg${v.traits?.length ? ' · ' + v.traits.map((t) => TRAITS[t].icon + TRAITS[t].label).join(' ') : ''}`],
-          ['钓获', `${fmtTime(L.ts)} · +${L.score} 分`],
-          ['创作者', esc(v.creator)],
-        ].filter(Boolean);
-        const dd = $('cdDetail');
-        dd.innerHTML = `<div class="blk cx-detail" style="--rc:${R.color}"><button class="x" aria-label="关闭">×</button><div class="ph">${im}</div><div class="h">${esc(displayName(v))} <span class="rb" style="background:${R.color}">${R.short}</span></div>
-          <dl>${rows.map(([k, val]) => `<dt>${k}</dt><dd>${val}</dd>`).join('')}</dl>${v.note ? `<div class="note">${esc(v.note)}</div>` : ''}</div>`;
-        fillThumbs(dd, [v]);
-        dd.querySelector('.x').onclick = () => { dd.innerHTML = ''; };
-        dd.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      });
+      body.querySelectorAll('.cx').forEach((c) => c.onclick = () => { sfx.tap(); openCodexView(shown, +c.dataset.i); });   // v2.6：像相册一样弹浮窗看详情
     }
     body.querySelectorAll('[data-sub]').forEach((b) => b.onclick = () => { sheetState.sub = b.dataset.sub; sfx.tap(); renderSheet(ctx); });
   } else if (tab === 'bag') {

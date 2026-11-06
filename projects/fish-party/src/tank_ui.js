@@ -265,7 +265,7 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
     visit = { owner: o, tank: o.tank, f };
     labels.innerHTML = '';
     hideAll(); refreshTop(); setHint();
-    enterScene(o.tank, o.theme, `正在去 ${o.name} 家串门`, false, () => notify(`来到 <b>${esc(o.name)}</b> 的水族箱<small>送 TA 一条鱼 · 每天可以偷偷带走一条</small>`, false, 2400));
+    enterScene(o.tank, o.theme, `正在去 ${o.name} 家串门`, false);   // v2.6：去掉「来到 XX 的水族箱」提示（资料卡已经说明了）
   }
   function backHome() {
     visit = null; labels.innerHTML = '';
