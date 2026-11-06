@@ -107,16 +107,16 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 #feed{position:absolute;left:50%;bottom:calc(190px + var(--sb));transform:translateX(-50%);max-width:calc(100% - 32px);pointer-events:none;z-index:2;transition:bottom var(--dur) var(--ease);display:flex;flex-direction:column;align-items:center}   /* v2.5：好友动态下移到屏幕下半部 */
 .ui.notop #feed{bottom:calc(30px + var(--sb))}
 #ui #feed.atcard{top:var(--ct);left:calc(14px + var(--sl));transform:none;max-width:calc(100% - 28px)}
-.fd{display:flex;align-items:center;gap:8px;min-height:40px;padding:4px 8px 4px 4px;border-radius:var(--pill);font-size:var(--f1);font-weight:700;white-space:nowrap;pointer-events:auto;color:var(--ink);background:#fff;box-shadow:var(--thick),var(--sh);animation:fdIn var(--dur) var(--ease) both}
+.fd{display:flex;align-items:center;gap:8px;min-height:40px;max-width:100%;box-sizing:border-box;padding:4px 8px 4px 4px;border-radius:var(--pill);font-size:var(--f1);font-weight:700;white-space:nowrap;pointer-events:auto;color:var(--ink);background:#fff;box-shadow:var(--thick),var(--sh);animation:fdIn var(--dur) var(--ease) both}   /* v2.6.1：防止长动态胶囊超出屏幕 */
 .fd.out{animation:fdOut var(--dur) var(--ease) forwards}
 @keyframes fdIn{from{transform:translateY(-10px);opacity:0}}
 @keyframes fdOut{to{transform:translateY(-8px);opacity:0}}
-.fd .avs{display:flex}
+.fd .avs{display:flex;flex:none}
 .fd .avs .av{width:30px;height:30px}
 .fd .avs .av + .av{margin-left:-10px}
 .fd .ico{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--mint-l);color:var(--mint-t);flex:none}
 .fd .ico svg{width:17px;height:17px}
-.fd .tx{overflow:hidden;text-overflow:ellipsis;padding-right:4px;color:var(--ink)}
+.fd .tx{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;padding-right:4px;color:var(--ink)}
 .fd .tx b{font-weight:800}
 .fd .tx .ttl{font-size:var(--f1);color:var(--grape-t);font-weight:800;margin-left:2px}
 .fd .tx em{font-style:normal;color:var(--pri-d);font-weight:800}
@@ -124,7 +124,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .fd.cele .tx .ttl{color:var(--lemon-t)}
 .fd.cele.out{animation:fdOut var(--dur) var(--ease) forwards}
 @keyframes celeWig{25%{transform:rotate(-2deg) scale(1.03)}75%{transform:rotate(2deg) scale(1.03)}}
-.fd .fth{width:44px;height:30px;object-fit:contain;margin:0 -2px 0 -4px;opacity:0;transition:opacity .25s}.fd .fth.ok{opacity:1}
+.fd .fth{width:44px;height:30px;object-fit:contain;margin:0 -2px 0 -4px;opacity:0;transition:opacity .25s;flex:none}.fd .fth.ok{opacity:1}
 .fd .like{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--pri-l);color:var(--pri-d);position:relative;flex:none}   /* v2.5：防止文字过长时点赞按钮被挤扁 */
 .fd .like::after{content:'';position:absolute;inset:-6px}
 .fd .like.done{background:var(--pri);color:#fff}

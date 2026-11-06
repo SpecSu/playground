@@ -521,6 +521,7 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
       <button class="tk-btn sub" id="fcRel">${ic('wave')}放生 <b>+${pts}</b></button></div>`;
     fillThumbs(card, [v]);
     card.querySelector('.tk-x').onclick = () => { sfx.close(); hideAll(); setHint(); };
+    aq.setFocusFy(0.58);   // v2.6.1：打开鱼卡时让选中的鱼再往下放一些，避开顶部按钮
     card.querySelector('#fcGene').onclick = () => { sfx.open(); openLab(v); };
     card.querySelector('#fcRel').onclick = () => confirmRelease(v, pts);
     card.querySelector('#plEd').onclick = () => editName(v);
@@ -561,6 +562,7 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
       <div class="pl-acts"><button class="tk-btn main" id="fcLike" ${on ? 'disabled' : ''}>${on ? `${ic('check')}已点赞` : `${ic('heart')}赞一下`}</button></div>`;
     fillThumbs(card, [v]);
     card.querySelector('.tk-x').onclick = () => { sfx.close(); hideAll(); setHint(); };
+    aq.setFocusFy(0.58);   // v2.6.1：朋友水族箱鱼卡同样下移焦点
     card.querySelector('#fcLike').onclick = () => { if (liked.has(v.uid)) return; liked.add(v.uid); sfx.coin(); vib(20); showVisitCard(v); };
     card.classList.add('show');
   }
