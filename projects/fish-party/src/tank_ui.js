@@ -451,7 +451,21 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
     open = false; visit = null; enterTok++; loading = false; if (loader.shown) loader.hide(0);
     root.classList.add('hidden'); hideAll(); aq.close(); labels.innerHTML = '';
   }
-  function hideAll() { give.classList.remove('show'); themeSh.classList.remove('show'); bagSh.classList.remove('show'); friends.classList.remove('show'); inbox.classList.remove('show'); card.classList.remove('show'); lab.classList.remove('show'); reveal.classList.remove('show'); conf.classList.remove('show'); cur = null; aq.select(null); }
+  let cardFocusRaf = 0;
+  function showCardFocused() {
+    card.classList.add('show');
+    cancelAnimationFrame(cardFocusRaf);
+    cardFocusRaf = requestAnimationFrame(() => {
+      if (!card.classList.contains('show')) return;
+      const tr = root.querySelector('.tk-top'), H = Math.max(1, root.clientHeight), cap = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+      // offsetTop 不受卡片弹入 transform 影响；getBoundingClientRect 在动画首帧会把卡片误判到屏幕外，导致鱼被推到卡片下面
+      const top = cap((tr.offsetTop + tr.offsetHeight + 16) / H, 0.12, 0.38);
+      const bottom = cap((card.offsetTop - 22) / H, top + 0.16, 0.72);
+      // 在真实可视区的 68% 处（略偏下），最多 48%；大鱼中心不会进入详情卡，身体下缘仍有余量
+      aq.setFocusFy(cap(top + (bottom - top) * 0.68, 0.35, 0.48));
+    });
+  }
+  function hideAll() { cancelAnimationFrame(cardFocusRaf); aq.setFocusFy(null); give.classList.remove('show'); themeSh.classList.remove('show'); bagSh.classList.remove('show'); friends.classList.remove('show'); inbox.classList.remove('show'); card.classList.remove('show'); lab.classList.remove('show'); reveal.classList.remove('show'); conf.classList.remove('show'); cur = null; aq.select(null); }
 
   function onTap(uid) {
     const tip = root.querySelector('.tk-tip'); if (tip) { tip.remove(); setHint(); }
@@ -521,11 +535,10 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
       <button class="tk-btn sub" id="fcRel">${ic('wave')}放生 <b>+${pts}</b></button></div>`;
     fillThumbs(card, [v]);
     card.querySelector('.tk-x').onclick = () => { sfx.close(); hideAll(); setHint(); };
-    aq.setFocusFy(0.58);   // v2.6.1：打开鱼卡时让选中的鱼再往下放一些，避开顶部按钮
     card.querySelector('#fcGene').onclick = () => { sfx.open(); openLab(v); };
     card.querySelector('#fcRel').onclick = () => confirmRelease(v, pts);
     card.querySelector('#plEd').onclick = () => editName(v);
-    card.classList.add('show');
+    showCardFocused();   // v2.6.2：根据顶部按钮和卡片之间的真实可视区动态定位鱼
   }
   // v2.3：自己水族箱里的鱼可以改名（✏️ → 卡片上就地变输入框 · 🎲 随机一个 · 回车 / ✓ 保存 · ✕ 取消）
   function editName(v) {
@@ -562,9 +575,8 @@ export function createTankUI({ meta, aq, genes, app, onExit, onChanged, size }) 
       <div class="pl-acts"><button class="tk-btn main" id="fcLike" ${on ? 'disabled' : ''}>${on ? `${ic('check')}已点赞` : `${ic('heart')}赞一下`}</button></div>`;
     fillThumbs(card, [v]);
     card.querySelector('.tk-x').onclick = () => { sfx.close(); hideAll(); setHint(); };
-    aq.setFocusFy(0.58);   // v2.6.1：朋友水族箱鱼卡同样下移焦点
     card.querySelector('#fcLike').onclick = () => { if (liked.has(v.uid)) return; liked.add(v.uid); sfx.coin(); vib(20); showVisitCard(v); };
-    card.classList.add('show');
+    showCardFocused();   // 朋友水族箱同样使用动态可视区
   }
 
   function confirmRelease(v, pts) {
